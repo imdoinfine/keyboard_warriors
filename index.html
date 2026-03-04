@@ -381,6 +381,13 @@ body {
   font-weight: 400;
   line-height: 1;
 }
+.key .win-svg {
+  width: 14px;
+  height: 14px;
+  color: #555;
+}
+.key.lit-green  .win-svg,
+.key.lit-orange .win-svg { color: white; }
 
 /* Mini-only: mod key with symbol only, centred */
 .key .mod-sym-only {
@@ -509,9 +516,131 @@ body {
   #statLeft  { width: 108px; }
   #statRight { width: 90px; }
 }
+
+/* ══════════════════════════════════════
+   OS TOGGLE ROW
+   The toggle group is pinned to the same
+   left edge as the buttons (24px inset).
+   The switch itself — not its labels —
+   aligns with the horizontal centre of
+   the buttons (width 140px → centre 70px).
+   So we offset: 24px + 70px - (switch_w/2)
+   Switch track: 36×14px stroke rect.
+   Knob: 10px circle, 2px stroke.
+══════════════════════════════════════ */
+#osRow {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 900px;
+  padding: 0 24px 8px;
+  position: relative;
+  box-sizing: border-box;
+  min-height: 28px;
+}
+/* Wrap is exactly as wide as the Start button (130px).
+   Three columns: Mac-label (left), switch (centre), PC-label (right).
+   justify-content: space-between pushes labels to the edges;
+   the switch sits in the physical centre of the box. */
+#osToggleWrap {
+  width: 130px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+#osToggleWrap .os-label {
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 12px;
+  color: #9ca3af;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  line-height: 1;
+}
+#osLabelLeft  { justify-content: flex-start; }
+#osLabelRight { justify-content: flex-end; }
+
+/* SVG toggle switch */
+.os-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  /* reserve space for the SVG track (36×14) */
+  width: 36px;
+  height: 14px;
+}
+.os-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0; height: 0;
+  pointer-events: none;
+}
+.os-track {
+  display: block;
+  pointer-events: none;
+  overflow: visible;
+}
+/* Knob: slide via transform; fill swap gives mac/pc visual state */
+#osKnobEl {
+  transition: transform 0.18s ease, fill 0.18s ease;
+  transform-origin: 7px 7px;
+  transform-box: fill-box;
+}
+
+#osMismatchPill {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f59e0b;
+  color: white;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+#osMismatchPill.show { opacity: 1; }
 </style>
 </head>
 <body>
+
+<!-- OS toggle row: sits above the game panel -->
+<div id="osRow">
+  <div id="osToggleWrap">
+    <!-- Apple icon -->
+    <span class="os-label" id="osLabelLeft">
+<svg width="10" height="12" viewBox="0 0 800 800" fill="#9ca3af" xmlns="http://www.w3.org/2000/svg"><path d="M623.67,650c-27.67,41.33-57,81.67-101.67,82.33-44.67,1-59-26.33-109.67-26.33s-66.67,25.67-109,27.33c-43.67,1.67-76.67-44-104.67-84.33-57-82.33-100.67-234-42-336,29-50.67,81-82.67,137.33-83.67,42.67-.67,83.33,29,109.67,29s75.33-35.67,127-30.33c21.67,1,82.33,8.67,121.33,66-3,2-72.33,42.67-71.67,127,1,100.67,88.33,134.33,89.33,134.67-1,2.33-14,48-46,94.33ZM433.33,116.67c24.33-27.67,64.67-48.67,98-50,4.33,39-11.33,78.33-34.67,106.33-23,28.33-61,50.33-98.33,47.33-5-38.33,13.67-78.33,35-103.67Z"/></svg>
+      Mac
+    </span>
+    <!-- SVG toggle switch -->
+    <label class="os-switch" id="osToggleLabel" title="Switch OS mode">
+      <input type="checkbox" id="osToggle" onchange="onOsToggle()">
+      <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Track outline -->
+        <rect id="osTrackRect" x="1" y="1" width="34" height="12" rx="6"
+              stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+        <!-- Knob -->
+        <circle id="osKnobEl" cx="7" cy="7" r="4"
+                stroke="#9ca3af" stroke-width="1.5" fill="white"/>
+      </svg>
+    </label>
+    <!-- Windows icon -->
+    <span class="os-label" id="osLabelRight">
+      PC
+<svg width="11" height="11" viewBox="0 0 102.73 104.6" fill="#9ca3af" xmlns="http://www.w3.org/2000/svg"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>
+    </span>
+  </div>
+  <div id="osMismatchPill"></div>
+</div>
 
 <div id="gameContainer">
   <div id="questionRow"></div>
@@ -693,6 +822,10 @@ function buildKey(cfg, isMini) {
       el.innerHTML = `<span class="letter-lbl">${cfg.label}</span>`;
       el.addEventListener('mousedown', showKbToast);
       break;
+    case 'winkey':
+      el.innerHTML = `<svg class="win-svg" width="14" height="14" viewBox="0 0 102.73 104.6" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>`;
+      el.addEventListener('mousedown', showKbToast);
+      break;
   }
 
   if (cfg.id) { keyEls[cfg.id] = el; el.dataset.key = cfg.id; }
@@ -753,17 +886,29 @@ const FULL_LAYOUT = [
     sKey('Comma',',','<'), sKey('Period','.', '>'), sKey('Slash','/','?'),
     uKey('ShiftRight','shift','⇧', 104, []),
   ],
-  [ // Bottom row
+  [ // Bottom row — Mac
     uKey('ControlLeft', 'control', 'ctrl', 52, ['bl']),
-    mKey('AltLeft',     '⌥', 'option',  '⌥',   52),
+    uKey('AltLeft',     'option',  'opt',  52),
     mKey('MetaLeft',    '⌘', 'command', '⌘',   70),
     spaceKey(180),
     mKey('MetaRight',   '⌘', 'command', '⌘',   70),
-    mKey('AltRight',    '⌥', 'option',  '⌥',   52),
+    uKey('AltRight',    'option',  'opt',  52),
     {type:'arrow', id:'ArrowLeft',  label:'◀', corner:[]},
     {type:'updown'},
     {type:'arrow', id:'ArrowRight', label:'▶', corner:['br']},
   ],
+];
+
+// PC bottom row replaces the Mac bottom row
+const PC_BOTTOM_ROW = [
+  uKey('ControlLeft',  'ctrl',    'ctrl', 52, ['bl']),
+  {type:'winkey', id:'MetaLeft',  w:52, corner:[]},
+  uKey('AltLeft',      'alt',     'alt',  52),
+  spaceKey(196),
+  uKey('ControlRight', 'ctrl',    'ctrl', 52, []),
+  {type:'arrow', id:'ArrowLeft',  label:'◀', corner:[]},
+  {type:'updown'},
+  {type:'arrow', id:'ArrowRight', label:'▶', corner:['br']},
 ];
 
 function buildKeyboard(isMini) {
@@ -772,14 +917,16 @@ function buildKeyboard(isMini) {
   Object.keys(keyEls).forEach(k => delete keyEls[k]);
   lockKeyEl = null;
 
-  FULL_LAYOUT.forEach((row, ri) => {
+  // Swap in the PC bottom row when PC mode is active
+  const layout = FULL_LAYOUT.map((row, ri) => ri === 5 && currentOs === 'pc' ? PC_BOTTOM_ROW : row);
+
+  layout.forEach((row, ri) => {
     const rowEl = document.getElementById(rowIds[ri]);
     row.forEach(cfg => {
       if (cfg.type === 'updown') {
         // Full: lr=40px, gap=4px, each ud=(40-4)/2=18px → 18+4+18=40 ✓
         // Mini: lr=27px, gap=3px, each ud=(27-3)/2=12px → 12+3+12=27 ✓
         const kw   = isMini ? Math.round(40*0.68) : 40;  // 27 or 40
-        const lrH  = 40;                                  // always full row height
         const gap  = 4;
         const kh   = 18;                                  // (40-4)/2 = 18 always
         const stack = document.createElement('div');
@@ -804,12 +951,10 @@ function buildKeyboard(isMini) {
         keyCfg = Object.assign({}, cfg);
         keyCfg.w = cfg.w ? Math.round(cfg.w * 0.68) : 28;
         if (cfg.type === 'fn' || cfg.type === 'lock') keyCfg.h = 22;
-        if (cfg.type === 'space') keyCfg.w = Math.round(180 * 0.68);
-        if (cfg.type === 'arrow') { keyCfg.w = 27; keyCfg.h = 40; } // height matches row, only width scales
+        if (cfg.type === 'space') keyCfg.w = Math.round((cfg.w || 180) * 0.68);
+        if (cfg.type === 'arrow') { keyCfg.w = 27; keyCfg.h = 40; }
+        if (cfg.type === 'winkey') keyCfg.w = Math.round(52 * 0.68);
       } else {
-        // Full keyboard: arrow-lr has no w/h in its config object,
-        // so set them explicitly so buildKey writes inline style.height=40px
-        // (ensures .key's CSS height:40px is reinforced, not needed but explicit)
         if (cfg.type === 'arrow') { keyCfg = Object.assign({}, cfg); keyCfg.w = 40; keyCfg.h = 40; }
       }
 
@@ -827,11 +972,94 @@ let toastTimer = null;
 
 function showKbToast(e) {
   e.preventDefault();
-  kbToastEl.innerHTML = 'This keyboard is for display only. Play with an actual Mac keyboard.';
+  const osName = currentOs === 'pc' ? 'PC' : 'Mac';
+  kbToastEl.innerHTML = `This keyboard is for display only. Play with an actual ${osName} keyboard.`;
   kbToastEl.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => kbToastEl.classList.remove('show'), 3000);
 }
+
+/* ══════════════════════════════════════
+   OS DETECTION & TOGGLE
+══════════════════════════════════════ */
+function detectOs() {
+  const ua = navigator.userAgent || '';
+  const platform = (navigator.userAgentData?.platform || navigator.platform || '').toLowerCase();
+  if (/mac/i.test(platform) || /mac os x/i.test(ua)) return 'mac';
+  if (/win/i.test(platform) || /windows/i.test(ua))  return 'pc';
+  // Mobile / tablet — keyboard shortcuts don't really apply
+  if (/android|iphone|ipad|ipod/i.test(ua))          return 'mobile';
+  // Linux / ChromeOS / unknown — treat like PC (Ctrl-based)
+  return 'other';
+}
+
+const detectedOs = detectOs();
+// 'currentOs' drives all game logic and keyboard rendering
+let currentOs = (detectedOs === 'mac') ? 'mac' : 'pc';
+
+const osToggleEl     = document.getElementById('osToggle');
+const osMismatchEl   = document.getElementById('osMismatchPill');
+
+const osKnobEl  = document.getElementById('osKnobEl');
+
+function updateToggleVisual(os) {
+  if (!osKnobEl) return;
+  // Knob starts at cx=7; shift 22px right for PC
+  const isPc = os === 'pc';
+  osKnobEl.style.transform = isPc ? 'translateX(22px)' : 'translateX(0)';
+  // Both states use the same grey — knob fill darkens slightly for PC
+  osKnobEl.setAttribute('fill', isPc ? '#9ca3af' : 'white');
+}
+
+function applyOsMode(os) {
+  currentOs = os;
+  osToggleEl.checked = (os === 'pc');
+  updateToggleVisual(os);
+  updateMismatchPill();
+  // Rebuild the keyboard with the new bottom row
+  if (currentKbMode && currentKbMode !== 'none') {
+    buildKeyboard(currentKbMode === 'mini');
+  }
+}
+
+function updateMismatchPill() {
+  if (detectedOs === 'mobile') {
+    osMismatchEl.textContent = 'Touch devices aren\'t supported — use a physical keyboard.';
+    osMismatchEl.classList.add('show');
+    return;
+  }
+  if (detectedOs === 'other') {
+    // Unknown OS — just show whichever mode is active, no mismatch warning
+    osMismatchEl.classList.remove('show');
+    return;
+  }
+  // Known OS: warn only when toggle doesn't match the detected OS
+  const mismatch = (detectedOs === 'mac' && currentOs === 'pc') ||
+                   (detectedOs === 'pc'  && currentOs === 'mac');
+  if (mismatch) {
+    const playing = currentOs === 'pc' ? 'PC' : 'Mac';
+    const machine = detectedOs === 'mac' ? 'a Mac' : 'a PC';
+    osMismatchEl.textContent = `Playing ${playing} mode on ${machine}`;
+    osMismatchEl.classList.add('show');
+  } else {
+    osMismatchEl.classList.remove('show');
+  }
+}
+
+function onOsToggle() {
+  applyOsMode(osToggleEl.checked ? 'pc' : 'mac');
+}
+
+// Show a gentle note if on mobile
+if (detectedOs === 'mobile') {
+  osMismatchEl.textContent = 'Touch devices aren\'t supported — use a physical keyboard.';
+  osMismatchEl.classList.add('show');
+}
+
+// Set the initial toggle position to match the detected OS
+// (defaults to PC for unknown/other systems)
+osToggleEl.checked = (currentOs === 'pc');
+updateToggleVisual(currentOs);
 
 /* ══════════════════════════════════════
    RESPONSIVE MODE
@@ -853,6 +1081,8 @@ function updateKeyboardMode() {
 }
 window.addEventListener('resize', updateKeyboardMode);
 updateKeyboardMode();
+// Show mismatch pill after initial keyboard build
+updateMismatchPill();
 
 /* ══════════════════════════════════════
    SHORTCUT → KEY CODES
@@ -870,6 +1100,9 @@ function shortcutToCodes(s) {
   if (u === 'OPTION')              return ['AltLeft', 'AltRight'];
   if (u.startsWith('CMD+')) {
     const key = charToCode(u.slice(4));
+    if (currentOs === 'pc') {
+      return ['ControlLeft', 'ControlRight', key].filter(Boolean);
+    }
     return ['MetaLeft', 'MetaRight', key].filter(Boolean);
   }
   const c = charToCode(u);
@@ -901,6 +1134,7 @@ const LR_PAIRS = [
   ['ShiftLeft','ShiftRight'],
   ['AltLeft','AltRight'],
   ['MetaLeft','MetaRight'],
+  ['ControlLeft','ControlRight'],
 ];
 function neededSatisfied(needed) {
   // Returns true if every code in needed is satisfied —
@@ -1115,7 +1349,7 @@ function timerBoxClick() {
 /* ══════════════════════════════════════
    HELP — auto-fades after 3s
 ══════════════════════════════════════ */
-const KEY_DISPLAY = {
+const KEY_DISPLAY_MAC = {
   'CMD':        { sym: '⌘', name: 'Command' },
   'SHIFT':      { sym: '⇧', name: 'Shift' },
   'OPTION':     { sym: '⌥', name: 'Option' },
@@ -1125,10 +1359,21 @@ const KEY_DISPLAY = {
   'SPACE':      { sym: '␣', name: 'Space' },
   'TAB':        { sym: '⇥', name: 'Tab' },
 };
+const KEY_DISPLAY_PC = {
+  'CMD':        { sym: 'Ctrl', name: '' },
+  'SHIFT':      { sym: '⇧', name: 'Shift' },
+  'OPTION':     { sym: 'Alt', name: '' },
+  'RETURN':     { sym: '↵', name: 'Enter' },
+  'ARROWLEFT':  { sym: '←', name: 'Left' },
+  'ARROWRIGHT': { sym: '→', name: 'Right' },
+  'SPACE':      { sym: '␣', name: 'Space' },
+  'TAB':        { sym: '⇥', name: 'Tab' },
+};
 
 function pillHTML(token) {
-  const k = KEY_DISPLAY[token.toUpperCase()];
-  const label = k ? k.sym + ' ' + k.name : token;
+  const map = currentOs === 'pc' ? KEY_DISPLAY_PC : KEY_DISPLAY_MAC;
+  const k = map[token.toUpperCase()];
+  const label = k ? (k.name ? k.sym + ' ' + k.name : k.sym) : token;
   return '<span style="display:inline-block;background:#f59e0b;color:white;font-weight:700;font-size:12px;padding:3px 10px;border-radius:10px;white-space:nowrap;">' + label + '</span>';
 }
 
@@ -1286,11 +1531,19 @@ function matchesShortcut(event, str) {
   if (s === 'SHIFT')  return event.key === 'Shift' && !event.metaKey && !event.altKey && !event.ctrlKey;
   if (s === 'OPTION') return event.key === 'Alt'   && !event.metaKey && !event.ctrlKey && !event.shiftKey;
   if (s.startsWith('CMD+')) {
-    if (!event.metaKey || event.altKey || event.ctrlKey) return false;
     const exp = s.slice(4);
-    if (exp === '=' && (event.key === '=' || event.key === '+')) return true;
-    if (exp === 'RETURN' && event.key === 'Enter') return true;
-    return event.key.toUpperCase() === exp;
+    if (currentOs === 'pc') {
+      // PC: Ctrl replaces Cmd
+      if (!event.ctrlKey || event.metaKey || event.altKey) return false;
+      if (exp === '=' && (event.key === '=' || event.key === '+')) return true;
+      if (exp === 'RETURN' && event.key === 'Enter') return true;
+      return event.key.toUpperCase() === exp;
+    } else {
+      if (!event.metaKey || event.altKey || event.ctrlKey) return false;
+      if (exp === '=' && (event.key === '=' || event.key === '+')) return true;
+      if (exp === 'RETURN' && event.key === 'Enter') return true;
+      return event.key.toUpperCase() === exp;
+    }
   }
   if (event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) return false;
   return event.key.toUpperCase() === s;
