@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Keyboard Warrior</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #f0f4f8;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+/* ══════════════════════════════════════
+   GAME PANEL
+══════════════════════════════════════ */
+#gameContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 900px;
+  background: #e0f2fe;
+  border-radius: 16px;
+  padding: 20px 24px 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+.topRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 90px;
+}
+.leftPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  flex-shrink: 0;
+  width: 140px;
+}
+.middlePanel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+}
+.rightPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  width: 120px;
+  justify-content: center;
+}
+
+/* ══════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════ */
+#mainBtn, #helpBtn {
+  width: 130px;
+  height: 32px;
+  border: none;
+  outline: none;
+  border-radius: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: center;
+  padding: 0 16px;
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+#mainBtn:focus, #helpBtn:focus { outline: none; box-shadow: none; }
+#mainBtn { background: #10b981; color: white; }
+#mainBtn:hover { background: #059669; }
+#helpBtn { background: #6b7280; color: white; font-size: 12px; transition: background 0.8s ease; }
+#helpBtn:hover { background: #4b5563; }
+#helpBtn:active { background: #9ca3af; transition: background 0s; }
+
+/* ══════════════════════════════════════
+   TIMER
+══════════════════════════════════════ */
+.timerBox {
+  background: #1f2937;
+  color: white;
+  border-radius: 50%;
+  width: 130px;
+  height: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+  transition: background 0.2s ease;
+  cursor: default;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+/* Each half occupies exactly 50% so the divider always lands at centre */
+.timerBox .timer-top,
+.timerBox .timer-bottom {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+/* Top: number sits closest to divider (flex-end), icon floats up */
+.timerBox .timer-top    { justify-content: flex-end;   padding-bottom: 5px; }
+/* Bottom: number sits closest to divider (flex-start), icon floats down */
+.timerBox .timer-bottom { justify-content: flex-start;  padding-top: 5px; }
+.timerBox .timer-icon {
+  width: 14px;
+  height: 14px;
+  opacity: 0.55;
+}
+.timerBox .accuracy-icon {
+  width: 14px;
+  height: 14px;
+  opacity: 0.55;
+}
+.timerBox .timer-time {
+  font-size: 26px;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+/* SVG dashed divider — zero flex-shrink so it never collapses */
+.timerBox .timer-divider {
+  display: block;
+  width: 100%;
+  flex-shrink: 0;
+  overflow: visible;
+}
+/* Accuracy number */
+.timerBox .timer-accuracy {
+  font-size: 26px;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+/* CHANGE 5: paused timer is clickable to unpause */
+.timerBox.paused        { background: #4b5563; cursor: pointer; }
+.timerBox.green         { background: #10b981; }
+.timerBox.finished      { background: #1f2937; }
+/* Penalty gradients — sharp split at 50%, rapid transition in */
+.timerBox.penalty-time  {
+  background: linear-gradient(to bottom, #ef4444 0%, #ef4444 50%, #1f2937 50%, #1f2937 100%);
+  transition: background 0.08s ease;
+}
+.timerBox.penalty-acc   {
+  background: linear-gradient(to bottom, #1f2937 0%, #1f2937 50%, #f59e0b 50%, #f59e0b 100%);
+  transition: background 0.08s ease;
+}
+
+/* ══════════════════════════════════════
+   TITLE
+══════════════════════════════════════ */
+#title {
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
+  color: #1f2937;
+  opacity: 1;
+  transition: opacity 0.3s, filter 0.4s;
+  filter: none;
+  white-space: pre-line;
+}
+#title.hidden  { opacity: 0; }
+#title.strike  { text-decoration: line-through; opacity: 0.45; }
+#title.blurred { filter: blur(8px); opacity: 0.6; user-select: none; }
+
+/* ══════════════════════════════════════
+   INFO ROWS (question count + best record)
+══════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+#questionRow {
+  width: 100%;
+  max-width: 900px;
+  text-align: center;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 16px;
+  color: #6b7280;
+  min-height: 24px;
+  padding: 2px 24px;
+  transition: opacity 0.4s ease;
+}
+/* Stats row: mirrors leftPanel/rightPanel widths, sits under game panel */
+#statsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 900px;
+  padding: 8px 24px 10px;
+  position: relative;
+  box-sizing: border-box;
+  min-height: 37px;
+}
+#statLeft, #statRight {
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 13px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+#statLeft  { width: 130px; text-align: center; }
+#statRight { width: 120px; text-align: center; }
+
+#credit {
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: center;
+  max-width: 900px;
+  width: 100%;
+  padding: 8px 24px 0;
+}
+
+/* Toast pill — centred over the stats row, overlaps if needed */
+#kbToast {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f59e0b;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 10;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+#kbToast.show { opacity: 1; }
+
+/* ══════════════════════════════════════
+   KEYBOARD WRAPPER
+══════════════════════════════════════ */
+#keyboardWrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* ══════════════════════════════════════
+   KEYBOARD PANEL
+   Outer: 14px → corner keys: 9px → base keys: 4px
+══════════════════════════════════════ */
+#keyboardPanel {
+  background: #b2b8c0;
+  border-radius: 14px;
+  padding: 9px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.kb-row {
+  display: flex;
+  gap: 4px;
+}
+
+/* Base key */
+.key {
+  background: #f5f5f7;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #1d1d1f;
+  font-family: system-ui, sans-serif;
+  box-shadow: 0 1px 0 #8a9099, inset 0 -1px 0 rgba(0,0,0,0.08);
+  user-select: none;
+  position: relative;
+  transition: background 0.07s;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  cursor: default;
+}
+.key.corner-tl { border-top-left-radius: 9px; }
+.key.corner-tr { border-top-right-radius: 9px; }
+.key.corner-bl { border-bottom-left-radius: 9px; }
+.key.corner-br { border-bottom-right-radius: 9px; }
+
+/* Keys that sit one step in from a panel corner get a mid-level radius.
+   Panel = 14px, true corner keys = 9px, these edge-adjacent keys = 6px. */
+/* ~` key: top-left */
+#keyboardPanel [data-key="Backquote"]  { border-top-left-radius: 6px; }
+/* delete key: top-right */
+#keyboardPanel [data-key="Backspace"]  { border-top-right-radius: 6px; }
+/* shift keys: all corners standard 4px — no overrides needed */
+/* Right arrow: bottom-right is a true panel corner → full concentric radius */
+#keyboardPanel [data-key="ArrowRight"] { border-bottom-right-radius: 9px; }
+
+/* Fn row */
+.key.fn {
+  background: #ffffff;
+  height: 28px;
+  box-shadow: 0 1px 0 #9aa0a8, inset 0 -1px 0 rgba(0,0,0,0.06);
+}
+.key.fn .fn-lbl {
+  font-size: 8.5px;
+  font-weight: 400;
+  color: #555;
+  position: absolute;
+  bottom: 4px;
+  left: 0; right: 0;
+  text-align: center;
+}
+
+/* Letter keys */
+.key .letter-lbl {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  line-height: 1;
+}
+
+/* Symbol keys */
+.key .sym-sub {
+  position: absolute;
+  top: 4px; left: 5px;
+  font-size: 8px;
+  color: #777;
+  line-height: 1;
+}
+.key .sym-main {
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+  line-height: 1;
+}
+
+/* Utility keys */
+.key .util-lbl {
+  font-size: 9px;
+  font-weight: 400;
+  color: #555;
+}
+
+/* Modifier keys */
+.key .mod-sym {
+  font-size: 16px;
+  color: #555;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.key .mod-word {
+  position: absolute;
+  bottom: 4px;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 8px;
+  color: #555;
+  font-weight: 400;
+  line-height: 1;
+}
+
+/* Mini-only: mod key with symbol only, centred */
+.key .mod-sym-only {
+  font-size: 14px;
+  color: #555;
+  line-height: 1;
+}
+/* Mini-only: util key with symbol only, centred */
+.key .util-sym-only {
+  font-size: 14px;
+  color: #555;
+  line-height: 1;
+}
+
+/* Lock key
+   CHANGE 2: .active stays white — no yellow highlight */
+.key.lock-key { cursor: pointer; }
+.key.lock-key:hover  { background: #e8e8ea; }
+.key.lock-key.active { background: #f5f5f7; }
+.key .lock-svg { width: 14px; height: 14px; opacity: 0.55; }
+
+/* Spacebar */
+.key.space-key { width: 180px; }
+
+/* Arrow keys */
+.arrow-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+/* Left/right arrows: full height of bottom row, standard 4px rounding all corners.
+   Right arrow gets corner-br (9px) from its corner[] config for the keyboard corner. */
+.key.arrow-lr {
+  /* Width and height set by inline style in buildKeyboard so mini scales correctly.
+     No border-radius here — inherits 4px from .key; .corner-br overrides ▶ bottom-right. */
+}
+.key.arrow-lr .letter-lbl { font-size: 11px; }
+/* Up/down: width, height and gap all set by inline style in buildKeyboard. */
+.key.arrow-ud {
+}
+.key.arrow-up   { border-radius: 4px 4px 0 0; }
+.key.arrow-down { border-radius: 0 0 4px 4px; }
+.key.arrow-ud .letter-lbl { font-size: 10px; }
+
+/* ══════════════════════════════════════
+   LIT STATES
+══════════════════════════════════════ */
+.key.lit-green {
+  background: #10b981 !important;
+  box-shadow: 0 1px 0 #059669, 0 0 8px rgba(16,185,129,0.5) !important;
+}
+.key.lit-green .letter-lbl,
+.key.lit-green .sym-main,
+.key.lit-green .sym-sub,
+.key.lit-green .util-lbl,
+.key.lit-green .fn-lbl,
+.key.lit-green .mod-sym,
+.key.lit-green .mod-sym-only,
+.key.lit-green .mod-word,
+.key.lit-green .util-sym-only { color: white !important; }
+
+.key.lit-orange {
+  background: #f97316 !important;
+  box-shadow: 0 1px 0 #c2410c, 0 0 8px rgba(249,115,22,0.5) !important;
+}
+.key.lit-orange .letter-lbl,
+.key.lit-orange .sym-main,
+.key.lit-orange .sym-sub,
+.key.lit-orange .util-lbl,
+.key.lit-orange .fn-lbl,
+.key.lit-orange .mod-sym,
+.key.lit-orange .mod-sym-only,
+.key.lit-orange .mod-word,
+.key.lit-orange .util-sym-only { color: white !important; }
+
+/* Fade-out transition — applied just before removing lit class */
+.key.lit-fading {
+  transition: background 0.8s ease, box-shadow 0.8s ease !important;
+}
+.key.lit-fading .letter-lbl,
+.key.lit-fading .sym-main,
+.key.lit-fading .sym-sub,
+.key.lit-fading .util-lbl,
+.key.lit-fading .fn-lbl,
+.key.lit-fading .mod-sym,
+.key.lit-fading .mod-sym-only,
+.key.lit-fading .mod-word,
+.key.lit-fading .util-sym-only {
+  transition: color 0.8s ease !important;
+}
+
+/* ══════════════════════════════════════
+   BREAKPOINTS
+   < 600px: keyboard hidden; stats bar still shows
+   600-819: mini keyboard
+   >= 820:  full keyboard
+══════════════════════════════════════ */
+@media (max-width: 599px) {
+  #keyboardWrap { display: none; }
+
+  body { padding: 12px; }
+
+  #gameContainer { padding: 14px 16px 12px; }
+
+  .topRow { gap: 10px; min-height: 72px; }
+
+  .leftPanel { width: 108px; }
+
+  #mainBtn, #helpBtn { width: 108px; font-size: 12px; }
+
+  .rightPanel { width: 90px; }
+
+  .timerBox { width: 90px; height: 90px; }
+  .timerBox .timer-time,
+  .timerBox .timer-accuracy { font-size: 18px; }
+  .timerBox .timer-icon,
+  .timerBox .accuracy-icon  { width: 11px; height: 11px; }
+  .timerBox .timer-top    { padding-bottom: 3px; }
+  .timerBox .timer-bottom { padding-top: 3px; }
+
+  #title { font-size: 18px; }
+
+  #questionRow { font-size: 13px; padding: 2px 12px; }
+
+  #statsRow { padding: 6px 0 8px; }
+  #statLeft  { width: 108px; }
+  #statRight { width: 90px; }
+}
+</style>
+</head>
+<body>
+
+<div id="gameContainer">
+  <div id="questionRow"></div>
+  <div class="topRow">
+    <div class="leftPanel">
+      <button id="mainBtn" onclick="mainButtonClick()">Start the game</button>
+      <button id="helpBtn" onclick="helpButtonClick()">Help</button>
+    </div>
+    <div class="middlePanel">
+      <h2 id="title">Play Keyboard Warrior</h2>
+    </div>
+    <div class="rightPanel">
+      <!-- CHANGE 5: timer click unpauses -->
+      <div class="timerBox" id="timerBox" onclick="timerBoxClick()">
+        <div class="timer-top">
+          <svg class="timer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="13" r="8"/>
+  <path d="M12 9v4l3 3"/>
+  <path d="M9 3h6"/>
+  <path d="M12 3v2"/>
+</svg>
+          <div class="timer-time" id="timer">0:00</div>
+        </div>
+        <svg class="timer-divider" viewBox="0 0 130 8" height="8" xmlns="http://www.w3.org/2000/svg">
+  <line x1="0" y1="4" x2="130" y2="4" stroke="#e0f2fe" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 5"/>
+</svg>
+        <div class="timer-bottom" id="timerBottom">
+          <div class="timer-accuracy" id="timerAccuracy">100%</div>
+          <svg class="accuracy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="7"/>
+  <line x1="12" y1="2" x2="12" y2="7"/>
+  <line x1="12" y1="17" x2="12" y2="22"/>
+  <line x1="2" y1="12" x2="7" y2="12"/>
+  <line x1="17" y1="12" x2="22" y2="12"/>
+</svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats bar: always visible -->
+<div id="statsRow">
+  <span id="statLeft"></span>
+  <div id="kbToast">This keyboard is for display only. Play with an actual Mac keyboard.</div>
+  <span id="statRight"></span>
+</div>
+
+<div id="keyboardWrap">
+  <div id="keyboardPanel">
+    <div class="kb-row" id="row-fn"></div>
+    <div class="kb-row" id="row-num"></div>
+    <div class="kb-row" id="row-q"></div>
+    <div class="kb-row" id="row-a"></div>
+    <div class="kb-row" id="row-z"></div>
+    <div class="kb-row" id="row-bot"></div>
+  </div>
+</div>
+
+<p id="credit">Built for learners. This digital toy was created by Wednesday Dessauer as open-source &amp; free to adapt under GNU GPL v3.0</p>
+
+<script>
+/* ══════════════════════════════════════
+   SHORTCUTS
+   CHANGE 1: added arrow nudges + Shift and Option as standalone
+══════════════════════════════════════ */
+const SHORTCUTS = [
+  {shortcut:"V",                display:"Grab the Selection tool"},
+  {shortcut:"A",                display:"Switch to the Direct Selection tool"},
+  {shortcut:"P",                display:"Switch to the Pen tool"},
+  {shortcut:"B",                display:"Switch to the Brush tool"},
+  {shortcut:"E",                display:"Switch to the Eraser tool"},
+  {shortcut:"T",                display:"Switch to the Type tool"},
+  {shortcut:"L",                display:"Switch to the Ellipse tool"},
+  {shortcut:"M",                display:"Switch to the Rectangle tool"},
+  {shortcut:"I",                display:"Pick up a colour with the Eyedropper"},
+  {shortcut:"Z",                display:"Switch to the Zoom tool"},
+  {shortcut:"Q",                display:"Switch to the Crop tool (Photoshop)"},
+  {shortcut:"G",                display:"Switch to the Gradient tool"},
+  {shortcut:"K",                display:"Switch to the Paint Bucket tool"},
+  {shortcut:"SPACE",            display:"Hold this to pan around your canvas"},
+  {shortcut:"CMD+=",            display:"Zoom in"},
+  {shortcut:"CMD+-",            display:"Zoom out"},
+  {shortcut:"CMD+0",            display:"Fit the page to your screen"},
+  {shortcut:"CMD+1",            display:"View at 100% zoom"},
+  {shortcut:"CMD+2",            display:"View at 200% zoom (Illustrator / Photoshop)"},
+  {shortcut:"CMD+3",            display:"View at 33% zoom (Illustrator)"},
+  {shortcut:"CMD+4",            display:"View at 66% zoom (Illustrator)"},
+  {shortcut:"CMD+;",            display:"Show or hide guides"},
+  {shortcut:";",                display:"Show or hide the grid"},
+  {shortcut:"CMD+U",            display:"Show or hide smart guides"},
+  {shortcut:"CMD+G",            display:"Group your selected objects"},
+  {shortcut:"CMD+]",            display:"Move object forward one layer"},
+  {shortcut:"CMD+[",            display:"Move object back one layer"},
+  {shortcut:"CMD+J",            display:"Duplicate the current layer (Photoshop)"},
+  {shortcut:"CMD+D",            display:"Deselect everything"},
+  {shortcut:"CMD+I",            display:"Invert your selection (Photoshop)"},
+  {shortcut:"F",                display:"Cycle through screen modes"},
+  {shortcut:"TAB",              display:"Hide or show all panels"},
+  {shortcut:"CMD+RETURN",       display:"Preview your document"},
+  {shortcut:"CMD+Y",            display:"Toggle Preview / Outline mode (Illustrator)"},
+  {shortcut:"D",                display:"Reset colours to black and white"},
+  {shortcut:"X",                display:"Swap foreground and background colours"},
+  {shortcut:"ARROWLEFT",        display:"Nudge selection 1px to the left"},
+  {shortcut:"ARROWRIGHT",       display:"Nudge selection 1px to the right"},
+  {shortcut:"SHIFT+ARROWLEFT",  display:"Nudge selection 10px to the left"},
+  {shortcut:"SHIFT+ARROWRIGHT", display:"Nudge selection 10px to the right"},
+  {shortcut:"SHIFT",            display:"Hold this to toggle constrain proportions while transforming"},
+  {shortcut:"OPTION",           display:"Hold this to transform from centre"},
+];
+
+/* ══════════════════════════════════════
+   KEYBOARD BUILDER
+══════════════════════════════════════ */
+const keyEls = {};
+let lockKeyEl = null;
+
+const LOCK_SVG = `<svg class="lock-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="5" y="11" width="14" height="10" rx="2"/>
+  <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+</svg>`;
+
+function buildKey(cfg, isMini) {
+  const el = document.createElement('div');
+  const classes = ['key'];
+  if (cfg.cls)    cfg.cls.forEach(c => classes.push(c));
+  if (cfg.corner) cfg.corner.forEach(c => classes.push('corner-' + c));
+  el.className = classes.join(' ');
+
+  if (cfg.w) el.style.width  = cfg.w + 'px';
+  if (cfg.h) el.style.height = cfg.h + 'px';
+
+  switch (cfg.type) {
+    case 'fn':
+      el.classList.add('fn');
+      el.innerHTML = `<span class="fn-lbl">${cfg.label}</span>`;
+      el.addEventListener('mousedown', showKbToast);
+      break;
+    case 'lock':
+      el.classList.add('fn', 'lock-key');
+      el.innerHTML = LOCK_SVG;
+      el.style.display = 'flex';
+      el.style.alignItems = 'center';
+      el.style.justifyContent = 'center';
+      el.addEventListener('mousedown', e => { e.preventDefault(); togglePause(); });
+      lockKeyEl = el;
+      break;
+    case 'letter':
+      el.innerHTML = `<span class="letter-lbl">${cfg.label}</span>`;
+      el.addEventListener('mousedown', showKbToast);
+      break;
+    case 'sym':
+      el.innerHTML = `<span class="sym-sub">${cfg.sub}</span><span class="sym-main">${cfg.main}</span>`;
+      el.addEventListener('mousedown', showKbToast);
+      break;
+    case 'util':
+      if (isMini && cfg.mini && cfg.mini.length <= 2 && /\p{So}|\p{Sm}|[⇧↩↑↓←→]/u.test(cfg.mini)) {
+        // Mini symbol keys: large centred glyph
+        el.innerHTML = `<span class="util-sym-only">${cfg.mini}</span>`;
+      } else {
+        el.innerHTML = `<span class="util-lbl">${isMini ? cfg.mini : cfg.label}</span>`;
+      }
+      el.addEventListener('mousedown', showKbToast);
+      break;
+    case 'mod':
+      if (isMini) {
+        // Mini: symbol only, centred — no word label beneath
+        el.innerHTML = `<span class="mod-sym-only">${cfg.sym || cfg.mini}</span>`;
+      } else {
+        el.innerHTML = `<span class="mod-sym">${cfg.sym}</span><span class="mod-word">${cfg.word}</span>`;
+      }
+      el.addEventListener('mousedown', showKbToast);
+      break;
+    case 'space':
+      el.addEventListener('mousedown', showKbToast);
+      break;
+    case 'arrow':
+      el.classList.add('arrow-lr');
+      el.innerHTML = `<span class="letter-lbl">${cfg.label}</span>`;
+      el.addEventListener('mousedown', showKbToast);
+      break;
+  }
+
+  if (cfg.id) { keyEls[cfg.id] = el; el.dataset.key = cfg.id; }
+
+  // Keys that stretch to fill remaining row width
+  const FLEX_KEYS = new Set(['Backspace','Tab','CapsLock','Enter','ShiftLeft','ShiftRight','Space']);
+  if (FLEX_KEYS.has(cfg.id) || cfg.type === 'lock') {
+    el.style.flex = '1 1 0';
+    el.style.minWidth = '0';
+    el.style.width = '';  // remove fixed px width so flex takes over
+  }
+
+  return el;
+}
+
+function fnKey(id, label, corner)             { return {type:'fn',     id, label, corner: corner||[]}; }
+function lKey(id, label, corner)              { return {type:'letter',  id, label, corner: corner||[]}; }
+function sKey(id, main, sub, corner)          { return {type:'sym',    id, main, sub, corner: corner||[]}; }
+function uKey(id, label, mini, w, corner)     { return {type:'util',   id, label, mini, w, corner: corner||[]}; }
+function mKey(id, sym, word, mini, w, corner) { return {type:'mod',    id, sym, word, mini, w, corner: corner||[]}; }
+function spaceKey(w)                          { return {type:'space',   id:'Space', w}; }
+
+const FULL_LAYOUT = [
+  [ // Fn row
+    fnKey('Escape','esc',['tl']),
+    fnKey('F1','F1'), fnKey('F2','F2'), fnKey('F3','F3'), fnKey('F4','F4'),
+    fnKey('F5','F5'), fnKey('F6','F6'), fnKey('F7','F7'), fnKey('F8','F8'),
+    fnKey('F9','F9'), fnKey('F10','F10'), fnKey('F11','F11'), fnKey('F12','F12'),
+    {type:'lock', corner:['tr'], w:40, h:28},
+  ],
+  [ // Number row
+    sKey('Backquote','`','~',['tl']),
+    sKey('Digit1','1','!'), sKey('Digit2','2','@'), sKey('Digit3','3','#'),
+    sKey('Digit4','4','$'), sKey('Digit5','5','%'), sKey('Digit6','6','^'),
+    sKey('Digit7','7','&'), sKey('Digit8','8','*'), sKey('Digit9','9','('),
+    sKey('Digit0','0',')'), sKey('Minus','-','_'),  sKey('Equal','=','+'),
+    uKey('Backspace','delete','del', 64, ['tr']),
+  ],
+  [ // QWERTY row
+    uKey('Tab','tab','tab', 56),
+    lKey('KeyQ','Q'), lKey('KeyW','W'), lKey('KeyE','E'), lKey('KeyR','R'),
+    lKey('KeyT','T'), lKey('KeyY','Y'), lKey('KeyU','U'), lKey('KeyI','I'),
+    lKey('KeyO','O'), lKey('KeyP','P'),
+    sKey('BracketLeft','[','{'), sKey('BracketRight',']','}'),
+    sKey('Backslash','\\','|'),
+  ],
+  [ // ASDF row
+    uKey('CapsLock','caps lock','caps', 66),
+    lKey('KeyA','A'), lKey('KeyS','S'), lKey('KeyD','D'), lKey('KeyF','F'),
+    lKey('KeyG','G'), lKey('KeyH','H'), lKey('KeyJ','J'), lKey('KeyK','K'),
+    lKey('KeyL','L'), sKey('Semicolon',';',':'), sKey('Quote',"'",'\"'),
+    uKey('Enter','return','↩', 76),
+  ],
+  [ // ZXCV row
+    uKey('ShiftLeft','shift','⇧', 84, []),
+    lKey('KeyZ','Z'), lKey('KeyX','X'), lKey('KeyC','C'), lKey('KeyV','V'),
+    lKey('KeyB','B'), lKey('KeyN','N'), lKey('KeyM','M'),
+    sKey('Comma',',','<'), sKey('Period','.', '>'), sKey('Slash','/','?'),
+    uKey('ShiftRight','shift','⇧', 104, []),
+  ],
+  [ // Bottom row
+    uKey('ControlLeft', 'control', 'ctrl', 52, ['bl']),
+    mKey('AltLeft',     '⌥', 'option',  '⌥',   52),
+    mKey('MetaLeft',    '⌘', 'command', '⌘',   70),
+    spaceKey(180),
+    mKey('MetaRight',   '⌘', 'command', '⌘',   70),
+    mKey('AltRight',    '⌥', 'option',  '⌥',   52),
+    {type:'arrow', id:'ArrowLeft',  label:'◀', corner:[]},
+    {type:'updown'},
+    {type:'arrow', id:'ArrowRight', label:'▶', corner:['br']},
+  ],
+];
+
+function buildKeyboard(isMini) {
+  const rowIds = ['row-fn','row-num','row-q','row-a','row-z','row-bot'];
+  rowIds.forEach(id => { document.getElementById(id).innerHTML = ''; });
+  Object.keys(keyEls).forEach(k => delete keyEls[k]);
+  lockKeyEl = null;
+
+  FULL_LAYOUT.forEach((row, ri) => {
+    const rowEl = document.getElementById(rowIds[ri]);
+    row.forEach(cfg => {
+      if (cfg.type === 'updown') {
+        // Full: lr=40px, gap=4px, each ud=(40-4)/2=18px → 18+4+18=40 ✓
+        // Mini: lr=27px, gap=3px, each ud=(27-3)/2=12px → 12+3+12=27 ✓
+        const kw   = isMini ? Math.round(40*0.68) : 40;  // 27 or 40
+        const lrH  = 40;                                  // always full row height
+        const gap  = 4;
+        const kh   = 18;                                  // (40-4)/2 = 18 always
+        const stack = document.createElement('div');
+        stack.className = 'arrow-stack';
+        stack.style.gap = gap + 'px';
+        [['ArrowUp','▲','arrow-up'],['ArrowDown','▼','arrow-down']].forEach(([dir,lbl,cls]) => {
+          const el = document.createElement('div');
+          el.className = 'key arrow-ud ' + cls;
+          el.style.width  = kw + 'px';
+          el.style.height = kh + 'px';
+          el.innerHTML = `<span class="letter-lbl">${lbl}</span>`;
+          el.addEventListener('mousedown', showKbToast);
+          keyEls[dir] = el; el.dataset.key = dir;
+          stack.appendChild(el);
+        });
+        rowEl.appendChild(stack);
+        return;
+      }
+
+      let keyCfg = cfg;
+      if (isMini) {
+        keyCfg = Object.assign({}, cfg);
+        keyCfg.w = cfg.w ? Math.round(cfg.w * 0.68) : 28;
+        if (cfg.type === 'fn' || cfg.type === 'lock') keyCfg.h = 22;
+        if (cfg.type === 'space') keyCfg.w = Math.round(180 * 0.68);
+        if (cfg.type === 'arrow') { keyCfg.w = 27; keyCfg.h = 40; } // height matches row, only width scales
+      } else {
+        // Full keyboard: arrow-lr has no w/h in its config object,
+        // so set them explicitly so buildKey writes inline style.height=40px
+        // (ensures .key's CSS height:40px is reinforced, not needed but explicit)
+        if (cfg.type === 'arrow') { keyCfg = Object.assign({}, cfg); keyCfg.w = 40; keyCfg.h = 40; }
+      }
+
+      const el = buildKey(keyCfg, isMini);
+      rowEl.appendChild(el);
+    });
+  });
+}
+
+/* ══════════════════════════════════════
+   KEYBOARD TOAST
+══════════════════════════════════════ */
+const kbToastEl = document.getElementById('kbToast');
+let toastTimer = null;
+
+function showKbToast(e) {
+  e.preventDefault();
+  kbToastEl.innerHTML = 'This keyboard is for display only. Play with an actual Mac keyboard.';
+  kbToastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => kbToastEl.classList.remove('show'), 3000);
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE MODE
+══════════════════════════════════════ */
+const keyboardWrap = document.getElementById('keyboardWrap');
+let currentKbMode = null;
+
+function updateKeyboardMode() {
+  const w = window.innerWidth;
+  const mode = w < 600 ? 'none' : w < 820 ? 'mini' : 'full';
+  if (mode === currentKbMode) return;
+  currentKbMode = mode;
+  if (mode === 'none') {
+    keyboardWrap.style.display = 'none';
+  } else {
+    keyboardWrap.style.display = 'flex';
+    buildKeyboard(mode === 'mini');
+  }
+}
+window.addEventListener('resize', updateKeyboardMode);
+updateKeyboardMode();
+
+/* ══════════════════════════════════════
+   SHORTCUT → KEY CODES
+   CHANGE 1: extended for new shortcuts
+══════════════════════════════════════ */
+function shortcutToCodes(s) {
+  const u = s.toUpperCase();
+  if (u === 'SPACE')               return ['Space'];
+  if (u === 'TAB')                 return ['Tab'];
+  if (u === 'ARROWLEFT')           return ['ArrowLeft'];
+  if (u === 'ARROWRIGHT')          return ['ArrowRight'];
+  if (u === 'SHIFT+ARROWLEFT')     return ['ShiftLeft', 'ShiftRight', 'ArrowLeft'];
+  if (u === 'SHIFT+ARROWRIGHT')    return ['ShiftLeft', 'ShiftRight', 'ArrowRight'];
+  if (u === 'SHIFT')               return ['ShiftLeft', 'ShiftRight'];
+  if (u === 'OPTION')              return ['AltLeft', 'AltRight'];
+  if (u.startsWith('CMD+')) {
+    const key = charToCode(u.slice(4));
+    return ['MetaLeft', 'MetaRight', key].filter(Boolean);
+  }
+  const c = charToCode(u);
+  return c ? [c] : [];
+}
+
+function charToCode(ch) {
+  const map = {
+    'RETURN':'Enter','ENTER':'Enter',
+    ';':'Semicolon','=':'Equal','-':'Minus',
+    '[':'BracketLeft',']':'BracketRight',
+    '0':'Digit0','1':'Digit1','2':'Digit2','3':'Digit3',
+    '4':'Digit4','5':'Digit5','6':'Digit6','7':'Digit7',
+    '8':'Digit8','9':'Digit9',
+  };
+  if (map[ch]) return map[ch];
+  if (ch.length === 1 && ch >= 'A' && ch <= 'Z') return 'Key' + ch;
+  return null;
+}
+
+/* ══════════════════════════════════════
+   KEYBOARD LIGHTING
+══════════════════════════════════════ */
+const heldKeys  = new Set();
+let   greenHeld = new Set();
+
+// Pairs of interchangeable L/R keys — holding either satisfies the requirement
+const LR_PAIRS = [
+  ['ShiftLeft','ShiftRight'],
+  ['AltLeft','AltRight'],
+  ['MetaLeft','MetaRight'],
+];
+function neededSatisfied(needed) {
+  // Returns true if every code in needed is satisfied —
+  // either held directly, or its L/R partner is held.
+  return needed.every(c => {
+    if (greenHeld.has(c)) return true;
+    const pair = LR_PAIRS.find(p => p.includes(c));
+    return pair ? pair.some(p => greenHeld.has(p)) : false;
+  });
+}
+
+// Per-key linger timers — so each key fades independently
+const lingerTimers = {};
+const LINGER_MS = 800;
+
+function clearAllLit() {
+  Object.values(keyEls).forEach(el => {
+    el.classList.remove('lit-green','lit-orange','lit-fading');
+  });
+  Object.keys(lingerTimers).forEach(k => { clearTimeout(lingerTimers[k]); delete lingerTimers[k]; });
+  greenHeld.clear();
+}
+
+function setKeyLit(code, state) {
+  const el = keyEls[code];
+  if (!el) return;
+  // Cancel any pending linger fade for this key
+  if (lingerTimers[code]) { clearTimeout(lingerTimers[code]); delete lingerTimers[code]; }
+  el.classList.remove('lit-green','lit-orange','lit-fading');
+  if (state) el.classList.add('lit-' + state);
+}
+
+function fadeKeyOut(code) {
+  const el = keyEls[code];
+  if (!el) return;
+  if (lingerTimers[code]) { clearTimeout(lingerTimers[code]); delete lingerTimers[code]; }
+  lingerTimers[code] = setTimeout(() => {
+    delete lingerTimers[code];
+    el.classList.add('lit-fading');
+    // Next frame: remove the lit colour so the slow transition takes over
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.classList.remove('lit-green','lit-orange');
+      // Clean up fading class after transition completes
+      setTimeout(() => el.classList.remove('lit-fading'), 900);
+    }));
+  }, LINGER_MS);
+}
+
+function updateKeyboardLighting(e, isDown) {
+  const code = e.code;
+  if (isDown) {
+    const alreadyHeld = heldKeys.has(code);
+    heldKeys.add(code);
+    if (gameState !== 'playing') return;
+    const needed = shortcutToCodes(currentAnswer);
+    if (needed.includes(code)) {
+      greenHeld.add(code);
+      setKeyLit(code, 'green');
+      if (!alreadyHeld) { greenHits++; totalHits++; updateAccuracyDisplay(); }
+    } else {
+      setKeyLit(code, 'orange');
+      if (!alreadyHeld) { totalHits++; updateAccuracyDisplay(); }
+    }
+  } else {
+    heldKeys.delete(code);
+    greenHeld.delete(code);
+    // Don't clear immediately — linger then fade
+    fadeKeyOut(code);
+  }
+}
+
+/* ══════════════════════════════════════
+   GAME STATE
+   States: idle | playing | paused | confirm-reset | finished
+══════════════════════════════════════ */
+let gameState = 'idle';
+let totalTime  = 0;
+let timerInterval   = null;
+let penaltyTimeout  = null;
+let questionIndex   = 0;   // position in the shuffled pool (0–41, loops)
+let questionPool    = [];  // shuffled pool of all 42 shortcuts
+let answersLeft     = 10;  // counts down only on correct answer
+let currentAnswer = '';
+let helpActive    = false;
+let transitioning = false;
+let bestRecord    = { time: null, accuracy: null };  // independent bests
+let greenHits     = 0;
+let totalHits     = 0;
+let helpFadeTimer = null;
+let accuracyPenaltyTimeout = null;
+
+try {
+  const s = localStorage.getItem('kw_best');
+  if (s !== null) {
+    const parsed = JSON.parse(s);
+    // Accept only the new {time, accuracy} shape; discard old bare numbers
+    if (parsed && typeof parsed === 'object' && typeof parsed.time === 'number') {
+      if (typeof parsed.time === 'number') bestRecord.time = parsed.time;
+      if (typeof parsed.accuracy === 'number') bestRecord.accuracy = parsed.accuracy;
+    } else {
+      localStorage.removeItem('kw_best');
+    }
+  }
+} catch(e) {}
+
+const mainBtn         = document.getElementById('mainBtn');
+const helpBtn         = document.getElementById('helpBtn');
+const titleEl         = document.getElementById('title');
+const timerDiv        = document.getElementById('timer');
+const timerBox        = document.getElementById('timerBox');
+const questionCountEl = document.getElementById('questionRow');
+const statLeftEl      = document.getElementById('statLeft');
+const statRightEl     = document.getElementById('statRight');
+const accuracyEl      = document.getElementById('timerAccuracy');
+
+function calcAccuracy() {
+  return totalHits === 0 ? null : Math.round(greenHits / totalHits * 100);
+}
+
+function updateAccuracyDisplay() {
+  const pct = calcAccuracy();
+  const display = (pct === null ? 100 : pct);
+  accuracyEl.textContent = display + '%';
+}
+
+const BULLSEYE_SVG_STR = '<svg style="width:12px;height:12px;vertical-align:middle;margin-right:3px;margin-bottom:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/></svg>';
+const WATCH_SVG = '<svg style="width:12px;height:12px;vertical-align:middle;margin-right:3px;margin-bottom:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6"/><path d="M12 3v2"/></svg>';
+
+function updateBestDisplay() {
+  if (bestRecord.time !== null) {
+    statLeftEl.innerHTML = 'best ' + WATCH_SVG + '= ' + formatTime(Math.floor(bestRecord.time));
+  } else {
+    statLeftEl.innerHTML = '';
+  }
+  if (bestRecord.accuracy !== null) {
+    const trophy = bestRecord.accuracy >= 100 ? ' 🏆' : '';
+    statRightEl.innerHTML = 'best ' + BULLSEYE_SVG_STR + '= ' + bestRecord.accuracy + '%' + trophy;
+  } else {
+    statRightEl.textContent = '';
+  }
+}
+updateBestDisplay();
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function formatTime(s) {
+  const m = Math.floor(s/60), sec = s%60;
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function updateTimer() {
+  if (gameState !== 'playing') return;
+  totalTime += 0.1;
+  timerDiv.textContent = formatTime(Math.floor(totalTime));
+}
+
+function resetTimerBox() {
+  timerBox.className = 'timerBox';
+  timerDiv.textContent = formatTime(Math.floor(totalTime));
+}
+
+function setTimerState(state, text) {
+  timerBox.className = 'timerBox' + (state ? ' '+state : '');
+  if (text !== undefined) timerDiv.textContent = text;
+}
+
+/* ══════════════════════════════════════
+   BUTTON HANDLERS
+══════════════════════════════════════ */
+function mainButtonClick() {
+  mainBtn.blur();
+  if (gameState === 'idle' || gameState === 'finished') { startGame(); return; }
+  if (gameState === 'playing')       { skipShortcut(); return; }
+  if (gameState === 'paused')        { unpause(); return; }
+  if (gameState === 'confirm-reset') { confirmResetYes(); return; }
+}
+
+const IMPROVEMENT_TIPS = [
+  'Try saying the shortcut out loud before you press it.',
+  'Focus on the shortcuts you keep skipping.\nRepetition will make them automatic.',
+  'Accuracy before speed.',
+  'Picture your hand moving to the keys before you press them.',
+  'Group shortcuts by hand.\nLeft-hand tools, right-hand combos.',
+  'Play this daily for a week.\nSpaced repetition beats cramming.',
+  'Try to improve your best time.',
+
+  'Pressing the lock key will pause the game.\nYou can also reset your high score.',
+];
+let tipIndex = 0;
+
+function helpButtonClick() {
+  helpBtn.blur();
+  if (gameState === 'idle')           { titleEl.textContent = 'Press start to begin'; return; }
+  if (gameState === 'playing')        { toggleHelp(); return; }
+  if (gameState === 'paused')         { enterConfirmReset(); return; }
+  if (gameState === 'confirm-reset')  { confirmResetNo(); return; }
+  if (gameState === 'finished')       { showTip(tipIndex + 1); tipIndex++; return; }
+}
+
+/* CHANGE 5: clicking the ⏸ timer unpauses */
+function timerBoxClick() {
+  if (gameState === 'paused') unpause();
+}
+
+/* ══════════════════════════════════════
+   HELP — auto-fades after 3s
+══════════════════════════════════════ */
+const KEY_DISPLAY = {
+  'CMD':        { sym: '⌘', name: 'Command' },
+  'SHIFT':      { sym: '⇧', name: 'Shift' },
+  'OPTION':     { sym: '⌥', name: 'Option' },
+  'RETURN':     { sym: '↩', name: 'Return' },
+  'ARROWLEFT':  { sym: '←', name: 'Left' },
+  'ARROWRIGHT': { sym: '→', name: 'Right' },
+  'SPACE':      { sym: '␣', name: 'Space' },
+  'TAB':        { sym: '⇥', name: 'Tab' },
+};
+
+function pillHTML(token) {
+  const k = KEY_DISPLAY[token.toUpperCase()];
+  const label = k ? k.sym + ' ' + k.name : token;
+  return '<span style="display:inline-block;background:#f59e0b;color:white;font-weight:700;font-size:12px;padding:3px 10px;border-radius:10px;white-space:nowrap;">' + label + '</span>';
+}
+
+function buildHintHTML(shortcut) {
+  const parts = shortcut.toUpperCase().split('+');
+  return parts.map(pillHTML).join(' <span style="color:#6b7280;font-weight:700;">+</span> ');
+}
+
+function toggleHelp() {
+  clearTimeout(helpFadeTimer);
+  if (!helpActive) {
+    helpActive = true;
+    // Show hint in the toast pill (same as keyboard tap message)
+    kbToastEl.innerHTML = buildHintHTML(currentAnswer);
+    kbToastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    // Apply -5% accuracy penalty
+    totalHits += 5;
+    updateAccuracyDisplay();
+    // Flash bottom half orange to show the penalty
+    clearTimeout(accuracyPenaltyTimeout);
+    timerBox.classList.add('penalty-acc');
+    accuracyEl.textContent = '-5%';
+    accuracyPenaltyTimeout = setTimeout(() => {
+      timerBox.classList.remove('penalty-acc');
+      updateAccuracyDisplay();
+    }, 2000);
+    helpFadeTimer = setTimeout(() => {
+      helpActive = false;
+      kbToastEl.classList.remove('show');
+    }, 3000);
+  } else {
+    helpActive = false;
+    kbToastEl.classList.remove('show');
+  }
+}
+
+function clearHelp() {
+  clearTimeout(helpFadeTimer);
+  helpActive = false;
+  kbToastEl.classList.remove('show');
+}
+
+/* ══════════════════════════════════════
+   PAUSE / EASTER EGG
+══════════════════════════════════════ */
+function togglePause() {
+  if (gameState === 'playing')                          { enterPause(); return; }
+  if (gameState === 'paused')                           { unpause(); return; }
+  if (gameState === 'confirm-reset')                    { confirmResetNo(); return; }
+  // CHANGE 4: lock from idle or finished → confirm-reset directly
+  if (gameState === 'idle' || gameState === 'finished') { enterConfirmReset(); return; }
+}
+
+function enterPause() {
+  gameState = 'paused';
+  clearInterval(timerInterval);
+  clearTimeout(penaltyTimeout);
+  clearHelp();
+
+  titleEl.classList.add('blurred');
+  titleEl.classList.remove('strike','hidden');
+  setTimerState('paused', '⏸');
+  mainBtn.textContent = 'Unpause';
+  // CHANGE 3: Reset button stays grey (not red)
+  helpBtn.textContent = 'Reset';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+  // CHANGE 2: lock key stays white — .active class in CSS keeps #f5f5f7
+  if (lockKeyEl) lockKeyEl.classList.add('active');
+}
+
+function unpause() {
+  gameState = 'playing';
+  titleEl.classList.remove('blurred');
+  helpBtn.style.background = '';
+  helpBtn.style.color = '';
+  resetTimerBox();
+  mainBtn.textContent = 'Skip';
+  helpBtn.textContent = 'Help';
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  timerInterval = setInterval(updateTimer, 100);
+}
+
+function enterConfirmReset() {
+  gameState = 'confirm-reset';
+  titleEl.classList.remove('blurred');
+  titleEl.className = '';
+  titleEl.textContent = 'Reset your best score and start again?';
+  mainBtn.textContent = 'Yes';
+  mainBtn.style.background = '#10b981';
+  helpBtn.textContent = 'No';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+}
+
+function confirmResetYes() {
+  bestRecord = { time: null, accuracy: null };
+  try { localStorage.removeItem('kw_best'); } catch(e) {}
+  updateBestDisplay();
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  resetToIdle();
+}
+
+function confirmResetNo() {
+  // If a game was in progress, return to paused; otherwise go to idle
+  if (questionPool.length > 0 && answersLeft > 0 && answersLeft < 10) {
+    gameState = 'paused';
+    titleEl.classList.add('blurred');
+    titleEl.textContent = questionPool[questionIndex]?.display || '';
+    mainBtn.textContent = 'Unpause';
+    helpBtn.textContent = 'Reset';
+    helpBtn.style.background = '#6b7280';
+    helpBtn.style.color = 'white';
+  } else {
+    resetToIdle();
+  }
+}
+
+function resetToIdle() {
+  gameState = 'idle';
+  clearInterval(timerInterval);
+  clearTimeout(penaltyTimeout);
+  clearHelp();
+  clearAllLit();
+  heldKeys.clear();
+  document.removeEventListener('keyup', handleKeyup);
+
+  mainBtn.textContent = 'Start the game';
+  mainBtn.style.background = '';
+  helpBtn.textContent = 'Help';
+  helpBtn.style.background = '';
+  helpBtn.style.color = '';
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  titleEl.className = '';
+  titleEl.textContent = 'Play Keyboard Warrior';
+  questionCountEl.textContent = '';
+  timerBox.className = 'timerBox';
+  timerDiv.textContent = '0:00';
+  greenHits = 0; totalHits = 0; updateAccuracyDisplay();
+}
+
+/* ══════════════════════════════════════
+   GAME FLOW
+   CHANGE 1: matchesShortcut extended for new shortcuts
+══════════════════════════════════════ */
+function matchesShortcut(event, str) {
+  const s = str.toUpperCase();
+  if (s === 'SPACE')  return event.key === ' '    && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey;
+  if (s === 'TAB')    return event.key === 'Tab'   && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey;
+  if (s === 'ARROWLEFT')       return event.key === 'ArrowLeft'  && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey;
+  if (s === 'ARROWRIGHT')      return event.key === 'ArrowRight' && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey;
+  if (s === 'SHIFT+ARROWLEFT') return event.key === 'ArrowLeft'  && event.shiftKey && !event.metaKey && !event.altKey && !event.ctrlKey;
+  if (s === 'SHIFT+ARROWRIGHT')return event.key === 'ArrowRight' && event.shiftKey && !event.metaKey && !event.altKey && !event.ctrlKey;
+  if (s === 'SHIFT')  return event.key === 'Shift' && !event.metaKey && !event.altKey && !event.ctrlKey;
+  if (s === 'OPTION') return event.key === 'Alt'   && !event.metaKey && !event.ctrlKey && !event.shiftKey;
+  if (s.startsWith('CMD+')) {
+    if (!event.metaKey || event.altKey || event.ctrlKey) return false;
+    const exp = s.slice(4);
+    if (exp === '=' && (event.key === '=' || event.key === '+')) return true;
+    if (exp === 'RETURN' && event.key === 'Enter') return true;
+    return event.key.toUpperCase() === exp;
+  }
+  if (event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) return false;
+  return event.key.toUpperCase() === s;
+}
+
+function startGame() {
+  gameState = 'playing';
+  totalTime = 0;
+  transitioning = false;
+  questionPool = shuffleArray(SHORTCUTS);
+  questionIndex = 0;
+  answersLeft = 10;
+  currentAnswer = questionPool[0].shortcut;
+  helpActive = false;
+
+  mainBtn.textContent = 'Skip';
+  mainBtn.style.background = '';
+  helpBtn.textContent = 'Help';
+  helpBtn.style.background = '';
+  helpBtn.style.color = '';
+  titleEl.className = '';
+  titleEl.textContent = questionPool[0].display;
+  questionCountEl.style.opacity = '1';
+  questionCountEl.textContent = 'You have 10 questions to go.';
+  resetTimerBox();
+  clearAllLit();
+  heldKeys.clear();
+  greenHeld.clear();
+  greenHits = 0;
+  totalHits = 0;
+  clearTimeout(accuracyPenaltyTimeout);
+  timerBox.classList.remove('penalty-time', 'penalty-acc');
+  updateAccuracyDisplay();
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+
+  clearInterval(timerInterval);
+  clearTimeout(penaltyTimeout);
+  timerInterval = setInterval(updateTimer, 100);
+  document.addEventListener('keydown', handleKeydown);
+  document.addEventListener('keyup',   handleKeyup);
+}
+
+function skipShortcut() {
+  if (transitioning) return;
+  transitioning = true;
+  clearHelp();
+  titleEl.classList.add('strike');
+  clearInterval(timerInterval);
+  timerBox.classList.add('penalty-time');
+  timerDiv.textContent = '+5';
+
+  penaltyTimeout = setTimeout(() => {
+    timerBox.classList.remove('penalty-time');
+    totalTime += 5;
+    advanceQuestion();
+    if (gameState === 'playing') {
+      resetTimerBox();
+      timerInterval = setInterval(updateTimer, 100);
+    }
+  }, 2000);
+}
+
+function advanceQuestion() {
+  // Move to the next question in the pool, reshuffling if we reach the end
+  questionIndex++;
+  if (questionIndex >= questionPool.length) {
+    questionPool = shuffleArray(SHORTCUTS);
+    questionIndex = 0;
+  }
+  currentAnswer = questionPool[questionIndex].shortcut;
+  titleEl.className = '';
+  titleEl.textContent = questionPool[questionIndex].display;
+  mainBtn.textContent = 'Skip';
+  clearHelp();
+  transitioning = false;
+  clearAllLit();
+  heldKeys.clear();
+  questionCountEl.style.opacity = '1';
+}
+
+function recordAnswer() {
+  // Called only on a correct keypress — decrements the answer counter
+  answersLeft--;
+  if (answersLeft <= 0) {
+    endGame();
+    return;
+  }
+  // Update count immediately, before the next question displays
+  questionCountEl.textContent = answersLeft === 1 ? 'Last question:' : 'You have ' + answersLeft + ' questions to go.';
+  advanceQuestion();
+}
+
+function endGameMessage(time, accuracy, record, wasFirst) {
+  if (wasFirst) return 'I will keep track of your best performances.';
+  const newBestTime = time <= record.time;
+  const newBestAcc  = accuracy >= record.accuracy;
+  const perfectAcc  = record.accuracy >= 100;
+  if (newBestTime && newBestAcc) return 'Wow.\nNew records on both fronts!';
+  if (newBestTime) return perfectAcc ? 'New time record!' : 'New time record! Can you raise the accuracy too?';
+  if (newBestAcc)  return 'Best accuracy yet!\nNow push that time down.';
+  if (time < record.time + 10 && accuracy > (record.accuracy ?? 0) - 5)
+    return "So close. You've shown you can do better.";
+  if (accuracy > (record.accuracy ?? 0))
+    return 'Accuracy improving — keep the pace up.';
+  if (time < record.time + 15)
+    return "Try again — you're almost there.";
+  return 'Keep practising. Every rep counts.';
+}
+
+function endGame() {
+  gameState = 'finished';
+  clearInterval(timerInterval);
+  clearTimeout(penaltyTimeout);
+  clearHelp();
+  document.removeEventListener('keyup', handleKeyup);
+  clearAllLit();
+  heldKeys.clear();
+
+  const finalAccuracy = calcAccuracy() ?? 0;
+  const wasFirstRecord = bestRecord.time === null;
+  let changed = false;
+  if (bestRecord.time === null || totalTime < bestRecord.time) {
+    bestRecord.time = totalTime; changed = true;
+  }
+  if (bestRecord.accuracy === null || finalAccuracy > bestRecord.accuracy) {
+    bestRecord.accuracy = finalAccuracy; changed = true;
+  }
+  if (changed) {
+    try { localStorage.setItem('kw_best', JSON.stringify(bestRecord)); } catch(e) {}
+    updateBestDisplay();
+  }
+
+  mainBtn.textContent = 'Try again?';
+  titleEl.className = '';
+  titleEl.textContent = endGameMessage(totalTime, finalAccuracy, bestRecord, wasFirstRecord);
+  questionCountEl.textContent = '';
+  timerBox.className = 'timerBox finished';
+  timerDiv.textContent = formatTime(Math.floor(totalTime));
+}
+
+function showTip(index) {
+  tipIndex = ((index % IMPROVEMENT_TIPS.length) + IMPROVEMENT_TIPS.length) % IMPROVEMENT_TIPS.length;
+  titleEl.textContent = IMPROVEMENT_TIPS[tipIndex];
+}
+
+function handleKeydown(e) {
+  updateKeyboardLighting(e, true);
+  if (gameState === 'finished') {
+    if (e.key === 'ArrowRight') { showTip(tipIndex + 1); e.preventDefault(); return; }
+    if (e.key === 'ArrowLeft')  { showTip(tipIndex - 1); e.preventDefault(); return; }
+  }
+  if (gameState === 'paused' || gameState === 'confirm-reset') { e.preventDefault(); return; }
+  if (gameState !== 'playing' || transitioning) { e.preventDefault(); return; }
+
+  if (matchesShortcut(e, currentAnswer)) {
+    transitioning = true;
+      clearHelp();
+    clearInterval(timerInterval);
+    // Keys already lit green by updateKeyboardLighting — nothing extra needed
+    setTimerState('green', 'right');
+    titleEl.classList.add('hidden');
+    // Fade out the question count immediately
+    questionCountEl.style.opacity = '0';
+    setTimeout(() => {
+      clearAllLit();
+      heldKeys.clear();
+      recordAnswer();
+      if (gameState === 'playing') {
+        resetTimerBox();
+        timerInterval = setInterval(updateTimer, 100);
+      }
+    }, 1500);
+  } else {
+    if (!timerBox.classList.contains('red') && !timerBox.classList.contains('green')) {
+      setTimerState('red');
+      setTimeout(() => {
+        if (gameState === 'playing' && timerBox.classList.contains('red')) resetTimerBox();
+      }, 800);
+    }
+  }
+  e.preventDefault();
+}
+
+function handleKeyup(e) {
+  updateKeyboardLighting(e, false);
+}
+</script>
+</body>
+</html>
