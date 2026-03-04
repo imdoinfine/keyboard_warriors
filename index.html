@@ -356,6 +356,22 @@ body {
   color: #555;
   line-height: 1;
 }
+/* PC mode: pull sym-sub away from the now-rounded corner,
+   centred above the main glyph with a small upward nudge */
+#keyboardPanel.pc-keys .key .sym-sub {
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* PC mini: sym-main shrinks to same size as sym-sub so the two
+   stacked symbols fit inside the smaller circular key */
+#keyboardPanel.pc-keys.mini-keys .key .sym-main {
+  font-size: 8px;
+}
+#keyboardPanel.pc-keys.mini-keys .key .sym-sub {
+  top: 3px;
+  font-size: 7px;
+}
 
 /* Utility keys */
 .key .util-lbl {
@@ -431,6 +447,115 @@ body {
 .key.arrow-up   { border-radius: 4px 4px 0 0; }
 .key.arrow-down { border-radius: 0 0 4px 4px; }
 .key.arrow-ud .letter-lbl { font-size: 10px; }
+
+/* ══════════════════════════════════════
+   PC MODE — rounded keys
+   #keyboardPanel.pc-keys sets all keys
+   to near-circular. Concentric radii:
+   panel 14px → keys 50% (full circle).
+   Wide/tall keys use a fixed large px
+   value so they pill rather than ellipse.
+   Arrow halves get asymmetric rounding.
+══════════════════════════════════════ */
+#keyboardPanel.pc-keys .key {
+  border-radius: 50%;
+  transition: background 0.07s, border-radius 0.2s ease;
+}
+/* Wide utility keys: pill shape */
+#keyboardPanel.pc-keys [data-key="Backspace"],
+#keyboardPanel.pc-keys [data-key="Tab"],
+#keyboardPanel.pc-keys [data-key="CapsLock"],
+#keyboardPanel.pc-keys [data-key="Enter"],
+#keyboardPanel.pc-keys [data-key="ShiftLeft"],
+#keyboardPanel.pc-keys [data-key="ShiftRight"],
+#keyboardPanel.pc-keys [data-key="Space"],
+#keyboardPanel.pc-keys [data-key="ControlLeft"],
+#keyboardPanel.pc-keys [data-key="ControlRight"],
+#keyboardPanel.pc-keys [data-key="MetaLeft"],
+#keyboardPanel.pc-keys [data-key="AltLeft"],
+#keyboardPanel.pc-keys [data-key="AltRight"] {
+  border-radius: 40px;
+}
+/* Fn row keys inherit 50% border-radius from .pc-keys .key —
+   their 40×28 native dimensions produce a natural stadium shape.
+   Lock key stretches wider via flex and auto-pills. No override needed. */
+/* Fn row: pill shape — radius = half the key height (28÷2 = 14px).
+   This overrides 50% for fn keys so they pill rather than oval. */
+#keyboardPanel.pc-keys .key.fn {
+  border-radius: 14px;
+}
+
+/* Backquote and ArrowRight sit at panel corners but are sym/arrow keys
+   not covered by any pill rule — explicitly keep them circular.
+   The .corner-* classes are NOT overridden here: they would stomp the
+   pill rules (40px / 14px) applied to Esc, lock, ControlLeft, Backspace. */
+#keyboardPanel.pc-keys [data-key="Backquote"],
+#keyboardPanel.pc-keys [data-key="ArrowRight"] {
+  border-radius: 50%;
+}
+/* Up/down arrow halves — keep the flat join between them */
+#keyboardPanel.pc-keys .key.arrow-up   { border-radius: 40px 40px 8px 8px; }
+#keyboardPanel.pc-keys .key.arrow-down { border-radius: 8px 8px 40px 40px; }
+
+/* Mini keyboards (both Mac and PC): shrink regular key heights to
+   match the scaled-down width (~28px), keeping keys squarish.
+   Fn row scales proportionally. Wide flex keys keep natural height. */
+#keyboardPanel.mini-keys .key {
+  height: 28px;
+}
+#keyboardPanel.mini-keys .key.fn {
+  height: 19px;
+}
+/* PC mini overrides — already handled by the rules above now shared */
+/* Up/down arrow halves in mini PC: height now set correctly by JS (12px) */
+/* Wide/pill/flex keys: keep at 28px in all mini keyboards */
+#keyboardPanel.mini-keys [data-key="Backspace"],
+#keyboardPanel.mini-keys [data-key="Tab"],
+#keyboardPanel.mini-keys [data-key="CapsLock"],
+#keyboardPanel.mini-keys [data-key="Enter"],
+#keyboardPanel.mini-keys [data-key="ShiftLeft"],
+#keyboardPanel.mini-keys [data-key="ShiftRight"],
+#keyboardPanel.mini-keys [data-key="Space"],
+#keyboardPanel.mini-keys [data-key="ControlLeft"],
+#keyboardPanel.mini-keys [data-key="ControlRight"],
+#keyboardPanel.mini-keys [data-key="MetaLeft"],
+#keyboardPanel.mini-keys [data-key="AltLeft"],
+#keyboardPanel.mini-keys [data-key="AltRight"] {
+  height: 28px;
+}
+
+/* PC keyboard panel: rounder corners + cyan-tinted plastic body */
+#keyboardPanel.pc-keys {
+  border-radius: 22px;
+  background: #9eb8bf;
+}
+
+/* Mini Mac number row: nudge sym-main down-right to clear the sym-sub
+   which sits top-left. Only digit keys (Digit0-9, Minus, Equal, Backquote)
+   need this — letter keys have no sym-sub clash. */
+#keyboardPanel.mini-keys:not(.pc-keys) [data-key="Backquote"] .sym-main,
+#keyboardPanel.mini-keys:not(.pc-keys) [data-key="Digit1"] .sym-main,
+#keyboardPanel.mini-keys:not(.pc-keys) [data-key="Digit2"] .sym-main,
+#keyboardPanel.mini-keys:not(.pc-keys) [data-key="Digit3"] .sym-main,
+#keyboardPanel.mini-keys:not(.pc-keys) [data-key="Digit4"] .sym-main,
+#keyboardPanel.mini-keys:not(.pc-keys) [data-key="Digit5"] .sym-main,
+#keyboardPanel.mini-keys:not(.pc-keys) [data-key="Digit6"] .sym-main,
+#keyboardPanel.mini-keys:not(.pc-keys) [data-key="Digit7"] .sym-main,
+#keyboardPanel.mini-keys:not(.pc-keys) [data-key="Digit8"] .sym-main,
+#keyboardPanel.mini-keys:not(.pc-keys) [data-key="Digit9"] .sym-main,
+#keyboardPanel.mini-keys:not(.pc-keys) [data-key="Digit0"] .sym-main,
+#keyboardPanel.mini-keys:not(.pc-keys) [data-key="Minus"] .sym-main,
+#keyboardPanel.mini-keys:not(.pc-keys) [data-key="Equal"] .sym-main {
+  position: relative;
+  top: 4px;
+  left: 3px;
+}
+
+/* PC: fn-lbl centres in the key (both full and mini) */
+#keyboardPanel.pc-keys .key.fn .fn-lbl {
+  position: static;
+  font-size: 8px;
+}
 
 /* ══════════════════════════════════════
    LIT STATES
@@ -618,7 +743,7 @@ body {
   <div id="osToggleWrap">
     <!-- Apple icon -->
     <span class="os-label" id="osLabelLeft">
-<svg width="10" height="12" viewBox="0 0 800 800" fill="#9ca3af" xmlns="http://www.w3.org/2000/svg"><path d="M623.67,650c-27.67,41.33-57,81.67-101.67,82.33-44.67,1-59-26.33-109.67-26.33s-66.67,25.67-109,27.33c-43.67,1.67-76.67-44-104.67-84.33-57-82.33-100.67-234-42-336,29-50.67,81-82.67,137.33-83.67,42.67-.67,83.33,29,109.67,29s75.33-35.67,127-30.33c21.67,1,82.33,8.67,121.33,66-3,2-72.33,42.67-71.67,127,1,100.67,88.33,134.33,89.33,134.67-1,2.33-14,48-46,94.33ZM433.33,116.67c24.33-27.67,64.67-48.67,98-50,4.33,39-11.33,78.33-34.67,106.33-23,28.33-61,50.33-98.33,47.33-5-38.33,13.67-78.33,35-103.67Z"/></svg>
+<svg width="10" height="12" viewBox="0 0 686.7 761.2" fill="#9ca3af" xmlns="http://www.w3.org/2000/svg"><path d="M563.7,589c-27.7,41.3-57,81.7-101.7,82.3-44.7,1-59-26.3-109.7-26.3s-66.7,25.7-109,27.3c-43.7,1.7-76.7-44-104.7-84.3-57-82.3-100.7-234-42-336,29-50.7,81-82.7,137.3-83.7,42.7-.7,83.3,29,109.7,29s75.3-35.7,127-30.3c21.7,1,82.3,8.7,121.3,66-3,2-72.3,42.7-71.7,127,1,100.7,88.3,134.3,89.3,134.7-1,2.3-14,48-46,94.3h0ZM373.3,55.7c24.3-27.7,64.7-48.7,98-50,4.3,39-11.3,78.3-34.7,106.3-23,28.3-61,50.3-98.3,47.3-5-38.3,13.7-78.3,35-103.7h0Z"/></svg>
       Mac
     </span>
     <!-- SVG toggle switch -->
@@ -635,7 +760,7 @@ body {
     </label>
     <!-- Windows icon -->
     <span class="os-label" id="osLabelRight">
-      PC
+      <small>PC</small>
 <svg width="11" height="11" viewBox="0 0 102.73 104.6" fill="#9ca3af" xmlns="http://www.w3.org/2000/svg"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>
     </span>
   </div>
@@ -916,6 +1041,8 @@ function buildKeyboard(isMini) {
   rowIds.forEach(id => { document.getElementById(id).innerHTML = ''; });
   Object.keys(keyEls).forEach(k => delete keyEls[k]);
   lockKeyEl = null;
+  // Track mini state as a CSS class for targeted overrides
+  document.getElementById('keyboardPanel').classList.toggle('mini-keys', isMini);
 
   // Swap in the PC bottom row when PC mode is active
   const layout = FULL_LAYOUT.map((row, ri) => ri === 5 && currentOs === 'pc' ? PC_BOTTOM_ROW : row);
@@ -925,10 +1052,11 @@ function buildKeyboard(isMini) {
     row.forEach(cfg => {
       if (cfg.type === 'updown') {
         // Full: lr=40px, gap=4px, each ud=(40-4)/2=18px → 18+4+18=40 ✓
-        // Mini: lr=27px, gap=3px, each ud=(27-3)/2=12px → 12+3+12=27 ✓
+        // Mini Mac: lr=27px, kh=18 (keep original proportions)
+        // Mini PC:  lr=27px, gap=3px, each ud=(27-3)/2=12px → 12+3+12=27 ✓
         const kw   = isMini ? Math.round(40*0.68) : 40;  // 27 or 40
-        const gap  = 4;
-        const kh   = 18;                                  // (40-4)/2 = 18 always
+        const gap  = isMini ? 3 : 4;
+        const kh   = isMini ? 12 : 18;
         const stack = document.createElement('div');
         stack.className = 'arrow-stack';
         stack.style.gap = gap + 'px';
@@ -950,9 +1078,9 @@ function buildKeyboard(isMini) {
       if (isMini) {
         keyCfg = Object.assign({}, cfg);
         keyCfg.w = cfg.w ? Math.round(cfg.w * 0.68) : 28;
-        if (cfg.type === 'fn' || cfg.type === 'lock') keyCfg.h = 22;
+        if (cfg.type === 'fn' || cfg.type === 'lock') keyCfg.h = 19;
         if (cfg.type === 'space') keyCfg.w = Math.round((cfg.w || 180) * 0.68);
-        if (cfg.type === 'arrow') { keyCfg.w = 27; keyCfg.h = 40; }
+        if (cfg.type === 'arrow') { keyCfg.w = 27; keyCfg.h = 27; } // square on both OS mini
         if (cfg.type === 'winkey') keyCfg.w = Math.round(52 * 0.68);
       } else {
         if (cfg.type === 'arrow') { keyCfg = Object.assign({}, cfg); keyCfg.w = 40; keyCfg.h = 40; }
@@ -985,10 +1113,13 @@ function showKbToast(e) {
 function detectOs() {
   const ua = navigator.userAgent || '';
   const platform = (navigator.userAgentData?.platform || navigator.platform || '').toLowerCase();
-  if (/mac/i.test(platform) || /mac os x/i.test(ua)) return 'mac';
-  if (/win/i.test(platform) || /windows/i.test(ua))  return 'pc';
-  // Mobile / tablet — keyboard shortcuts don't really apply
-  if (/android|iphone|ipad|ipod/i.test(ua))          return 'mobile';
+  // Check for touch FIRST — iPadOS 13+ reports itself as macOS in the UA,
+  // so a touch-capable "Mac" is almost certainly an iPad or similar tablet.
+  const isTouch = navigator.maxTouchPoints > 1;
+  if (isTouch && (/mac/i.test(platform) || /mac os x/i.test(ua))) return 'mobile';
+  if (/android|iphone|ipad|ipod/i.test(ua))                        return 'mobile';
+  if (/mac/i.test(platform) || /mac os x/i.test(ua))               return 'mac';
+  if (/win/i.test(platform) || /windows/i.test(ua))                return 'pc';
   // Linux / ChromeOS / unknown — treat like PC (Ctrl-based)
   return 'other';
 }
@@ -1016,6 +1147,8 @@ function applyOsMode(os) {
   osToggleEl.checked = (os === 'pc');
   updateToggleVisual(os);
   updateMismatchPill();
+  // Toggle rounded PC key style
+  document.getElementById('keyboardPanel').classList.toggle('pc-keys', os === 'pc');
   // Rebuild the keyboard with the new bottom row
   if (currentKbMode && currentKbMode !== 'none') {
     buildKeyboard(currentKbMode === 'mini');
@@ -1083,6 +1216,8 @@ window.addEventListener('resize', updateKeyboardMode);
 updateKeyboardMode();
 // Show mismatch pill after initial keyboard build
 updateMismatchPill();
+// Apply rounded style if starting in PC mode
+document.getElementById('keyboardPanel').classList.toggle('pc-keys', currentOs === 'pc');
 
 /* ══════════════════════════════════════
    SHORTCUT → KEY CODES
