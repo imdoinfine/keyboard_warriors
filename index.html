@@ -159,74 +159,7 @@ body {
 /* CHANGE 5: paused timer is clickable to unpause */
 .timerBox.paused        { background: #4b5563; cursor: pointer; }
 .timerBox.green         { background: #10b981; }
-/* Medal colours on the finished screen — awarded by personal improvement */
-.timerBox.medal-gold {
-  background: conic-gradient(
-    #c8860a 0deg,
-    #fde68a 40deg,
-    #f6c547 70deg,
-    #b8730a 110deg,
-    #7c4d04 140deg,
-    #e8b84b 175deg,
-    #fef08a 200deg,
-    #d4a017 230deg,
-    #8a5c08 265deg,
-    #f0c040 295deg,
-    #fde68a 325deg,
-    #c8860a 360deg
-  );
-  color: #3b1a00;
-  text-shadow: 0 1px 2px rgba(255,220,100,0.5);
-  transition: background 0.6s ease;
-}
-.timerBox.medal-silver {
-  background: conic-gradient(
-    #7a8fa6 0deg,
-    #dce8f0 40deg,
-    #f0f6fa 70deg,
-    #8fa8bf 110deg,
-    #4a6070 140deg,
-    #c8d8e8 175deg,
-    #f4f8fb 200deg,
-    #90a8be 230deg,
-    #506070 265deg,
-    #d0e0ee 295deg,
-    #dce8f0 325deg,
-    #7a8fa6 360deg
-  );
-  color: #1a2530;
-  text-shadow: 0 1px 2px rgba(200,220,240,0.6);
-  transition: background 0.6s ease;
-}
-.timerBox.medal-bronze {
-  background: conic-gradient(
-    #7a3e10 0deg,
-    #e8915a 40deg,
-    #c8703a 70deg,
-    #8b4515 110deg,
-    #4a2008 140deg,
-    #d4814a 175deg,
-    #f0a060 200deg,
-    #a05820 230deg,
-    #5a2a0a 265deg,
-    #c07840 295deg,
-    #e8915a 325deg,
-    #7a3e10 360deg
-  );
-  color: #2a0e00;
-  text-shadow: 0 1px 2px rgba(240,160,80,0.4);
-  transition: background 0.6s ease;
-}
-/* Divider line adapts on medal backgrounds */
-.timerBox.medal-gold   .timer-divider line,
-.timerBox.medal-silver .timer-divider line,
-.timerBox.medal-bronze .timer-divider line { stroke: rgba(0,0,0,0.2); }
-.timerBox.medal-gold   .timer-icon,
-.timerBox.medal-gold   .accuracy-icon,
-.timerBox.medal-silver .timer-icon,
-.timerBox.medal-silver .accuracy-icon,
-.timerBox.medal-bronze .timer-icon,
-.timerBox.medal-bronze .accuracy-icon { opacity: 0.4; }
+.timerBox.finished      { background: #1f2937; }
 /* Penalty gradients — sharp split at 50%, rapid transition in */
 .timerBox.penalty-time  {
   background: linear-gradient(to bottom, #ef4444 0%, #ef4444 50%, #1f2937 50%, #1f2937 100%);
@@ -292,15 +225,6 @@ body {
 #statLeft  { width: 130px; text-align: center; }
 #statRight { width: 130px; text-align: center; }
 
-@keyframes statPulse {
-  0%   { transform: scale(1);    color: #6b7280; }
-  50%  { transform: scale(1.18); color: #f59e0b; }
-  100% { transform: scale(1);    color: #6b7280; }
-}
-.stat-pulse {
-  animation: statPulse 0.5s ease-in-out;
-}
-
 #credit {
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 12px;
@@ -360,7 +284,7 @@ body.pc-mode #extKeyPill {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  background: transparent;
+  background: #f59e0b;
   color: white;
   font-size: 12px;
   font-weight: 600;
@@ -369,13 +293,12 @@ body.pc-mode #extKeyPill {
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity 0.3s;
   z-index: 10;
   top: 50%;
   transform: translate(-50%, -50%);
 }
 #kbToast.show { opacity: 1; }
-#kbToast.warning { background: #f59e0b; }
 
 /* ══════════════════════════════════════
    KEYBOARD WRAPPER
@@ -1063,34 +986,15 @@ body.pc-mode #extKeyPill {
   </div>
 </div>
 
-<div id="debugOverlay" style="position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;border-radius:8px;z-index:9999;pointer-events:auto;line-height:1.5;display:none;flex-direction:row;gap:0;align-items:stretch;" aria-hidden="true">
-  <div style="display:flex;flex-direction:column;justify-content:space-between;min-width:280px;max-width:420px;padding-right:12px;">
-    <div>
-      <div id="dbgCtx" style="color:#8af;margin-bottom:3px;border-bottom:1px solid #333;padding-bottom:3px;"></div>
-      <div id="dbgAnswer"></div>
-      <div id="dbgKey"></div>
-      <div id="dbgMatch"></div>
-    </div>
-    <div style="margin-top:6px;display:flex;gap:5px;">
-      <button onclick="dbgPrevQuestion()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;">&#8592;</button>
-      <button onclick="dbgNextQuestion()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;">&#8594;</button>
-      <button onclick="(()=>{const ids=['dbgCtx','dbgAnswer','dbgKey','dbgMatch'];const t=ids.map(id=>document.getElementById(id).textContent).join('\n');navigator.clipboard.writeText(t).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1200)}).catch(()=>{this.textContent='Failed';setTimeout(()=>this.textContent='Copy',1200)});})()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;">Copy</button>
-    </div>
+<div id="debugOverlay" style="position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;border-radius:8px;z-index:9999;max-width:400px;pointer-events:auto;line-height:1.5;display:none;" aria-hidden="true">
+  <div id="dbgAnswer"></div>
+  <div id="dbgKey"></div>
+  <div id="dbgMatch"></div>
+  <div style="margin-top:6px;display:flex;gap:5px;">
+    <button onclick="dbgPrevQuestion()" style="background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:monospace;">&#8592;</button>
+    <button onclick="dbgNextQuestion()" style="background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:monospace;">&#8594;</button>
+    <button onclick="(()=>{const t=[dbgAnswer,dbgKey,dbgMatch].map(i=>document.getElementById(i.id).textContent).join('\n');navigator.clipboard.writeText(t).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1200)});})()" style="background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:monospace;">Copy</button>
   </div>
-  <svg width="12" style="flex-shrink:0;align-self:stretch;overflow:visible;" xmlns="http://www.w3.org/2000/svg">
-    <line x1="6" y1="0" x2="6" y2="100%" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 5"/>
-  </svg>
-  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding-left:12px;min-width:110px;gap:4px;">
-    <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">accuracy</div>
-    <div style="display:flex;align-items:baseline;gap:4px;">
-      <span id="dbgGreenHits" style="font-size:22px;font-weight:700;color:#0f0;line-height:1;">0</span>
-      <span style="font-size:13px;color:#666;">/</span>
-      <span id="dbgTotalHits" style="font-size:22px;font-weight:700;color:#aaa;line-height:1;">0</span>
-    </div>
-    <div style="width:60px;height:1px;background:#444;margin:2px 0;"></div>
-    <div id="dbgPct" style="font-size:22px;font-weight:700;color:#888;line-height:1;">&#8212;</div>
-  </div>
-</div>
 </div>
 <p id="credit">Built for learners. This digital toy was created by Wednesday Dessauer as open-source &amp; free to adapt under <small>GNU GPL v3.0</small></p>
 
@@ -1152,9 +1056,7 @@ const SHORTCUTS = [
   {shortcut:"E",display:"Reveal Effects on selected layer",mac_sc:"E",pc_sc:"E",pc_safe:true,ps:false,ai:false,indd:false,ae:true,fi:false},
   {shortcut:"SPACE",display:"Hold to temporarily activate the Hand tool and pan",mac_sc:"Space",pc_sc:"Space",pc_safe:true,ps:true,ai:true,indd:true,ae:false,fi:true},
   {shortcut:"SHIFT",display:"Hold to constrain proportions while transforming",mac_sc:"\u21e7 Shift",pc_sc:"\u21e7 Shift",pc_safe:true,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"SHIFT",display:"Hold to add to an active selection",mac_sc:"\u21e7 Shift",pc_sc:"\u21e7 Shift",pc_safe:true,ps:true,ai:true,indd:true,ae:false,fi:true},
   {shortcut:"OPTION",display:"Hold to transform from the centre outward",mac_sc:"\u2325 Option",pc_sc:"Alt",pc_safe:true,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"OPTION",display:"Hold to subtract from an active selection",mac_sc:"\u2325 Option",pc_sc:"Alt",pc_safe:true,ps:true,ai:true,indd:false,ae:false,fi:false},
   {shortcut:"TAB",display:"Hide or show all panels",mac_sc:"Tab",pc_sc:"Tab",pc_safe:true,ps:true,ai:true,indd:true,ae:false,fi:false},
   {shortcut:"CMD+=",display:"Zoom in",mac_sc:"\u2318 =",pc_sc:"Ctrl =",pc_safe:true,ps:true,ai:true,indd:true,ae:true,fi:true},
   {shortcut:"CMD+-",display:"Zoom out",mac_sc:"\u2318 -",pc_sc:"Ctrl -",pc_safe:true,ps:true,ai:true,indd:true,ae:true,fi:true},
@@ -1172,13 +1074,12 @@ const SHORTCUTS = [
   {shortcut:"CMD+OPTION+I",display:"Open the Image Size dialog",mac_sc:"\u2318 \u2325 I",pc_sc:"Ctrl Alt I",pc_safe:true,ps:true,ai:false,indd:false,ae:false,fi:false},
   {shortcut:"CMD+G",display:"Group selected objects",mac_sc:"\u2318 G",pc_sc:"Ctrl G",pc_safe:true,ps:true,ai:true,indd:true,ae:true,fi:true},
   {shortcut:"CMD+SHIFT+G",display:"Ungroup selected objects",mac_sc:"\u2318 \u21e7 G",pc_sc:"Ctrl \u21e7 G",pc_safe:true,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+]",display:"Raise object one level in the stack",mac_sc:"\u2318 ]",pc_sc:"Ctrl ]",pc_safe:true,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+[",display:"Lower object one level in the stack",mac_sc:"\u2318 [",pc_sc:"Ctrl [",pc_safe:true,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+D",display:"Duplicate the selection",mac_sc:"\u2318 D",pc_sc:"Ctrl D",pc_safe:true,ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+]",display:"Move object forward one step",mac_sc:"\u2318 ]",pc_sc:"Ctrl ]",pc_safe:true,ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"CMD+[",display:"Move object back one step",mac_sc:"\u2318 [",pc_sc:"Ctrl [",pc_safe:true,ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"CMD+D",display:"Duplicate the selection",mac_sc:"\u2318 D",pc_sc:"Ctrl D",pc_safe:true,ps:true,ai:false,indd:false,ae:false,fi:true},
   {shortcut:"CMD+D",display:"Transform Again",mac_sc:"\u2318 D",pc_sc:"Ctrl D",pc_safe:true,ps:false,ai:true,indd:false,ae:false,fi:false},
   {shortcut:"CMD+D",display:"Duplicate the selected layer",mac_sc:"\u2318 D",pc_sc:"Ctrl D",pc_safe:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+D",display:"Deselect all pixels",mac_sc:"\u2318 D",pc_sc:"Ctrl D",pc_safe:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+A",display:"Deselect all",mac_sc:"\u2318 \u21e7 A",pc_sc:"Ctrl \u21e7 A",pc_safe:true,ps:false,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"CMD+SHIFT+A",display:"Deselect all objects",mac_sc:"\u2318 \u21e7 A",pc_sc:"Ctrl \u21e7 A",pc_safe:true,ps:true,ai:true,indd:true,ae:true,fi:true},
   {shortcut:"CMD+OPTION+2",display:"Unlock all locked objects",mac_sc:"\u2318 \u2325 2",pc_sc:"Ctrl Alt 2",pc_safe:true,ps:false,ai:true,indd:false,ae:false,fi:false},
   {shortcut:"CMD+OPTION+3",display:"Show all hidden objects",mac_sc:"\u2318 \u2325 3",pc_sc:"Ctrl Alt 3",pc_safe:true,ps:false,ai:true,indd:false,ae:false,fi:false},
   {shortcut:"CMD+J",display:"Duplicate the current layer",mac_sc:"\u2318 J",pc_sc:"Ctrl J",pc_safe:true,ps:true,ai:false,indd:false,ae:false,fi:false},
@@ -1187,7 +1088,7 @@ const SHORTCUTS = [
   {shortcut:"CMD+E",display:"Merge selected layers",mac_sc:"\u2318 E",pc_sc:"Ctrl E",pc_safe:true,ps:true,ai:false,indd:false,ae:false,fi:false},
   {shortcut:"CMD+E",display:"Flatten the selection",mac_sc:"\u2318 E",pc_sc:"Ctrl E",pc_safe:true,ps:false,ai:false,indd:false,ae:false,fi:true},
   {shortcut:"CMD+SHIFT+I",display:"Invert the selection",mac_sc:"\u2318 \u21e7 I",pc_sc:"Ctrl \u21e7 I",pc_safe:true,ps:true,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+I",display:"Invert image",mac_sc:"\u2318 I",pc_sc:"Ctrl I",pc_safe:true,ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+I",display:"Invert colours",mac_sc:"\u2318 I",pc_sc:"Ctrl I",pc_safe:true,ps:true,ai:false,indd:false,ae:false,fi:false},
   {shortcut:"CMD+OPTION+A",display:"Select all objects on the active layer",mac_sc:"\u2318 \u2325 A",pc_sc:"Ctrl Alt A",pc_safe:true,ps:false,ai:true,indd:false,ae:false,fi:false},
   {shortcut:"SHIFT+A",display:"Add Auto Layout",mac_sc:"\u21e7 A",pc_sc:"\u21e7 A",pc_safe:true,ps:false,ai:false,indd:false,ae:false,fi:true},
   {shortcut:"CMD+B",display:"Paste in Back",mac_sc:"\u2318 B",pc_sc:"Ctrl B",pc_safe:true,ps:false,ai:true,indd:true,ae:false,fi:false},
@@ -1468,9 +1369,9 @@ function showKbToast(e) {
   e.preventDefault();
   const osName = currentOs === 'pc' ? 'PC' : 'Mac';
   kbToastEl.innerHTML = `This keyboard is for display only. Play with an actual ${osName} keyboard.`;
-  kbToastEl.classList.add('show', 'warning');
+  kbToastEl.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => kbToastEl.classList.remove('show', 'warning'), 3000);
+  toastTimer = setTimeout(() => kbToastEl.classList.remove('show'), 3000);
 }
 
 /* ══════════════════════════════════════
@@ -1492,7 +1393,7 @@ function detectOs() {
 
 const detectedOs = detectOs();
 // 'currentOs' drives all game logic and keyboard rendering
-let currentOs = (detectedOs === 'mac' || detectedOs === 'mobile') ? 'mac' : 'pc';
+let currentOs = (detectedOs === 'mac') ? 'mac' : 'pc';
 
 const osToggleEl     = document.getElementById('osToggle');
 const osMismatchEl   = document.getElementById('osMismatchPill');
@@ -1541,7 +1442,7 @@ function applyOsMode(os) {
 
 function updateMismatchPill() {
   if (detectedOs === 'mobile') {
-    osMismatchEl.textContent = 'Use a physical keyboard with your touchscreen device.';
+    osMismatchEl.textContent = 'Touch devices aren\'t supported — use a physical keyboard.';
     osMismatchEl.classList.add('show');
     return;
   }
@@ -1569,7 +1470,7 @@ function onOsToggle() {
 
 // Show a gentle note if on mobile
 if (detectedOs === 'mobile') {
-  osMismatchEl.textContent = 'Use a physical keyboard with your touchscreen device.';
+  osMismatchEl.textContent = 'Touch devices aren\'t supported — use a physical keyboard.';
   osMismatchEl.classList.add('show');
 }
 
@@ -1772,13 +1673,6 @@ function isKeyPartOfShortcut(e, token) {
   // Uses the same modifier-flag logic as matchesShortcut so they stay in sync.
   const u = token.toUpperCase();
   const code = e.code;
-  // Check alternates — if any alternate matches, treat as correct
-  const alts = SHORTCUT_ALTERNATES[u];
-  if (alts) {
-    for (const alt of alts) {
-      if (isKeyPartOfShortcut(e, alt)) return true;
-    }
-  }
 
   // Determine which modifiers the token needs
   const needsCmd   = u.includes('CMD');
@@ -1786,10 +1680,8 @@ function isKeyPartOfShortcut(e, token) {
   const needsOpt   = u.includes('OPTION');
 
   // Is this key press a modifier key that the shortcut requires?
-  // On Mac, CMD = Meta only. On PC, CMD = Ctrl only. Control on Mac is never CMD.
-  const isCmdKey   = currentOs === 'pc'
-    ? (code === 'ControlLeft'  || code === 'ControlRight')
-    : (code === 'MetaLeft'     || code === 'MetaRight');
+  const isCmdKey   = code === 'MetaLeft'    || code === 'MetaRight' ||
+                     code === 'ControlLeft' || code === 'ControlRight';
   const isShiftKey = code === 'ShiftLeft'   || code === 'ShiftRight';
   const isOptKey   = code === 'AltLeft'     || code === 'AltRight';
 
@@ -1861,19 +1753,8 @@ function hideExtKeyPill() {
   }));
 }
 
-// Numpad → main keyboard code remapping for lighting
-const NUMPAD_MAP = {
-  'Numpad0':'Digit0','Numpad1':'Digit1','Numpad2':'Digit2','Numpad3':'Digit3',
-  'Numpad4':'Digit4','Numpad5':'Digit5','Numpad6':'Digit6','Numpad7':'Digit7',
-  'Numpad8':'Digit8','Numpad9':'Digit9',
-  'NumpadAdd':'Equal','NumpadSubtract':'Minus','NumpadDecimal':'Period',
-  'NumpadDivide':'Slash','NumpadMultiply':'Digit8',
-  'NumpadEnter':'Enter',
-};
-
 function updateKeyboardLighting(e, isDown) {
-  // Remap numpad codes to their main-keyboard equivalents for lighting
-  const code = NUMPAD_MAP[e.code] || e.code;
+  const code = e.code;
   if (isDown) {
     const alreadyHeld = heldKeys.has(code);
     heldKeys.add(code);
@@ -1882,9 +1763,6 @@ function updateKeyboardLighting(e, isDown) {
                        code === 'ControlLeft' || code === 'ControlRight' ||
                        code === 'ShiftLeft'   || code === 'ShiftRight'   ||
                        code === 'AltLeft'     || code === 'AltRight';
-    // Silent keys: never count toward accuracy (Esc, F-row, CapsLock)
-    const isSilent = code === 'Escape' || code === 'CapsLock' ||
-                     (code.startsWith('F') && /^F\d+$/.test(code));
     const isExtKey = code in EXT_KEY_LABELS;
     const isCorrect = isKeyPartOfShortcut(e, currentAnswer);
     if (isCorrect) {
@@ -1894,14 +1772,14 @@ function updateKeyboardLighting(e, isDown) {
       } else {
         setKeyLit(code, 'green');
       }
-      if (!alreadyHeld && !isModifier && !isSilent) { greenHits++; totalHits++; updateAccuracyDisplay(); }
+      if (!alreadyHeld && !isModifier) { greenHits++; totalHits++; updateAccuracyDisplay(); }
     } else {
       if (isExtKey) {
         showExtKeyPill(code, 'orange');
       } else {
         setKeyLit(code, 'orange');
       }
-      if (!alreadyHeld && !isModifier && !isSilent) { totalHits++; updateAccuracyDisplay(); }
+      if (!alreadyHeld && !isModifier) { totalHits++; updateAccuracyDisplay(); }
     }
   } else {
     heldKeys.delete(code);
@@ -1929,9 +1807,8 @@ let currentAnswer = '';
 let helpActive    = false;
 let transitioning = false;
 let bestRecord    = { time: null, accuracy: null };  // independent bests
-let greenHits       = 0;
-let totalHits       = 0;
-let hintPenaltyPct  = 0;  // decaying hint penalty in percentage points
+let greenHits     = 0;
+let totalHits     = 0;
 let helpFadeTimer = null;
 let accuracyPenaltyTimeout = null;
 
@@ -1960,9 +1837,7 @@ const statRightEl     = document.getElementById('statRight');
 const accuracyEl      = document.getElementById('timerAccuracy');
 
 function calcAccuracy() {
-  if (totalHits === 0 && hintPenaltyPct === 0) return null;
-  const raw = totalHits === 0 ? 100 : Math.round(greenHits / totalHits * 100);
-  return Math.max(0, raw - hintPenaltyPct);
+  return totalHits === 0 ? null : Math.round(greenHits / totalHits * 100);
 }
 
 function updateAccuracyDisplay() {
@@ -1974,7 +1849,7 @@ function updateAccuracyDisplay() {
 const BULLSEYE_SVG_STR = '<svg style="width:12px;height:12px;vertical-align:middle;margin-right:3px;margin-bottom:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/></svg>';
 const WATCH_SVG = '<svg style="width:12px;height:12px;vertical-align:middle;margin-right:3px;margin-bottom:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6"/><path d="M12 3v2"/></svg>';
 
-function updateBestDisplay(pulseTime, pulseAcc) {
+function updateBestDisplay() {
   if (bestRecord.time !== null) {
     statLeftEl.innerHTML = 'best ' + WATCH_SVG + '= ' + formatTime(Math.floor(bestRecord.time));
   } else {
@@ -1985,19 +1860,6 @@ function updateBestDisplay(pulseTime, pulseAcc) {
     statRightEl.innerHTML = 'best ' + BULLSEYE_SVG_STR + '= ' + bestRecord.accuracy + '%' + trophy;
   } else {
     statRightEl.textContent = '';
-  }
-  // Pulse whichever stat(s) just set a new personal best
-  if (pulseTime) {
-    statLeftEl.classList.remove('stat-pulse');
-    void statLeftEl.offsetWidth; // force reflow so re-adding the class restarts the animation
-    statLeftEl.classList.add('stat-pulse');
-    statLeftEl.addEventListener('animationend', () => statLeftEl.classList.remove('stat-pulse'), { once: true });
-  }
-  if (pulseAcc) {
-    statRightEl.classList.remove('stat-pulse');
-    void statRightEl.offsetWidth;
-    statRightEl.classList.add('stat-pulse');
-    statRightEl.addEventListener('animationend', () => statRightEl.classList.remove('stat-pulse'), { once: true });
   }
 }
 updateBestDisplay();
@@ -2058,7 +1920,7 @@ let tipIndex = 0;
 
 function helpButtonClick() {
   helpBtn.blur();
-  if (gameState === 'idle')           { titleEl.textContent = bestRecord.time !== null ? 'To reset your score, press the lock key on the keyboard.' : 'Press start to begin.'; return; }
+  if (gameState === 'idle')           { titleEl.textContent = 'Press start to begin'; return; }
   if (gameState === 'playing')        { toggleHelp(); return; }
   if (gameState === 'paused')         { enterConfirmReset(); return; }
   if (gameState === 'confirm-reset')  { confirmResetNo(); return; }
@@ -2080,10 +1942,6 @@ const KEY_DISPLAY_MAC = {
   'RETURN':     { sym: '↩', name: 'Return' },
   'ARROWLEFT':  { sym: '←', name: 'Left' },
   'ARROWRIGHT': { sym: '→', name: 'Right' },
-  'ARROWUP':    { sym: '↑', name: 'Up' },
-  'ARROWDOWN':  { sym: '↓', name: 'Down' },
-  'HOME':       { sym: '↖', name: 'Home' },
-  'END':        { sym: '↘', name: 'End' },
   'SPACE':      { sym: '␣', name: 'Space' },
   'TAB':        { sym: '⇥', name: 'Tab' },
 };
@@ -2094,43 +1952,37 @@ const KEY_DISPLAY_PC = {
   'RETURN':     { sym: '↵', name: 'Enter' },
   'ARROWLEFT':  { sym: '←', name: 'Left' },
   'ARROWRIGHT': { sym: '→', name: 'Right' },
-  'ARROWUP':    { sym: '↑', name: 'Up' },
-  'ARROWDOWN':  { sym: '↓', name: 'Down' },
-  'HOME':       { sym: '↖', name: 'Home' },
-  'END':        { sym: '↘', name: 'End' },
   'SPACE':      { sym: '␣', name: 'Space' },
   'TAB':        { sym: '⇥', name: 'Tab' },
 };
 
-function pillHTML(token, bg) {
+function pillHTML(token) {
   const map = currentOs === 'pc' ? KEY_DISPLAY_PC : KEY_DISPLAY_MAC;
   const k = map[token.toUpperCase()];
-  const label = k ? (k.name ? k.sym + ' ' + k.name : k.sym) : token;
-  const colour = bg || '#f59e0b';
-  return '<span style="display:inline-block;background:' + colour + ';color:white;font-weight:700;font-size:12px;padding:3px 10px;border-radius:10px;white-space:nowrap;">' + label + '</span>';
+  const label = k ? (k.name ? k.sym + ' ' + k.name : k.sym) : token;
+  return '<span style="display:inline-block;background:#f59e0b;color:white;font-weight:700;font-size:12px;padding:3px 10px;border-radius:10px;white-space:nowrap;">' + label + '</span>';
 }
 
-function buildHintHTML(shortcut, bg) {
+function buildHintHTML(shortcut) {
   const parts = shortcut.toUpperCase().split('+');
-  return parts.map(t => pillHTML(t, bg)).join(' <span style="color:#6b7280;font-weight:700;">+</span> ');
+  return parts.map(pillHTML).join(' <span style="color:#6b7280;font-weight:700;">+</span> ');
 }
 
 function toggleHelp() {
   clearTimeout(helpFadeTimer);
   if (!helpActive) {
     helpActive = true;
-    // Show hint in the toast pill — green to distinguish from accuracy penalty
-    kbToastEl.innerHTML = buildHintHTML(currentAnswer, '#10b981');
+    // Show hint in the toast pill (same as keyboard tap message)
+    kbToastEl.innerHTML = buildHintHTML(currentAnswer);
     kbToastEl.classList.add('show');
     clearTimeout(toastTimer);
-    // Apply -10% hint penalty (deducted from displayed %, raw counts unchanged)
-    hintPenaltyPct += 10;
+    // Apply -5% accuracy penalty
+    totalHits += 5;
     updateAccuracyDisplay();
-    dbgRefreshCtx(); dbgRefreshAccuracy();
     // Flash bottom half orange to show the penalty
     clearTimeout(accuracyPenaltyTimeout);
     timerBox.classList.add('penalty-acc');
-    accuracyEl.textContent = '-10%';
+    accuracyEl.textContent = '-5%';
     accuracyPenaltyTimeout = setTimeout(() => {
       timerBox.classList.remove('penalty-acc');
       updateAccuracyDisplay();
@@ -2155,16 +2007,11 @@ function clearHelp() {
    PAUSE / EASTER EGG
 ══════════════════════════════════════ */
 function togglePause() {
-  if (gameState === 'playing')   { enterPause(); return; }
-  if (gameState === 'paused')    {
-    // Only offer reset if there's actually a score to reset
-    if (bestRecord.time !== null) { enterConfirmReset(); return; }
-    return; // no score — do nothing
-  }
-  if (gameState === 'confirm-reset') { confirmResetNo(); return; }
-  if (gameState === 'idle' || gameState === 'finished') {
-    if (bestRecord.time !== null) { enterConfirmReset(); return; }
-  }
+  if (gameState === 'playing')                          { enterPause(); return; }
+  if (gameState === 'paused')                           { unpause(); return; }
+  if (gameState === 'confirm-reset')                    { confirmResetNo(); return; }
+  // CHANGE 4: lock from idle or finished → confirm-reset directly
+  if (gameState === 'idle' || gameState === 'finished') { enterConfirmReset(); return; }
 }
 
 function enterPause() {
@@ -2253,28 +2100,15 @@ function resetToIdle() {
   questionCountEl.textContent = '';
   timerBox.className = 'timerBox';
   timerDiv.textContent = '0:00';
-  greenHits = 0; totalHits = 0; hintPenaltyPct = 0; updateAccuracyDisplay(); dbgRefreshCtx(); dbgRefreshAccuracy();
+  greenHits = 0; totalHits = 0; updateAccuracyDisplay();
 }
 
 /* ══════════════════════════════════════
    GAME FLOW
    CHANGE 1: matchesShortcut extended for new shortcuts
 ══════════════════════════════════════ */
-// Alternate accepted answers: pressing any of these counts as correct
-// for questions whose shortcut token matches the key.
-const SHORTCUT_ALTERNATES = {
-  'H': ['SPACE'],  // Hand tool — Space bar temporarily activates it
-};
-
 function matchesShortcut(event, str) {
   const s    = str.toUpperCase();
-  // Check alternates first
-  const alts = SHORTCUT_ALTERNATES[s];
-  if (alts) {
-    for (const alt of alts) {
-      if (matchesShortcut(event, alt)) return true;
-    }
-  }
   const cmd  = currentOs === 'pc' ? event.ctrlKey  : event.metaKey;
   const nocmd= currentOs === 'pc' ? !event.ctrlKey && !event.metaKey : !event.metaKey && !event.ctrlKey;
   const opt  = event.altKey;
@@ -2496,11 +2330,10 @@ document.addEventListener('keydown', e => {
   escHoldTimer = setTimeout(() => {
     escHoldFired = true;
     const dbg = document.getElementById('debugOverlay');
-    dbg.style.display = 'flex';
+    dbg.style.display = 'block';
     document.getElementById('dbgAnswer').textContent = 'debug on — press a key during play';
     document.getElementById('dbgKey').textContent = '';
     document.getElementById('dbgMatch').textContent = '';
-    dbgRefreshCtx(); dbgRefreshAccuracy();
   }, 2000);
 });
 
@@ -2515,37 +2348,6 @@ document.addEventListener('keyup', e => {
   const dbg = document.getElementById('debugOverlay');
   if (dbg.style.display !== 'none') dbg.style.display = 'none';
 });
-
-// ── Debug context display ────────────────────────────────────────────────────
-function dbgRefreshCtx() {
-  const el = document.getElementById('dbgCtx');
-  if (!el) return;
-  const appLabels = {Ps:'Photoshop', Ai:'Illustrator', In:'InDesign', Ae:'After Effects', Fi:'Figma'};
-  const appName = appLabels[currentApp] || currentApp;
-  const osName  = currentOs === 'pc' ? 'PC/Windows' : 'Mac';
-  const state   = gameState;
-  const pool    = questionPool.length;
-  const qi      = questionPool.length > 0 ? (questionIndex % questionPool.length) + 1 : '—';
-  el.textContent = 'os:' + osName + '  app:' + appName + '  state:' + state + '  q:' + qi + '/' + pool;
-}
-
-// ── Debug accuracy display ────────────────────────────────────────────────────
-function dbgRefreshAccuracy() {
-  const gh = document.getElementById('dbgGreenHits');
-  const th = document.getElementById('dbgTotalHits');
-  const pc = document.getElementById('dbgPct');
-  if (!gh) return;
-  gh.textContent = greenHits;
-  th.textContent = totalHits;
-  const pct = calcAccuracy();
-  if (pct === null) {
-    pc.innerHTML = '&#8212;';
-    pc.style.color = '#888';
-  } else {
-    pc.textContent = pct + '%' + (hintPenaltyPct > 0 ? ' (-' + hintPenaltyPct + ')' : '');
-    pc.style.color = pct >= 80 ? '#0f0' : pct >= 50 ? '#fa0' : '#f48';
-  }
-}
 
 // ── Debug navigation ──────────────────────────────────────────────────────
 function dbgPrevQuestion() {
@@ -2566,70 +2368,6 @@ function dbgNextQuestion() {
   clearAllLit(); heldKeys.clear();
   clearHelp(); transitioning = false;
 }
-
-/* ══════════════════════════════════════
-   BROWSER COMPATIBILITY CHECK
-   Detects non-Chrome browsers and warns
-   about known shortcut conflicts.
-══════════════════════════════════════ */
-(function() {
-  const ua = navigator.userAgent;
-  const isChrome = /Chrome\//.test(ua) && !/Edg\//.test(ua) && !/OPR\//.test(ua);
-  if (isChrome) return;
-
-  const isSafari  = /Safari\//.test(ua) && !/Chrome\//.test(ua);
-  const isFirefox = /Firefox\//.test(ua);
-  const isEdge    = /Edg\//.test(ua);
-
-  const conflicts = {
-    Safari: [
-      'Cmd+Opt+U (grid — opens Page Source)',
-      'Cmd+Shift+H (opens Home)',
-      'Cmd+Opt+I (opens Web Inspector)',
-      'Cmd+Opt+C (opens Inspector Console)',
-      'Cmd+Shift+I (opens Mail)',
-      'Cmd+Shift+L (opens Sidebar)',
-    ],
-    Firefox: [
-      'Cmd+Shift+A (opens Add-ons)',
-      'Cmd+Shift+H (opens History)',
-      'Cmd+Opt+I (opens DevTools)',
-      'Cmd+Shift+I (opens DevTools)',
-      'Cmd+Shift+U (opens Page Source)',
-      'Cmd+Shift+D (bookmarks page)',
-    ],
-    Edge: [
-      'Cmd+Shift+C (opens DevTools inspector)',
-      'Cmd+Shift+I (opens DevTools)',
-      'Cmd+Opt+I (opens DevTools)',
-      'Cmd+Shift+H (opens History)',
-      'Cmd+Shift+D (saves all tabs)',
-    ],
-  };
-
-  const browser = isSafari ? 'Safari' : isFirefox ? 'Firefox' : isEdge ? 'Edge' : 'your browser';
-  const list = conflicts[browser] || [];
-  const listText = list.length
-    ? '\n\nKnown conflicts in ' + browser + ':\n• ' + list.join('\n• ')
-    : '';
-
-  // Show a non-blocking banner rather than alert()
-  const banner = document.createElement('div');
-  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#1e40af;color:white;' +
-    'font-family:system-ui,sans-serif;font-size:13px;padding:10px 48px 10px 16px;' +
-    'z-index:99999;line-height:1.5;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
-  banner.innerHTML =
-    '<strong>Keyboard Warrior was built for Chrome.</strong> It should work well in ' + browser +
-    (list.length
-      ? ', but these shortcuts may conflict with browser actions:<br><span style="opacity:0.85">' +
-        list.join(' &nbsp;·&nbsp; ') + '</span>'
-      : ' with no known conflicts.') +
-    '<button onclick="this.parentElement.remove()" style="position:absolute;right:12px;top:50%;' +
-    'transform:translateY(-50%);background:none;border:none;color:white;font-size:18px;' +
-    'cursor:pointer;padding:0 4px;line-height:1;">×</button>';
-  document.body.prepend(banner);
-})();
-
 // Initialise
 buildAppPill();
 
@@ -2675,8 +2413,6 @@ function startGame() {
   greenHeld.clear();
   greenHits = 0;
   totalHits = 0;
-  hintPenaltyPct = 0;
-  dbgRefreshCtx(); dbgRefreshAccuracy();
   clearTimeout(accuracyPenaltyTimeout);
   timerBox.classList.remove('penalty-time', 'penalty-acc');
   updateAccuracyDisplay();
@@ -2728,12 +2464,6 @@ function advanceQuestion() {
 }
 
 function recordAnswer() {
-  // Decay hint penalty by 2% per correct answer
-  if (hintPenaltyPct > 0) {
-    hintPenaltyPct = Math.max(0, hintPenaltyPct - 2);
-    updateAccuracyDisplay();
-    dbgRefreshCtx(); dbgRefreshAccuracy();
-  }
   // Called only on a correct keypress — decrements the answer counter
   answersLeft--;
   if (answersLeft <= 0) {
@@ -2774,49 +2504,23 @@ function endGame() {
 
   const finalAccuracy = calcAccuracy() ?? 0;
   const wasFirstRecord = bestRecord.time === null;
-
-  // Snapshot the previous best before we overwrite it, so medal logic
-  // can compare this run against what the player had before.
-  const prevTime     = bestRecord.time;
-  const prevAccuracy = bestRecord.accuracy;
-
-  let newBestTime = false;
-  let newBestAcc  = false;
+  let changed = false;
   if (bestRecord.time === null || totalTime < bestRecord.time) {
-    bestRecord.time = totalTime; newBestTime = true;
+    bestRecord.time = totalTime; changed = true;
   }
   if (bestRecord.accuracy === null || finalAccuracy > bestRecord.accuracy) {
-    bestRecord.accuracy = finalAccuracy; newBestAcc = true;
+    bestRecord.accuracy = finalAccuracy; changed = true;
   }
-  if (newBestTime || newBestAcc) {
+  if (changed) {
     try { localStorage.setItem('kw_best', JSON.stringify(bestRecord)); } catch(e) {}
-    updateBestDisplay(newBestTime, newBestAcc);
-  }
-
-  // Decide which medal the player earns:
-  //   Gold   — first ever run, OR beat/equalled both records, OR beat one and equalled the other
-  //   Silver — improved on exactly one of time or accuracy
-  //   Bronze — failed to improve either
-  let medal;
-  if (wasFirstRecord) {
-    medal = 'gold';
-  } else {
-    const beatTime = totalTime <= prevTime;
-    const beatAcc  = finalAccuracy >= prevAccuracy;
-    if (beatTime && beatAcc) {
-      medal = 'gold';
-    } else if (beatTime || beatAcc) {
-      medal = 'silver';
-    } else {
-      medal = 'bronze';
-    }
+    updateBestDisplay();
   }
 
   mainBtn.textContent = 'Try again?';
   titleEl.className = '';
   titleEl.textContent = endGameMessage(totalTime, finalAccuracy, bestRecord, wasFirstRecord);
   questionCountEl.textContent = '';
-  timerBox.className = 'timerBox medal-' + medal;
+  timerBox.className = 'timerBox finished';
   timerDiv.textContent = formatTime(Math.floor(totalTime));
 }
 
@@ -2831,21 +2535,13 @@ function handleKeydown(e) {
   const dbg = document.getElementById('debugOverlay');
   if (dbg && dbg.style.display !== 'none') {
     const needed = shortcutToCodes(currentAnswer);
-    dbgRefreshCtx();
     document.getElementById('dbgAnswer').textContent = 'answer: ' + currentAnswer;
     document.getElementById('dbgKey').textContent =
       'key=' + JSON.stringify(e.key) + ' code=' + e.code +
       ' cmd=' + (currentOs==='pc'?e.ctrlKey:e.metaKey) +
       ' sh=' + e.shiftKey + ' opt=' + e.altKey;
-    const matchResult = matchesShortcut(e, currentAnswer);
-    const includesResult = needed.includes(e.code);
-    const dbgMatchEl = document.getElementById('dbgMatch');
-    dbgMatchEl.innerHTML =
-      'needed:' + needed.join(',') + ' | includes(' + e.code + '):' +
-      (includesResult ? '<span style="color:#0f0">true</span>' : '<span style="color:#f48">false</span>') +
-      ' | match:' +
-      (matchResult ? '<span style="color:#0f0">true</span>' : '<span style="color:#f48">false</span>');
-    dbgRefreshCtx(); dbgRefreshAccuracy();
+    document.getElementById('dbgMatch').textContent =
+      'needed:' + needed.join(',') + ' | includes('+e.code+'):' + needed.includes(e.code) + ' | match:' + matchesShortcut(e, currentAnswer);
   }
   if (gameState === 'finished') {
     if (e.key === 'ArrowRight') { showTip(tipIndex + 1); e.preventDefault(); return; }
