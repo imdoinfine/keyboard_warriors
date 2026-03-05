@@ -159,7 +159,74 @@ body {
 /* CHANGE 5: paused timer is clickable to unpause */
 .timerBox.paused        { background: #4b5563; cursor: pointer; }
 .timerBox.green         { background: #10b981; }
-.timerBox.finished      { background: #1f2937; }
+/* Medal colours on the finished screen — awarded by personal improvement */
+.timerBox.medal-gold {
+  background: conic-gradient(
+    #c8860a 0deg,
+    #fde68a 40deg,
+    #f6c547 70deg,
+    #b8730a 110deg,
+    #7c4d04 140deg,
+    #e8b84b 175deg,
+    #fef08a 200deg,
+    #d4a017 230deg,
+    #8a5c08 265deg,
+    #f0c040 295deg,
+    #fde68a 325deg,
+    #c8860a 360deg
+  );
+  color: #3b1a00;
+  text-shadow: 0 1px 2px rgba(255,220,100,0.5);
+  transition: background 0.6s ease;
+}
+.timerBox.medal-silver {
+  background: conic-gradient(
+    #7a8fa6 0deg,
+    #dce8f0 40deg,
+    #f0f6fa 70deg,
+    #8fa8bf 110deg,
+    #4a6070 140deg,
+    #c8d8e8 175deg,
+    #f4f8fb 200deg,
+    #90a8be 230deg,
+    #506070 265deg,
+    #d0e0ee 295deg,
+    #dce8f0 325deg,
+    #7a8fa6 360deg
+  );
+  color: #1a2530;
+  text-shadow: 0 1px 2px rgba(200,220,240,0.6);
+  transition: background 0.6s ease;
+}
+.timerBox.medal-bronze {
+  background: conic-gradient(
+    #7a3e10 0deg,
+    #e8915a 40deg,
+    #c8703a 70deg,
+    #8b4515 110deg,
+    #4a2008 140deg,
+    #d4814a 175deg,
+    #f0a060 200deg,
+    #a05820 230deg,
+    #5a2a0a 265deg,
+    #c07840 295deg,
+    #e8915a 325deg,
+    #7a3e10 360deg
+  );
+  color: #2a0e00;
+  text-shadow: 0 1px 2px rgba(240,160,80,0.4);
+  transition: background 0.6s ease;
+}
+/* Divider line adapts on medal backgrounds */
+.timerBox.medal-gold   .timer-divider line,
+.timerBox.medal-silver .timer-divider line,
+.timerBox.medal-bronze .timer-divider line { stroke: rgba(0,0,0,0.2); }
+.timerBox.medal-gold   .timer-icon,
+.timerBox.medal-gold   .accuracy-icon,
+.timerBox.medal-silver .timer-icon,
+.timerBox.medal-silver .accuracy-icon,
+.timerBox.medal-bronze .timer-icon,
+.timerBox.medal-bronze .accuracy-icon { opacity: 0.4; }
 /* Penalty gradients — sharp split at 50%, rapid transition in */
 .timerBox.penalty-time  {
   background: linear-gradient(to bottom, #ef4444 0%, #ef4444 50%, #1f2937 50%, #1f2937 100%);
@@ -224,6 +291,15 @@ body {
 }
 #statLeft  { width: 130px; text-align: center; }
 #statRight { width: 130px; text-align: center; }
+
+@keyframes statPulse {
+  0%   { transform: scale(1);    color: #6b7280; }
+  50%  { transform: scale(1.18); color: #f59e0b; }
+  100% { transform: scale(1);    color: #6b7280; }
+}
+.stat-pulse {
+  animation: statPulse 0.5s ease-in-out;
+}
 
 #credit {
   font-family: 'Lato', system-ui, sans-serif;
@@ -990,6 +1066,7 @@ body.pc-mode #extKeyPill {
 <div id="debugOverlay" style="position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;border-radius:8px;z-index:9999;pointer-events:auto;line-height:1.5;display:none;flex-direction:row;gap:0;align-items:stretch;" aria-hidden="true">
   <div style="display:flex;flex-direction:column;justify-content:space-between;min-width:280px;max-width:420px;padding-right:12px;">
     <div>
+      <div id="dbgCtx" style="color:#8af;margin-bottom:3px;border-bottom:1px solid #333;padding-bottom:3px;"></div>
       <div id="dbgAnswer"></div>
       <div id="dbgKey"></div>
       <div id="dbgMatch"></div>
@@ -997,7 +1074,7 @@ body.pc-mode #extKeyPill {
     <div style="margin-top:6px;display:flex;gap:5px;">
       <button onclick="dbgPrevQuestion()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;">&#8592;</button>
       <button onclick="dbgNextQuestion()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;">&#8594;</button>
-      <button onclick="(()=>{const t=[dbgAnswer,dbgKey,dbgMatch].map(i=>document.getElementById(i.id).textContent).join('\n');navigator.clipboard.writeText(t).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1200)});})()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;">Copy</button>
+      <button onclick="(()=>{const ids=['dbgCtx','dbgAnswer','dbgKey','dbgMatch'];const t=ids.map(id=>document.getElementById(id).textContent).join('\n');navigator.clipboard.writeText(t).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1200)}).catch(()=>{this.textContent='Failed';setTimeout(()=>this.textContent='Copy',1200)});})()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;">Copy</button>
     </div>
   </div>
   <svg width="12" style="flex-shrink:0;align-self:stretch;overflow:visible;" xmlns="http://www.w3.org/2000/svg">
@@ -1075,7 +1152,9 @@ const SHORTCUTS = [
   {shortcut:"E",display:"Reveal Effects on selected layer",mac_sc:"E",pc_sc:"E",pc_safe:true,ps:false,ai:false,indd:false,ae:true,fi:false},
   {shortcut:"SPACE",display:"Hold to temporarily activate the Hand tool and pan",mac_sc:"Space",pc_sc:"Space",pc_safe:true,ps:true,ai:true,indd:true,ae:false,fi:true},
   {shortcut:"SHIFT",display:"Hold to constrain proportions while transforming",mac_sc:"\u21e7 Shift",pc_sc:"\u21e7 Shift",pc_safe:true,ps:true,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"SHIFT",display:"Hold to add to an active selection",mac_sc:"\u21e7 Shift",pc_sc:"\u21e7 Shift",pc_safe:true,ps:true,ai:true,indd:true,ae:false,fi:true},
   {shortcut:"OPTION",display:"Hold to transform from the centre outward",mac_sc:"\u2325 Option",pc_sc:"Alt",pc_safe:true,ps:true,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"OPTION",display:"Hold to subtract from an active selection",mac_sc:"\u2325 Option",pc_sc:"Alt",pc_safe:true,ps:true,ai:true,indd:false,ae:false,fi:false},
   {shortcut:"TAB",display:"Hide or show all panels",mac_sc:"Tab",pc_sc:"Tab",pc_safe:true,ps:true,ai:true,indd:true,ae:false,fi:false},
   {shortcut:"CMD+=",display:"Zoom in",mac_sc:"\u2318 =",pc_sc:"Ctrl =",pc_safe:true,ps:true,ai:true,indd:true,ae:true,fi:true},
   {shortcut:"CMD+-",display:"Zoom out",mac_sc:"\u2318 -",pc_sc:"Ctrl -",pc_safe:true,ps:true,ai:true,indd:true,ae:true,fi:true},
@@ -1093,12 +1172,13 @@ const SHORTCUTS = [
   {shortcut:"CMD+OPTION+I",display:"Open the Image Size dialog",mac_sc:"\u2318 \u2325 I",pc_sc:"Ctrl Alt I",pc_safe:true,ps:true,ai:false,indd:false,ae:false,fi:false},
   {shortcut:"CMD+G",display:"Group selected objects",mac_sc:"\u2318 G",pc_sc:"Ctrl G",pc_safe:true,ps:true,ai:true,indd:true,ae:true,fi:true},
   {shortcut:"CMD+SHIFT+G",display:"Ungroup selected objects",mac_sc:"\u2318 \u21e7 G",pc_sc:"Ctrl \u21e7 G",pc_safe:true,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+]",display:"Move object forward one step",mac_sc:"\u2318 ]",pc_sc:"Ctrl ]",pc_safe:true,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+[",display:"Move object back one step",mac_sc:"\u2318 [",pc_sc:"Ctrl [",pc_safe:true,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+D",display:"Duplicate the selection",mac_sc:"\u2318 D",pc_sc:"Ctrl D",pc_safe:true,ps:true,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+]",display:"Raise object one level in the stack",mac_sc:"\u2318 ]",pc_sc:"Ctrl ]",pc_safe:true,ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"CMD+[",display:"Lower object one level in the stack",mac_sc:"\u2318 [",pc_sc:"Ctrl [",pc_safe:true,ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"CMD+D",display:"Duplicate the selection",mac_sc:"\u2318 D",pc_sc:"Ctrl D",pc_safe:true,ps:false,ai:false,indd:false,ae:false,fi:true},
   {shortcut:"CMD+D",display:"Transform Again",mac_sc:"\u2318 D",pc_sc:"Ctrl D",pc_safe:true,ps:false,ai:true,indd:false,ae:false,fi:false},
   {shortcut:"CMD+D",display:"Duplicate the selected layer",mac_sc:"\u2318 D",pc_sc:"Ctrl D",pc_safe:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+A",display:"Deselect all objects",mac_sc:"\u2318 \u21e7 A",pc_sc:"Ctrl \u21e7 A",pc_safe:true,ps:true,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"CMD+D",display:"Deselect all pixels",mac_sc:"\u2318 D",pc_sc:"Ctrl D",pc_safe:true,ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+A",display:"Deselect all",mac_sc:"\u2318 \u21e7 A",pc_sc:"Ctrl \u21e7 A",pc_safe:true,ps:false,ai:true,indd:true,ae:true,fi:true},
   {shortcut:"CMD+OPTION+2",display:"Unlock all locked objects",mac_sc:"\u2318 \u2325 2",pc_sc:"Ctrl Alt 2",pc_safe:true,ps:false,ai:true,indd:false,ae:false,fi:false},
   {shortcut:"CMD+OPTION+3",display:"Show all hidden objects",mac_sc:"\u2318 \u2325 3",pc_sc:"Ctrl Alt 3",pc_safe:true,ps:false,ai:true,indd:false,ae:false,fi:false},
   {shortcut:"CMD+J",display:"Duplicate the current layer",mac_sc:"\u2318 J",pc_sc:"Ctrl J",pc_safe:true,ps:true,ai:false,indd:false,ae:false,fi:false},
@@ -1107,7 +1187,7 @@ const SHORTCUTS = [
   {shortcut:"CMD+E",display:"Merge selected layers",mac_sc:"\u2318 E",pc_sc:"Ctrl E",pc_safe:true,ps:true,ai:false,indd:false,ae:false,fi:false},
   {shortcut:"CMD+E",display:"Flatten the selection",mac_sc:"\u2318 E",pc_sc:"Ctrl E",pc_safe:true,ps:false,ai:false,indd:false,ae:false,fi:true},
   {shortcut:"CMD+SHIFT+I",display:"Invert the selection",mac_sc:"\u2318 \u21e7 I",pc_sc:"Ctrl \u21e7 I",pc_safe:true,ps:true,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+I",display:"Invert colours",mac_sc:"\u2318 I",pc_sc:"Ctrl I",pc_safe:true,ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+I",display:"Invert image",mac_sc:"\u2318 I",pc_sc:"Ctrl I",pc_safe:true,ps:true,ai:false,indd:false,ae:false,fi:false},
   {shortcut:"CMD+OPTION+A",display:"Select all objects on the active layer",mac_sc:"\u2318 \u2325 A",pc_sc:"Ctrl Alt A",pc_safe:true,ps:false,ai:true,indd:false,ae:false,fi:false},
   {shortcut:"SHIFT+A",display:"Add Auto Layout",mac_sc:"\u21e7 A",pc_sc:"\u21e7 A",pc_safe:true,ps:false,ai:false,indd:false,ae:false,fi:true},
   {shortcut:"CMD+B",display:"Paste in Back",mac_sc:"\u2318 B",pc_sc:"Ctrl B",pc_safe:true,ps:false,ai:true,indd:true,ae:false,fi:false},
@@ -1692,6 +1772,13 @@ function isKeyPartOfShortcut(e, token) {
   // Uses the same modifier-flag logic as matchesShortcut so they stay in sync.
   const u = token.toUpperCase();
   const code = e.code;
+  // Check alternates — if any alternate matches, treat as correct
+  const alts = SHORTCUT_ALTERNATES[u];
+  if (alts) {
+    for (const alt of alts) {
+      if (isKeyPartOfShortcut(e, alt)) return true;
+    }
+  }
 
   // Determine which modifiers the token needs
   const needsCmd   = u.includes('CMD');
@@ -1699,8 +1786,10 @@ function isKeyPartOfShortcut(e, token) {
   const needsOpt   = u.includes('OPTION');
 
   // Is this key press a modifier key that the shortcut requires?
-  const isCmdKey   = code === 'MetaLeft'    || code === 'MetaRight' ||
-                     code === 'ControlLeft' || code === 'ControlRight';
+  // On Mac, CMD = Meta only. On PC, CMD = Ctrl only. Control on Mac is never CMD.
+  const isCmdKey   = currentOs === 'pc'
+    ? (code === 'ControlLeft'  || code === 'ControlRight')
+    : (code === 'MetaLeft'     || code === 'MetaRight');
   const isShiftKey = code === 'ShiftLeft'   || code === 'ShiftRight';
   const isOptKey   = code === 'AltLeft'     || code === 'AltRight';
 
@@ -1885,7 +1974,7 @@ function updateAccuracyDisplay() {
 const BULLSEYE_SVG_STR = '<svg style="width:12px;height:12px;vertical-align:middle;margin-right:3px;margin-bottom:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/></svg>';
 const WATCH_SVG = '<svg style="width:12px;height:12px;vertical-align:middle;margin-right:3px;margin-bottom:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6"/><path d="M12 3v2"/></svg>';
 
-function updateBestDisplay() {
+function updateBestDisplay(pulseTime, pulseAcc) {
   if (bestRecord.time !== null) {
     statLeftEl.innerHTML = 'best ' + WATCH_SVG + '= ' + formatTime(Math.floor(bestRecord.time));
   } else {
@@ -1896,6 +1985,19 @@ function updateBestDisplay() {
     statRightEl.innerHTML = 'best ' + BULLSEYE_SVG_STR + '= ' + bestRecord.accuracy + '%' + trophy;
   } else {
     statRightEl.textContent = '';
+  }
+  // Pulse whichever stat(s) just set a new personal best
+  if (pulseTime) {
+    statLeftEl.classList.remove('stat-pulse');
+    void statLeftEl.offsetWidth; // force reflow so re-adding the class restarts the animation
+    statLeftEl.classList.add('stat-pulse');
+    statLeftEl.addEventListener('animationend', () => statLeftEl.classList.remove('stat-pulse'), { once: true });
+  }
+  if (pulseAcc) {
+    statRightEl.classList.remove('stat-pulse');
+    void statRightEl.offsetWidth;
+    statRightEl.classList.add('stat-pulse');
+    statRightEl.addEventListener('animationend', () => statRightEl.classList.remove('stat-pulse'), { once: true });
   }
 }
 updateBestDisplay();
@@ -1978,6 +2080,10 @@ const KEY_DISPLAY_MAC = {
   'RETURN':     { sym: '↩', name: 'Return' },
   'ARROWLEFT':  { sym: '←', name: 'Left' },
   'ARROWRIGHT': { sym: '→', name: 'Right' },
+  'ARROWUP':    { sym: '↑', name: 'Up' },
+  'ARROWDOWN':  { sym: '↓', name: 'Down' },
+  'HOME':       { sym: '↖', name: 'Home' },
+  'END':        { sym: '↘', name: 'End' },
   'SPACE':      { sym: '␣', name: 'Space' },
   'TAB':        { sym: '⇥', name: 'Tab' },
 };
@@ -1988,6 +2094,10 @@ const KEY_DISPLAY_PC = {
   'RETURN':     { sym: '↵', name: 'Enter' },
   'ARROWLEFT':  { sym: '←', name: 'Left' },
   'ARROWRIGHT': { sym: '→', name: 'Right' },
+  'ARROWUP':    { sym: '↑', name: 'Up' },
+  'ARROWDOWN':  { sym: '↓', name: 'Down' },
+  'HOME':       { sym: '↖', name: 'Home' },
+  'END':        { sym: '↘', name: 'End' },
   'SPACE':      { sym: '␣', name: 'Space' },
   'TAB':        { sym: '⇥', name: 'Tab' },
 };
@@ -2016,7 +2126,7 @@ function toggleHelp() {
     // Apply -10% hint penalty (deducted from displayed %, raw counts unchanged)
     hintPenaltyPct += 10;
     updateAccuracyDisplay();
-    dbgRefreshAccuracy();
+    dbgRefreshCtx(); dbgRefreshAccuracy();
     // Flash bottom half orange to show the penalty
     clearTimeout(accuracyPenaltyTimeout);
     timerBox.classList.add('penalty-acc');
@@ -2143,15 +2253,28 @@ function resetToIdle() {
   questionCountEl.textContent = '';
   timerBox.className = 'timerBox';
   timerDiv.textContent = '0:00';
-  greenHits = 0; totalHits = 0; hintPenaltyPct = 0; updateAccuracyDisplay(); dbgRefreshAccuracy();
+  greenHits = 0; totalHits = 0; hintPenaltyPct = 0; updateAccuracyDisplay(); dbgRefreshCtx(); dbgRefreshAccuracy();
 }
 
 /* ══════════════════════════════════════
    GAME FLOW
    CHANGE 1: matchesShortcut extended for new shortcuts
 ══════════════════════════════════════ */
+// Alternate accepted answers: pressing any of these counts as correct
+// for questions whose shortcut token matches the key.
+const SHORTCUT_ALTERNATES = {
+  'H': ['SPACE'],  // Hand tool — Space bar temporarily activates it
+};
+
 function matchesShortcut(event, str) {
   const s    = str.toUpperCase();
+  // Check alternates first
+  const alts = SHORTCUT_ALTERNATES[s];
+  if (alts) {
+    for (const alt of alts) {
+      if (matchesShortcut(event, alt)) return true;
+    }
+  }
   const cmd  = currentOs === 'pc' ? event.ctrlKey  : event.metaKey;
   const nocmd= currentOs === 'pc' ? !event.ctrlKey && !event.metaKey : !event.metaKey && !event.ctrlKey;
   const opt  = event.altKey;
@@ -2377,7 +2500,7 @@ document.addEventListener('keydown', e => {
     document.getElementById('dbgAnswer').textContent = 'debug on — press a key during play';
     document.getElementById('dbgKey').textContent = '';
     document.getElementById('dbgMatch').textContent = '';
-    dbgRefreshAccuracy();
+    dbgRefreshCtx(); dbgRefreshAccuracy();
   }, 2000);
 });
 
@@ -2393,7 +2516,20 @@ document.addEventListener('keyup', e => {
   if (dbg.style.display !== 'none') dbg.style.display = 'none';
 });
 
-// ── Debug accuracy display ───────────────────────────────────────────────────
+// ── Debug context display ────────────────────────────────────────────────────
+function dbgRefreshCtx() {
+  const el = document.getElementById('dbgCtx');
+  if (!el) return;
+  const appLabels = {Ps:'Photoshop', Ai:'Illustrator', In:'InDesign', Ae:'After Effects', Fi:'Figma'};
+  const appName = appLabels[currentApp] || currentApp;
+  const osName  = currentOs === 'pc' ? 'PC/Windows' : 'Mac';
+  const state   = gameState;
+  const pool    = questionPool.length;
+  const qi      = questionPool.length > 0 ? (questionIndex % questionPool.length) + 1 : '—';
+  el.textContent = 'os:' + osName + '  app:' + appName + '  state:' + state + '  q:' + qi + '/' + pool;
+}
+
+// ── Debug accuracy display ────────────────────────────────────────────────────
 function dbgRefreshAccuracy() {
   const gh = document.getElementById('dbgGreenHits');
   const th = document.getElementById('dbgTotalHits');
@@ -2540,7 +2676,7 @@ function startGame() {
   greenHits = 0;
   totalHits = 0;
   hintPenaltyPct = 0;
-  dbgRefreshAccuracy();
+  dbgRefreshCtx(); dbgRefreshAccuracy();
   clearTimeout(accuracyPenaltyTimeout);
   timerBox.classList.remove('penalty-time', 'penalty-acc');
   updateAccuracyDisplay();
@@ -2596,7 +2732,7 @@ function recordAnswer() {
   if (hintPenaltyPct > 0) {
     hintPenaltyPct = Math.max(0, hintPenaltyPct - 2);
     updateAccuracyDisplay();
-    dbgRefreshAccuracy();
+    dbgRefreshCtx(); dbgRefreshAccuracy();
   }
   // Called only on a correct keypress — decrements the answer counter
   answersLeft--;
@@ -2638,23 +2774,49 @@ function endGame() {
 
   const finalAccuracy = calcAccuracy() ?? 0;
   const wasFirstRecord = bestRecord.time === null;
-  let changed = false;
+
+  // Snapshot the previous best before we overwrite it, so medal logic
+  // can compare this run against what the player had before.
+  const prevTime     = bestRecord.time;
+  const prevAccuracy = bestRecord.accuracy;
+
+  let newBestTime = false;
+  let newBestAcc  = false;
   if (bestRecord.time === null || totalTime < bestRecord.time) {
-    bestRecord.time = totalTime; changed = true;
+    bestRecord.time = totalTime; newBestTime = true;
   }
   if (bestRecord.accuracy === null || finalAccuracy > bestRecord.accuracy) {
-    bestRecord.accuracy = finalAccuracy; changed = true;
+    bestRecord.accuracy = finalAccuracy; newBestAcc = true;
   }
-  if (changed) {
+  if (newBestTime || newBestAcc) {
     try { localStorage.setItem('kw_best', JSON.stringify(bestRecord)); } catch(e) {}
-    updateBestDisplay();
+    updateBestDisplay(newBestTime, newBestAcc);
+  }
+
+  // Decide which medal the player earns:
+  //   Gold   — first ever run, OR beat/equalled both records, OR beat one and equalled the other
+  //   Silver — improved on exactly one of time or accuracy
+  //   Bronze — failed to improve either
+  let medal;
+  if (wasFirstRecord) {
+    medal = 'gold';
+  } else {
+    const beatTime = totalTime <= prevTime;
+    const beatAcc  = finalAccuracy >= prevAccuracy;
+    if (beatTime && beatAcc) {
+      medal = 'gold';
+    } else if (beatTime || beatAcc) {
+      medal = 'silver';
+    } else {
+      medal = 'bronze';
+    }
   }
 
   mainBtn.textContent = 'Try again?';
   titleEl.className = '';
   titleEl.textContent = endGameMessage(totalTime, finalAccuracy, bestRecord, wasFirstRecord);
   questionCountEl.textContent = '';
-  timerBox.className = 'timerBox finished';
+  timerBox.className = 'timerBox medal-' + medal;
   timerDiv.textContent = formatTime(Math.floor(totalTime));
 }
 
@@ -2669,6 +2831,7 @@ function handleKeydown(e) {
   const dbg = document.getElementById('debugOverlay');
   if (dbg && dbg.style.display !== 'none') {
     const needed = shortcutToCodes(currentAnswer);
+    dbgRefreshCtx();
     document.getElementById('dbgAnswer').textContent = 'answer: ' + currentAnswer;
     document.getElementById('dbgKey').textContent =
       'key=' + JSON.stringify(e.key) + ' code=' + e.code +
@@ -2682,7 +2845,7 @@ function handleKeydown(e) {
       (includesResult ? '<span style="color:#0f0">true</span>' : '<span style="color:#f48">false</span>') +
       ' | match:' +
       (matchResult ? '<span style="color:#0f0">true</span>' : '<span style="color:#f48">false</span>');
-    dbgRefreshAccuracy();
+    dbgRefreshCtx(); dbgRefreshAccuracy();
   }
   if (gameState === 'finished') {
     if (e.key === 'ArrowRight') { showTip(tipIndex + 1); e.preventDefault(); return; }
