@@ -284,7 +284,7 @@ body.pc-mode #extKeyPill {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  background: #f59e0b;
+  background: transparent;
   color: white;
   font-size: 12px;
   font-weight: 600;
@@ -293,13 +293,13 @@ body.pc-mode #extKeyPill {
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.3s, background 0.2s;
+  transition: opacity 0.15s;
   z-index: 10;
   top: 50%;
   transform: translate(-50%, -50%);
 }
 #kbToast.show { opacity: 1; }
-#kbToast.hint { background: transparent; }
+#kbToast.warning { background: #f59e0b; }
 
 /* ══════════════════════════════════════
    KEYBOARD WRAPPER
@@ -987,15 +987,33 @@ body.pc-mode #extKeyPill {
   </div>
 </div>
 
-<div id="debugOverlay" style="position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;border-radius:8px;z-index:9999;max-width:420px;pointer-events:auto;line-height:1.5;display:none;" aria-hidden="true">
-  <div id="dbgAnswer"></div>
-  <div id="dbgKey"></div>
-  <div id="dbgMatch"></div>
-  <div style="margin-top:6px;display:flex;gap:5px;justify-content:flex-end;">
-    <button onclick="dbgPrevQuestion()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;">&#8592;</button>
-    <button onclick="dbgNextQuestion()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;">&#8594;</button>
-    <button onclick="(()=>{const t=[dbgAnswer,dbgKey,dbgMatch].map(i=>document.getElementById(i.id).textContent).join('\n');navigator.clipboard.writeText(t).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1200)});})()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;margin-left:auto;">Copy</button>
+<div id="debugOverlay" style="position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;border-radius:8px;z-index:9999;pointer-events:auto;line-height:1.5;display:none;flex-direction:row;gap:0;align-items:stretch;" aria-hidden="true">
+  <div style="display:flex;flex-direction:column;justify-content:space-between;min-width:280px;max-width:420px;padding-right:12px;">
+    <div>
+      <div id="dbgAnswer"></div>
+      <div id="dbgKey"></div>
+      <div id="dbgMatch"></div>
+    </div>
+    <div style="margin-top:6px;display:flex;gap:5px;">
+      <button onclick="dbgPrevQuestion()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;">&#8592;</button>
+      <button onclick="dbgNextQuestion()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;">&#8594;</button>
+      <button onclick="(()=>{const t=[dbgAnswer,dbgKey,dbgMatch].map(i=>document.getElementById(i.id).textContent).join('\n');navigator.clipboard.writeText(t).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1200)});})()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;">Copy</button>
+    </div>
   </div>
+  <svg width="12" style="flex-shrink:0;align-self:stretch;overflow:visible;" xmlns="http://www.w3.org/2000/svg">
+    <line x1="6" y1="0" x2="6" y2="100%" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 5"/>
+  </svg>
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding-left:12px;min-width:110px;gap:4px;">
+    <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">accuracy</div>
+    <div style="display:flex;align-items:baseline;gap:4px;">
+      <span id="dbgGreenHits" style="font-size:22px;font-weight:700;color:#0f0;line-height:1;">0</span>
+      <span style="font-size:13px;color:#666;">/</span>
+      <span id="dbgTotalHits" style="font-size:22px;font-weight:700;color:#aaa;line-height:1;">0</span>
+    </div>
+    <div style="width:60px;height:1px;background:#444;margin:2px 0;"></div>
+    <div id="dbgPct" style="font-size:22px;font-weight:700;color:#888;line-height:1;">&#8212;</div>
+  </div>
+</div>
 </div>
 <p id="credit">Built for learners. This digital toy was created by Wednesday Dessauer as open-source &amp; free to adapt under <small>GNU GPL v3.0</small></p>
 
@@ -1370,9 +1388,9 @@ function showKbToast(e) {
   e.preventDefault();
   const osName = currentOs === 'pc' ? 'PC' : 'Mac';
   kbToastEl.innerHTML = `This keyboard is for display only. Play with an actual ${osName} keyboard.`;
-  kbToastEl.classList.add('show');
+  kbToastEl.classList.add('show', 'warning');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => kbToastEl.classList.remove('show'), 3000);
+  toastTimer = setTimeout(() => kbToastEl.classList.remove('show', 'warning'), 3000);
 }
 
 /* ══════════════════════════════════════
@@ -1822,8 +1840,9 @@ let currentAnswer = '';
 let helpActive    = false;
 let transitioning = false;
 let bestRecord    = { time: null, accuracy: null };  // independent bests
-let greenHits     = 0;
-let totalHits     = 0;
+let greenHits       = 0;
+let totalHits       = 0;
+let hintPenaltyPct  = 0;  // decaying hint penalty in percentage points
 let helpFadeTimer = null;
 let accuracyPenaltyTimeout = null;
 
@@ -1852,7 +1871,9 @@ const statRightEl     = document.getElementById('statRight');
 const accuracyEl      = document.getElementById('timerAccuracy');
 
 function calcAccuracy() {
-  return totalHits === 0 ? null : Math.round(greenHits / totalHits * 100);
+  if (totalHits === 0 && hintPenaltyPct === 0) return null;
+  const raw = totalHits === 0 ? 100 : Math.round(greenHits / totalHits * 100);
+  return Math.max(0, raw - hintPenaltyPct);
 }
 
 function updateAccuracyDisplay() {
@@ -1990,33 +2011,34 @@ function toggleHelp() {
     helpActive = true;
     // Show hint in the toast pill — green to distinguish from accuracy penalty
     kbToastEl.innerHTML = buildHintHTML(currentAnswer, '#10b981');
-    kbToastEl.classList.add('show', 'hint');
+    kbToastEl.classList.add('show');
     clearTimeout(toastTimer);
-    // Apply -5% accuracy penalty
-    totalHits += 5;
+    // Apply -10% hint penalty (deducted from displayed %, raw counts unchanged)
+    hintPenaltyPct += 10;
     updateAccuracyDisplay();
+    dbgRefreshAccuracy();
     // Flash bottom half orange to show the penalty
     clearTimeout(accuracyPenaltyTimeout);
     timerBox.classList.add('penalty-acc');
-    accuracyEl.textContent = '-5%';
+    accuracyEl.textContent = '-10%';
     accuracyPenaltyTimeout = setTimeout(() => {
       timerBox.classList.remove('penalty-acc');
       updateAccuracyDisplay();
     }, 2000);
     helpFadeTimer = setTimeout(() => {
       helpActive = false;
-      kbToastEl.classList.remove('show', 'hint');
+      kbToastEl.classList.remove('show');
     }, 3000);
   } else {
     helpActive = false;
-    kbToastEl.classList.remove('show', 'hint');
+    kbToastEl.classList.remove('show');
   }
 }
 
 function clearHelp() {
   clearTimeout(helpFadeTimer);
   helpActive = false;
-  kbToastEl.classList.remove('show', 'hint');
+  kbToastEl.classList.remove('show');
 }
 
 /* ══════════════════════════════════════
@@ -2121,7 +2143,7 @@ function resetToIdle() {
   questionCountEl.textContent = '';
   timerBox.className = 'timerBox';
   timerDiv.textContent = '0:00';
-  greenHits = 0; totalHits = 0; updateAccuracyDisplay();
+  greenHits = 0; totalHits = 0; hintPenaltyPct = 0; updateAccuracyDisplay(); dbgRefreshAccuracy();
 }
 
 /* ══════════════════════════════════════
@@ -2351,10 +2373,11 @@ document.addEventListener('keydown', e => {
   escHoldTimer = setTimeout(() => {
     escHoldFired = true;
     const dbg = document.getElementById('debugOverlay');
-    dbg.style.display = 'block';
+    dbg.style.display = 'flex';
     document.getElementById('dbgAnswer').textContent = 'debug on — press a key during play';
     document.getElementById('dbgKey').textContent = '';
     document.getElementById('dbgMatch').textContent = '';
+    dbgRefreshAccuracy();
   }, 2000);
 });
 
@@ -2369,6 +2392,24 @@ document.addEventListener('keyup', e => {
   const dbg = document.getElementById('debugOverlay');
   if (dbg.style.display !== 'none') dbg.style.display = 'none';
 });
+
+// ── Debug accuracy display ───────────────────────────────────────────────────
+function dbgRefreshAccuracy() {
+  const gh = document.getElementById('dbgGreenHits');
+  const th = document.getElementById('dbgTotalHits');
+  const pc = document.getElementById('dbgPct');
+  if (!gh) return;
+  gh.textContent = greenHits;
+  th.textContent = totalHits;
+  const pct = calcAccuracy();
+  if (pct === null) {
+    pc.innerHTML = '&#8212;';
+    pc.style.color = '#888';
+  } else {
+    pc.textContent = pct + '%' + (hintPenaltyPct > 0 ? ' (-' + hintPenaltyPct + ')' : '');
+    pc.style.color = pct >= 80 ? '#0f0' : pct >= 50 ? '#fa0' : '#f48';
+  }
+}
 
 // ── Debug navigation ──────────────────────────────────────────────────────
 function dbgPrevQuestion() {
@@ -2498,6 +2539,8 @@ function startGame() {
   greenHeld.clear();
   greenHits = 0;
   totalHits = 0;
+  hintPenaltyPct = 0;
+  dbgRefreshAccuracy();
   clearTimeout(accuracyPenaltyTimeout);
   timerBox.classList.remove('penalty-time', 'penalty-acc');
   updateAccuracyDisplay();
@@ -2549,6 +2592,12 @@ function advanceQuestion() {
 }
 
 function recordAnswer() {
+  // Decay hint penalty by 2% per correct answer
+  if (hintPenaltyPct > 0) {
+    hintPenaltyPct = Math.max(0, hintPenaltyPct - 2);
+    updateAccuracyDisplay();
+    dbgRefreshAccuracy();
+  }
   // Called only on a correct keypress — decrements the answer counter
   answersLeft--;
   if (answersLeft <= 0) {
@@ -2633,6 +2682,7 @@ function handleKeydown(e) {
       (includesResult ? '<span style="color:#0f0">true</span>' : '<span style="color:#f48">false</span>') +
       ' | match:' +
       (matchResult ? '<span style="color:#0f0">true</span>' : '<span style="color:#f48">false</span>');
+    dbgRefreshAccuracy();
   }
   if (gameState === 'finished') {
     if (e.key === 'ArrowRight') { showTip(tipIndex + 1); e.preventDefault(); return; }
