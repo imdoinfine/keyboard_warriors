@@ -1153,11 +1153,12 @@ body.pc-mode #extKeyPill {
 <div id="debugOverlay" style="position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;border-radius:8px;z-index:9999;pointer-events:auto;line-height:1.5;display:none;flex-direction:row;gap:0;align-items:stretch;" aria-hidden="true">
   <div style="display:flex;flex-direction:column;justify-content:space-between;min-width:280px;max-width:420px;padding-right:12px;">
     <div>
-      <div id="dbgCtx" style="color:#8af;margin-bottom:3px;border-bottom:1px solid #333;padding-bottom:3px;"></div>
+      <div style="display:flex;align-items:center;gap:0;margin-bottom:3px;border-bottom:1px solid #333;padding-bottom:3px;"><span id="dbgToggle" onclick="(()=>{const b=document.getElementById('dbgBody');const c=document.getElementById('dbgToggle');const collapsed=b.style.display==='none';b.style.display=collapsed?'block':'none';c.textContent=collapsed?'▼':'▶';})()" style="color:#0f0;font-size:12px;cursor:pointer;user-select:none;padding-right:6px;line-height:1;">▼</span><div id="dbgCtx" style="color:#8af;flex:1;"></div><div style="color:#0f0;font-weight:700;font-size:9px;letter-spacing:2px;text-align:center;min-width:80px;">DEBUGGER</div></div><div id="dbgBody">
       <div id="dbgAnswer"></div>
       <div id="dbgKey"></div>
       <div id="dbgMatch"></div>
     </div>
+    </div><!-- /dbgBody -->
     <div style="margin-top:6px;display:flex;gap:5px;">
       <button onclick="dbgPrevQuestion()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;">&#8592;</button>
       <button onclick="dbgNextQuestion()" style="flex:1;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 0;font-size:10px;cursor:pointer;font-family:monospace;">&#8594;</button>
@@ -1611,6 +1612,17 @@ const detectedOs = detectOs();
 // 'currentOs' drives all game logic and keyboard rendering
 let currentOs = (detectedOs === 'mac' || detectedOs === 'mobile') ? 'mac' : 'pc';
 
+// Runtime style tag for medal face rotation (::before can't be set via JS directly)
+const medalFaceStyleEl = document.createElement('style');
+medalFaceStyleEl.id = 'medalFaceStyle';
+document.head.appendChild(medalFaceStyleEl);
+
+function updateMedalFaceStyle(angle) {
+  if (!currentMedal) return;
+  medalFaceStyleEl.textContent =
+    '.timerBox.medal-' + currentMedal + '::before { background: ' + MEDAL_FACE[currentMedal](angle) + ' !important; }';
+}
+
 const osToggleEl     = document.getElementById('osToggle');
 const osMismatchEl   = document.getElementById('osMismatchPill');
 
@@ -2021,7 +2033,6 @@ function updateKeyboardLighting(e, isDown) {
   if (isDown) {
     const alreadyHeld = heldKeys.has(code);
     heldKeys.add(code);
-    if (gameState !== 'playing') return;
     const isModifier = code === 'MetaLeft'    || code === 'MetaRight'   ||
                        code === 'ControlLeft' || code === 'ControlRight' ||
                        code === 'ShiftLeft'   || code === 'ShiftRight'   ||
@@ -2030,22 +2041,29 @@ function updateKeyboardLighting(e, isDown) {
     const isSilent = code === 'Escape' || code === 'CapsLock' ||
                      (code.startsWith('F') && /^F\d+$/.test(code));
     const isExtKey = code in EXT_KEY_LABELS;
-    const isCorrect = isKeyPartOfShortcut(e, currentAnswer);
-    if (isCorrect) {
+    if (gameState !== 'playing') {
+      // Outside a round: all keys light green, no stats affected
       greenHeld.add(code);
-      if (isExtKey) {
-        showExtKeyPill(code, 'green');
-      } else {
-        setKeyLit(code, 'green-down');
-      }
-      if (!alreadyHeld && !isModifier && !isSilent) { greenHits++; totalHits++; updateAccuracyDisplay(); }
+      if (isExtKey) { showExtKeyPill(code, 'green'); }
+      else          { setKeyLit(code, 'green-down'); }
     } else {
-      if (isExtKey) {
-        showExtKeyPill(code, 'orange');
+      const isCorrect = isKeyPartOfShortcut(e, currentAnswer);
+      if (isCorrect) {
+        greenHeld.add(code);
+        if (isExtKey) {
+          showExtKeyPill(code, 'green');
+        } else {
+          setKeyLit(code, 'green-down');
+        }
+        if (!alreadyHeld && !isModifier && !isSilent) { greenHits++; totalHits++; updateAccuracyDisplay(); }
       } else {
-        setKeyLit(code, 'orange-down');
+        if (isExtKey) {
+          showExtKeyPill(code, 'orange');
+        } else {
+          setKeyLit(code, 'orange-down');
+        }
+        if (!alreadyHeld && !isModifier && !isSilent) { totalHits++; updateAccuracyDisplay(); }
       }
-      if (!alreadyHeld && !isModifier && !isSilent) { totalHits++; updateAccuracyDisplay(); }
     }
   } else {
     heldKeys.delete(code);
@@ -2069,6 +2087,7 @@ function updateKeyboardLighting(e, isDown) {
    States: idle | playing | paused | confirm-reset | finished
 ══════════════════════════════════════ */
 let gameState = 'idle';
+let currentMedal = null;
 let totalTime  = 0;
 let timerInterval   = null;
 let penaltyTimeout  = null;
@@ -2172,6 +2191,9 @@ function updateTimer() {
 }
 
 function resetTimerBox() {
+  timerBox.style.background = '';
+  timerBox.style.removeProperty('--face-rot');
+  currentMedal = null;
   timerBox.className = 'timerBox';
   timerDiv.textContent = formatTime(Math.floor(totalTime));
 }
@@ -2389,8 +2411,6 @@ function resetToIdle() {
   clearHelp();
   clearAllLit();
   heldKeys.clear();
-  document.removeEventListener('keyup', handleKeyup);
-
   mainBtn.textContent = 'Start the game';
   mainBtn.style.background = '';
   helpBtn.textContent = 'Help';
@@ -2837,8 +2857,6 @@ function startGame() {
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
   timerInterval = setInterval(updateTimer, 100);
-  document.addEventListener('keydown', handleKeydown);
-  document.addEventListener('keyup',   handleKeyup);
 }
 
 function skipShortcut() {
@@ -2926,7 +2944,6 @@ function endGame() {
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
   clearHelp();
-  document.removeEventListener('keyup', handleKeyup);
   clearAllLit();
   heldKeys.clear();
 
@@ -2965,8 +2982,61 @@ function endGame() {
   titleEl.textContent = endGameMessage(totalTime, finalAccuracy, bestRecord, wasFirstRecord);
   questionCountEl.textContent = '';
   timerBox.className = 'timerBox medal-' + medal;
+  currentMedal = medal;
+  rimTarget = 0; rimCurrent = 0; rimVelocity = 0;
+  updateMedalFaceStyle(0);
   timerDiv.textContent = formatTime(Math.floor(totalTime));
 }
+
+// ── Medal lighting: mouse-driven gradient rotation ──────────────────────────
+// Base rim gradients — the `from Xdeg` angle gets offset by mouse position.
+const MEDAL_RIM = {
+  gold:   (a) => `conic-gradient(from ${225+a}deg,#b8730a 0deg,#b8730a 1deg,#fff9d6 14deg,#fff9d6 17deg,#e8c060 35deg,#c88810 70deg,#7c4d04 108deg,#3d1e00 128deg,#3d1e00 132deg,#6b3e03 155deg,#a06818 185deg,#c8860a 210deg,#f0d070 222deg,#b8730a 225deg,#b8730a 360deg)`,
+  silver: (a) => `conic-gradient(from ${225+a}deg,#6a8090 0deg,#6a8090 1deg,#ffffff 14deg,#ffffff 17deg,#d8eaf5 35deg,#90aabf 70deg,#3a5060 108deg,#1a2830 128deg,#1a2830 132deg,#3a5060 155deg,#6a8898 185deg,#7a8fa6 210deg,#c8dce8 222deg,#6a8090 225deg,#6a8090 360deg)`,
+  bronze: (a) => `conic-gradient(from ${225+a}deg,#6a3010 0deg,#6a3010 1deg,#ffd4a0 14deg,#ffd4a0 17deg,#d07040 35deg,#8b4515 70deg,#3a1808 108deg,#1a0800 128deg,#1a0800 132deg,#3a1808 155deg,#703018 185deg,#7a3e10 210deg,#d08040 222deg,#6a3010 225deg,#6a3010 360deg)`,
+};
+const MEDAL_FACE = {
+  gold:   (a) => `conic-gradient(from ${a}deg,#c8860a 0deg,#fde68a 40deg,#f6c547 70deg,#b8730a 110deg,#7c4d04 140deg,#e8b84b 175deg,#fef08a 200deg,#d4a017 230deg,#8a5c08 265deg,#f0c040 295deg,#fde68a 325deg,#c8860a 360deg)`,
+  silver: (a) => `conic-gradient(from ${a}deg,#7a8fa6 0deg,#dce8f0 40deg,#f4f8fb 70deg,#8fa8bf 110deg,#4a6070 140deg,#c8d8e8 175deg,#f4f8fb 200deg,#90a8be 230deg,#506070 265deg,#d0e0ee 295deg,#dce8f0 325deg,#7a8fa6 360deg)`,
+  bronze: (a) => `conic-gradient(from ${a}deg,#7a3e10 0deg,#e8915a 40deg,#c8703a 70deg,#8b4515 110deg,#4a2008 140deg,#d4814a 175deg,#f0a060 200deg,#a05820 230deg,#5a2a0a 265deg,#c07840 295deg,#e8915a 325deg,#7a3e10 360deg)`,
+};
+
+// ── Rim easing: spring toward target angle, eases out with slight overshoot ──
+let rimTarget   = 0;  // angle we're heading toward (set by mouse)
+let rimCurrent  = 0;  // angle currently rendered
+let rimVelocity = 0;  // for spring physics
+let rimRafId    = null;
+
+const RIM_STIFFNESS = 0.10; // spring pull strength
+const RIM_DAMPING   = 0.72; // < 1 allows overshoot; higher = less
+
+function rimTick() {
+  if (!currentMedal) { rimRafId = null; return; }
+  const force    = (rimTarget - rimCurrent) * RIM_STIFFNESS;
+  rimVelocity    = rimVelocity * RIM_DAMPING + force;
+  rimCurrent    += rimVelocity;
+  const faceAngle = Math.round((rimTarget / 15) * 5); // ±5° face, keyed off target
+  timerBox.style.background = MEDAL_RIM[currentMedal](rimCurrent);
+  updateMedalFaceStyle(faceAngle);
+  // Keep ticking until settled
+  if (Math.abs(rimVelocity) > 0.01 || Math.abs(rimCurrent - rimTarget) > 0.01) {
+    rimRafId = requestAnimationFrame(rimTick);
+  } else {
+    rimCurrent = rimTarget;
+    rimRafId   = null;
+  }
+}
+
+document.addEventListener('mousemove', e => {
+  if (gameState !== 'finished' || !currentMedal) return;
+  const d = (e.clientX / window.innerWidth) - 0.5; // -0.5..+0.5
+  rimTarget = d * 30; // ±15°
+  if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
+});
+
+// Key lighting active at all times, not just during play
+document.addEventListener('keydown', handleKeydown);
+document.addEventListener('keyup',   handleKeyup);
 
 function showTip(index) {
   tipIndex = ((index % IMPROVEMENT_TIPS.length) + IMPROVEMENT_TIPS.length) % IMPROVEMENT_TIPS.length;
