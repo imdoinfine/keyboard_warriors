@@ -1318,7 +1318,7 @@ body.pc-mode #extKeyPill {
 #rotatePrompt svg { opacity: 0.5; }
 #rotatePrompt p { font-size: 18px; color: #6b7280; }
 
-/* Fixed body — no scroll, no flex centering needed */
+/* Fixed body — centred column */
 body {
   padding: 0 !important;
   min-height: 100vh !important;
@@ -1333,24 +1333,32 @@ body {
   gap: 0 !important;
 }
 
-#gameContainer {
-  /* default: iPad 10th gen / Air landscape 1180×820 */
+/* Single wrapper — everything inherits this width so columns line up */
+#ipadLayout {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  /* default: iPad 10th gen / Air / Pro 11" landscape */
   width: 1060px;
+}
+
+#gameContainer {
+  width: 100% !important;
   padding: 6px 50px 20px !important;
-  flex-shrink: 0;
 }
 
 #statsRow {
-  flex-shrink: 0;
+  width: 100% !important;
 }
 
 #keyboardWrap {
-  flex-shrink: 0;
+  width: 100% !important;
 }
 
-/* mini 6 landscape: 1133×744 */
+/* iPad mini 6 landscape: 1133×744 */
 @media (max-width: 1140px) {
-  #gameContainer { width: 1000px !important; padding: 4px 40px 16px !important; }
+  #ipadLayout { width: 980px; }
+  #gameContainer { padding: 4px 40px 16px !important; }
   .topRow { min-height: 90px !important; }
   .leftPanel { width: 120px !important; }
   #mainBtn, #helpBtn { width: 120px !important; font-size: 13px !important; }
@@ -1358,16 +1366,14 @@ body {
   .timerBox { width: 84px !important; height: 84px !important; }
 }
 
-/* Pro 12.9" landscape: 1366×1024 */
+/* iPad Pro 12.9" landscape: 1366×1024 */
 @media (min-width: 1340px) {
-  #gameContainer { width: 1240px !important; padding: 8px 60px 28px !important; }
+  #ipadLayout { width: 1240px; }
+  #gameContainer { padding: 8px 60px 28px !important; }
 }
 
 /* Pill fixed width so it never collapses */
 #appPill { width: 128px; }
-
-/* Stats row matches container */
-#statsRow { width: 100%; }
 </style>
 </head>
 <body>
@@ -1453,6 +1459,8 @@ body {
   </div>
 </div>
 
+<div id="ipadLayout">
+
 <!-- Stats bar: always visible -->
 <div id="statsRow">
   <span id="statLeft"></span>
@@ -1474,6 +1482,8 @@ body {
     <div class="kb-row" id="row-bot"></div>
   </div>
 </div>
+
+</div><!-- /#ipadLayout -->
 
 <div id="debugOverlay" style="position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;border-radius:8px;z-index:9999;pointer-events:auto;line-height:1.5;display:none;flex-direction:row;gap:0;align-items:flex-start;overflow:hidden;max-height:800px;transition:max-height 0.2s ease,border-radius 0.2s ease;" aria-hidden="true">
   <!-- Left column -->
@@ -3326,10 +3336,13 @@ function onTouchToggle() {
     setStickyKeys(true);
     document.getElementById('stickyRow').classList.add('disabled');
     showModeToast('On-Screen Keyboard Active');
+    osMismatchEl.textContent = 'We recommend training with a real mechanical keyboard.';
+    osMismatchEl.classList.add('show');
   } else {
     setStickyKeys(false);
     document.getElementById('stickyRow').classList.remove('disabled');
     showModeToast('On-Screen Keyboard = Display Only');
+    osMismatchEl.classList.remove('show');
   }
 }
 
