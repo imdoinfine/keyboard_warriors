@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Keyboard Warrior</title>
+<script>
+  // Redirect iPad users to the optimised iPad build
+  (function() {
+    var ua = navigator.userAgent;
+    var isIpad = /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    if (isIpad && window.location.pathname.indexOf('ipad') === -1) {
+      window.location.replace('ipad/index.html');
+    }
+  })();
+</script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 
@@ -2470,7 +2480,7 @@ function updateKeyboardLighting(e, isDown) {
   const isSilent   = code === 'Escape' || code === 'CapsLock' ||
                      (code.startsWith('F') && /^F\d+$/.test(code));
 
-  if (stickyKeysOn && gameState === 'playing') {
+  if (stickyKeysOn) {
     if (!isDown) return; // key-up does nothing in sticky mode
     // Toggle: if already sticky-lit, un-light it
     if (stickyLit.has(code)) {
@@ -3517,12 +3527,14 @@ function dbgRefreshCtx() {
   const el = document.getElementById('dbgCtx');
   if (!el) return;
   const appLabels = {Ps:'Photoshop', Ai:'Illustrator', In:'InDesign', Ae:'After Effects', Fi:'Figma'};
-  const appName = appLabels[currentApp] || currentApp;
-  const osName  = currentOs === 'pc' ? 'PC/Windows' : 'Mac';
-  const state   = gameState;
-  const pool    = questionPool.length;
-  const qi      = questionPool.length > 0 ? (questionIndex % questionPool.length) + 1 : '—';
-  el.textContent = 'os:' + osName + '  app:' + appName + '  state:' + state + '  q:' + qi + '/' + pool;
+  const appName  = appLabels[currentApp] || currentApp;
+  const osName   = currentOs === 'pc' ? 'PC/Windows' : 'Mac';
+  const device   = typeof DBG_DEVICE !== 'undefined' ? DBG_DEVICE : 'computer';
+  const state    = gameState;
+  const pool     = questionPool.length;
+  const qi       = pool > 0 ? (questionIndex % pool) + 1 : '—';
+  const qStr     = state === 'idle' ? '—/0' : qi + '/' + pool;
+  el.textContent = 'device:' + device + '  os:' + osName + '  app:' + appName + '  state:' + state + '  Q:' + qStr;
 }
 
 // ── Debug accuracy display ────────────────────────────────────────────────────
@@ -3960,8 +3972,8 @@ document.addEventListener('visibilitychange', () => {
 
 function handleKeyup(e) {
   updateKeyboardLighting(e, false);
-  // In sticky mode during play, key-up never clears anything
-  if (stickyKeysOn && gameState === 'playing') return;
+  // In sticky mode, key-up never clears anything (toggle is handled in updateKeyboardLighting)
+  if (stickyKeysOn) return;
   // On Mac, releasing a modifier suppresses keyup for any keys held while it
   // was down. Sweep all keys still showing a pressed (down) state and release
   // them now so nothing gets stuck lit.
