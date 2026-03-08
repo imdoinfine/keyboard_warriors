@@ -333,14 +333,14 @@ body {
 
 #questionRow {
   width: 100%;
-  max-width: 900px;
   text-align: center;
   min-height: 20px;
-  padding: 0 24px 2px;
+  padding: 0 60px 2px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-sizing: border-box;
 }
 /* Individual progress dot */
 .prog-dot {
@@ -359,8 +359,7 @@ body {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 900px;
-  padding: 8px 24px 10px;
+  padding: 8px 60px 10px;
   position: relative;
   box-sizing: border-box;
   min-height: 37px;
@@ -371,7 +370,7 @@ body {
   color: #6b7280;
   white-space: nowrap;
 }
-#statLeft  { width: 130px; text-align: center; }
+#statLeft  { width: 140px; text-align: center; }
 #statRight { width: 130px; text-align: center; }
 
 @keyframes statPulse {
@@ -386,9 +385,9 @@ body {
   font-size: 12px;
   color: #9ca3af;
   text-align: center;
-  max-width: 900px;
   width: 100%;
-  padding: 8px 24px 0;
+  padding: 8px 60px 0;
+  box-sizing: border-box;
 }
 
 /* Extended key ghost pill — appears in statsRow when a key not on the
@@ -499,6 +498,14 @@ body.pc-mode #extKeyPill {
 .modal-radio-fill { opacity: 0; transition: opacity 0.15s ease; }
 .modal-radio.on .modal-radio-fill { opacity: 1; }
 
+@keyframes paperUnfurl {
+  0%   { opacity: 0; transform: perspective(800px) rotateX(22deg) scale(1.1); }
+  100% { opacity: 1; transform: perspective(800px) rotateX(0deg)  scale(1); }
+}
+@keyframes paperFurl {
+  0%   { opacity: 1; transform: perspective(800px) rotateX(0deg)  scale(1); }
+  100% { opacity: 0; transform: perspective(800px) rotateX(22deg) scale(1.1); }
+}
 #kbModal {
   position: fixed;
   background: white;
@@ -509,12 +516,14 @@ body.pc-mode #extKeyPill {
   z-index: 50;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
   overflow: hidden;
+  transform-origin: top center;
 }
 #kbModal.visible {
   opacity: 1;
   pointer-events: auto;
+  animation: paperUnfurl 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 
 
@@ -964,9 +973,9 @@ body.pc-mode #extKeyPill {
 
   #title { font-size: 18px; }
 
-  #questionRow { font-size: 13px; padding: 2px 12px; }
+  #questionRow { font-size: 13px; padding: 2px 16px; }
 
-  #statsRow { padding: 6px 0 8px; }
+  #statsRow { padding: 6px 16px 8px; }
   #statLeft  { width: 108px; }
   #statRight { width: 90px; }
 }
@@ -987,8 +996,7 @@ body.pc-mode #extKeyPill {
   align-items: center;
   justify-content: center;
   width: 100%;
-  max-width: 900px;
-  padding: 0 24px;
+  padding: 0 60px;
   position: relative;
   box-sizing: border-box;
   height: 41px;
@@ -1737,20 +1745,17 @@ let toastTimer = null;
 var modeToastTimer = null;
 
 function showModeToast(msg) {
-  // Save whatever the pill is currently showing so we can restore it
-  var prevText    = osMismatchEl.textContent;
-  var wasVisible  = osMismatchEl.classList.contains('show');
-
+  var prevText   = osMismatchEl.textContent;
+  var wasVisible = osMismatchEl.classList.contains('show');
   clearTimeout(modeToastTimer);
   osMismatchEl.textContent = msg;
   osMismatchEl.classList.add('show');
-
   modeToastTimer = setTimeout(function() {
     osMismatchEl.classList.remove('show');
     setTimeout(function() {
       osMismatchEl.textContent = prevText;
       if (wasVisible) osMismatchEl.classList.add('show');
-    }, 300); // wait for fade-out transition to finish before restoring
+    }, 300);
   }, 2000);
 }
 
@@ -1904,11 +1909,9 @@ function updateMismatchPill() {
     return;
   }
   if (detectedOs === 'other') {
-    // Unknown OS — just show whichever mode is active, no mismatch warning
     osMismatchEl.classList.remove('show');
     return;
   }
-  // Known OS: warn only when toggle doesn't match the detected OS
   const mismatch = (detectedOs === 'mac' && currentOs === 'pc') ||
                    (detectedOs === 'pc'  && currentOs === 'mac');
   if (mismatch) {
@@ -1964,8 +1967,19 @@ function updateKeyboardMode() {
     buildKeyboard(mode === 'mini');
   }
 }
-window.addEventListener('resize', updateKeyboardMode);
+function alignKbIcon() {
+  var icon   = document.getElementById('kbIcon');
+  var kpanel = document.getElementById('keyboardPanel');
+  var kwrap  = document.getElementById('keyboardWrap');
+  if (!icon || !kpanel || !kwrap) return;
+  var iconW      = icon.offsetWidth || 44;
+  var kpanelLeft = kpanel.getBoundingClientRect().left - kwrap.getBoundingClientRect().left;
+  icon.style.left = (kpanelLeft - iconW * 2) + 'px';
+}
+
+window.addEventListener('resize', function() { updateKeyboardMode(); alignKbIcon(); });
 updateKeyboardMode();
+setTimeout(alignKbIcon, 50);
 // Show mismatch pill after initial keyboard build
 updateMismatchPill();
 // Apply rounded style if starting in PC mode
@@ -2548,7 +2562,7 @@ const KEY_DISPLAY_MAC = {
   'ARROWUP':    { sym: '↑', name: 'Up' },
   'ARROWDOWN':  { sym: '↓', name: 'Down' },
   'HOME':       { sym: '↖', name: 'Home' },
-  'END':        { sym: '↘', name: 'End' },
+  'END':        { sym: '⇥', name: 'End' },
   'SPACE':      { sym: '␣', name: 'Space' },
   'TAB':        { sym: '⇥', name: 'Tab' },
 };
@@ -2562,7 +2576,7 @@ const KEY_DISPLAY_PC = {
   'ARROWUP':    { sym: '↑', name: 'Up' },
   'ARROWDOWN':  { sym: '↓', name: 'Down' },
   'HOME':       { sym: '↖', name: 'Home' },
-  'END':        { sym: '↘', name: 'End' },
+  'END':        { sym: '⇥', name: 'End' },
   'SPACE':      { sym: '␣', name: 'Space' },
   'TAB':        { sym: '⇥', name: 'Tab' },
 };
@@ -2667,6 +2681,7 @@ function unpause() {
 
 function enterConfirmReset() {
   gameState = 'confirm-reset';
+  if (currentMedal) resetTimerBox();
   titleEl.classList.remove('blurred');
   questionCountEl.classList.remove('blurred');
   titleEl.className = '';
@@ -3071,8 +3086,15 @@ function openKbModal() {
 }
 
 function closeKbModal() {
-  document.getElementById('kbModal').classList.remove('visible');
   kbModalOpen = false;
+  var modal = document.getElementById('kbModal');
+  modal.style.animation = 'paperFurl 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards';
+  modal.style.pointerEvents = 'none';
+  setTimeout(function() {
+    modal.classList.remove('visible');
+    modal.style.animation = '';
+    modal.style.pointerEvents = '';
+  }, 450);
   if (gameState === 'paused') unpause();
 }
 
@@ -3185,6 +3207,11 @@ function dbgCopyFallback(t, btn) {
 }
 
 function dbgReport() {
+  var btn = document.querySelector('[onclick="dbgReport()"]');
+  if (btn) {
+    btn.textContent = 'Preparing…';
+    setTimeout(function() { btn.textContent = 'Report'; }, 2500);
+  }
   var body    = 'Bug report from Keyboard Warrior:\n\n' + dbgBuildReport() + '\n\nPlease describe the issue here:';
   var subject = 'Keyboard Warrior error report';
   window.location.href = 'mailto:Wednesday%20Dessauer%20%3Cddessauer%40swin.edu.au%3E?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
@@ -3314,11 +3341,20 @@ buildAppPill();
 ══════════════════════════════════════ */
 const APP_FIELD = {Ps:'ps', Ai:'ai', In:'indd', Ae:'ae', Fi:'fi'};
 
+// Codes that only exist on the extended keyboard (not on the graphical layout)
+const EXT_CODES = new Set(Object.keys(EXT_KEY_LABELS));
+
+function requiresExtKey(shortcut) {
+  // Returns true if any code needed for this shortcut is an extended key
+  return shortcutToCodes(shortcut).some(c => EXT_CODES.has(c));
+}
+
 function buildPool() {
   const field = APP_FIELD[currentApp] || 'ps';
   return SHORTCUTS.filter(s => {
-    if (!s[field]) return false;             // not in this app
-    if (!s.pc_safe && currentOs === 'pc') return false;  // mac-only on PC
+    if (!s[field]) return false;
+    if (!s.pc_safe && currentOs === 'pc') return false;
+    if (touchEnabled && requiresExtKey(s.shortcut)) return false;
     return true;
   });
 }
