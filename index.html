@@ -440,33 +440,60 @@ body.pc-mode #extKeyPill {
 ══════════════════════════════════════ */
 
 /* Modal inline rows (label = toggle) */
+/* All three layout rows share a grid so their switches column-align */
+/* All three toggle rows share one table so the switch column aligns perfectly.
+   Left cells are right-aligned (labels hang leftward from switch),
+   switch cells are centred, right cells are left-aligned. */
+.modal-layout-rows {
+  display: table;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+  width: auto;
+}
 .modal-inline-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 10px;
+  display: table-row;
 }
 .modal-inline-row.disabled {
   opacity: 0.38;
   pointer-events: none;
 }
+/* Column 1: left label — right-aligned so it butts up against the switch */
+.modal-left-label {
+  display: table-cell;
+  text-align: right;
+  vertical-align: middle;
+  padding-right: 5px;
+  white-space: nowrap;
+  font-size: 12px;
+  color: #6b7280;
+}
+/* Column 2: the toggle switch itself */
 .modal-switch-wrap {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  flex-shrink: 0;
+  display: table-cell;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+/* Column 3: right label — left-aligned from the switch */
+.modal-right-label {
+  display: table-cell;
+  vertical-align: middle;
+  padding-left: 5px;
+  white-space: nowrap;
+  font-size: 12px;
+  color: #374151;
 }
 .modal-inline-val {
   font-size: 12px;
   color: #6b7280;
-  min-width: 14px;
-  text-align: center;
-  white-space: nowrap;
 }
 .modal-inline-label {
   font-size: 12px;
   color: #374151;
-  white-space: nowrap;
+}
+.modal-kbsize-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
 /* Keyboard variant picker */
@@ -514,9 +541,9 @@ body.pc-mode #extKeyPill {
 #kbModalInner {
   width: 100%;
   height: 100%;
-  padding: 24px 28px;
+  padding: 16px 22px;
   box-sizing: border-box;
-  overflow-y: auto;
+  overflow-y: visible;
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 13px;
   color: #374151;
@@ -526,7 +553,7 @@ body.pc-mode #extKeyPill {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   user-select: none;
 }
 .modal-toggle-row label {
@@ -543,7 +570,7 @@ body.pc-mode #extKeyPill {
   font-size: 13px;
   color: #374151;
 }
-.modal-section-gap { height: 14px; }
+.modal-section-gap { height: 8px; }
 .modal-section-title {
   font-size: 12px;
   font-weight: 700;
@@ -575,8 +602,9 @@ body.pc-mode #extKeyPill {
   100% { opacity: 1; transform: perspective(800px) rotateX(0deg)  scale(1); }
 }
 @keyframes paperFurl {
-  0%   { opacity: 1; transform: perspective(800px) rotateX(0deg)  scale(1); }
-  100% { opacity: 0; transform: perspective(800px) rotateX(22deg) scale(1.1); }
+  /* Top edge rises toward the viewer first — rotateX negative tilts top forward */
+  0%   { opacity: 1; transform: perspective(800px) rotateX(0deg)   scale(1); }
+  100% { opacity: 0; transform: perspective(800px) rotateX(-20deg) scale(1.05); }
 }
 #kbModal {
   position: fixed;
@@ -585,14 +613,12 @@ body.pc-mode #extKeyPill {
   box-shadow:
     0 4px 10px rgba(0,0,0,0.13),
     0 12px 28px rgba(0,0,0,0.16);
-  z-index: 50;
+  z-index: 200;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease;
   overflow: hidden;
   transform-origin: top center;
-  min-width: 260px;
-  min-height: 320px;
 }
 #kbModal.visible {
   opacity: 1;
@@ -1028,6 +1054,7 @@ body.pc-mode #extKeyPill {
 @media (max-width: 599px) {
   #keyboardWrap { display: none; }
   #kbIcon { display: none; }
+  #kbModal { display: none !important; }
 
   body { padding: 12px; }
 
@@ -1894,19 +1921,25 @@ function buildKeyboard(isMini) {
 const kbToastEl = document.getElementById('kbToast');
 let toastTimer = null;
 
-var modeToastTimer = null;
+var modeToastTimer   = null;
+var modeToastOrigText    = null;
+var modeToastOrigVisible = false;
 
 function showModeToast(msg) {
-  var prevText   = osMismatchEl.textContent;
-  var wasVisible = osMismatchEl.classList.contains('show');
+  // Capture the original state only before the first toast in a sequence
+  if (!modeToastTimer) {
+    modeToastOrigText    = osMismatchEl.textContent;
+    modeToastOrigVisible = osMismatchEl.classList.contains('show');
+  }
   clearTimeout(modeToastTimer);
   osMismatchEl.textContent = msg;
   osMismatchEl.classList.add('show');
   modeToastTimer = setTimeout(function() {
+    modeToastTimer = null;
     osMismatchEl.classList.remove('show');
     setTimeout(function() {
-      osMismatchEl.textContent = prevText;
-      if (wasVisible) osMismatchEl.classList.add('show');
+      osMismatchEl.textContent = modeToastOrigText;
+      if (modeToastOrigVisible) osMismatchEl.classList.add('show');
     }, 300);
   }, 2000);
 }
@@ -2131,7 +2164,17 @@ function alignKbIcon() {
   icon.style.left = (kpanelLeft - iconW * 2) + 'px';
 }
 
-window.addEventListener('resize', function() { updateKeyboardMode(); alignKbIcon(); });
+window.addEventListener('resize', function() {
+  updateKeyboardMode();
+  alignKbIcon();
+  if (kbModalOpen) {
+    if (window.innerWidth < 600) {
+      closeKbModal();
+    } else {
+      positionKbModal();
+    }
+  }
+});
 updateKeyboardMode();
 setTimeout(alignKbIcon, 50);
 // Show mismatch pill after initial keyboard build
@@ -2270,10 +2313,12 @@ const lingerTimers = {};
 const LINGER_MS = 800;
 
 function clearAllLit() {
+  // Cancel all linger timers first so no deferred class changes fire after we clear
+  Object.keys(lingerTimers).forEach(k => { clearTimeout(lingerTimers[k]); delete lingerTimers[k]; });
   Object.values(keyEls).forEach(el => {
     el.classList.remove('lit-green-up','lit-green-down','lit-orange-up','lit-orange-down','lit-fading');
+    void el.offsetWidth; // force reflow to abort any in-progress CSS transitions on this key
   });
-  Object.keys(lingerTimers).forEach(k => { clearTimeout(lingerTimers[k]); delete lingerTimers[k]; });
   clearTimeout(extKeyPillTimer);
   extKeyPillEl.className = '';
   extKeyPillEl.style.display = 'none';
@@ -3126,7 +3171,8 @@ function setAppSelectorGameActive(active) {
 
 // ── Modal toggles ─────────────────────────────────────────────────────────────
 var stickyKeysOn = false;
-var touchEnabled = false;
+var touchEnabled     = false;
+var hasFullKeyboard  = true;  // false = tenkeyless/compact — skip extended key questions
 
 function setStickyKeys(on) {
   stickyKeysOn = on;
@@ -3137,19 +3183,50 @@ function setStickyKeys(on) {
   if (!on) { clearAllLit(); heldKeys.clear(); greenHeld.clear(); }
 }
 
+function setKbSizeToggle(full) {
+  hasFullKeyboard = full;
+  updateKbSizeToggle();
+}
+
+function updateKbSizeToggle() {
+  var row  = document.getElementById('modalKbSizeRow');
+  var knob = document.getElementById('modalKbSizeKnob');
+  var tog  = document.getElementById('modalKbSizeToggle');
+  if (!knob) return;
+  var isCompact = !hasFullKeyboard;
+  knob.style.transform = isCompact ? 'translateX(22px)' : 'translateX(0)';
+  knob.setAttribute('fill', isCompact ? '#9ca3af' : 'white');
+  if (tog) tog.checked = isCompact;
+  // Grey out and lock to compact when touch is enabled
+  if (row) row.classList.toggle('disabled', touchEnabled);
+}
+
+function onKbSizeToggle() {
+  var tog = document.getElementById('modalKbSizeToggle');
+  setKbSizeToggle(!tog.checked); // checked = compact/tenkeyless
+}
+
 function setTouchEnabled(on) {
   touchEnabled = on;
   var radio = document.getElementById('touchRadio');
   if (!radio) return;
   radio.classList.toggle('on', on);
+  if (on) {
+    // Force compact when touch on
+    setKbSizeToggle(false);
+  } else {
+    // Restore full keyboard when touch off
+    setKbSizeToggle(true);
+  }
 }
 
 function onStickyKeysToggle() {
   var stickyRow = document.getElementById('stickyRow');
   if (stickyRow.classList.contains('disabled')) return;
-  setStickyKeys(!stickyKeysOn);
+  var turningOn = !stickyKeysOn;
+  setStickyKeys(turningOn);
   if (!touchEnabled) {
-    showModeToast(stickyKeysOn ? 'Sticky Keys now ON' : 'Sticky Keys now OFF');
+    showModeToast(turningOn ? 'Sticky Keys now ON' : 'Sticky Keys now OFF');
   }
 }
 
@@ -3270,27 +3347,26 @@ var _origOpenKbModal = openKbModal;
 openKbModal = function() {
   _origOpenKbModal();
   updateModalToggles();
+  updateKbSizeToggle();
 };
 
 // ── Keyboard icon modal ──────────────────────────────────────────────────────
 var kbModalOpen = false;
 
+var MODAL_W = 290;
+var MODAL_H = 360;
+
 function positionKbModal() {
-  var modal   = document.getElementById('kbModal');
-  var timer   = document.getElementById('timerBox');
-  var shiftEl = document.querySelector('[data-key="ShiftLeft"]');
-  if (!modal || !timer || !shiftEl) return;
+  var modal  = document.getElementById('kbModal');
+  var timer  = document.getElementById('timerBox');
+  if (!modal || !timer) return;
   var timerRect = timer.getBoundingClientRect();
-  var shiftRect = shiftEl.getBoundingClientRect();
-  var top    = timerRect.top   + window.scrollY;
-  var bottom = shiftRect.top   + shiftRect.height / 2 + window.scrollY;
-  var height = bottom - top;
-  var width  = Math.round(height / Math.SQRT2);
-  var left   = Math.round((window.innerWidth - width) / 2);
+  var top  = timerRect.top + window.scrollY;
+  var left = Math.round((window.innerWidth - MODAL_W) / 2);
   modal.style.top    = top    + 'px';
   modal.style.left   = left   + 'px';
-  modal.style.width  = width  + 'px';
-  modal.style.height = height + 'px';
+  modal.style.width  = MODAL_W + 'px';
+  modal.style.height = MODAL_H + 'px';
 }
 
 function openKbModal() {
@@ -3303,13 +3379,13 @@ function openKbModal() {
 function closeKbModal() {
   kbModalOpen = false;
   var modal = document.getElementById('kbModal');
-  modal.style.animation = 'paperFurl 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards';
+  modal.style.animation = 'paperFurl 0.55s cubic-bezier(0.64, 0, 0.78, 0) forwards';
   modal.style.pointerEvents = 'none';
   setTimeout(function() {
     modal.classList.remove('visible');
     modal.style.animation = '';
     modal.style.pointerEvents = '';
-  }, 450);
+  }, 550);
   if (gameState === 'paused') unpause();
 }
 
@@ -3574,7 +3650,7 @@ function buildPool() {
   return SHORTCUTS.filter(s => {
     if (!s[field]) return false;
     if (!s.pc_safe && currentOs === 'pc') return false;
-    if (touchEnabled && requiresExtKey(s.shortcut)) return false;
+    if ((touchEnabled || !hasFullKeyboard) && requiresExtKey(s.shortcut)) return false;
     return true;
   });
 }
@@ -3946,44 +4022,85 @@ function handleKeyup(e) {
     <p class="modal-section-title">Keyboard Layout:</p>
     <div class="modal-section-gap"></div>
 
-    <div class="modal-inline-row">
-      <div class="modal-switch-wrap">
-        <span class="modal-inline-val">3</span>
-        <label class="os-switch" title="Keys left of space" style="cursor:pointer;">
-          <input type="checkbox" id="modalOsToggle" onchange="onModalOsToggle()">
-          <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect id="modalOsTrackRect" x="1" y="1" width="34" height="12" rx="6"
-                  stroke="#9ca3af" stroke-width="1.5" fill="none"/>
-            <circle id="modalOsKnobEl" cx="7" cy="7" r="4"
-                    stroke="#9ca3af" stroke-width="1.5" fill="white"
-                    style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
-          </svg>
-        </label>
-        <span class="modal-inline-val">4</span>
-      </div>
-      <span class="modal-inline-label">keys to the left of spacebar</span>
-    </div>
+    <div class="modal-layout-rows">
 
-    <div class="modal-inline-row" id="modalFnRow">
-      <div class="modal-switch-wrap">
-        <span class="modal-inline-val" id="modalFnLabelLeft"></span>
-        <label class="os-switch" title="Leftmost key" style="cursor:pointer;">
-          <input type="checkbox" id="modalFnToggle" onchange="onModalFnToggle()">
-          <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="1" width="34" height="12" rx="6"
-                  stroke="#9ca3af" stroke-width="1.5" fill="none"/>
-            <circle id="modalFnKnobEl" cx="7" cy="7" r="4"
-                    stroke="#9ca3af" stroke-width="1.5" fill="white"
-                    style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
-          </svg>
-        </label>
-        <span class="modal-inline-val" id="modalFnLabelRight"></span>
+      <!-- Row 1: 3 / 4 keys -->
+      <div class="modal-inline-row">
+        <div class="modal-left-label"><span>3</span></div>
+        <div class="modal-switch-wrap">
+          <label class="os-switch" title="Keys left of space" style="cursor:pointer;">
+            <input type="checkbox" id="modalOsToggle" onchange="onModalOsToggle()">
+            <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect id="modalOsTrackRect" x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+              <circle id="modalOsKnobEl" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
+                      style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
+            </svg>
+          </label>
+        </div>
+        <div class="modal-right-label"><span class="modal-inline-val">4</span>&ensp;<span class="modal-inline-label">keys to the left of spacebar</span></div>
       </div>
-      <span class="modal-inline-label">is the leftmost key</span>
-    </div>
 
-  </div>
+      <!-- Row 2: ctrl / fn -->
+      <div class="modal-inline-row" id="modalFnRow">
+        <div class="modal-left-label"><span id="modalFnLabelLeft"></span></div>
+        <div class="modal-switch-wrap">
+          <label class="os-switch" title="Leftmost key" style="cursor:pointer;">
+            <input type="checkbox" id="modalFnToggle" onchange="onModalFnToggle()">
+            <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+              <circle id="modalFnKnobEl" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
+                      style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
+            </svg>
+          </label>
+        </div>
+        <div class="modal-right-label"><span id="modalFnLabelRight" class="modal-inline-val"></span>&ensp;<span class="modal-inline-label">is the leftmost key</span></div>
+      </div>
+
+    </div><!-- /.modal-layout-rows (layout rows) -->
+
+    <div class="modal-section-gap"></div>
+    <div id="modalKbSizeSection">
+      <p>The on-screen display shows a compact keyboard, but the game also accepts input from full-sized keyboards with their extended keys.</p>
+      <p>Don&#8217;t have a full-sized keyboard? Let us know so we won&#8217;t ask you any impossible questions:</p>
+      <div class="modal-kbsize-row" id="modalKbSizeRow">
+        <div class="modal-left-label"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 167 101.8" style="width:66px;height:auto;fill:#9ca3af;flex-shrink:0;"><path d="M142.1,32.4H24.9c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h117.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM143.4,65.9c0,.7-.6,1.3-1.3,1.3H24.9c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h117.2c.7,0,1.3.6,1.3,1.3v29.6ZM28.7,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM28.7,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM109.4,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM28.7,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM79.3,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM109.4,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM38.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM46.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM54.6,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM62.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.9,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM79,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM87.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.3,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM54.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM58.3,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM71.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM88.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM96.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM49.8,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM57.8,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM66.6,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM70.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM84.2,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM93,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM118.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM109.4,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM118.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM118.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM118.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM48.9,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM41.8,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM34.7,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM87,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM94.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM102,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM109.4,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/></svg></div>
+        <div class="modal-switch-wrap">
+          <label class="os-switch" title="Keyboard size" style="cursor:pointer;">
+            <input type="checkbox" id="modalKbSizeToggle" onchange="onKbSizeToggle()">
+            <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+              <circle id="modalKbSizeKnob" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
+                      style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
+            </svg>
+          </label>
+        </div>
+        <div class="modal-right-label"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;fill:#9ca3af;"> <path d="M98.6,32.4H11.4c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h87.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM99.9,65.9c0,.7-.6,1.3-1.3,1.3H11.4c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h87.2c.7,0,1.3.6,1.3,1.3v29.6ZM15.2,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM15.2,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM95.9,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM15.2,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM65.8,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM95.9,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM24.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM33,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.1,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM49.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM57.4,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM65.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM73.7,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM27.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM40.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM44.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM57.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM66.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM74.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM83.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM36.3,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM44.3,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM53.1,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM56.7,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.7,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.5,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM81.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.9,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM35.4,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM28.3,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM21.2,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM73.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM81,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM88.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM95.9,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/> </svg></div>
+      </div>
+    </div><!-- /#modalKbSizeSection -->
+
 </div>
+</div>
+
+<style>
+#modalKbSizeSection {
+  margin-top: 2px;
+}
+#modalKbSizeSection p {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.55;
+  margin: 0 0 5px 0;
+}
+.modal-kbsize-row {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+}
+.modal-kbsize-row.disabled {
+  opacity: 0.38;
+  pointer-events: none;
+}
+</style>
 
 </body>
 </html>
