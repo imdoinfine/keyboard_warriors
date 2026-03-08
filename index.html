@@ -439,6 +439,77 @@ body.pc-mode #extKeyPill {
    KEYBOARD ICON MODAL
 ══════════════════════════════════════ */
 
+/* Modal inline rows (label = toggle) */
+.modal-inline-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.modal-inline-row.disabled {
+  opacity: 0.38;
+  pointer-events: none;
+}
+.modal-switch-wrap {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.modal-inline-val {
+  font-size: 12px;
+  color: #6b7280;
+  min-width: 14px;
+  text-align: center;
+  white-space: nowrap;
+}
+.modal-inline-label {
+  font-size: 12px;
+  color: #374151;
+  white-space: nowrap;
+}
+
+/* Keyboard variant picker */
+.kb-variant-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.kb-variant-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  transition: border-color 0.15s;
+}
+.kb-variant-option:hover { border-color: #d1d5db; }
+.kb-variant-option.selected { border-color: #374151; }
+.kb-variant-keys {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.kb-variant-key {
+  background: #e5e7eb;
+  border-radius: 3px;
+  font-size: 9px;
+  font-family: system-ui, sans-serif;
+  color: #374151;
+  padding: 3px 5px;
+  white-space: nowrap;
+  border-bottom: 1.5px solid #9ca3af;
+}
+.kb-variant-key.wide { padding: 3px 14px; }
+.kb-variant-label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
 /* Modal toggle rows */
 #kbModalInner {
   width: 100%;
@@ -475,7 +546,8 @@ body.pc-mode #extKeyPill {
 .modal-section-gap { height: 14px; }
 .modal-section-title {
   font-size: 12px;
-  color: #6b7280;
+  font-weight: 700;
+  color: #374151;
   margin: 0;
 }
 /* Radio dot toggle */
@@ -519,6 +591,8 @@ body.pc-mode #extKeyPill {
   transition: opacity 0.15s ease;
   overflow: hidden;
   transform-origin: top center;
+  min-width: 260px;
+  min-height: 320px;
 }
 #kbModal.visible {
   opacity: 1;
@@ -754,6 +828,10 @@ body.pc-mode #extKeyPill {
   /* Width and height set by inline style in buildKeyboard so mini scales correctly.
      No border-radius here — inherits 4px from .key; .corner-br overrides ▶ bottom-right. */
 }
+/* Mac: half-width arrows with square inner corners so they butt against updown stack */
+.key.arrow-half { width: 20px !important; }
+.key.arrow-sq-right { border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; }
+.key.arrow-sq-left  { border-top-left-radius:  0 !important; border-bottom-left-radius:  0 !important; }
 .key.arrow-lr .letter-lbl { font-size: 11px; }
 /* Up/down: width, height and gap all set by inline style in buildKeyboard. */
 .key.arrow-ud {
@@ -1565,8 +1643,8 @@ function buildKey(cfg, isMini) {
       break;
     }
     case 'mod':
-      if (isMini) {
-        // Mini: symbol only, centred — no word label beneath
+      if (isMini || cfg.word === cfg.sym) {
+        // Mini or symbol-only: centred single glyph
         el.innerHTML = `<span class="mod-sym-only">${cfg.sym || cfg.mini}</span>`;
       } else {
         el.innerHTML = `<span class="mod-sym">${cfg.sym}</span><span class="mod-word">${cfg.word}</span>`;
@@ -1578,6 +1656,9 @@ function buildKey(cfg, isMini) {
       break;
     case 'arrow':
       el.classList.add('arrow-lr');
+      if (cfg.half)        el.classList.add('arrow-half');
+      if (cfg.squareRight) el.classList.add('arrow-sq-right');
+      if (cfg.squareLeft)  el.classList.add('arrow-sq-left');
       el.innerHTML = `<span class="letter-lbl">${cfg.label}</span>`;
       el.addEventListener('mousedown', function(ev){ touchEnabled ? handleKeyTouch(ev, el) : showKbToast(ev); });
       break;
@@ -1649,28 +1730,96 @@ const FULL_LAYOUT = [
     uKey('ControlLeft', 'control', 'ctrl', 52, ['bl']),
     uKey('AltLeft',     'option',  'opt',  52),
     mKey('MetaLeft',    '⌘', 'command', '⌘',   70),
-    spaceKey(180),
+    spaceKey(200),
     mKey('MetaRight',   '⌘', 'command', '⌘',   70),
+    uKey('AltRight',    'option',  'opt',  52),
+    {type:'arrow', id:'ArrowLeft',  label:'◀', corner:[], half:true, squareRight:true},
+    {type:'updown'},
+    {type:'arrow', id:'ArrowRight', label:'▶', corner:['br'], half:true, squareLeft:true},
+  ],
+];
+
+// PC bottom row replaces the Mac bottom row
+const PC_BOTTOM_ROWS = {
+  'pc-fn-left': [  // Standard: Fn at far left
+    uKey('Fn',           'fn',   'fn',   52, ['bl']),
+    uKey('ControlLeft',  'ctrl', 'ctrl', 52, []),
+    {type:'winkey', id:'MetaLeft', w:52, corner:[]},
+    uKey('AltLeft',      'alt',  'alt',  52),
+    spaceKey(144),
+    uKey('ControlRight', 'ctrl', 'ctrl', 52, []),
+    {type:'arrow', id:'ArrowLeft',  label:'◀', corner:[]},
+    {type:'updown'},
+    {type:'arrow', id:'ArrowRight', label:'▶', corner:['br']},
+  ],
+  'pc-fn-right': [  // Ctrl at far left: Ctrl, Fn, Win, Alt
+    uKey('ControlLeft',  'ctrl', 'ctrl', 52, ['bl']),
+    uKey('Fn',           'fn',   'fn',   52, []),
+    {type:'winkey', id:'MetaLeft', w:52, corner:[]},
+    uKey('AltLeft',      'alt',  'alt',  52),
+    spaceKey(144),
+    uKey('ControlRight', 'ctrl', 'ctrl', 52, []),
+    {type:'arrow', id:'ArrowLeft',  label:'◀', corner:[]},
+    {type:'updown'},
+    {type:'arrow', id:'ArrowRight', label:'▶', corner:['br']},
+  ],
+  'pc-no-fn': [  // No Fn key
+    uKey('ControlLeft',  'ctrl', 'ctrl', 52, ['bl']),
+    {type:'winkey', id:'MetaLeft', w:52, corner:[]},
+    uKey('AltLeft',      'alt',  'alt',  52),
+    spaceKey(196),
+    uKey('ControlRight', 'ctrl', 'ctrl', 52, []),
+    {type:'arrow', id:'ArrowLeft',  label:'◀', corner:[]},
+    {type:'updown'},
+    {type:'arrow', id:'ArrowRight', label:'▶', corner:['br']},
+  ],
+};
+// Mac bottom row variants
+const MAC_BOTTOM_ROWS = {
+  'mac-3key': [  // Standard modern Mac: Ctrl, Opt, Cmd
+    uKey('ControlLeft', 'control', 'ctrl', 52, ['bl']),
+    uKey('AltLeft',     'option',  'opt',  52),
+    mKey('MetaLeft',    '⌘', 'command', '⌘', 70),
+    spaceKey(180),
+    mKey('MetaRight',   '⌘', 'command', '⌘', 70),
     uKey('AltRight',    'option',  'opt',  52),
     {type:'arrow', id:'ArrowLeft',  label:'◀', corner:[]},
     {type:'updown'},
     {type:'arrow', id:'ArrowRight', label:'▶', corner:['br']},
   ],
-];
-
-// PC bottom row replaces the Mac bottom row
-// Standard PC laptop: Fn, Ctrl, Win, Alt | Space | Ctrl | arrows
-const PC_BOTTOM_ROW = [
-  uKey('Fn',           'fn',  'fn',   52, ['bl']),
-  uKey('ControlLeft',  'ctrl',    'ctrl', 52, []),
-  {type:'winkey', id:'MetaLeft',  w:52, corner:[]},
-  uKey('AltLeft',      'alt',     'alt',  52),
-  spaceKey(144),
-  uKey('ControlRight', 'ctrl',    'ctrl', 52, []),
-  {type:'arrow', id:'ArrowLeft',  label:'◀', corner:[]},
-  {type:'updown'},
-  {type:'arrow', id:'ArrowRight', label:'▶', corner:['br']},
-];
+  'mac-4key': [  // Fn at far left: Fn, Ctrl, Opt, Cmd
+    uKey('Fn',          'fn',  'fn',  52, ['bl']),
+    uKey('ControlLeft', 'ctrl','ctrl',52, []),
+    uKey('AltLeft',     'opt', 'opt', 52, []),
+    mKey('MetaLeft',    '⌘',   '⌘',  '⌘', 52),
+    spaceKey(188),
+    mKey('MetaRight',   '⌘',   '⌘',  '⌘', 52),
+    uKey('AltRight',    'opt', 'opt', 52, []),
+    {type:'arrow', id:'ArrowLeft',  label:'◀', corner:[], half:true, squareRight:true},
+    {type:'updown'},
+    {type:'arrow', id:'ArrowRight', label:'▶', corner:['br'], half:true, squareLeft:true},
+  ],
+  'mac-4key-ctrl-left': [  // Ctrl at far left: Ctrl, Fn, Opt, Cmd
+    uKey('ControlLeft', 'ctrl','ctrl',52, ['bl']),
+    uKey('Fn',          'fn',  'fn',  52, []),
+    uKey('AltLeft',     'opt', 'opt', 52, []),
+    mKey('MetaLeft',    '⌘',   '⌘',  '⌘', 52),
+    spaceKey(188),
+    mKey('MetaRight',   '⌘',   '⌘',  '⌘', 52),
+    uKey('AltRight',    'opt', 'opt', 52, []),
+    {type:'arrow', id:'ArrowLeft',  label:'◀', corner:[], half:true, squareRight:true},
+    {type:'updown'},
+    {type:'arrow', id:'ArrowRight', label:'▶', corner:['br'], half:true, squareLeft:true},
+  ],
+};
+// Active variant keys — default to standard layouts
+var kbVariantMac = 'mac-3key';
+var kbVariantPc  = 'pc-fn-left';
+// Legacy alias used in buildKeyboard
+var PC_BOTTOM_ROW = PC_BOTTOM_ROWS['pc-fn-left'];
+// Bottom-row config state
+var kbLeftCount = 3;   // 3 or 4 keys left of space
+var kbFnLeft    = true; // true = Fn at far left, false = Fn right of Alt (PC only)
 
 function buildKeyboard(isMini) {
   const rowIds = ['row-fn','row-num','row-q','row-a','row-z','row-bot'];
@@ -1681,7 +1830,10 @@ function buildKeyboard(isMini) {
   document.getElementById('keyboardPanel').classList.toggle('mini-keys', isMini);
 
   // Swap in the PC bottom row when PC mode is active
-  const layout = FULL_LAYOUT.map((row, ri) => ri === 5 && currentOs === 'pc' ? PC_BOTTOM_ROW : row);
+  const activeBottomRow = currentOs === 'pc'
+    ? (PC_BOTTOM_ROWS[kbVariantPc] || PC_BOTTOM_ROWS['pc-fn-left'])
+    : (MAC_BOTTOM_ROWS[kbVariantMac] || MAC_BOTTOM_ROWS['mac-3key']);
+  const layout = FULL_LAYOUT.map((row, ri) => ri === 5 ? activeBottomRow : row);
 
   layout.forEach((row, ri) => {
     const rowEl = document.getElementById(rowIds[ri]);
@@ -1930,6 +2082,8 @@ function onOsToggle() {
   applyOsMode(osToggleEl.checked
     ? (nativeMac ? 'pc'  : 'mac')
     : (nativeMac ? 'mac' : 'pc'));
+  // If modal is open, refresh toggles to reflect the new OS
+  if (kbModalOpen) updateModalToggles();
 }
 
 // On mobile: auto-enable sticky + touch modes, show updated message
@@ -3013,48 +3167,109 @@ function onTouchToggle() {
 }
 
 
+// ── Keyboard variant picker ───────────────────────────────────────────────────
+
+
 // ── Modal OS toggle ───────────────────────────────────────────────────────────
 var modalOs = currentOs; // independent from the game OS toggle
 
-function buildModalOsLabels() {
-  var nativeMac = (detectedOs === 'mac' || detectedOs === 'mobile');
-  var left  = document.getElementById('modalOsLabelLeft');
-  var right = document.getElementById('modalOsLabelRight');
-  if (!left) return;
-  if (nativeMac) {
-    left.innerHTML  = MAC_ICON_SVG + ' Mac';
-    right.innerHTML = '<small>PC</small>' + PC_ICON_SVG;
+// ── Keyboard layout toggles in modal ─────────────────────────────────────────
+function activeVariantKey() {
+  if (currentOs === 'mac') {
+    if (kbLeftCount === 3) return 'mac-3key';
+    return kbFnLeft ? 'mac-4key' : 'mac-4key-ctrl-left';
   } else {
-    left.innerHTML  = '<small>PC</small>' + PC_ICON_SVG;
-    right.innerHTML = MAC_ICON_SVG + ' Mac';
+    if (kbLeftCount === 3) return 'pc-no-fn';
+    return kbFnLeft ? 'pc-fn-left' : 'pc-fn-right';
   }
 }
 
-function updateModalOsKnob(os) {
-  var knob = document.getElementById('modalOsKnobEl');
-  if (!knob) return;
-  var nativeMac = (detectedOs === 'mac' || detectedOs === 'mobile');
-  var isToggled = nativeMac ? (os === 'pc') : (os === 'mac');
-  knob.style.transform = isToggled ? 'translateX(22px)' : 'translateX(0)';
-  knob.setAttribute('fill', isToggled ? '#9ca3af' : 'white');
-  var tog = document.getElementById('modalOsToggle');
-  if (tog) tog.checked = isToggled;
+// Keys that are candidates for the flash — bottom-row modifiers only
+const BOTTOM_ROW_CODES = new Set([
+  'Fn','ControlLeft','MetaLeft','AltLeft','ControlRight','MetaRight','AltRight'
+]);
+
+function flashKeys(codes) {
+  codes.forEach(function(code) {
+    if (!keyEls[code]) return;
+    setKeyLit(code, 'green-up');
+    fadeKeyOut(code);
+  });
+}
+
+function applyVariant(flashCodes) {
+  if (currentOs === 'mac') kbVariantMac = activeVariantKey();
+  else                     kbVariantPc  = activeVariantKey();
+  if (currentKbMode && currentKbMode !== 'none') {
+    buildKeyboard(currentKbMode === 'mini');
+    if (flashCodes) flashKeys(flashCodes);
+  }
+}
+
+function updateModalToggles() {
+  // 3/4 key count knob
+  var knob3 = document.getElementById('modalOsKnobEl');
+  var tog3  = document.getElementById('modalOsToggle');
+  if (knob3) {
+    var is4 = kbLeftCount === 4;
+    knob3.style.transform = is4 ? 'translateX(22px)' : 'translateX(0)';
+    knob3.setAttribute('fill', is4 ? '#9ca3af' : 'white');
+    if (tog3) tog3.checked = is4;
+  }
+  // Fn/Ctrl knob — label depends on OS
+  var isMac   = currentOs === 'mac';
+  var ctrlLbl = 'ctrl';
+  var fnLbl   = 'fn';
+  var leftLbl  = kbFnLeft ? ctrlLbl : fnLbl;  // left side = the one NOT selected (toggle off)
+  var rightLbl = kbFnLeft ? fnLbl   : ctrlLbl;
+  // When kbFnLeft=true (Fn at far left) the fn label is on the RIGHT
+  // Toggle: unchecked = Ctrl at far left (kbFnLeft=false), checked = Fn at far left (kbFnLeft=true)
+  var knobFn = document.getElementById('modalFnKnobEl');
+  var togFn  = document.getElementById('modalFnToggle');
+  var llEl   = document.getElementById('modalFnLabelLeft');
+  var rlEl   = document.getElementById('modalFnLabelRight');
+  if (llEl) llEl.textContent = ctrlLbl;
+  if (rlEl) rlEl.textContent = fnLbl;
+  if (knobFn) {
+    // checked = fn at far left
+    var fnAtLeft = kbFnLeft;
+    knobFn.style.transform = fnAtLeft ? 'translateX(22px)' : 'translateX(0)';
+    knobFn.setAttribute('fill', fnAtLeft ? '#9ca3af' : 'white');
+    if (togFn) togFn.checked = fnAtLeft;
+  }
+  // Show the Fn-position row only when 4 keys is selected (both Mac and PC).
+  var fnRow = document.getElementById('modalFnRow');
+  if (fnRow) {
+    fnRow.style.display = '';
+    fnRow.classList.toggle('disabled', kbLeftCount === 3);
+  }
 }
 
 function onModalOsToggle() {
-  var nativeMac = (detectedOs === 'mac' || detectedOs === 'mobile');
   var tog = document.getElementById('modalOsToggle');
-  modalOs = tog.checked ? (nativeMac ? 'pc' : 'mac') : (nativeMac ? 'mac' : 'pc');
-  updateModalOsKnob(modalOs);
+  var goingTo4 = tog.checked;
+  kbLeftCount = goingTo4 ? 4 : 3;
+  updateModalToggles();
+  // 3→4: flash Fn only. 4→3: flash the three left-of-space modifier keys.
+  var flash = goingTo4
+    ? ['Fn']
+    : ['ControlLeft', 'AltLeft', 'MetaLeft'];
+  applyVariant(flash);
 }
 
-// Initialise modal OS toggle when modal opens
+function onModalFnToggle() {
+  var tog = document.getElementById('modalFnToggle');
+  kbFnLeft = tog.checked;
+  updateModalToggles();
+  // Always flash ControlLeft and Fn — they swap positions
+  applyVariant(['ControlLeft', 'Fn']);
+}
+
+// Initialise modal controls when modal opens
 var _origOpenKbModal = openKbModal;
 openKbModal = function() {
   _origOpenKbModal();
-  modalOs = currentOs;
-  buildModalOsLabels();
-  updateModalOsKnob(modalOs);
+  updateModalToggles();
 };
 
 // ── Keyboard icon modal ──────────────────────────────────────────────────────
@@ -3108,9 +3323,14 @@ document.getElementById('kbIcon').addEventListener('click', function(e) {
 });
 
 document.addEventListener('click', function(e) {
-  if (kbModalOpen && !document.getElementById('kbModal').contains(e.target)) {
-    closeKbModal();
-  }
+  if (!kbModalOpen) return;
+  var modal  = document.getElementById('kbModal');
+  var icon   = document.getElementById('kbIcon');
+  var osWrap = document.getElementById('osToggleWrap'); // main OS toggle area
+  if (modal.contains(e.target))   return; // inside modal — fine
+  if (icon  && icon.contains(e.target))   return; // icon handled separately
+  if (osWrap && osWrap.contains(e.target)) return; // OS toggle — keep modal open
+  closeKbModal();
 });
 
 window.addEventListener('resize', function() {
@@ -3693,7 +3913,7 @@ function handleKeyup(e) {
 <div id="kbModal" role="dialog" aria-modal="true">
   <div id="kbModalInner">
 
-    <p class="modal-section-title">Behaviour:</p>
+    <p class="modal-section-title">Keyboard Behaviour:</p>
     <div class="modal-section-gap"></div>
 
     <div class="modal-toggle-row" id="stickyRow">
@@ -3721,23 +3941,45 @@ function handleKeyup(e) {
     </div>
 
     <div class="modal-section-gap"></div>
-
-    <p class="modal-section-title">Keyboard variants:</p>
     <div class="modal-section-gap"></div>
 
-    <div id="modalOsToggleWrap" style="display:flex;align-items:center;gap:8px;">
-      <span class="modal-os-label" id="modalOsLabelLeft" style="font-size:12px;color:#6b7280;display:flex;align-items:center;gap:3px;user-select:none;"></span>
-      <label class="os-switch" id="modalOsToggleLabel" title="Switch keyboard OS" style="cursor:pointer;">
-        <input type="checkbox" id="modalOsToggle" onchange="onModalOsToggle()">
-        <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect id="modalOsTrackRect" x="1" y="1" width="34" height="12" rx="6"
-                stroke="#9ca3af" stroke-width="1.5" fill="none"/>
-          <circle id="modalOsKnobEl" cx="7" cy="7" r="4"
-                  stroke="#9ca3af" stroke-width="1.5" fill="white"
-                  style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
-        </svg>
-      </label>
-      <span class="modal-os-label" id="modalOsLabelRight" style="font-size:12px;color:#6b7280;display:flex;align-items:center;gap:3px;user-select:none;"></span>
+    <p class="modal-section-title">Keyboard Layout:</p>
+    <div class="modal-section-gap"></div>
+
+    <div class="modal-inline-row">
+      <div class="modal-switch-wrap">
+        <span class="modal-inline-val">3</span>
+        <label class="os-switch" title="Keys left of space" style="cursor:pointer;">
+          <input type="checkbox" id="modalOsToggle" onchange="onModalOsToggle()">
+          <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect id="modalOsTrackRect" x="1" y="1" width="34" height="12" rx="6"
+                  stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+            <circle id="modalOsKnobEl" cx="7" cy="7" r="4"
+                    stroke="#9ca3af" stroke-width="1.5" fill="white"
+                    style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
+          </svg>
+        </label>
+        <span class="modal-inline-val">4</span>
+      </div>
+      <span class="modal-inline-label">keys to the left of spacebar</span>
+    </div>
+
+    <div class="modal-inline-row" id="modalFnRow">
+      <div class="modal-switch-wrap">
+        <span class="modal-inline-val" id="modalFnLabelLeft"></span>
+        <label class="os-switch" title="Leftmost key" style="cursor:pointer;">
+          <input type="checkbox" id="modalFnToggle" onchange="onModalFnToggle()">
+          <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="34" height="12" rx="6"
+                  stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+            <circle id="modalFnKnobEl" cx="7" cy="7" r="4"
+                    stroke="#9ca3af" stroke-width="1.5" fill="white"
+                    style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
+          </svg>
+        </label>
+        <span class="modal-inline-val" id="modalFnLabelRight"></span>
+      </div>
+      <span class="modal-inline-label">is the leftmost key</span>
     </div>
 
   </div>
