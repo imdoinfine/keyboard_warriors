@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Keyboard Warriorss</title>
+<title>Keyboard Warriors</title>
 <script>
   // Redirect iPad users to the optimised iPad build
   (function() {
@@ -593,12 +593,16 @@ body.pc-mode #extKeyPill {
 }
 
 /* Modal toggle rows */
+
+
+/* ── Keyboard modal shell ─────────────────────────────────────── */
+
+/* ── Modal dismiss X ──────────────────────────────────────────── */
+
 #kbModalInner {
   width: 100%;
-  height: 100%;
   padding: 16px 22px;
   box-sizing: border-box;
-  overflow-y: visible;
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 13px;
   color: #374151;
@@ -733,6 +737,108 @@ body.pc-mode #extKeyPill {
   animation: kbIconPulse 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+
+/* ── Browser icon (mirrors kbIcon, right side) ─────────────────── */
+#browserIcon {
+  display: block;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 0;
+  pointer-events: auto;
+  cursor: pointer;
+}
+@keyframes browserIconPulse {
+  0%   { transform: translateY(-50%) scale(1); }
+  40%  { transform: translateY(-50%) scale(1.22); }
+  100% { transform: translateY(-50%) scale(1); }
+}
+#browserIcon.pulse {
+  animation: browserIconPulse 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ── Browser modal (same spec as kbModal) ──────────────────────── */
+#browserModal {
+  position: fixed;
+  background: white;
+  border-radius: 0;
+  box-shadow:
+    0 4px 10px rgba(0,0,0,0.13),
+    0 12px 28px rgba(0,0,0,0.16);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  overflow: hidden;
+  transform-origin: top center;
+}
+#browserModal.visible {
+  opacity: 1;
+  pointer-events: auto;
+  animation: paperUnfurl 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+/* ── Modal dismiss X (shared style) ───────────────────────────── */
+.modal-dismiss-btn {
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 17px;
+  line-height: 1;
+  border: none; background: none; padding: 0;
+  z-index: 10;
+  transition: color 0.15s;
+}
+.modal-dismiss-btn:hover { color: #374151; }
+
+/* ── Browser modal inner content ──────────────────────────────── */
+#browserModalInner {
+  width: 100%;
+  padding: 16px 20px 18px;
+  box-sizing: border-box;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.55;
+}
+#browserModalInner .compat-heading {
+  font-size: 12px;
+  font-weight: 400;
+  color: #374151;
+  margin: 0 0 0 0;
+  padding-right: 24px;
+  line-height: 1.6;
+}
+#browserModalInner .compat-intro {
+  font-size: 12px;
+  color: #374151;
+  margin: 10px 0 8px;
+  line-height: 1.6;
+}
+
+#browserModalInner ul {
+  margin: 0 0 12px 0;
+  padding-left: 16px;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.75;
+}
+#browserModalInner ul li { margin-bottom: 2px; }
+#browserModalInner .compat-footer {
+  font-size: 11px;
+  color: #9ca3af;
+  line-height: 1.55;
+  margin: 0;
+}
+#browserModalInner .compat-debug-hint {
+  font-size: 10px;
+  color: #9ca3af;
+  line-height: 1.6;
+  margin: 0;
+}
 /* ══════════════════════════════════════
    KEYBOARD PANEL
    Outer: 14px → corner keys: 9px → base keys: 4px
@@ -1500,6 +1606,15 @@ body.pc-mode #extKeyPill {
     <div class="kb-row" id="row-z"></div>
     <div class="kb-row" id="row-bot"></div>
   </div>
+  <svg id="browserIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 86 64.1" style="width:44px;height:auto;fill:#9ca3af;" cursor="pointer">
+    <g>
+    <path d="M7,11.7v42c0,2.2,1.8,4,4,4h63c2.2,0,4-1.8,4-4V11.7c0-2.2-1.8-4-4-4H11c-2.2,0-4,1.8-4,4ZM9,19.7h67v34c0,1.1-.9,2-2,2H11c-1.1,0-2-.9-2-2V19.7ZM9,11.7c0-1.1.9-2,2-2h63c1.1,0,2,.9,2,2v6H9v-6Z"/>
+    <circle cx="19.3" cy="13.7" r="2"/>
+    <circle cx="13.3" cy="13.7" r="2"/>
+    <circle cx="25.3" cy="13.7" r="2"/>
+  </g>
+  <path d="M42.5,23.4c-6,0-11.4,2.1-14.9,5.4h0c0,0-.1.1-.2.2-2.4,2.3-3.8,5.2-3.8,8.4s1.4,6,3.8,8.4c0,0,0,.1.2.2,3.4,3.3,8.8,5.4,14.9,5.4s11.4-2.1,14.9-5.4h0c0,0,.1-.1.2-.2,0,0,0,0,0,0,2.4-2.3,3.8-5.2,3.8-8.4s-1.4-6-3.8-8.4c0,0-.1-.1-.2-.2-3.4-3.3-8.8-5.4-14.9-5.4h0ZM41.3,25.3v5.4c-1.9,0-3.7-.2-5.4-.4.3-.6.7-1.2,1-1.7,1.3-1.7,2.8-2.8,4.4-3.2h0ZM43.7,25.3c1.6.4,3.1,1.5,4.4,3.2.4.5.7,1.1,1.1,1.7-1.7.2-3.5.4-5.4.4v-5.3ZM49,26.2c2.1.7,4,1.7,5.5,2.9-.9.3-1.9.5-2.9.8-.4-.8-.8-1.5-1.3-2.2-.4-.5-.8-1-1.3-1.5h0ZM36,26.2c-.5.4-.9.9-1.2,1.5-.5.7-.9,1.4-1.3,2.2-1.1-.2-2.1-.5-2.9-.8,1.5-1.2,3.4-2.2,5.5-2.9h0ZM28.9,30.6c1.1.4,2.4.8,3.8,1-.5,1.5-.8,3.1-.9,4.8h-5.6c.2-2.1,1.2-4.1,2.7-5.8h0ZM56.1,30.6c1.5,1.7,2.5,3.7,2.7,5.8h-5.6c0-1.7-.4-3.3-.9-4.8,1.4-.3,2.7-.6,3.8-1h0ZM35.1,32c1.9.3,4,.4,6.1.5v3.9h-7c0-1.5.4-3,.8-4.3h0ZM49.9,32c.4,1.3.7,2.8.8,4.3h-7v-3.9c2.2,0,4.2-.2,6.1-.5h0ZM26.2,38.2h5.6c0,1.7.4,3.3.9,4.8-1.4.3-2.7.6-3.8,1-1.5-1.7-2.5-3.7-2.7-5.8h0ZM34.3,38.2h7v3.9c-2.2,0-4.2.2-6.1.5-.4-1.3-.7-2.8-.8-4.3h0ZM43.7,38.2h7c0,1.5-.4,3-.8,4.3-1.9-.3-4-.4-6.1-.5v-3.9ZM53.2,38.2h5.6c-.2,2.1-1.2,4.1-2.7,5.8-1.1-.4-2.4-.8-3.8-1,.5-1.5.8-3.1.9-4.8h0ZM41.3,43.9v5.4c-1.6-.4-3.1-1.4-4.4-3.2-.4-.5-.7-1.1-1.1-1.7,1.7-.2,3.5-.4,5.4-.4h0ZM43.7,43.9c1.9,0,3.7.2,5.4.4-.3.6-.7,1.2-1.1,1.7-1.3,1.7-2.8,2.8-4.4,3.2v-5.3ZM33.4,44.7c.4.8.8,1.5,1.3,2.2.4.5.8,1,1.2,1.5-2.1-.7-4-1.7-5.5-2.9.9-.3,1.9-.5,2.9-.8h0ZM51.6,44.7c1.1.2,2.1.5,2.9.8-1.5,1.2-3.4,2.2-5.5,2.9.5-.4.9-.9,1.3-1.5.5-.7.9-1.4,1.3-2.2h0Z"/>
+  </svg>
 </div>
 
 <div id="debugOverlay" style="position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;border-radius:8px;z-index:9999;pointer-events:auto;line-height:1.5;display:none;flex-direction:row;gap:0;align-items:flex-start;overflow:hidden;max-height:800px;transition:max-height 0.2s ease,border-radius 0.2s ease;" aria-hidden="true">
@@ -3532,39 +3647,63 @@ function onModalFnToggle() {
   applyVariant(['ControlLeft', 'Fn']);
 }
 
-// Initialise modal controls when modal opens
+// ── Keyboard icon modal ──────────────────────────────────────────────────────
+var kbModalOpen = false;
+var browserModalOpen = false;
+
+
+function positionIcons() {
+  var panel = document.getElementById('keyboardPanel');
+  var wrap  = document.getElementById('keyboardWrap');
+  var kb    = document.getElementById('kbIcon');
+  var br    = document.getElementById('browserIcon');
+  if (!panel || !wrap) return;
+  var pRect = panel.getBoundingClientRect();
+  var wRect = wrap.getBoundingClientRect();
+  var GAP   = 18;
+  if (kb) kb.style.left = Math.round(pRect.left - wRect.left - kb.offsetWidth - GAP) + 'px';
+  if (br) br.style.left = Math.round(pRect.right - wRect.left + GAP) + 'px';
+}
+var MODAL_W = 290;
+var MODAL_H = 395;
+var BROWSER_MODAL_W = 310;
+var BROWSER_MODAL_H = 380;
+
+function _kbPanelRect() {
+  var p = document.getElementById('keyboardPanel');
+  return p ? p.getBoundingClientRect() : null;
+}
+
+function positionKbModal() {
+  var modal = document.getElementById('kbModal');
+  var r     = _kbPanelRect();
+  if (!modal || !r) return;
+  // Centred over keyboard panel, offset slightly left when both open
+  var offset = browserModalOpen ? -8 : 0;
+  modal.style.top   = Math.round(r.top + window.scrollY) + 'px';
+  modal.style.left  = Math.round(r.left + window.scrollX + (r.width - MODAL_W) / 2 + offset) + 'px';
+  modal.style.width = MODAL_W + 'px';
+  if (!modal.style.height) modal.style.height = MODAL_H + 'px';
+}
+
+function openKbModal() {
+  var km = document.getElementById('kbModal');
+  var bm = document.getElementById('browserModal');
+  km.style.zIndex = '202';
+  if (bm) { bm.style.zIndex = '201'; positionBrowserModal(); }
+  positionKbModal();
+  km.classList.add('visible');
+  kbModalOpen = true;
+  if (gameState === 'playing') enterPause();
+}
+
+// Wrap to also update modal toggles on open
 var _origOpenKbModal = openKbModal;
 openKbModal = function() {
   _origOpenKbModal();
   updateModalToggles();
   updateKbSizeToggle();
 };
-
-// ── Keyboard icon modal ──────────────────────────────────────────────────────
-var kbModalOpen = false;
-
-var MODAL_W = 290;
-var MODAL_H = 395;
-
-function positionKbModal() {
-  var modal  = document.getElementById('kbModal');
-  var timer  = document.getElementById('timerBox');
-  if (!modal || !timer) return;
-  var timerRect = timer.getBoundingClientRect();
-  var top  = timerRect.top + window.scrollY;
-  var left = Math.round((window.innerWidth - MODAL_W) / 2);
-  modal.style.top    = top    + 'px';
-  modal.style.left   = left   + 'px';
-  modal.style.width  = MODAL_W + 'px';
-  modal.style.height = MODAL_H + 'px';
-}
-
-function openKbModal() {
-  positionKbModal();
-  document.getElementById('kbModal').classList.add('visible');
-  kbModalOpen = true;
-  if (gameState === 'playing') enterPause();
-}
 
 function closeKbModal() {
   kbModalOpen = false;
@@ -3575,6 +3714,7 @@ function closeKbModal() {
     modal.classList.remove('visible');
     modal.style.animation = '';
     modal.style.pointerEvents = '';
+    if (browserModalOpen) positionBrowserModal(); // re-centre if other still open
   }, 550);
   // Do NOT auto-unpause — player resumes via timer circle or lock key
 }
@@ -3583,25 +3723,169 @@ function toggleKbModal() {
   kbModalOpen ? closeKbModal() : openKbModal();
 }
 
+function positionBrowserModal() {
+  var modal = document.getElementById('browserModal');
+  var r     = _kbPanelRect();
+  if (!modal || !r) return;
+  // Centred over keyboard panel, offset slightly right when both open
+  var offset = kbModalOpen ? 8 : 0;
+  modal.style.top   = Math.round(r.top + window.scrollY) + 'px';
+  modal.style.left  = Math.round(r.left + window.scrollX + (r.width - BROWSER_MODAL_W) / 2 + offset) + 'px';
+  modal.style.width = BROWSER_MODAL_W + 'px';
+  if (!modal.style.height) modal.style.height = BROWSER_MODAL_H + 'px';
+}
+
+function _renderKeyChips(label) {
+  // label format: "Cmd+Opt+I — opens DevTools"
+  var em     = '—';
+  var dashIdx = label.indexOf(' ' + em + ' ');
+  var keys   = dashIdx >= 0 ? label.slice(0, dashIdx)          : label;
+  var desc   = dashIdx >= 0 ? label.slice(dashIdx + em.length + 2) : '';
+  var frag   = document.createDocumentFragment();
+  var tokens = keys.split('+');
+  tokens.forEach(function(tok, i) {
+    if (i > 0) {
+      var sep = document.createElement('span');
+      sep.textContent = '+';
+      sep.style.cssText = 'margin:0 1px;color:#9ca3af;font-size:10px;line-height:1;vertical-align:middle;';
+      frag.appendChild(sep);
+    }
+    var chip = document.createElement('span');
+    chip.textContent = tok.trim();
+    chip.style.cssText = [
+      'display:inline-block',
+      'font-family:inherit',
+      'font-size:10px',
+      'font-weight:600',
+      'color:#1e3a5f',
+      'background:#f3f4f6',
+      'border:1px solid #d1d5db',
+      'border-radius:3px',
+      'padding:1px 4px 0',
+      'line-height:1.6',
+      'white-space:nowrap',
+      'box-shadow:0 1px 0 #c9cdd3',
+      'vertical-align:middle',
+    ].join(';');
+    frag.appendChild(chip);
+  });
+  if (desc) {
+    var d = document.createElement('span');
+    d.style.cssText = 'margin-left:5px;color:#6b7280;font-size:11px;vertical-align:middle;';
+    d.textContent = '— ' + desc;
+    frag.appendChild(d);
+  }
+  return frag;
+}
+
+function openBrowserModal() {
+  var d     = getBrowserConflicts();
+  var bname = d.name;
+
+  var h = document.getElementById('browserCompatHeading');
+  if (h) {
+    h.innerHTML = '';
+    var t1 = document.createElement('strong');
+    t1.style.color = '#1e3a5f';
+    t1.textContent = 'Keyboard Warriors';
+    var t2 = document.createTextNode(', the shortcuts coach, is compatible with your browser, ');
+    var t3 = document.createElement('strong');
+    t3.textContent = bname + '.';
+    h.appendChild(t1); h.appendChild(t2); h.appendChild(t3);
+  }
+
+  var intro = document.getElementById('browserCompatIntro');
+  if (intro) {
+    if (d.labels.length > 0) {
+      intro.textContent = 'But, you may find that ' + bname + ' can take over if it hears one of its favourite shortcuts called:';
+    } else {
+      intro.textContent = 'We haven’t spotted any shortcut conflicts for your current setup — you’re good to go.';
+    }
+  }
+
+  var ul = document.getElementById('browserCompatList');
+  if (ul) {
+    ul.innerHTML = '';
+    d.labels.forEach(function(s) {
+      var li = document.createElement('li');
+      li.style.cssText = 'margin-bottom:6px;display:flex;align-items:center;flex-wrap:wrap;gap:0;line-height:1.6;';
+      li.appendChild(_renderKeyChips(s));
+      ul.appendChild(li);
+    });
+  }
+
+  var ft = document.getElementById('browserCompatFooter');
+  if (ft) ft.textContent = 'We will try not to ask you any questions that use these specific key combinations, but if we do get interrupted during play, just click back into our window to continue training.';
+
+  var bm = document.getElementById('browserModal');
+  var km = document.getElementById('kbModal');
+  bm.style.zIndex = '202';
+  if (km) { km.style.zIndex = '201'; positionKbModal(); }
+  positionBrowserModal();
+  bm.classList.remove('visible'); // reset in case re-opened
+  bm.style.animation = '';
+  bm.style.height = '';
+  bm.classList.add('visible');
+  browserModalOpen = true;
+}
+
+function closeBrowserModal() {
+  browserModalOpen = false;
+  var modal = document.getElementById('browserModal');
+  modal.style.animation = 'paperFurl 0.55s cubic-bezier(0.64, 0, 0.78, 0) forwards';
+  modal.style.pointerEvents = 'none';
+  setTimeout(function() {
+    modal.classList.remove('visible');
+    modal.style.animation = '';
+    modal.style.pointerEvents = '';
+    if (kbModalOpen) positionKbModal(); // re-centre if other still open
+  }, 550);
+}
+
+function toggleBrowserModal() {
+  browserModalOpen ? closeBrowserModal() : openBrowserModal();
+}
+
+// ── Unified icon click handlers ──────────────────────────────────────────────
 document.getElementById('kbIcon').addEventListener('click', function(e) {
   e.stopPropagation();
   toggleKbModal();
 });
 
+document.getElementById('browserIcon').addEventListener('click', function(e) {
+  e.stopPropagation();
+  toggleBrowserModal();
+});
+
+// ── Unified outside-click: dismiss both, except safe zones ───────────────────
 document.addEventListener('click', function(e) {
-  if (!kbModalOpen) return;
-  var modal  = document.getElementById('kbModal');
-  var icon   = document.getElementById('kbIcon');
-  var osWrap = document.getElementById('osToggleWrap'); // main OS toggle area
-  if (modal.contains(e.target))   return; // inside modal — fine
-  if (icon  && icon.contains(e.target))   return; // icon handled separately
-  if (osWrap && osWrap.contains(e.target)) return; // OS toggle — keep modal open
-  closeKbModal();
+  if (!kbModalOpen && !browserModalOpen) return;
+  var kbM    = document.getElementById('kbModal');
+  var brM    = document.getElementById('browserModal');
+  var kbI    = document.getElementById('kbIcon');
+  var brI    = document.getElementById('browserIcon');
+  var osWrap = document.getElementById('osToggleWrap');
+  var appP   = document.getElementById('appPill');
+  var appD   = document.getElementById('appDropdown');
+  var safe   = (kbM  && kbM.contains(e.target))  ||
+               (brM  && brM.contains(e.target))   ||
+               (kbI  && kbI.contains(e.target))   ||
+               (brI  && brI.contains(e.target))   ||
+               (osWrap && osWrap.contains(e.target));
+  // App pill/dropdown: safe only when not mid-game
+  var midGame = (gameState === 'playing' || gameState === 'paused');
+  if (!midGame && ((appP && appP.contains(e.target)) || (appD && appD.contains(e.target)))) safe = true;
+  if (safe) return;
+  if (kbModalOpen)      closeKbModal();
+  if (browserModalOpen) closeBrowserModal();
 });
 
 window.addEventListener('resize', function() {
-  if (kbModalOpen) positionKbModal();
+  positionIcons();
+  if (kbModalOpen)      positionKbModal();
+  if (browserModalOpen) positionBrowserModal();
 });
+
 
 // ── Debug overlay — Esc hold 2s to show, single Esc to hide ─────────────────
 // ── Debug overlay — Esc hold 2s to show, single Esc to hide ─────────────────
@@ -3759,118 +4043,144 @@ function dbgNextQuestion() {
   clearHelp(); transitioning = false;
 }
 
+
 /* ══════════════════════════════════════
-   BROWSER COMPATIBILITY MODAL
-   Only shown when there are real conflicts.
+   BROWSER + OS CONFLICT DATA
+   Evaluated lazily so currentOs is known.
 ══════════════════════════════════════ */
-(function() {
-  var ua       = navigator.userAgent || '';
-  var isChrome = /Chrome\//.test(ua) && !/Edg\//.test(ua) && !/OPR\//.test(ua);
-  if (isChrome) return;
+function getBrowserConflicts() {
+  var ua      = navigator.userAgent || '';
+  var isMacOs = currentOs === 'mac';
 
-  var isSafari  = /Safari\//.test(ua) && !/Chrome\//.test(ua);
-  var isFirefox = /Firefox\//.test(ua);
-  var isEdge    = /Edg\//.test(ua);
+  // Detect browser
+  var browser;
+  if      (/Edg\//.test(ua))                              browser = 'Edge';
+  else if (/Firefox\//.test(ua))                          browser = 'Firefox';
+  else if (/Safari\//.test(ua) && !/Chrome\//.test(ua))  browser = 'Safari';
+  else if (/OPR\//.test(ua))                              browser = 'Opera';
+  else if (/Chrome\//.test(ua))                           browser = 'Chrome';
+  else                                                     browser = null;
 
-  var conflicts = {
-    Safari:  ['Cmd+Opt+U (opens Page Source)',    'Cmd+Shift+H (opens Home)',
-              'Cmd+Opt+I (opens Web Inspector)',   'Cmd+Opt+C (opens Inspector Console)',
-              'Cmd+Shift+I (opens Mail)',           'Cmd+Shift+L (opens Sidebar)'],
-    Firefox: ['Cmd+Shift+A (opens Add-ons)',       'Cmd+Shift+H (opens History)',
-              'Cmd+Opt+I (opens DevTools)',         'Cmd+Shift+I (opens DevTools)',
-              'Cmd+Shift+U (opens Page Source)',    'Cmd+Shift+D (bookmarks page)'],
-    Edge:    ['Cmd+Shift+C (opens DevTools)',      'Cmd+Shift+I (opens DevTools)',
-              'Cmd+Opt+I (opens DevTools)',         'Cmd+Shift+H (opens History)',
-              'Cmd+Shift+D (saves all tabs)'],
+  // Conflict tables — Mac shortcuts use Cmd, PC use Ctrl (same token in our shortcut strings)
+  // Values are the canonical shortcut strings used in SHORTCUTS[].shortcut
+  var mac = {
+    Edge:    ['CMD+OPTION+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Firefox: ['CMD+OPTION+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Safari:  ['CMD+OPTION+U','CMD+OPTION+I','CMD+OPTION+C','CMD+SHIFT+H','CMD+SHIFT+I','CMD+SHIFT+L'],
+    Opera:   ['CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Chrome:  ['CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
+  };
+  var pc = {
+    Edge:    ['CMD+SHIFT+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Firefox: ['CMD+SHIFT+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Opera:   ['CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Chrome:  ['CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+C','CMD+SHIFT+N'],
   };
 
-  var browser = isSafari ? 'Safari' : isFirefox ? 'Firefox' : isEdge ? 'Edge' : null;
-  if (!browser) return;
-  var list = conflicts[browser] || [];
-  if (!list.length) return;
+  // Human-readable labels — Mac vs PC, browser-specific
+  var macLabels = {
+    Edge: [
+      'Cmd+Opt+I \u2014 opens DevTools',
+      'Cmd+Shift+C \u2014 opens DevTools inspector',
+      'Cmd+Shift+J \u2014 opens DevTools console',
+      'Cmd+Shift+H \u2014 opens History',
+      'Cmd+Shift+D \u2014 saves all tabs',
+      'Cmd+Shift+N \u2014 opens InPrivate window',
+    ],
+    Firefox: [
+      'Cmd+Opt+I \u2014 opens DevTools',
+      'Cmd+Shift+A \u2014 opens Add-ons',
+      'Cmd+Shift+H \u2014 opens History',
+      'Cmd+Shift+U \u2014 opens Page Source',
+      'Cmd+Shift+D \u2014 bookmarks page',
+      'Cmd+Shift+N \u2014 opens Private window',
+    ],
+    Safari: [
+      'Cmd+Opt+U \u2014 opens Page Source',
+      'Cmd+Opt+I \u2014 opens Web Inspector',
+      'Cmd+Opt+C \u2014 opens Inspector Console',
+      'Cmd+Shift+H \u2014 opens Home \u2215 History',
+      'Cmd+Shift+I \u2014 opens Mail',
+      'Cmd+Shift+L \u2014 opens Sidebar',
+    ],
+    Opera: [
+      'Cmd+Opt+I \u2014 opens DevTools',
+      'Cmd+Opt+J \u2014 opens DevTools console',
+      'Cmd+Shift+D \u2014 saves bookmark',
+      'Cmd+Shift+N \u2014 opens Private window',
+    ],
+    Chrome: [
+      'Cmd+Opt+I \u2014 opens DevTools',
+      'Cmd+Opt+J \u2014 opens DevTools console',
+      'Cmd+Shift+C \u2014 opens DevTools inspector',
+      'Cmd+Shift+N \u2014 opens Incognito window',
+    ],
+  };
+  var pcLabels = {
+    Edge: [
+      'Ctrl+Shift+I \u2014 opens DevTools',
+      'Ctrl+Shift+C \u2014 opens DevTools inspector',
+      'Ctrl+Shift+J \u2014 opens DevTools console',
+      'Ctrl+Shift+H \u2014 opens History',
+      'Ctrl+Shift+D \u2014 saves all tabs',
+      'Ctrl+Shift+N \u2014 opens InPrivate window',
+    ],
+    Firefox: [
+      'Ctrl+Shift+I \u2014 opens DevTools',
+      'Ctrl+Shift+A \u2014 opens Add-ons',
+      'Ctrl+Shift+H \u2014 opens History',
+      'Ctrl+Shift+U \u2014 opens Page Source',
+      'Ctrl+Shift+D \u2014 bookmarks page',
+      'Ctrl+Shift+N \u2014 opens Private window',
+    ],
+    Opera: [
+      'Ctrl+Shift+I \u2014 opens DevTools',
+      'Ctrl+Shift+J \u2014 opens DevTools console',
+      'Ctrl+Shift+D \u2014 saves bookmark',
+      'Ctrl+Shift+N \u2014 opens Private window',
+    ],
+    Chrome: [
+      'Ctrl+Shift+I \u2014 opens DevTools',
+      'Ctrl+Shift+J \u2014 opens DevTools console',
+      'Ctrl+Shift+C \u2014 opens DevTools inspector',
+      'Ctrl+Shift+N \u2014 opens Incognito window',
+    ],
+  };
 
-  document.addEventListener('DOMContentLoaded', function() {
-    // Backdrop
-    var backdrop = document.createElement('div');
-    backdrop.id = 'browserBackdrop';
-    backdrop.style.cssText = [
-      'position:fixed', 'inset:0', 'z-index:1000',
-      'background:rgba(0,0,0,0.35)',
-      'backdrop-filter:blur(3px)', '-webkit-backdrop-filter:blur(3px)'
-    ].join(';');
+  var conflictKeys = [];
+  var labels       = [];
 
-    // Modal shell
-    var modal = document.createElement('div');
-    modal.id = 'browserModal';
-    modal.style.cssText = [
-      'position:fixed', 'z-index:1001', 'background:white',
-      'box-shadow:0 4px 10px rgba(0,0,0,0.13),0 12px 28px rgba(0,0,0,0.16)',
-      'width:320px', 'padding:28px 26px 22px', 'box-sizing:border-box',
-      "font-family:'Lato',system-ui,sans-serif"
-    ].join(';');
+  if (browser) {
+    var keyTable   = isMacOs ? mac   : pc;
+    var labelTable = isMacOs ? macLabels : pcLabels;
+    conflictKeys = (keyTable[browser]   || []).slice();
+    labels       = (labelTable[browser] || []).slice();
+  } else {
+    // Generic fallback — show both platforms' most universal conflicts
+    conflictKeys = isMacOs
+      ? ['CMD+OPTION+I','CMD+SHIFT+H','CMD+SHIFT+N']
+      : ['CMD+SHIFT+I', 'CMD+SHIFT+H','CMD+SHIFT+N'];
+    labels = isMacOs
+      ? ['Cmd+Opt+I \u2014 opens DevTools','Cmd+Shift+H \u2014 opens History','Cmd+Shift+N \u2014 opens Private window']
+      : ['Ctrl+Shift+I \u2014 opens DevTools','Ctrl+Shift+H \u2014 opens History','Ctrl+Shift+N \u2014 opens Private window'];
+  }
 
-    // Title
-    var title = document.createElement('p');
-    title.style.cssText = 'font-size:15px;font-weight:700;color:#1e3a5f;margin:0 0 12px';
-    title.textContent = 'One quick heads-up';
+  return {
+    name:        browser || 'your browser',
+    keys:        conflictKeys,   // canonical shortcut strings for pool filtering
+    labels:      labels,         // human-readable strings for display
+  };
+}
 
-    // Intro
-    var intro = document.createElement('p');
-    intro.style.cssText = 'font-size:13px;color:#374151;line-height:1.6;margin:0 0 10px';
-    intro.textContent = 'Keyboard Warriors was built for Chrome. It will work in ' + browser +
-      ', but a few shortcuts clash with browser actions:';
-
-    // List
-    var ul = document.createElement('ul');
-    ul.style.cssText = 'font-size:12px;color:#6b7280;line-height:1.7;margin:0 0 20px;padding-left:18px';
-    list.forEach(function(s) {
-      var li = document.createElement('li');
-      li.style.marginBottom = '4px';
-      li.textContent = s;
-      ul.appendChild(li);
-    });
-
-    // Footer note
-    var note = document.createElement('p');
-    note.style.cssText = 'font-size:12px;color:#9ca3af;margin:0 0 20px;line-height:1.5';
-    note.textContent = 'These won\u2019t affect most questions, but the browser may intercept those specific combinations.';
-
-    // Dismiss button
-    var btn = document.createElement('button');
-    btn.style.cssText = [
-      'background:#1e3a5f', 'color:white', 'border:none', 'border-radius:6px',
-      'padding:11px 0', 'font-size:14px', "font-family:'Lato',system-ui,sans-serif",
-      'font-weight:600', 'cursor:pointer', 'width:100%'
-    ].join(';');
-    btn.textContent = 'Got it';
-    btn.addEventListener('click', function() {
-      backdrop.remove();
-      modal.remove();
-    });
-
-    modal.appendChild(title);
-    modal.appendChild(intro);
-    modal.appendChild(ul);
-    modal.appendChild(note);
-    modal.appendChild(btn);
-
-    function positionModal() {
-      modal.style.left = Math.round((window.innerWidth  - 320) / 2) + 'px';
-      modal.style.top  = Math.round((window.innerHeight - modal.offsetHeight) / 2) + 'px';
-    }
-
-    document.body.appendChild(backdrop);
-    document.body.appendChild(modal);
-    setTimeout(function() {
-      positionModal();
-      modal.style.animation = 'gyroUnfurl 0.45s cubic-bezier(0.22,0.61,0.36,1) forwards';
-      window.addEventListener('resize', positionModal);
-    }, 400);
-  });
-})();
+// Returns a Set of shortcut strings that conflict for the current browser+OS.
+// Called by buildPool() to silently exclude them.
+function getBrowserConflictSet() {
+  return new Set(getBrowserConflicts().keys);
+}
 
 // Initialise
 buildAppPill();
+positionIcons();
 
 
 /* ══════════════════════════════════════
@@ -3889,11 +4199,13 @@ function requiresExtKey(shortcut) {
 }
 
 function buildPool() {
-  const field = APP_FIELD[currentApp] || 'ps';
+  const field        = APP_FIELD[currentApp] || 'ps';
+  const browserSkip  = getBrowserConflictSet();
   return SHORTCUTS.filter(s => {
     if (!s[field]) return false;
     if (!s.pc_safe && currentOs === 'pc') return false;
     if ((touchEnabled || !hasFullKeyboard) && requiresExtKey(s.shortcut)) return false;
+    if (browserSkip.has(s.shortcut)) return false;
     return true;
   });
 }
@@ -4352,6 +4664,7 @@ function handleKeyup(e) {
 }
 </script>
 <div id="kbModal" role="dialog" aria-modal="true">
+  <button class="modal-dismiss-btn" onclick="closeKbModal()">&times;</button>
   <div id="kbModalInner">
 
     <p class="modal-section-title">Keyboard Behaviour:</p>
@@ -4433,7 +4746,7 @@ function handleKeyup(e) {
         <div class="modal-right-label"><span id="modalFnLabelRight" class="modal-inline-val"></span>&ensp;<span class="modal-inline-label">is the leftmost key</span></div>
       </div>
 
-    </div><!-- /.modal-layout-rows (layout rows) -->
+    </div><!-- /.modal-layout-rows -->
 
     <div class="modal-section-gap"></div>
     <div id="modalKbSizeSection">
@@ -4455,7 +4768,23 @@ function handleKeyup(e) {
       </div>
     </div><!-- /#modalKbSizeSection -->
 
-</div>
+</div><!-- /#kbModalInner -->
+</div><!-- /#kbModal -->
+
+<div id="browserModal" role="dialog" aria-modal="true">
+  <button class="modal-dismiss-btn" onclick="closeBrowserModal()">&times;</button>
+  <div id="browserModalInner">
+    <p class="modal-section-title" style="padding-right:24px;">Browser Compatibility Report:</p>
+    <div class="modal-section-gap"></div>
+    <p class="compat-heading" id="browserCompatHeading"></p>
+    <p class="compat-intro"   id="browserCompatIntro"></p>
+    <ul id="browserCompatList"></ul>
+    <p class="compat-footer"  id="browserCompatFooter"></p>
+    <div class="modal-section-gap"></div>
+    <p class="compat-debug-hint">If you encounter an error, please hold down
+      <span style="display:inline-block;font-size:10px;font-weight:600;color:#1e3a5f;background:#f3f4f6;border:1px solid #d1d5db;border-radius:3px;padding:1px 4px 0;line-height:1.6;white-space:nowrap;box-shadow:0 1px 0 #c9cdd3;">Esc</span>
+      to wake my debug window where you can send me a report.</p>
+  </div>
 </div>
 
 <style>
