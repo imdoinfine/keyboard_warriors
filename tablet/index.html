@@ -1388,19 +1388,14 @@ body {
   padding: 6px 50px 20px !important;
 }
 
-/* Stats: use JS alignment after keyboard build — see alignStats() */
+/* Stats: same padding as gameContainer so columns align */
 #statsRow {
   width: 100% !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  position: relative;
+  padding-left: 50px !important;
+  padding-right: 50px !important;
 }
-#statLeft, #statRight {
-  position: absolute !important;
-  width: auto !important;
-  text-align: left !important;
-}
-#statRight { text-align: right !important; }
+#statLeft  { width: 140px !important; text-align: left  !important; }
+#statRight { width: 130px !important; text-align: right !important; }
 
 #keyboardWrap {
   width: 100% !important;
@@ -1434,6 +1429,9 @@ body {
   .timerBox { width: 84px !important; height: 84px !important; }
   #keyboardPanel { transform: scale(1.18); }
   #keyboardWrap  { margin-bottom: 56px; }
+  #statsRow  { padding-left: 40px !important; padding-right: 40px !important; }
+  #statLeft  { width: 120px !important; }
+  #statRight { width: 110px !important; }
 }
 
 /* iPad Pro 12.9" landscape: 1366×1024 */
@@ -1442,6 +1440,9 @@ body {
   #gameContainer { padding: 8px 60px 28px !important; }
   #keyboardPanel { transform: scale(1.48); }
   #keyboardWrap  { margin-bottom: 144px; }
+  #statsRow  { padding-left: 60px !important; padding-right: 60px !important; }
+  #statLeft  { width: 140px !important; }
+  #statRight { width: 130px !important; }
 }
 
 /* Pill fixed width so it never collapses */
@@ -1550,15 +1551,14 @@ body {
   </div>
 </div>
 
-<div id="ipadLayout">
-
-<!-- Stats bar: always visible -->
 <div id="statsRow">
   <span id="statLeft"></span>
   <div id="kbToast">This keyboard is for display only. Play with an actual Mac keyboard.</div>
   <div id="extKeyPill"></div>
   <span id="statRight"></span>
 </div>
+
+<div id="ipadLayout">
 
 <div id="keyboardWrap">
   <svg id="kbIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;fill:#9ca3af;">
@@ -2341,24 +2341,6 @@ function updateKeyboardMode() {
     buildKeyboard(mode === 'mini');
   }
 }
-function alignStats() {
-  var sl   = document.getElementById('statLeft');
-  var sr   = document.getElementById('statRight');
-  var row  = document.getElementById('statsRow');
-  var lp   = document.querySelector('.leftPanel');
-  var rp   = document.querySelector('.rightPanel');
-  if (!sl || !sr || !row || !lp || !rp) return;
-  var rowRect = row.getBoundingClientRect();
-  var lpRect  = lp.getBoundingClientRect();
-  var rpRect  = rp.getBoundingClientRect();
-  // Pin statLeft's left edge to leftPanel's left edge
-  sl.style.left  = (lpRect.left  - rowRect.left) + 'px';
-  sl.style.right = 'auto';
-  // Pin statRight's right edge to rightPanel's right edge
-  sr.style.right = (rowRect.right - rpRect.right) + 'px';
-  sr.style.left  = 'auto';
-}
-
 function alignKbIcon() {
   var icon   = document.getElementById('kbIcon');
   var kpanel = document.getElementById('keyboardPanel');
@@ -2372,7 +2354,6 @@ function alignKbIcon() {
 // iPad: resize only repositions modal if open
 window.addEventListener('resize', function() {
   alignKbIcon();
-  alignStats();
   if (kbModalOpen) positionKbModal();
 });
 // iPad fork: always full keyboard, never mini
@@ -2385,7 +2366,6 @@ requestAnimationFrame(function() {
     buildKeyboard(false);
     document.getElementById('keyboardPanel').classList.toggle('pc-keys', currentOs === 'pc');
     alignKbIcon();
-    alignStats();
     // Restore longer button label if it fits without wrapping
     (function() {
       var btn = document.getElementById('mainBtn');
