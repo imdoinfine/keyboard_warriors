@@ -385,8 +385,8 @@ body {
   color: #6b7280;
   white-space: nowrap;
 }
-#statLeft  { width: 140px; text-align: left; }
-#statRight { width: 130px; text-align: right; }
+#statLeft  { width: auto; text-align: left; }
+#statRight { width: auto; text-align: right; }
 
 @keyframes statPulse {
   0%   { transform: scale(1);    color: #6b7280; }
@@ -1388,18 +1388,17 @@ body {
   padding: 6px 50px 20px !important;
 }
 
+/* Stats: use JS alignment after keyboard build — see alignStats() */
 #statsRow {
   width: 100% !important;
-  /* Mirror gameContainer padding so statLeft/Right sit above leftPanel/rightPanel */
-  padding-left: 50px !important;
-  padding-right: 50px !important;
+  position: relative;
 }
-@media (max-width: 1140px) {
-  #statsRow { padding-left: 40px !important; padding-right: 40px !important; }
+#statLeft, #statRight {
+  position: absolute !important;
+  width: auto !important;
+  text-align: left !important;
 }
-@media (min-width: 1340px) {
-  #statsRow { padding-left: 60px !important; padding-right: 60px !important; }
-}
+#statRight { text-align: right !important; }
 
 #keyboardWrap {
   width: 100% !important;
@@ -1433,8 +1432,6 @@ body {
   .timerBox { width: 84px !important; height: 84px !important; }
   #keyboardPanel { transform: scale(1.18); }
   #keyboardWrap  { margin-bottom: 56px; }
-  #statLeft  { width: 120px !important; }
-  #statRight { width: 110px !important; }
 }
 
 /* iPad Pro 12.9" landscape: 1366×1024 */
@@ -1448,40 +1445,8 @@ body {
 /* Pill fixed width so it never collapses */
 #appPill { width: 128px; }
 
-/* kbIcon tablet overrides:
-   - Vertical: centred on the scaled keyboard panel.
-     Natural kb height ≈ 244px. Scaled heights:
-       default ×1.28 → 312px, top at 0, centre at 156px. Icon 44px → top: 134px
-       mini    ×1.18 → 288px, centre at 144px → top: 122px
-       large   ×1.48 → 361px, centre at 180px → top: 158px
-   - Horizontal: centred under leftPanel with a generous margin.
-     default: padding 50px + leftPanel 140px/2 = 120px centre; icon 44px/2=22px → left 98px
-     but we pull it a further 18px left for breathing room → 80px
-     mini:    padding 40px + 120px/2 = 100px - 18px → 62px
-     large:   padding 60px + 140px/2 = 130px - 18px → 112px               */
-/* kbIcon tablet: top centres on scaled keyboard panel visually.
-   left centres icon under leftPanel column (padding + leftPanel/2 - iconW/2 - 10px margin).
-   default: 50 + 70 - 22 - 10 = 88px
-   mini:    40 + 60 - 22 - 10 = 68px
-   large:   60 + 70 - 22 - 10 = 98px  */
-#keyboardWrap #kbIcon {
-  top: 134px !important;
-  transform: none !important;
-  left: 88px !important;
-}
-@media (max-width: 1140px) {
-  #keyboardWrap #kbIcon {
-    top: 122px !important;
-    left: 68px !important;
-  }
-}
-@media (min-width: 1340px) {
-  #keyboardWrap #kbIcon {
-    top: 158px !important;
-    left: 98px !important;
-  }
-}
-/* Pulse animation override — no translateY since position is set via top */
+/* kbIcon positioned entirely by alignKbIcon() JS measurement.
+   Pulse override drops translateY since transform:none is set by JS. */
 @keyframes kbIconPulseTablet {
   0%   { transform: scale(1); }
   40%  { transform: scale(1.22); }
@@ -1612,10 +1577,14 @@ body {
 <div id="debugOverlay" style="position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;border-radius:8px;z-index:9999;pointer-events:auto;line-height:1.5;display:none;flex-direction:row;gap:0;align-items:flex-start;overflow:hidden;max-height:800px;transition:max-height 0.2s ease,border-radius 0.2s ease;" aria-hidden="true">
   <!-- Left column -->
   <div style="display:flex;flex-direction:column;justify-content:space-between;width:360px;padding-right:12px;align-self:stretch;">
-    <!-- Header row -->
-    <div id="dbgHeader" onclick="dbgToggle()" style="display:flex;align-items:center;gap:6px;padding-bottom:3px;cursor:pointer;user-select:none;">
+    <!-- Header row: app/state/Q only — no wrap, accordion trigger -->
+    <div id="dbgHeader" onclick="dbgToggle()" style="display:flex;align-items:center;gap:6px;padding-bottom:2px;cursor:pointer;user-select:none;">
       <span id="dbgToggle" style="color:#888;font-size:13px;line-height:1;">&#9660;</span>
-      <div id="dbgCtx" style="color:#8af;flex:1;"></div>
+      <div id="dbgCtxTop" style="color:#8af;flex:1;white-space:nowrap;overflow:hidden;"></div>
+    </div>
+    <!-- Sub-header row: device/os -->
+    <div style="padding-bottom:3px;overflow:hidden;">
+      <div id="dbgCtxSub" style="color:#8af;white-space:nowrap;overflow:hidden;font-size:10px;opacity:0.75;"></div>
     </div>
     <!-- Collapsible body -->
     <div id="dbgCollapsible" style="border-top:1px solid #333;margin-top:3px;display:flex;flex-direction:column;justify-content:space-between;flex:1;">
@@ -2370,6 +2339,24 @@ function updateKeyboardMode() {
     buildKeyboard(mode === 'mini');
   }
 }
+function alignStats() {
+  var sl   = document.getElementById('statLeft');
+  var sr   = document.getElementById('statRight');
+  var row  = document.getElementById('statsRow');
+  var lp   = document.querySelector('.leftPanel');
+  var rp   = document.querySelector('.rightPanel');
+  if (!sl || !sr || !row || !lp || !rp) return;
+  var rowRect = row.getBoundingClientRect();
+  var lpRect  = lp.getBoundingClientRect();
+  var rpRect  = rp.getBoundingClientRect();
+  // Pin statLeft's left edge to leftPanel's left edge
+  sl.style.left  = (lpRect.left  - rowRect.left) + 'px';
+  sl.style.right = 'auto';
+  // Pin statRight's right edge to rightPanel's right edge
+  sr.style.right = (rowRect.right - rpRect.right) + 'px';
+  sr.style.left  = 'auto';
+}
+
 function alignKbIcon() {
   var icon   = document.getElementById('kbIcon');
   var kpanel = document.getElementById('keyboardPanel');
@@ -2383,6 +2370,7 @@ function alignKbIcon() {
 // iPad: resize only repositions modal if open
 window.addEventListener('resize', function() {
   alignKbIcon();
+  alignStats();
   if (kbModalOpen) positionKbModal();
 });
 // iPad fork: always full keyboard, never mini
@@ -2395,6 +2383,7 @@ requestAnimationFrame(function() {
     buildKeyboard(false);
     document.getElementById('keyboardPanel').classList.toggle('pc-keys', currentOs === 'pc');
     alignKbIcon();
+    alignStats();
     // Restore longer button label if it fits without wrapping
     (function() {
       var btn = document.getElementById('mainBtn');
@@ -3702,8 +3691,10 @@ function dbgToggle() {
 }
 
 function dbgBuildReport() {
+  var top = document.getElementById('dbgCtxTop');
+  var sub = document.getElementById('dbgCtxSub');
   var lines = [
-    document.getElementById('dbgCtx').textContent,
+    (sub ? sub.textContent + '  ' : '') + (top ? top.textContent : ''),
     document.getElementById('dbgAnswer').textContent,
     document.getElementById('dbgKey').textContent,
     document.getElementById('dbgMatch').textContent,
@@ -3754,8 +3745,9 @@ function dbgReport() {
 var DBG_DEVICE = 'Tablet';
 
 function dbgRefreshCtx() {
-  const el = document.getElementById('dbgCtx');
-  if (!el) return;
+  const top = document.getElementById('dbgCtxTop');
+  const sub = document.getElementById('dbgCtxSub');
+  if (!top) return;
   const appLabels = {Ps:'Photoshop', Ai:'Illustrator', In:'InDesign', Ae:'After Effects', Fi:'Figma'};
   const appName  = appLabels[currentApp] || currentApp;
   const osName   = currentOs === 'pc' ? 'PC/Windows' : 'Mac';
@@ -3764,7 +3756,8 @@ function dbgRefreshCtx() {
   const pool     = questionPool.length;
   const qi       = pool > 0 ? (questionIndex % pool) + 1 : '—';
   const qStr     = state === 'idle' ? '—/0' : qi + '/' + pool;
-  el.textContent = 'device:' + device + '  os:' + osName + '  app:' + appName + '  state:' + state + '  Q:' + qStr;
+  top.textContent = 'app:' + appName + '  state:' + state + '  Q:' + qStr;
+  if (sub) sub.textContent = 'device:' + device + '  os:' + osName;
 }
 
 // ── Debug accuracy display ────────────────────────────────────────────────────
