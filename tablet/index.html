@@ -385,8 +385,8 @@ body {
   color: #6b7280;
   white-space: nowrap;
 }
-#statLeft  { width: 140px; text-align: center; }
-#statRight { width: 130px; text-align: center; }
+#statLeft  { width: 140px; text-align: left; }
+#statRight { width: 130px; text-align: right; }
 
 @keyframes statPulse {
   0%   { transform: scale(1);    color: #6b7280; }
@@ -1433,6 +1433,8 @@ body {
   .timerBox { width: 84px !important; height: 84px !important; }
   #keyboardPanel { transform: scale(1.18); }
   #keyboardWrap  { margin-bottom: 56px; }
+  #statLeft  { width: 120px !important; }
+  #statRight { width: 110px !important; }
 }
 
 /* iPad Pro 12.9" landscape: 1366×1024 */
@@ -1457,21 +1459,26 @@ body {
      but we pull it a further 18px left for breathing room → 80px
      mini:    padding 40px + 120px/2 = 100px - 18px → 62px
      large:   padding 60px + 140px/2 = 130px - 18px → 112px               */
+/* kbIcon tablet: top centres on scaled keyboard panel visually.
+   left centres icon under leftPanel column (padding + leftPanel/2 - iconW/2 - 10px margin).
+   default: 50 + 70 - 22 - 10 = 88px
+   mini:    40 + 60 - 22 - 10 = 68px
+   large:   60 + 70 - 22 - 10 = 98px  */
 #keyboardWrap #kbIcon {
   top: 134px !important;
   transform: none !important;
-  left: 80px !important;
+  left: 88px !important;
 }
 @media (max-width: 1140px) {
   #keyboardWrap #kbIcon {
     top: 122px !important;
-    left: 62px !important;
+    left: 68px !important;
   }
 }
 @media (min-width: 1340px) {
   #keyboardWrap #kbIcon {
     top: 158px !important;
-    left: 112px !important;
+    left: 98px !important;
   }
 }
 /* Pulse animation override — no translateY since position is set via top */
