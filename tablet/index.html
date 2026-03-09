@@ -1448,8 +1448,21 @@ body {
 /* Pill fixed width so it never collapses */
 #appPill { width: 128px; }
 
-/* kbIcon positioned entirely by alignKbIcon() JS measurement.
-   Pulse override drops translateY since transform:none is set by JS. */
+/* kbIcon: vertically aligned to gap between Q row and A row (Tab/CapsLock gap).
+   q row bottom = 116px unscaled; a row top = 120px; centre = 118px.
+   Scaled: ×1.28→151px, ×1.18→139px, ×1.48→175px. Icon 44px tall → subtract 22.
+   Horizontally: leftPanel centre minus half icon (22px) minus 10px breathing room. */
+#keyboardWrap #kbIcon {
+  top: 129px !important;
+  transform: none !important;
+  left: 88px !important;
+}
+@media (max-width: 1140px) {
+  #keyboardWrap #kbIcon { top: 117px !important; left: 68px !important; }
+}
+@media (min-width: 1340px) {
+  #keyboardWrap #kbIcon { top: 153px !important; left: 98px !important; }
+}
 @keyframes kbIconPulseTablet {
   0%   { transform: scale(1); }
   40%  { transform: scale(1.22); }
@@ -1457,6 +1470,34 @@ body {
 }
 #keyboardWrap #kbIcon.pulse {
   animation: kbIconPulseTablet 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Countdown overlay inside #title area */
+@keyframes countPop {
+  0%   { transform: scale(2.2); opacity: 0; }
+  20%  { transform: scale(1.0); opacity: 1; }
+  75%  { transform: scale(1.0); opacity: 1; }
+  100% { transform: scale(0.6); opacity: 0; }
+}
+#countdownOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 10;
+}
+#countdownNum {
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 64px;
+  font-weight: 900;
+  color: #1e3a5f;
+  opacity: 0;
+  line-height: 1;
+}
+#countdownNum.pop {
+  animation: countPop 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 </style>
 </head>
@@ -1513,7 +1554,10 @@ body {
       <button id="helpBtn" onclick="helpButtonClick()">Help</button>
     </div>
     <div class="middlePanel">
-      <h2 id="title">Play Keyboard Warrior</h2>
+      <div style="position:relative;display:flex;align-items:center;justify-content:center;width:100%;">
+          <h2 id="title">Play Keyboard Warrior</h2>
+          <div id="countdownOverlay"><span id="countdownNum"></span></div>
+        </div>
     </div>
     <div class="rightPanel">
       <!-- CHANGE 5: timer click unpauses -->
@@ -1551,14 +1595,14 @@ body {
   </div>
 </div>
 
+<div id="ipadLayout">
+
 <div id="statsRow">
   <span id="statLeft"></span>
   <div id="kbToast">This keyboard is for display only. Play with an actual Mac keyboard.</div>
   <div id="extKeyPill"></div>
   <span id="statRight"></span>
 </div>
-
-<div id="ipadLayout">
 
 <div id="keyboardWrap">
   <svg id="kbIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;fill:#9ca3af;">
@@ -2169,6 +2213,7 @@ function handleKeyTouch(e, el) {
   e.preventDefault();
   const code = el.dataset.key;
   if (!code) return;
+  playKeyClick();
   // Build a minimal synthetic event carrying the code we need
   // We dispatch through our own handlers directly (real KeyboardEvent
   // requires trusted origin for some keys, so we call handlers directly).
@@ -2921,7 +2966,7 @@ function setTimerState(state, text) {
 ══════════════════════════════════════ */
 function mainButtonClick() {
   mainBtn.blur();
-  if (gameState === 'idle' || gameState === 'finished') { startGame(); return; }
+  if (gameState === 'idle' || gameState === 'finished') { beginCountdown(); return; }
   if (gameState === 'playing')       { skipShortcut(); return; }
   if (gameState === 'paused')        { unpause(); return; }
   if (gameState === 'confirm-reset') { confirmResetYes(); return; }
@@ -3804,14 +3849,6 @@ function dbgNextQuestion() {
     return;
   }
 
-  // Position modal centred on screen
-  function positionGyroModal() {
-    var modal = document.getElementById('gyroModal');
-    if (!modal) return;
-    modal.style.left = Math.round((window.innerWidth  - 300) / 2) + 'px';
-    modal.style.top  = Math.round((window.innerHeight - modal.offsetHeight) / 2) + 'px';
-  }
-
   function showGyroModal() {
     var backdrop = document.getElementById('gyroBackdrop');
     var modal    = document.getElementById('gyroModal');
@@ -3826,6 +3863,13 @@ function dbgNextQuestion() {
   // Show after a brief delay so the app is visible behind the modal
   setTimeout(showGyroModal, 600);
 })();
+
+function positionGyroModal() {
+  var modal = document.getElementById('gyroModal');
+  if (!modal || modal.style.display === 'none') return;
+  modal.style.left = Math.round((window.innerWidth  - 300) / 2) + 'px';
+  modal.style.top  = Math.round((window.innerHeight - modal.offsetHeight) / 2) + 'px';
+}
 
 function hideGyroModal() {
   var backdrop = document.getElementById('gyroBackdrop');
@@ -3884,6 +3928,20 @@ function buildPool() {
     return true;
   });
 }
+function beginCountdown() {
+  // Prevent double-triggers during countdown
+  if (_countdownTimer) return;
+  gameState = 'counting';
+  mainBtn.textContent = '';
+  mainBtn.disabled = true;
+  helpBtn.disabled = true;
+  runCountdown(function() {
+    mainBtn.disabled = false;
+    helpBtn.disabled = false;
+    startGame();
+  });
+}
+
 function startGame() {
   gameState = 'playing';
   setAppSelectorGameActive(true);
@@ -4115,6 +4173,73 @@ function initGyro() {
 }
 
 // Key lighting active at all times, not just during play
+
+/* ══════════════════════════════════════
+   MECHANICAL KEY CLICK SOUND
+   Synthetic Web Audio — no asset needed.
+   Only triggered by soft (on-screen) keys.
+══════════════════════════════════════ */
+var _audioCtx = null;
+function getAudioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return _audioCtx;
+}
+function playKeyClick() {
+  try {
+    var ctx  = getAudioCtx();
+    var buf  = ctx.createBuffer(1, ctx.sampleRate * 0.04, ctx.sampleRate);
+    var data = buf.getChannelData(0);
+    // Sharp noise burst — decays very fast for a mechanical 'tick'
+    for (var i = 0; i < data.length; i++) {
+      var t = i / ctx.sampleRate;
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-t * 400);
+    }
+    var src  = ctx.createBufferSource();
+    var gain = ctx.createGain();
+    src.buffer = buf;
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    src.connect(gain);
+    gain.connect(ctx.destination);
+    src.start();
+  } catch(e) {}
+}
+
+/* ══════════════════════════════════════
+   COUNTDOWN 3-2-1
+══════════════════════════════════════ */
+var _countdownTimer = null;
+function runCountdown(onComplete) {
+  // Clear any running countdown
+  if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
+
+  var overlay = document.getElementById('countdownOverlay');
+  var numEl   = document.getElementById('countdownNum');
+  if (!overlay || !numEl) { onComplete(); return; }
+
+  // Prep the title area
+  titleEl.textContent = '';
+  titleEl.style.position = 'relative';
+
+  var counts = [3, 2, 1];
+  var step = 0;
+
+  function tick() {
+    if (step >= counts.length) {
+      numEl.className = '';
+      numEl.textContent = '';
+      titleEl.style.position = '';
+      onComplete();
+      return;
+    }
+    numEl.textContent = counts[step];
+    numEl.className = '';
+    void numEl.offsetWidth; // force reflow so animation restarts
+    numEl.className = 'pop';
+    step++;
+    _countdownTimer = setTimeout(tick, 900);
+  }
+  tick();
+}
 document.addEventListener('keydown', handleKeydown);
 document.addEventListener('keyup',   handleKeyup);
 
