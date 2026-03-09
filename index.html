@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Keyboard Warrior</title>
+<title>Keyboard Warriorss</title>
 <script>
   // Redirect iPad users to the optimised iPad build
   (function() {
@@ -1402,7 +1402,7 @@ body.pc-mode #extKeyPill {
     <path d="M28,14c0-.6-.4-1-1-1h-6c-.6,0-1,.4-1,1s.4,1,1,1h6c.6,0,1-.4,1-1Z"/>
     <path d="M25.5,39.3c-2.9-1-6,.6-7.2,3.9-.3.8-.1,1.5.5,1.8.4.2,1.1,0,1.3-.7.7-1.8,2.1-2.9,3.8-2.9,1.7,0,3.1,1.1,3.8,2.9.2.7.9.9,1.3.7,1.6-.9-.4-4.8-3.4-5.8Z"/>
   </svg>
-  <p class="prompt-sorry">Sorry, your screen is too small for Keyboard Warrior.</p>
+  <p class="prompt-sorry">Sorry, your screen is too small for Keyboard Warriors.</p>
   <p class="prompt-info">For the best training experience, we recommend a device with a physical keyboard attached.</p>
 </div>
 
@@ -1435,12 +1435,12 @@ body.pc-mode #extKeyPill {
   <div id="questionRow"></div>
   <div class="topRow">
     <div class="leftPanel">
-      <button id="mainBtn" onclick="mainButtonClick()">Start the game</button>
+      <button id="mainBtn" onclick="mainButtonClick()">Start</button>
       <button id="helpBtn" onclick="helpButtonClick()">Help</button>
     </div>
     <div class="middlePanel">
       <div style="position:relative;display:flex;align-items:center;justify-content:center;width:100%;">
-          <h2 id="title">Play Keyboard Warrior</h2>
+          <h2 id="title">Play Keyboard Warriors</h2>
           <div id="countdownOverlay"><span id="countdownNum"></span></div>
         </div>
     </div>
@@ -2672,6 +2672,7 @@ function updateKeyboardLighting(e, isDown) {
 ══════════════════════════════════════ */
 let gameState = 'idle';
 let currentMedal = null;
+let _confirmFromFinished = false; // true when confirm-reset entered from finished state
 let totalTime  = 0;
 let timerInterval   = null;
 let penaltyTimeout  = null;
@@ -2990,11 +2991,9 @@ function enterPause() {
   timerDiv.innerHTML = '<svg width="26" height="26" viewBox="0 0 26 26" style="display:block;vertical-align:top;" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="2" width="4" height="22" rx="1.5" fill="white"/><rect x="16" y="2" width="4" height="22" rx="1.5" fill="white"/></svg>';
   setTimerState('paused');
   mainBtn.textContent = 'Unpause';
-  // CHANGE 3: Reset button stays grey (not red)
   helpBtn.textContent = 'Reset';
   helpBtn.style.background = '#6b7280';
   helpBtn.style.color = 'white';
-  // CHANGE 2: lock key stays white — .active class in CSS keeps #f5f5f7
   if (lockKeyEl) lockKeyEl.classList.add('active');
 }
 
@@ -3012,28 +3011,58 @@ function unpause() {
 }
 
 function enterConfirmReset() {
+  _confirmFromFinished = (gameState === 'finished');
   gameState = 'confirm-reset';
-  if (currentMedal) resetTimerBox();
+  if (currentMedal && !_confirmFromFinished) resetTimerBox();
   titleEl.classList.remove('blurred');
   questionCountEl.classList.remove('blurred');
   titleEl.className = '';
-  titleEl.textContent = 'Reset your best score and start again?';
+  titleEl.textContent = _confirmFromFinished
+    ? 'Do you want to reset your high scores?'
+    : 'Reset your best score and start again?';
+  if (_confirmFromFinished) setAppSelectorGameActive(false);
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
   helpBtn.textContent = 'No';
   helpBtn.style.background = '#6b7280';
   helpBtn.style.color = 'white';
+  if (lockKeyEl) lockKeyEl.classList.add('active');
 }
 
 function confirmResetYes() {
+  var fromFinished = _confirmFromFinished;
+  _confirmFromFinished = false;
   bestRecord = { time: null, accuracy: null };
   try { localStorage.removeItem('kw_best'); } catch(e) {}
   updateBestDisplay();
   if (lockKeyEl) lockKeyEl.classList.remove('active');
   resetToIdle();
+  if (fromFinished) {
+    titleEl.textContent = 'Both records have been cleared.';
+  }
 }
 
 function confirmResetNo() {
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  if (_confirmFromFinished) {
+    // Return to medal screen — keep everything intact, show a tip
+    _confirmFromFinished = false;
+    gameState = 'finished';
+    // Restore medal on timerBox in case anything disturbed it
+    if (currentMedal) {
+      timerBox.className = 'timerBox medal-' + currentMedal;
+      timerBox.style.background = MEDAL_RIM[currentMedal](rimCurrent);
+    }
+    mainBtn.textContent = 'Try again?';
+    mainBtn.style.background = '';
+    helpBtn.textContent = 'Help';
+    helpBtn.style.background = '';
+    helpBtn.style.color = '';
+    titleEl.className = '';
+    setAppSelectorGameActive(false); // app selector stays active (between games)
+    showTip(tipIndex);
+    return;
+  }
   // If a game was in progress, return to paused; otherwise go to idle
   if (questionPool.length > 0 && answersLeft > 0 && answersLeft < 10) {
     gameState = 'paused';
@@ -3056,15 +3085,18 @@ function resetToIdle() {
   clearHelp();
   clearAllLit();
   heldKeys.clear();
-  mainBtn.textContent = 'Start the game';
+  mainBtn.textContent = 'Start';
   mainBtn.style.background = '';
   helpBtn.textContent = 'Help';
   helpBtn.style.background = '';
   helpBtn.style.color = '';
   if (lockKeyEl) lockKeyEl.classList.remove('active');
   titleEl.className = '';
-  titleEl.textContent = 'Play Keyboard Warrior';
+  titleEl.textContent = 'Play Keyboard Warriors';
   questionCountEl.innerHTML = ''; dotEls = [];
+  timerBox.style.background = '';
+  timerBox.style.removeProperty('--face-rot');
+  currentMedal = null;
   timerBox.className = 'timerBox';
   timerDiv.textContent = '0:00';
   greenHits = 0; totalHits = 0; hintPenaltyPct = 0; updateAccuracyDisplay(); dbgRefreshCtx(); dbgRefreshAccuracy();
@@ -3544,7 +3576,7 @@ function closeKbModal() {
     modal.style.animation = '';
     modal.style.pointerEvents = '';
   }, 550);
-  if (gameState === 'paused') unpause();
+  // Do NOT auto-unpause — player resumes via timer circle or lock key
 }
 
 function toggleKbModal() {
@@ -3668,8 +3700,8 @@ function dbgReport() {
     btn.textContent = 'Preparing…';
     setTimeout(function() { btn.textContent = 'Report'; }, 2500);
   }
-  var body    = 'Bug report from Keyboard Warrior:\n\n' + dbgBuildReport() + '\n\nPlease describe the issue here:';
-  var subject = 'Keyboard Warrior error report';
+  var body    = 'Bug report from Keyboard Warriors:\n\n' + dbgBuildReport() + '\n\nPlease describe the issue here:';
+  var subject = 'Keyboard Warriors error report';
   window.location.href = 'mailto:Wednesday%20Dessauer%20%3Cddessauer%40swin.edu.au%3E?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
 }
 
@@ -3785,7 +3817,7 @@ function dbgNextQuestion() {
     // Intro
     var intro = document.createElement('p');
     intro.style.cssText = 'font-size:13px;color:#374151;line-height:1.6;margin:0 0 10px';
-    intro.textContent = 'Keyboard Warrior was built for Chrome. It will work in ' + browser +
+    intro.textContent = 'Keyboard Warriors was built for Chrome. It will work in ' + browser +
       ', but a few shortcuts clash with browser actions:';
 
     // List
@@ -4096,12 +4128,33 @@ function rimTick() {
   }
 }
 
+// Medal tilt on press/release
+function medalPressDown(clientX) {
+  if (!currentMedal) return;
+  var rect = timerBox.getBoundingClientRect();
+  var side = (clientX - rect.left) / rect.width < 0.5 ? -1 : 1;
+  rimTarget = side * 28; // kick it hard to one side
+  if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
+}
+function medalPressUp() {
+  if (!currentMedal) return;
+  rimTarget = 0; // snap back toward centre
+  if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
+}
+
 document.addEventListener('mousemove', e => {
-  if (gameState !== 'finished' || !currentMedal) return;
+  if (!currentMedal) return;
+  if (gameState !== 'finished' && gameState !== 'confirm-reset') return;
   const d = (e.clientX / window.innerWidth) - 0.5; // -0.5..+0.5
   rimTarget = d * 30; // ±15°
   if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
 });
+
+timerBox.addEventListener('mousedown', e => { medalPressDown(e.clientX); });
+timerBox.addEventListener('mouseup',   () => { medalPressUp(); });
+timerBox.addEventListener('mouseleave',() => { medalPressUp(); });
+timerBox.addEventListener('touchstart', e => { if (e.touches.length) medalPressDown(e.touches[0].clientX); }, { passive: true });
+timerBox.addEventListener('touchend',   () => { medalPressUp(); }, { passive: true });
 
 // Key lighting active at all times, not just during play
 
