@@ -4,6 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Keyboard Warrior — iPad</title>
+<script>
+  // Show unsupported message immediately for phones (small touch screens)
+  (function() {
+    var ua = navigator.userAgent || '';
+    var isPhone = /iPhone|iPod/.test(ua) ||
+                  (/Android/.test(ua) && /Mobile/.test(ua));
+    if (isPhone) {
+      // Wait for DOM then show phone prompt, hide everything else
+      document.addEventListener('DOMContentLoaded', function() {
+        var p = document.getElementById('phonePrompt');
+        if (p) p.style.display = 'flex';
+      });
+    }
+  })();
+</script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 
@@ -1315,8 +1330,34 @@ body.pc-mode #extKeyPill {
   color: #374151;
   z-index: 9999;
 }
-#rotatePrompt svg { opacity: 0.5; }
+#rotatePrompt svg { opacity: 0.55; }
 #rotatePrompt p { font-size: 18px; color: #6b7280; }
+
+#phonePrompt {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #f0f4f8;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px;
+  font-family: system-ui, -apple-system, sans-serif;
+  z-index: 10000;
+  text-align: center;
+}
+.prompt-sorry {
+  font-size: 20px;
+  font-weight: 600;
+  color: #374151;
+}
+.prompt-info {
+  font-size: 16px;
+  color: #6b7280;
+  max-width: 320px;
+  line-height: 1.6;
+}
 
 /* Fixed body — centred column */
 body {
@@ -1349,11 +1390,37 @@ body {
 
 #statsRow {
   width: 100% !important;
+  /* Mirror gameContainer padding so statLeft/Right sit above leftPanel/rightPanel */
+  padding-left: 50px !important;
+  padding-right: 50px !important;
+}
+@media (max-width: 1140px) {
+  #statsRow { padding-left: 40px !important; padding-right: 40px !important; }
+}
+@media (min-width: 1340px) {
+  #statsRow { padding-left: 60px !important; padding-right: 60px !important; }
 }
 
 #keyboardWrap {
   width: 100% !important;
 }
+
+/* Keyboard scaling — scale up from 40px base keys using CSS transform.
+   transform-origin top center keeps it anchored; margin-bottom compensates
+   for the space the scaled-up panel would otherwise overflow into. */
+#keyboardWrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: visible;
+}
+#keyboardPanel {
+  transform-origin: top center;
+}
+
+/* Default (iPad Air/Pro 11" / iPad 10th gen — ~1180px wide) */
+#keyboardPanel { transform: scale(1.28); }
+#keyboardWrap  { margin-bottom: 84px; } /* (scale-1) * natural kb height ~330px * 0.28 ≈ 84 */
 
 /* iPad mini 6 landscape: 1133×744 */
 @media (max-width: 1140px) {
@@ -1364,24 +1431,52 @@ body {
   #mainBtn, #helpBtn { width: 120px !important; font-size: 13px !important; }
   .rightPanel { width: 110px !important; }
   .timerBox { width: 84px !important; height: 84px !important; }
+  #keyboardPanel { transform: scale(1.18); }
+  #keyboardWrap  { margin-bottom: 56px; }
 }
 
 /* iPad Pro 12.9" landscape: 1366×1024 */
 @media (min-width: 1340px) {
   #ipadLayout { width: 1240px; }
   #gameContainer { padding: 8px 60px 28px !important; }
+  #keyboardPanel { transform: scale(1.48); }
+  #keyboardWrap  { margin-bottom: 144px; }
 }
 
 /* Pill fixed width so it never collapses */
 #appPill { width: 128px; }
+
+/* kbIcon: align its centre with the centre of .leftPanel.
+   leftPanel is 140px wide, gameContainer padding is 50px.
+   Centre of leftPanel from layout left edge = 50 + 70 = 120px.
+   Icon is 44px wide, so left = 120 - 22 = 98px. */
+#keyboardWrap #kbIcon {
+  left: 98px !important;
+}
+@media (max-width: 1140px) {
+  /* leftPanel 120px, padding 40px → centre = 40+60 = 100px, icon 44px → 78px */
+  #keyboardWrap #kbIcon { left: 78px !important; }
+}
+@media (min-width: 1340px) {
+  /* leftPanel 140px, padding 60px → centre = 60+70 = 130px, icon 44px → 108px */
+  #keyboardWrap #kbIcon { left: 108px !important; }
+}
 </style>
 </head>
 <body>
+<div id="phonePrompt">
+  <p class="prompt-sorry">Sorry, your screen is too small for Keyboard Warrior.</p>
+  <p class="prompt-info">It works on larger touch screens like iPads, but for the best training experience we recommend a device with a physical keyboard attached.</p>
+</div>
+
 <div id="rotatePrompt">
-  <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="16" y="8" width="32" height="48" rx="5" stroke="#374151" stroke-width="3" fill="none"/>
-    <path d="M8 32 C8 20 20 8 32 8" stroke="#374151" stroke-width="3" stroke-linecap="round" fill="none"/>
-    <polyline points="28,4 32,8 28,12" stroke="#374151" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 111.6 110.2" width="90" height="90">
+    <defs><style>.rp-white{fill:#fff;}</style></defs>
+    <rect class="rp-white" x="29.6" y="42.8" width="74.1" height="59.4" rx="5.1" ry="5.1"/>
+    <path d="M96.8,40.4h-26.8c0-.1-.2-.2-.3-.3V13.8c0-4.7-3.3-8.4-7.9-9.1H13.5c-4.6.7-7.9,4.4-7.9,9.1v60.6c0,4,3.4,8.9,7.8,8.9h13.9v13.4c.7,4.5,4.3,7.9,8.9,7.9h60.8c4,0,8.7-3.5,8.7-7.8v-48.6c-.8-4.4-4.3-7.8-8.9-7.8ZM14.6,79.6c-3,0-5.5-2.3-5.5-5.4V13.7c0-3.1,2.4-5.4,5.5-5.4h46.1c3,0,5.5,2.3,5.5,5.3v22.8c-5.9-5.2-13.4-8.2-21.4-8.2s-2,.9-2,2,.9,2,2,2c7.5,0,14.5,3,19.8,8.1h-28.5c-4.5,0-8,3.5-8.8,7.9v31.4s-12.7,0-12.7,0ZM102.2,95.6c0,2.9-2.3,5.3-5.3,5.3h-60.6c-3,0-5.5-2.3-5.5-5.3v-46.4c0-3,2.4-5.3,5.4-5.3h30.3s1.3,0,1.3,0c1.9,2.5,3.5,5.2,4.7,8.3l-4.7-1.8,9.1,14.6,3.7-16.8-4,3.4c-1-2.8-2.3-5.3-3.8-7.7h24.1c3,0,5.4,2.4,5.4,5.5v46.3Z"/>
+    <path d="M32.4,15.4h10.6c1.1,0,1.8-.8,1.9-1.7,0-1-.8-1.8-1.9-1.8h-10.5c-1.1,0-1.8.8-1.8,1.8,0,.9.8,1.7,1.8,1.7Z"/>
+    <path d="M96.8,65.3c-.9,0-1.7.8-1.7,1.8v10.6c0,1.1.8,1.8,1.7,1.9,1,0,1.8-.8,1.8-1.9v-10.5c0-1.1-.8-1.8-1.8-1.8Z"/>
+    <circle cx="38" cy="72.5" r="3.8"/>
   </svg>
   <p>Please rotate your device to landscape to play.</p>
 </div>
@@ -1417,7 +1512,7 @@ body {
   <div id="questionRow"></div>
   <div class="topRow">
     <div class="leftPanel">
-      <button id="mainBtn" onclick="mainButtonClick()">Start the game</button>
+      <button id="mainBtn" onclick="mainButtonClick()">Start</button>
       <button id="helpBtn" onclick="helpButtonClick()">Help</button>
     </div>
     <div class="middlePanel">
@@ -2271,6 +2366,17 @@ requestAnimationFrame(function() {
     buildKeyboard(false);
     document.getElementById('keyboardPanel').classList.toggle('pc-keys', currentOs === 'pc');
     alignKbIcon();
+    // Restore longer button label if it fits without wrapping
+    (function() {
+      var btn = document.getElementById('mainBtn');
+      if (!btn) return;
+      btn.textContent = 'Start the game';
+      // Force layout so scrollHeight is accurate
+      void btn.offsetHeight;
+      if (btn.scrollHeight > btn.offsetHeight) {
+        btn.textContent = 'Start';
+      }
+    })();
     // iPad fork: unconditionally enable touch + sticky.
     // Users only arrive here after the root index identified a touch device.
     setStickyKeys(true);
