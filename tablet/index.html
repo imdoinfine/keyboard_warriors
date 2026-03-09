@@ -2,20 +2,21 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Keyboard Warrior — Tablet</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Keyboard Warrior</title>
 <script>
-  // Show unsupported message immediately for phones (small touch screens)
+  // Redirect iPad users to the optimised iPad build
   (function() {
     var ua = navigator.userAgent || '';
-    var isPhone = /iPhone|iPod/.test(ua) ||
-                  (/Android/.test(ua) && /Mobile/.test(ua));
-    if (isPhone) {
-      // Wait for DOM then show phone prompt, hide everything else
-      document.addEventListener('DOMContentLoaded', function() {
-        var p = document.getElementById('phonePrompt');
-        if (p) p.style.display = 'flex';
-      });
+    var isPhone = /iPhone|iPod/.test(ua) || (/Android/.test(ua) && /Mobile/.test(ua));
+    var isTablet = !isPhone && (
+      /iPad/.test(ua) ||
+      (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ||
+      (/Android/.test(ua) && !/Mobile/.test(ua)) ||
+      (navigator.maxTouchPoints > 1 && window.screen.width >= 768)
+    );
+    if (isTablet && window.location.pathname.indexOf('tablet') === -1) {
+      window.location.replace('tablet/index.html');
     }
   })();
 </script>
@@ -385,8 +386,8 @@ body {
   color: #6b7280;
   white-space: nowrap;
 }
-#statLeft  { width: auto; text-align: left; }
-#statRight { width: auto; text-align: right; }
+#statLeft  { width: 140px; text-align: center; }
+#statRight { width: 130px; text-align: center; }
 
 @keyframes statPulse {
   0%   { transform: scale(1);    color: #6b7280; }
@@ -1069,6 +1070,7 @@ body.pc-mode #extKeyPill {
 @media (max-width: 599px) {
   #keyboardWrap { display: none; }
   #kbIcon { display: none; }
+  #kbModal { display: none !important; }
 
   body { padding: 12px; }
 
@@ -1302,179 +1304,9 @@ body.pc-mode #extKeyPill {
 #appPill.open .app-option.selected .app-caret {
   transform: rotate(90deg);   /* points down ▼ when open */
 }
-
-/* ══════════════════════════════════════
-   iPAD FIXED LAYOUT
-   Landscape only — portrait shows rotate prompt
-══════════════════════════════════════ */
-
-/* Portrait: hide everything, show rotate prompt */
-@media (orientation: portrait) {
-  body > *:not(#rotatePrompt) { display: none !important; }
-  #rotatePrompt { display: flex !important; }
-}
-@media (orientation: landscape) {
-  #rotatePrompt { display: none !important; }
-}
-
-#rotatePrompt {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: #f0f4f8;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  font-family: system-ui, -apple-system, sans-serif;
-  color: #374151;
-  z-index: 9999;
-}
-#rotatePrompt svg { opacity: 0.55; }
-#rotatePrompt p { font-size: 18px; color: #6b7280; }
-
-#phonePrompt {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: #f0f4f8;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 40px;
-  font-family: system-ui, -apple-system, sans-serif;
-  z-index: 10000;
-  text-align: center;
-}
-.prompt-sorry {
-  font-size: 20px;
-  font-weight: 600;
-  color: #374151;
-}
-.prompt-info {
-  font-size: 16px;
-  color: #6b7280;
-  max-width: 320px;
-  line-height: 1.6;
-}
-
-/* Fixed body — centred column */
-body {
-  padding: 0 !important;
-  min-height: 100vh !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  gap: 0 !important;
-}
-
-/* Single wrapper — everything inherits this width so columns line up */
-#ipadLayout {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  /* default: iPad 10th gen / Air / Pro 11" landscape */
-  width: 1060px;
-}
-
-#gameContainer {
-  width: 100% !important;
-  padding: 6px 50px 20px !important;
-}
-
-/* Stats: use JS alignment after keyboard build — see alignStats() */
-#statsRow {
-  width: 100% !important;
-  position: relative;
-}
-#statLeft, #statRight {
-  position: absolute !important;
-  width: auto !important;
-  text-align: left !important;
-}
-#statRight { text-align: right !important; }
-
-#keyboardWrap {
-  width: 100% !important;
-}
-
-/* Keyboard scaling — scale up from 40px base keys using CSS transform.
-   transform-origin top center keeps it anchored; margin-bottom compensates
-   for the space the scaled-up panel would otherwise overflow into. */
-#keyboardWrap {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  overflow: visible;
-}
-#keyboardPanel {
-  transform-origin: top center;
-}
-
-/* Default (iPad Air/Pro 11" / iPad 10th gen — ~1180px wide) */
-#keyboardPanel { transform: scale(1.28); }
-#keyboardWrap  { margin-bottom: 84px; } /* (scale-1) * natural kb height ~330px * 0.28 ≈ 84 */
-
-/* iPad mini 6 landscape: 1133×744 */
-@media (max-width: 1140px) {
-  #ipadLayout { width: 980px; }
-  #gameContainer { padding: 4px 40px 16px !important; }
-  .topRow { min-height: 90px !important; }
-  .leftPanel { width: 120px !important; }
-  #mainBtn, #helpBtn { width: 120px !important; font-size: 13px !important; }
-  .rightPanel { width: 110px !important; }
-  .timerBox { width: 84px !important; height: 84px !important; }
-  #keyboardPanel { transform: scale(1.18); }
-  #keyboardWrap  { margin-bottom: 56px; }
-}
-
-/* iPad Pro 12.9" landscape: 1366×1024 */
-@media (min-width: 1340px) {
-  #ipadLayout { width: 1240px; }
-  #gameContainer { padding: 8px 60px 28px !important; }
-  #keyboardPanel { transform: scale(1.48); }
-  #keyboardWrap  { margin-bottom: 144px; }
-}
-
-/* Pill fixed width so it never collapses */
-#appPill { width: 128px; }
-
-/* kbIcon positioned entirely by alignKbIcon() JS measurement.
-   Pulse override drops translateY since transform:none is set by JS. */
-@keyframes kbIconPulseTablet {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.22); }
-  100% { transform: scale(1); }
-}
-#keyboardWrap #kbIcon.pulse {
-  animation: kbIconPulseTablet 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
 </style>
 </head>
 <body>
-<div id="phonePrompt">
-  <p class="prompt-sorry">Sorry, your screen is too small for Keyboard Warrior.</p>
-  <p class="prompt-info">It works on larger touch screens like iPads, but for the best training experience we recommend a device with a physical keyboard attached.</p>
-</div>
-
-<div id="rotatePrompt">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 111.6 110.2" width="90" height="90">
-    <defs><style>.rp-white{fill:#fff;}</style></defs>
-    <rect class="rp-white" x="29.6" y="42.8" width="74.1" height="59.4" rx="5.1" ry="5.1"/>
-    <path d="M96.8,40.4h-26.8c0-.1-.2-.2-.3-.3V13.8c0-4.7-3.3-8.4-7.9-9.1H13.5c-4.6.7-7.9,4.4-7.9,9.1v60.6c0,4,3.4,8.9,7.8,8.9h13.9v13.4c.7,4.5,4.3,7.9,8.9,7.9h60.8c4,0,8.7-3.5,8.7-7.8v-48.6c-.8-4.4-4.3-7.8-8.9-7.8ZM14.6,79.6c-3,0-5.5-2.3-5.5-5.4V13.7c0-3.1,2.4-5.4,5.5-5.4h46.1c3,0,5.5,2.3,5.5,5.3v22.8c-5.9-5.2-13.4-8.2-21.4-8.2s-2,.9-2,2,.9,2,2,2c7.5,0,14.5,3,19.8,8.1h-28.5c-4.5,0-8,3.5-8.8,7.9v31.4s-12.7,0-12.7,0ZM102.2,95.6c0,2.9-2.3,5.3-5.3,5.3h-60.6c-3,0-5.5-2.3-5.5-5.3v-46.4c0-3,2.4-5.3,5.4-5.3h30.3s1.3,0,1.3,0c1.9,2.5,3.5,5.2,4.7,8.3l-4.7-1.8,9.1,14.6,3.7-16.8-4,3.4c-1-2.8-2.3-5.3-3.8-7.7h24.1c3,0,5.4,2.4,5.4,5.5v46.3Z"/>
-    <path d="M32.4,15.4h10.6c1.1,0,1.8-.8,1.9-1.7,0-1-.8-1.8-1.9-1.8h-10.5c-1.1,0-1.8.8-1.8,1.8,0,.9.8,1.7,1.8,1.7Z"/>
-    <path d="M96.8,65.3c-.9,0-1.7.8-1.7,1.8v10.6c0,1.1.8,1.8,1.7,1.9,1,0,1.8-.8,1.8-1.9v-10.5c0-1.1-.8-1.8-1.8-1.8Z"/>
-    <circle cx="38" cy="72.5" r="3.8"/>
-  </svg>
-  <p>Please rotate your device to landscape to play.</p>
-</div>
-
 
 <!-- OS toggle row: sits above the game panel -->
 <div id="osRow">
@@ -1506,7 +1338,7 @@ body {
   <div id="questionRow"></div>
   <div class="topRow">
     <div class="leftPanel">
-      <button id="mainBtn" onclick="mainButtonClick()">Start</button>
+      <button id="mainBtn" onclick="mainButtonClick()">Start the game</button>
       <button id="helpBtn" onclick="helpButtonClick()">Help</button>
     </div>
     <div class="middlePanel">
@@ -1548,8 +1380,6 @@ body {
   </div>
 </div>
 
-<div id="ipadLayout">
-
 <!-- Stats bar: always visible -->
 <div id="statsRow">
   <span id="statLeft"></span>
@@ -1571,8 +1401,6 @@ body {
     <div class="kb-row" id="row-bot"></div>
   </div>
 </div>
-
-</div><!-- /#ipadLayout -->
 
 <div id="debugOverlay" style="position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;border-radius:8px;z-index:9999;pointer-events:auto;line-height:1.5;display:none;flex-direction:row;gap:0;align-items:flex-start;overflow:hidden;max-height:800px;transition:max-height 0.2s ease,border-radius 0.2s ease;" aria-hidden="true">
   <!-- Left column -->
@@ -2311,7 +2139,14 @@ function onOsToggle() {
   if (kbModalOpen) updateModalToggles();
 }
 
-
+// On mobile: auto-enable sticky + touch modes, show updated message
+if (detectedOs === 'mobile') {
+  setStickyKeys(true);
+  setTouchEnabled(true);
+  document.getElementById('stickyRow').classList.add('disabled');
+  osMismatchEl.textContent = 'We recommend training with a real mechanical keyboard.';
+  osMismatchEl.classList.add('show');
+}
 
 // Set the initial toggle position to match the detected OS
 // (defaults to PC for unknown/other systems)
@@ -2339,24 +2174,6 @@ function updateKeyboardMode() {
     buildKeyboard(mode === 'mini');
   }
 }
-function alignStats() {
-  var sl   = document.getElementById('statLeft');
-  var sr   = document.getElementById('statRight');
-  var row  = document.getElementById('statsRow');
-  var lp   = document.querySelector('.leftPanel');
-  var rp   = document.querySelector('.rightPanel');
-  if (!sl || !sr || !row || !lp || !rp) return;
-  var rowRect = row.getBoundingClientRect();
-  var lpRect  = lp.getBoundingClientRect();
-  var rpRect  = rp.getBoundingClientRect();
-  // Pin statLeft's left edge to leftPanel's left edge
-  sl.style.left  = (lpRect.left  - rowRect.left) + 'px';
-  sl.style.right = 'auto';
-  // Pin statRight's right edge to rightPanel's right edge
-  sr.style.right = (rowRect.right - rpRect.right) + 'px';
-  sr.style.left  = 'auto';
-}
-
 function alignKbIcon() {
   var icon   = document.getElementById('kbIcon');
   var kpanel = document.getElementById('keyboardPanel');
@@ -2367,44 +2184,23 @@ function alignKbIcon() {
   icon.style.left = (kpanelLeft - iconW * 2) + 'px';
 }
 
-// iPad: resize only repositions modal if open
 window.addEventListener('resize', function() {
+  updateKeyboardMode();
   alignKbIcon();
-  alignStats();
-  if (kbModalOpen) positionKbModal();
+  if (kbModalOpen) {
+    if (window.innerWidth < 600) {
+      closeKbModal();
+    } else {
+      positionKbModal();
+    }
+  }
 });
-// iPad fork: always full keyboard, never mini
-currentKbMode = 'full';
-keyboardWrap.style.display = 'flex';
-
-// Double-rAF ensures layout is complete before we measure or build anything
-requestAnimationFrame(function() {
-  requestAnimationFrame(function() {
-    buildKeyboard(false);
-    document.getElementById('keyboardPanel').classList.toggle('pc-keys', currentOs === 'pc');
-    alignKbIcon();
-    alignStats();
-    // Restore longer button label if it fits without wrapping
-    (function() {
-      var btn = document.getElementById('mainBtn');
-      if (!btn) return;
-      btn.textContent = 'Start the game';
-      // Force layout so scrollHeight is accurate
-      void btn.offsetHeight;
-      if (btn.scrollHeight > btn.offsetHeight) {
-        btn.textContent = 'Start';
-      }
-    })();
-    // iPad fork: unconditionally enable touch + sticky.
-    // Users only arrive here after the root index identified a touch device.
-    setStickyKeys(true);
-    setTouchEnabled(true);
-    var stickyRow = document.getElementById('stickyRow');
-    if (stickyRow) stickyRow.classList.add('disabled');
-    osMismatchEl.textContent = 'We recommend training with a real mechanical keyboard.';
-    osMismatchEl.classList.add('show');
-  });
-});
+updateKeyboardMode();
+setTimeout(alignKbIcon, 50);
+// Show mismatch pill after initial keyboard build
+updateMismatchPill();
+// Apply rounded style if starting in PC mode
+document.getElementById('keyboardPanel').classList.toggle('pc-keys', currentOs === 'pc');
 
 /* ══════════════════════════════════════
    SHORTCUT → KEY CODES
@@ -3460,13 +3256,10 @@ function onTouchToggle() {
     setStickyKeys(true);
     document.getElementById('stickyRow').classList.add('disabled');
     showModeToast('On-Screen Keyboard Active');
-    osMismatchEl.textContent = 'We recommend training with a real mechanical keyboard.';
-    osMismatchEl.classList.add('show');
   } else {
     setStickyKeys(false);
     document.getElementById('stickyRow').classList.remove('disabled');
     showModeToast('On-Screen Keyboard = Display Only');
-    osMismatchEl.classList.remove('show');
   }
 }
 
@@ -3580,8 +3373,8 @@ openKbModal = function() {
 // ── Keyboard icon modal ──────────────────────────────────────────────────────
 var kbModalOpen = false;
 
-var MODAL_W = 340;
-var MODAL_H = 420;
+var MODAL_W = 290;
+var MODAL_H = 360;
 
 function positionKbModal() {
   var modal  = document.getElementById('kbModal');
@@ -3742,8 +3535,6 @@ function dbgReport() {
   window.location.href = 'mailto:Wednesday%20Dessauer%20%3Cddessauer%40swin.edu.au%3E?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
 }
 
-var DBG_DEVICE = 'Tablet';
-
 function dbgRefreshCtx() {
   const top = document.getElementById('dbgCtxTop');
   const sub = document.getElementById('dbgCtxSub');
@@ -3751,7 +3542,7 @@ function dbgRefreshCtx() {
   const appLabels = {Ps:'Photoshop', Ai:'Illustrator', In:'InDesign', Ae:'After Effects', Fi:'Figma'};
   const appName  = appLabels[currentApp] || currentApp;
   const osName   = currentOs === 'pc' ? 'PC/Windows' : 'Mac';
-  const device   = DBG_DEVICE;
+  const device   = typeof DBG_DEVICE !== 'undefined' ? DBG_DEVICE : 'computer';
   const state    = gameState;
   const pool     = questionPool.length;
   const qi       = pool > 0 ? (questionIndex % pool) + 1 : '—';
