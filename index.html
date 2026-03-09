@@ -38,15 +38,21 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 20px;
   padding: 40px 28px;
   text-align: center;
   font-family: 'Lato', system-ui, sans-serif;
+}
+#phonePrompt svg {
+  flex-shrink: 0;
+  fill: #1e3a5f;
+  opacity: 0.6;
 }
 .prompt-sorry {
   font-size: 18px;
   font-weight: 700;
   color: #1e3a5f;
-  margin-bottom: 16px;
+  margin: 0;
   line-height: 1.4;
 }
 .prompt-info {
@@ -1391,6 +1397,11 @@ body.pc-mode #extKeyPill {
 
 <!-- OS toggle row: sits above the game panel -->
 <div id="phonePrompt">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 60" width="72" height="90" fill="white">
+    <path d="M31.3,9h-14.6c-2.6,0-4.7,2.1-4.7,4.7v34.6c0,2.6,2.1,4.7,4.7,4.7h14.6c2.6,0,4.7-2.1,4.7-4.7V13.7c0-2.6-2.1-4.7-4.7-4.7ZM31.3,51h-14.6c-1.5,0-2.7-1.2-2.7-2.7v-16.9c.7,1,1.9,1.7,3.2,1.7,2.2,0,3.9-1.8,3.9-3.9s-1.8-3.9-3.9-3.9-2.5.7-3.2,1.7v-13.3c0-1.5,1.2-2.7,2.7-2.7h14.6c1.5,0,2.7,1.2,2.7,2.7v13.3c-.7-1-1.9-1.7-3.2-1.7-2.2,0-3.9,1.8-3.9,3.9s1.8,3.9,3.9,3.9,2.5-.7,3.2-1.7v16.9c0,1.5-1.2,2.7-2.7,2.7Z"/>
+    <path d="M28,14c0-.6-.4-1-1-1h-6c-.6,0-1,.4-1,1s.4,1,1,1h6c.6,0,1-.4,1-1Z"/>
+    <path d="M25.5,39.3c-2.9-1-6,.6-7.2,3.9-.3.8-.1,1.5.5,1.8.4.2,1.1,0,1.3-.7.7-1.8,2.1-2.9,3.8-2.9,1.7,0,3.1,1.1,3.8,2.9.2.7.9.9,1.3.7,1.6-.9-.4-4.8-3.4-5.8Z"/>
+  </svg>
   <p class="prompt-sorry">Sorry, your screen is too small for Keyboard Warrior.</p>
   <p class="prompt-info">For the best training experience, we recommend a device with a physical keyboard attached.</p>
 </div>
@@ -2462,8 +2473,18 @@ function fadeKeyOut(code) {
 function checkStickyShortcut() {
   // All required codes must be green-toggled on; no orange key may be active.
   if ([...stickyLit.values()].includes('orange')) return false;
+  // Primary path: check the canonical shortcut codes
   const needed = shortcutToCodes(currentAnswer);
-  return neededSatisfied(needed);
+  if (neededSatisfied(needed)) return true;
+  // Alternate path: if this shortcut has alternates (e.g. H → Space),
+  // check whether the green-held keys satisfy any alternate instead.
+  const alts = SHORTCUT_ALTERNATES[currentAnswer.toUpperCase()];
+  if (alts) {
+    for (const alt of alts) {
+      if (neededSatisfied(shortcutToCodes(alt))) return true;
+    }
+  }
+  return false;
 }
 
 function isKeyPartOfShortcut(e, token) {
