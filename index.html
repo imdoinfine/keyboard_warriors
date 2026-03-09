@@ -3660,9 +3660,10 @@ function positionIcons() {
   if (!panel || !wrap) return;
   var pRect = panel.getBoundingClientRect();
   var wRect = wrap.getBoundingClientRect();
-  var GAP   = 18;
-  if (kb) kb.style.left = Math.round(pRect.left - wRect.left - kb.offsetWidth - GAP) + 'px';
-  if (br) br.style.left = Math.round(pRect.right - wRect.left + GAP) + 'px';
+  var KB_GAP = 18;  // left: keyboard icon
+  var BR_GAP = 36;  // right: browser icon (wider SVG needs more air)
+  if (kb) kb.style.left = Math.round(pRect.left - wRect.left - kb.offsetWidth - KB_GAP) + 'px';
+  if (br) br.style.left = Math.round(pRect.right - wRect.left + BR_GAP) + 'px';
 }
 var MODAL_W = 290;
 var MODAL_H = 395;
@@ -3678,10 +3679,10 @@ function positionKbModal() {
   var modal = document.getElementById('kbModal');
   var r     = _kbPanelRect();
   if (!modal || !r) return;
-  // Centred over keyboard panel, offset slightly left when both open
-  var offset = browserModalOpen ? -8 : 0;
-  modal.style.top   = Math.round(r.top + window.scrollY) + 'px';
-  modal.style.left  = Math.round(r.left + window.scrollX + (r.width - MODAL_W) / 2 + offset) + 'px';
+  // Right of panel centre (clears cmd/alt labels), pulled up above keyboard
+  var cx    = r.left + window.scrollX + r.width / 2;
+  modal.style.top   = Math.round(r.top + window.scrollY - 80) + 'px';
+  modal.style.left  = Math.round(cx - MODAL_W / 2 + 40) + 'px';
   modal.style.width = MODAL_W + 'px';
   if (!modal.style.height) modal.style.height = MODAL_H + 'px';
 }
@@ -3690,7 +3691,7 @@ function openKbModal() {
   var km = document.getElementById('kbModal');
   var bm = document.getElementById('browserModal');
   km.style.zIndex = '202';
-  if (bm) { bm.style.zIndex = '201'; positionBrowserModal(); }
+  if (bm) bm.style.zIndex = '201';
   positionKbModal();
   km.classList.add('visible');
   kbModalOpen = true;
@@ -3714,7 +3715,6 @@ function closeKbModal() {
     modal.classList.remove('visible');
     modal.style.animation = '';
     modal.style.pointerEvents = '';
-    if (browserModalOpen) positionBrowserModal(); // re-centre if other still open
   }, 550);
   // Do NOT auto-unpause — player resumes via timer circle or lock key
 }
@@ -3727,10 +3727,10 @@ function positionBrowserModal() {
   var modal = document.getElementById('browserModal');
   var r     = _kbPanelRect();
   if (!modal || !r) return;
-  // Centred over keyboard panel, offset slightly right when both open
-  var offset = kbModalOpen ? 8 : 0;
-  modal.style.top   = Math.round(r.top + window.scrollY) + 'px';
-  modal.style.left  = Math.round(r.left + window.scrollX + (r.width - BROWSER_MODAL_W) / 2 + offset) + 'px';
+  // Further right + slightly lower than kb modal so both X buttons stay clear
+  var cx    = r.left + window.scrollX + r.width / 2;
+  modal.style.top   = Math.round(r.top + window.scrollY - 60) + 'px';
+  modal.style.left  = Math.round(cx - BROWSER_MODAL_W / 2 + 80) + 'px';
   modal.style.width = BROWSER_MODAL_W + 'px';
   if (!modal.style.height) modal.style.height = BROWSER_MODAL_H + 'px';
 }
@@ -3820,7 +3820,7 @@ function openBrowserModal() {
   var bm = document.getElementById('browserModal');
   var km = document.getElementById('kbModal');
   bm.style.zIndex = '202';
-  if (km) { km.style.zIndex = '201'; positionKbModal(); }
+  if (km) km.style.zIndex = '201';
   positionBrowserModal();
   bm.classList.remove('visible'); // reset in case re-opened
   bm.style.animation = '';
@@ -3838,7 +3838,6 @@ function closeBrowserModal() {
     modal.classList.remove('visible');
     modal.style.animation = '';
     modal.style.pointerEvents = '';
-    if (kbModalOpen) positionKbModal(); // re-centre if other still open
   }, 550);
 }
 
