@@ -1206,6 +1206,7 @@ body.pc-mode #extKeyPill {
   gap: 7px;
   flex-shrink: 0;
   position: relative;
+  overflow: visible;
 }
 #appSelectorLabel {
   font-family: 'Lato', system-ui, sans-serif;
@@ -1234,8 +1235,15 @@ body.pc-mode #extKeyPill {
   overscroll-behavior: none;
 }
 #appPill.open {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 500;
   height: auto;
   max-height: 123px;
+  width: max-content;
+  min-width: 100%;
+  border-radius: 0 0 10px 10px;
 }
 /* During game: border and background vanish — looks like plain text.
    JS blocks interaction via gameState check. Pill stays in layout. */
@@ -1473,6 +1481,14 @@ body {
 }
 
 /* Countdown overlay inside #title area */
+@keyframes questionPop {
+  0%   { opacity: 0; transform: scale(0.94); }
+  60%  { opacity: 1; transform: scale(1.015); }
+  100% { opacity: 1; transform: scale(1); }
+}
+#title.question-pop {
+  animation: questionPop 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
 @keyframes countPop {
   0%   { transform: scale(2.2); opacity: 0; }
   20%  { transform: scale(1.0); opacity: 1; }
@@ -1491,7 +1507,7 @@ body {
 #countdownNum {
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 64px;
-  font-weight: 900;
+  font-weight: 600;
   color: #1e3a5f;
   opacity: 0;
   line-height: 1;
@@ -1885,7 +1901,7 @@ function buildKey(cfg, isMini) {
       el.style.display = 'flex';
       el.style.alignItems = 'center';
       el.style.justifyContent = 'center';
-      el.addEventListener('mousedown', function(ev) { ev.preventDefault(); if (touchEnabled) { handleKeyTouch(ev, el); } else { togglePause(); } });
+      el.addEventListener('mousedown', function(ev) { ev.preventDefault(); togglePause(); });
       lockKeyEl = el;
       break;
     case 'letter':
@@ -2996,7 +3012,8 @@ function helpButtonClick() {
 
 /* CHANGE 5: clicking the ⏸ timer unpauses */
 function timerBoxClick() {
-  if (gameState === 'paused') unpause();
+  if (gameState === 'playing') { enterPause(); return; }
+  if (gameState === 'paused')  { unpause(); return; }
 }
 
 /* ══════════════════════════════════════
@@ -3084,6 +3101,7 @@ function clearHelp() {
    PAUSE / EASTER EGG
 ══════════════════════════════════════ */
 function togglePause() {
+  if (gameState === 'counting')  { cancelCountdown(); return; }
   if (gameState === 'playing')   { enterPause(); return; }
   if (gameState === 'paused')    {
     // Only offer reset if there's actually a score to reset
@@ -3398,8 +3416,11 @@ function toggleAppDropdown() {
 }
 
 function openAppPill() {
+  // Cap height so the open pill never clips outside the viewport
+  var rect     = appPillEl.getBoundingClientRect();
+  var available = window.innerHeight - rect.bottom - 8;
+  appPillEl.style.maxHeight = Math.min(123, Math.max(48, available)) + 'px';
   appPillEl.classList.add('open');
-  // Reset scroll so list shows from top when fully open
   appPillEl.scrollTop = 0;
 }
 
@@ -3423,6 +3444,7 @@ function setAppSelectorGameActive(active) {
 // ── Modal toggles ─────────────────────────────────────────────────────────────
 var stickyKeysOn = false;
 var touchEnabled     = false;
+var soundEnabled     = false; // enabled automatically when touch turns on
 var hasFullKeyboard  = true;  // false = tenkeyless/compact — skip extended key questions
 
 function setStickyKeys(on) {
@@ -3460,15 +3482,29 @@ function onKbSizeToggle() {
 function setTouchEnabled(on) {
   touchEnabled = on;
   var radio = document.getElementById('touchRadio');
-  if (!radio) return;
-  radio.classList.toggle('on', on);
+  if (radio) radio.classList.toggle('on', on);
   if (on) {
-    // Force compact when touch on
     setKbSizeToggle(false);
+    setSoundEnabled(true);   // audible on by default when touch activates
   } else {
-    // Restore full keyboard when touch off
     setKbSizeToggle(true);
+    setSoundEnabled(false);
   }
+  // Audible row: enabled only when touch is on
+  var audibleRow = document.getElementById('audibleRow');
+  if (audibleRow) audibleRow.classList.toggle('disabled', !on);
+}
+
+function setSoundEnabled(on) {
+  soundEnabled = on;
+  var radio = document.getElementById('audibleRadio');
+  if (radio) radio.classList.toggle('on', on);
+}
+
+function onAudibleToggle() {
+  var row = document.getElementById('audibleRow');
+  if (row && row.classList.contains('disabled')) return;
+  setSoundEnabled(!soundEnabled);
 }
 
 function onStickyKeysToggle() {
@@ -3928,6 +3964,16 @@ function buildPool() {
     return true;
   });
 }
+function cancelCountdown() {
+  if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
+  var numEl = document.getElementById('countdownNum');
+  if (numEl) { numEl.className = ''; numEl.textContent = ''; }
+  titleEl.style.position = '';
+  mainBtn.disabled  = false;
+  helpBtn.disabled  = false;
+  resetToIdle();
+}
+
 function beginCountdown() {
   // Prevent double-triggers during countdown
   if (_countdownTimer) return;
@@ -4015,7 +4061,9 @@ function advanceQuestion() {
   }
   currentAnswer = questionPool[questionIndex].shortcut;
   titleEl.className = '';
+  void titleEl.offsetWidth; // flush so animation restarts
   titleEl.textContent = questionPool[questionIndex].display;
+  titleEl.classList.add('question-pop');
   mainBtn.textContent = 'Skip';
   clearHelp();
   transitioning = false;
@@ -4185,20 +4233,27 @@ function getAudioCtx() {
   return _audioCtx;
 }
 function playKeyClick() {
+  if (!soundEnabled) return;
   try {
-    var ctx  = getAudioCtx();
-    var buf  = ctx.createBuffer(1, ctx.sampleRate * 0.04, ctx.sampleRate);
-    var data = buf.getChannelData(0);
-    // Sharp noise burst — decays very fast for a mechanical 'tick'
+    var ctx    = getAudioCtx();
+    var dur    = 0.06;
+    var buf    = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * dur), ctx.sampleRate);
+    var data   = buf.getChannelData(0);
+    // Softer, deeper click: slower decay + low-pass shaped noise
     for (var i = 0; i < data.length; i++) {
       var t = i / ctx.sampleRate;
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-t * 400);
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-t * 180);
     }
-    var src  = ctx.createBufferSource();
-    var gain = ctx.createGain();
+    var src    = ctx.createBufferSource();
+    var filter = ctx.createBiquadFilter();
+    var gain   = ctx.createGain();
     src.buffer = buf;
-    gain.gain.setValueAtTime(0.18, ctx.currentTime);
-    src.connect(gain);
+    filter.type            = 'lowpass';
+    filter.frequency.value = 1200; // cut highs for a muted thud
+    filter.Q.value         = 0.7;
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    src.connect(filter);
+    filter.connect(gain);
     gain.connect(ctx.destination);
     src.start();
   } catch(e) {}
@@ -4228,6 +4283,7 @@ function runCountdown(onComplete) {
       numEl.className = '';
       numEl.textContent = '';
       titleEl.style.position = '';
+      _countdownTimer = null;
       onComplete();
       return;
     }
@@ -4242,6 +4298,21 @@ function runCountdown(onComplete) {
 }
 document.addEventListener('keydown', handleKeydown);
 document.addEventListener('keyup',   handleKeyup);
+
+// Hide the "recommend a real keyboard" pill permanently once a physical key is detected
+(function() {
+  var physicalKeyDetected = false;
+  document.addEventListener('keydown', function(e) {
+    if (physicalKeyDetected || !e.isTrusted) return;
+    physicalKeyDetected = true;
+    var pill = document.getElementById('osMismatchPill');
+    if (pill) {
+      pill.style.transition = 'opacity 0.5s ease';
+      pill.style.opacity = '0';
+      setTimeout(function() { pill.style.display = 'none'; }, 500);
+    }
+  }, { capture: true });
+})();
 
 function showTip(index) {
   tipIndex = ((index % IMPROVEMENT_TIPS.length) + IMPROVEMENT_TIPS.length) % IMPROVEMENT_TIPS.length;
@@ -4398,6 +4469,18 @@ function handleKeyup(e) {
           </svg>
         </span>
         <span class="modal-toggle-label">Touch Enabled (soft keys)</span>
+      </label>
+    </div>
+
+    <div class="modal-toggle-row disabled" id="audibleRow">
+      <label onclick="onAudibleToggle()">
+        <span class="modal-radio" id="audibleRadio">
+          <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
+            <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
+          </svg>
+        </span>
+        <span class="modal-toggle-label">Audible</span>
       </label>
     </div>
 
