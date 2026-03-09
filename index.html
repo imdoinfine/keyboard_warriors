@@ -7,10 +7,16 @@
 <script>
   // Redirect iPad users to the optimised iPad build
   (function() {
-    var ua = navigator.userAgent;
-    var isIpad = /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-    if (isIpad && window.location.pathname.indexOf('ipad') === -1) {
-      window.location.replace('ipad/index.html');
+    var ua = navigator.userAgent || '';
+    var isPhone = /iPhone|iPod/.test(ua) || (/Android/.test(ua) && /Mobile/.test(ua));
+    var isTablet = !isPhone && (
+      /iPad/.test(ua) ||
+      (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ||
+      (/Android/.test(ua) && !/Mobile/.test(ua)) ||
+      (navigator.maxTouchPoints > 1 && window.screen.width >= 768)
+    );
+    if (isTablet && window.location.pathname.indexOf('tablet') === -1) {
+      window.location.replace('tablet/index.html');
     }
   })();
 </script>
