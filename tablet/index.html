@@ -1543,21 +1543,36 @@ body {
 
 #browserModalInner ul {
   margin: 0 0 12px 0;
-  padding-left: 16px;
+  padding-left: 0;
+  list-style: none;
   font-size: 12px;
   color: #6b7280;
   line-height: 1.75;
 }
 #browserModalInner ul li { margin-bottom: 2px; }
+/* Default conflict chip — flat, no fill, no shadow */
+.conflict-chip {
+  background: transparent;
+  box-shadow: none;
+}
+/* Dismissed row: chips "light up" as available; description struck through */
+li.conflict-dismissed .conflict-chip {
+  background: #f3f4f6;
+  box-shadow: 0 1.5px 0 #c9cdd3;
+}
+li.conflict-dismissed .conflict-desc {
+  text-decoration: line-through;
+  color: #c0c5cc;
+}
 #browserModalInner .compat-footer {
-  font-size: 11px;
-  color: #9ca3af;
-  line-height: 1.55;
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.6;
   margin: 0;
 }
 #browserModalInner .compat-debug-hint {
-  font-size: 10px;
-  color: #9ca3af;
+  font-size: 12px;
+  color: #374151;
   line-height: 1.6;
   margin: 0;
 }
@@ -3810,7 +3825,7 @@ var browserModalOpen = false;
 
 var MODAL_W = 340;
 var MODAL_H = 420;
-var BROWSER_MODAL_W = 310;
+var BROWSER_MODAL_W = 340;
 var BROWSER_MODAL_H = 380;
 
 function _kbPanelRect() {
@@ -3879,13 +3894,12 @@ function positionBrowserModal() {
 }
 
 function _renderKeyChips(label) {
-  // label format: "Cmd+Opt+I — opens DevTools"
-  var em     = '—';
+  var em      = '\u2014';
   var dashIdx = label.indexOf(' ' + em + ' ');
-  var keys   = dashIdx >= 0 ? label.slice(0, dashIdx)          : label;
-  var desc   = dashIdx >= 0 ? label.slice(dashIdx + em.length + 2) : '';
-  var frag   = document.createDocumentFragment();
-  var tokens = keys.split('+');
+  var keys    = dashIdx >= 0 ? label.slice(0, dashIdx)           : label;
+  var desc    = dashIdx >= 0 ? label.slice(dashIdx + em.length + 2) : '';
+  var frag    = document.createDocumentFragment();
+  var tokens  = keys.split('+');
   tokens.forEach(function(tok, i) {
     if (i > 0) {
       var sep = document.createElement('span');
@@ -3894,6 +3908,7 @@ function _renderKeyChips(label) {
       frag.appendChild(sep);
     }
     var chip = document.createElement('span');
+    chip.className = 'conflict-chip';
     chip.textContent = tok.trim();
     chip.style.cssText = [
       'display:inline-block',
@@ -3901,24 +3916,53 @@ function _renderKeyChips(label) {
       'font-size:10px',
       'font-weight:600',
       'color:#1e3a5f',
-      'background:#f3f4f6',
       'border:1px solid #d1d5db',
       'border-radius:3px',
       'padding:1px 4px 0',
       'line-height:1.6',
       'white-space:nowrap',
-      'box-shadow:0 1px 0 #c9cdd3',
       'vertical-align:middle',
     ].join(';');
     frag.appendChild(chip);
   });
   if (desc) {
     var d = document.createElement('span');
+    d.className = 'conflict-desc';
     d.style.cssText = 'margin-left:5px;color:#6b7280;font-size:11px;vertical-align:middle;';
-    d.textContent = '— ' + desc;
+    d.textContent = desc;
     frag.appendChild(d);
   }
   return frag;
+}
+
+function _makeConflictRadio(canonicalKey) {
+  var isDismissed = dismissedConflicts.has(canonicalKey);
+  var wrap = document.createElement('span');
+  wrap.className = 'modal-radio' + (isDismissed ? ' on' : '');
+  wrap.style.cssText = 'flex-shrink:0;margin-right:7px;cursor:pointer;';
+  wrap.innerHTML = '<svg class="modal-radio-dot" width="16" height="16" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">'
+    + '<circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>'
+    + '<circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>'
+    + '</svg>';
+  wrap.addEventListener('click', function() {
+    var li = wrap.closest('li');
+    if (dismissedConflicts.has(canonicalKey)) {
+      // Restore
+      dismissedConflicts.delete(canonicalKey);
+      wrap.classList.remove('on');
+      if (li) li.classList.remove('conflict-dismissed');
+      showModeToast('Assumption restored');
+    } else {
+      // Dismiss
+      dismissedConflicts.add(canonicalKey);
+      wrap.classList.add('on');
+      if (li) li.classList.add('conflict-dismissed');
+      showModeToast('Assumption removed');
+    }
+    // Rebuild pool immediately so the change takes effect
+    questionPool = shuffleArray(buildPool());
+  });
+  return wrap;
 }
 
 function openBrowserModal() {
@@ -3942,17 +3986,29 @@ function openBrowserModal() {
     if (d.labels.length > 0) {
       intro.textContent = 'But, you may find that ' + bname + ' can take over if it hears one of its favourite shortcuts called:';
     } else {
-      intro.textContent = 'We haven’t spotted any shortcut conflicts for your current setup — you’re good to go.';
+      intro.textContent = 'We haven\u2019t spotted any shortcut conflicts for your current setup \u2014 you\u2019re good to go.';
     }
   }
 
   var ul = document.getElementById('browserCompatList');
   if (ul) {
     ul.innerHTML = '';
-    d.labels.forEach(function(s) {
+    d.labels.forEach(function(s, i) {
+      var canonicalKey = d.keys[i];
+      var isDismissed  = dismissedConflicts.has(canonicalKey);
       var li = document.createElement('li');
-      li.style.cssText = 'margin-bottom:6px;display:flex;align-items:center;flex-wrap:wrap;gap:0;line-height:1.6;';
-      li.appendChild(_renderKeyChips(s));
+      li.className = isDismissed ? 'conflict-dismissed' : '';
+      li.style.cssText = 'margin-bottom:6px;display:flex;align-items:center;flex-wrap:nowrap;gap:0;line-height:1.6;cursor:pointer;';
+      li.appendChild(_makeConflictRadio(canonicalKey));
+      var label = document.createElement('span');
+      label.className = 'conflict-label';
+      label.appendChild(_renderKeyChips(s));
+      li.appendChild(label);
+      // Clicking anywhere on the row also toggles
+      li.addEventListener('click', function(e) {
+        if (e.target.closest('.modal-radio')) return; // radio handles its own click
+        li.querySelector('.modal-radio').click();
+      });
       ul.appendChild(li);
     });
   }
@@ -3965,7 +4021,7 @@ function openBrowserModal() {
   bm.style.zIndex = '202';
   if (km) km.style.zIndex = '201';
   positionBrowserModal();
-  bm.classList.remove('visible'); // reset in case re-opened
+  bm.classList.remove('visible');
   bm.style.animation = '';
   bm.style.height = '';
   bm.classList.add('visible');
@@ -4033,32 +4089,66 @@ window.addEventListener('resize', function() {
 let escHoldTimer = null;
 let escHoldFired = false;
 
+function _escHoldOpen() {
+  escHoldFired = true;
+  const dbg = document.getElementById('debugOverlay');
+  dbg.style.display = 'flex';
+  document.getElementById('dbgAnswer').textContent = 'debug on — press a key during play';
+  document.getElementById('dbgKey').textContent = '';
+  document.getElementById('dbgMatch').textContent = '';
+  dbgRefreshCtx(); dbgRefreshAccuracy();
+}
+
+function _escHoldClose() {
+  const dbg = document.getElementById('debugOverlay');
+  if (dbg.style.display !== 'none') dbg.style.display = 'none';
+}
+
+// Physical keyboard hold-to-open / single-press-to-close
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape' || e.repeat) return;
   if (document.getElementById('debugOverlay').style.display !== 'none') return;
   escHoldFired = false;
-  escHoldTimer = setTimeout(() => {
-    escHoldFired = true;
-    const dbg = document.getElementById('debugOverlay');
-    dbg.style.display = 'flex';
-    document.getElementById('dbgAnswer').textContent = 'debug on — press a key during play';
-    document.getElementById('dbgKey').textContent = '';
-    document.getElementById('dbgMatch').textContent = '';
-    dbgRefreshCtx(); dbgRefreshAccuracy();
-  }, 2000);
+  escHoldTimer = setTimeout(_escHoldOpen, 2000);
 });
 
 document.addEventListener('keyup', e => {
   if (e.key !== 'Escape') return;
   clearTimeout(escHoldTimer);
   escHoldTimer = null;
-  if (escHoldFired) {
-    escHoldFired = false;
+  if (escHoldFired) { escHoldFired = false; return; }
+  _escHoldClose();
+});
+
+// Touch hold-to-open / single tap-to-close on the on-screen Escape key
+// Uses event delegation on keyboardPanel so it works after any keyboard rebuild.
+document.getElementById('keyboardPanel').addEventListener('touchstart', function(e) {
+  var el = e.target.closest('[data-key="Escape"]');
+  if (!el) return;
+  const dbg = document.getElementById('debugOverlay');
+  // If already open, a tap closes it
+  if (dbg.style.display !== 'none') {
+    _escHoldClose();
     return;
   }
-  const dbg = document.getElementById('debugOverlay');
-  if (dbg.style.display !== 'none') dbg.style.display = 'none';
-});
+  escHoldFired = false;
+  escHoldTimer = setTimeout(_escHoldOpen, 2000);
+}, { passive: true });
+
+document.getElementById('keyboardPanel').addEventListener('touchend', function(e) {
+  var el = e.target.closest('[data-key="Escape"]');
+  if (!el) return;
+  clearTimeout(escHoldTimer);
+  escHoldTimer = null;
+  // escHoldFired already reset by _escHoldOpen; no-op on quick release
+}, { passive: true });
+
+document.getElementById('keyboardPanel').addEventListener('touchcancel', function(e) {
+  var el = e.target.closest('[data-key="Escape"]');
+  if (!el) return;
+  clearTimeout(escHoldTimer);
+  escHoldTimer = null;
+}, { passive: true });
 
 // ── Debug context display ────────────────────────────────────────────────────
 function dbgToggle() {
@@ -4391,9 +4481,13 @@ function getBrowserConflicts() {
 }
 
 // Returns a Set of shortcut strings that conflict for the current browser+OS.
+// Shortcuts the user has manually re-enabled (dismissed from conflict list)
+var dismissedConflicts = new Set();
+
 // Called by buildPool() to silently exclude them.
 function getBrowserConflictSet() {
-  return new Set(getBrowserConflicts().keys);
+  var all = getBrowserConflicts().keys;
+  return new Set(all.filter(function(k) { return !dismissedConflicts.has(k); }));
 }
 
 // Initialise
@@ -4657,38 +4751,6 @@ function rimTick() {
   }
 }
 
-// Medal drag gesture — pointer drag drives rim rotation, springs back on release
-var _medalDragActive = false;
-var _medalDragStartX = 0;
-var _medalDragBaseRim = 0;
-var _medalDragPointerId = null;
-
-function medalDragStart(e) {
-  if (!currentMedal) return;
-  if (gameState !== 'finished' && gameState !== 'confirm-reset') return;
-  _medalDragActive    = true;
-  _medalDragStartX    = e.clientX;
-  _medalDragBaseRim   = rimCurrent;
-  _medalDragPointerId = e.pointerId;
-  timerBox.setPointerCapture(e.pointerId);
-}
-
-function medalDragMove(e) {
-  if (!_medalDragActive || e.pointerId !== _medalDragPointerId) return;
-  var dx = e.clientX - _medalDragStartX;
-  // ±120px drag = ±30° rim rotation
-  rimTarget = Math.max(-30, Math.min(30, _medalDragBaseRim + (dx / 120) * 30));
-  if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
-}
-
-function medalDragEnd(e) {
-  if (!_medalDragActive) return;
-  _medalDragActive = false;
-  // Spring back to gyro-driven value (or 0 if no gyro)
-  rimTarget = 0;
-  if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
-}
-
 // Gyroscope drives rim sheen on the tablet version (replaces mousemove)
 // gamma = left/right tilt, ±90°. We map ±30° of tilt to ±15° rim rotation.
 function onDeviceOrientation(e) {
@@ -4715,10 +4777,7 @@ function initGyro() {
   }
 }
 
-timerBox.addEventListener('pointerdown', medalDragStart);
-timerBox.addEventListener('pointermove', medalDragMove);
-timerBox.addEventListener('pointerup',   medalDragEnd);
-timerBox.addEventListener('pointercancel', medalDragEnd);
+
 
 // Key lighting active at all times, not just during play
 
@@ -5061,7 +5120,7 @@ function handleKeyup(e) {
     <p class="compat-footer"  id="browserCompatFooter"></p>
     <div class="modal-section-gap"></div>
     <p class="compat-debug-hint">If you encounter an error, please hold down
-      <span style="display:inline-block;font-size:10px;font-weight:600;color:#1e3a5f;background:#f3f4f6;border:1px solid #d1d5db;border-radius:3px;padding:1px 4px 0;line-height:1.6;white-space:nowrap;box-shadow:0 1px 0 #c9cdd3;">Esc</span>
+      <span style="display:inline-block;font-size:10px;font-weight:600;color:#1e3a5f;border:1px solid #d1d5db;border-radius:3px;padding:1px 4px 0;line-height:1.6;white-space:nowrap;">Esc</span>
       to wake my debug window where you can send me a report.</p>
   </div>
 </div>
