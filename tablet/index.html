@@ -625,13 +625,26 @@ body.pc-mode #extKeyPill {
   0%   { opacity: 1; transform: perspective(800px) rotateX(0deg)   scale(1); }
   100% { opacity: 0; transform: perspective(800px) rotateX(-20deg) scale(1.05); }
 }
+@keyframes paperFurlFront {
+  0%   { opacity: 1; transform: perspective(800px) rotateX(0deg)   translateY(0)     scale(1); }
+  100% { opacity: 0; transform: perspective(800px) rotateX(14deg)  translateY(-24px) scale(0.97); }
+}
+@keyframes btnPulse {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.13); }
+  65%  { transform: scale(1.07); }
+  100% { transform: scale(1); }
+}
+#mainBtn.pulse {
+  animation: btnPulse 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
 #kbModal {
   position: fixed;
   background: white;
   border-radius: 0;
   box-shadow:
-    0 4px 10px rgba(0,0,0,0.13),
-    0 12px 28px rgba(0,0,0,0.16);
+    0 6px 16px rgba(0,0,0,0.18),
+    0 18px 40px rgba(0,0,0,0.24);
   z-index: 200;
   opacity: 0;
   pointer-events: none;
@@ -1485,8 +1498,8 @@ body {
   background: white;
   border-radius: 0;
   box-shadow:
-    0 4px 10px rgba(0,0,0,0.13),
-    0 12px 28px rgba(0,0,0,0.16);
+    0 6px 16px rgba(0,0,0,0.18),
+    0 18px 40px rgba(0,0,0,0.24);
   z-index: 200;
   opacity: 0;
   pointer-events: none;
@@ -2354,6 +2367,17 @@ function showModeToast(msg) {
   }, 2000);
 }
 
+function pulseBtn(el) {
+  if (!el) return;
+  el.classList.remove('pulse');
+  void el.offsetWidth;
+  el.classList.add('pulse');
+  el.addEventListener('animationend', function h() {
+    el.classList.remove('pulse');
+    el.removeEventListener('animationend', h);
+  });
+}
+
 function pulseKbIcon() {
   var icon = document.getElementById('kbIcon');
   if (!icon) return;
@@ -2477,6 +2501,7 @@ function applyOsMode(os) {
   if (currentKbMode && currentKbMode !== 'none') {
     buildKeyboard(currentKbMode === 'mini');
   }
+  _syncKbCountFromVariant();
   // Mid-game OS toggle: rebuild pool and replace current question if it
   // is no longer valid (e.g. a mac-only shortcut when switching to PC).
   if (gameState === 'playing') {
@@ -2521,13 +2546,12 @@ function updateMismatchPill() {
 }
 
 function onOsToggle() {
-  // Checked = moved right = away from native OS
   const nativeMac = (detectedOs === 'mac' || detectedOs === 'mobile');
   applyOsMode(osToggleEl.checked
     ? (nativeMac ? 'pc'  : 'mac')
     : (nativeMac ? 'mac' : 'pc'));
-  // If modal is open, refresh toggles to reflect the new OS
   if (kbModalOpen) updateModalToggles();
+  if (browserModalOpen) _refreshBrowserContent();
 }
 
 
@@ -2572,6 +2596,30 @@ function alignKbIcon() {
 window.addEventListener('resize', function() {
   alignKbIcon();
   if (kbModalOpen) positionKbModal();
+});
+
+// ── Game-area click pulses the contextually useful button ────────────────────
+var _gcEl = document.getElementById('ipadLayout') || document.getElementById('gameContainer');
+if (_gcEl) _gcEl.addEventListener('click', function(e) {
+  var tag = e.target.tagName;
+  if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'LABEL' || tag === 'A') return;
+  if (e.target.closest('button, input, label, a, #timerBox, #kbIcon, #browserIcon, #appPill, #appDropdown, #debugOverlay')) return;
+  if (gameState === 'paused') {
+    pulseBtn(document.getElementById('mainBtn'));
+    return;
+  }
+  if (gameState === 'idle') {
+    pulseBtn(document.getElementById('mainBtn'));
+    return;
+  }
+  if (gameState === 'finished') {
+    pulseBtn(document.getElementById('mainBtn'));
+    var sl = document.getElementById('statLeft');
+    var sr = document.getElementById('statRight');
+    if (sl && sl.textContent) { sl.classList.remove('stat-pulse'); void sl.offsetWidth; sl.classList.add('stat-pulse'); }
+    if (sr && sr.textContent) { sr.classList.remove('stat-pulse'); void sr.offsetWidth; sr.classList.add('stat-pulse'); }
+    return;
+  }
 });
 // iPad fork: always full keyboard, never mini
 currentKbMode = 'full';
@@ -2967,7 +3015,10 @@ function updateKeyboardLighting(e, isDown) {
 ══════════════════════════════════════ */
 let gameState = 'idle';
 let currentMedal = null;
-let _confirmFromFinished = false; // true when confirm-reset entered from finished state
+let _confirmFromFinished  = false; // true when confirm-reset entered from finished state
+let _countdownMode        = 'start'; // 'start' | 'resume'
+let _modalWasOpenOnPause  = false;   // true when a modal was open entering/during pause
+let _wasPlaying           = false;   // true once any question has been answered (answersLeft decremented)
 let totalTime  = 0;
 let timerInterval   = null;
 let penaltyTimeout  = null;
@@ -3140,11 +3191,21 @@ function setTimerState(state, text) {
 /* ══════════════════════════════════════
    BUTTON HANDLERS
 ══════════════════════════════════════ */
+function _closeAllModals() {
+  if (kbModalOpen)      closeKbModal();
+  if (browserModalOpen) closeBrowserModal();
+}
+
 function mainButtonClick() {
   mainBtn.blur();
-  if (gameState === 'idle' || gameState === 'finished') { beginCountdown(); return; }
+  if (gameState === 'idle' || gameState === 'finished') { _closeAllModals(); beginCountdown(); return; }
   if (gameState === 'playing')       { skipShortcut(); return; }
-  if (gameState === 'paused')        { unpause(); return; }
+  if (gameState === 'paused') {
+    var needsCountdown = _modalWasOpenOnPause || kbModalOpen || browserModalOpen;
+    _closeAllModals();
+    if (needsCountdown) { beginResumeCountdown(); } else { unpause(); }
+    return;
+  }
   if (gameState === 'confirm-reset') { confirmResetYes(); return; }
 }
 
@@ -3173,7 +3234,12 @@ function helpButtonClick() {
 /* CHANGE 5: clicking the ⏸ timer unpauses */
 function timerBoxClick() {
   if (gameState === 'playing') { enterPause(); return; }
-  if (gameState === 'paused')  { unpause(); return; }
+  if (gameState === 'paused') {
+    var needsCountdown = _modalWasOpenOnPause || kbModalOpen || browserModalOpen;
+    _closeAllModals();
+    if (needsCountdown) { beginResumeCountdown(); } else { unpause(); }
+    return;
+  }
 }
 
 /* ══════════════════════════════════════
@@ -3278,6 +3344,7 @@ function enterPause() {
   gameState = 'paused';
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
+  transitioning = false; // clear skip-in-progress if pause interrupts it
   clearHelp();
 
   titleEl.classList.add('blurred');
@@ -3290,10 +3357,17 @@ function enterPause() {
   helpBtn.style.background = '#6b7280';
   helpBtn.style.color = 'white';
   if (lockKeyEl) lockKeyEl.classList.add('active');
+  _modalWasOpenOnPause = (kbModalOpen || browserModalOpen);
 }
 
 function unpause() {
   gameState = 'playing';
+  // Restore question title — may have been blanked by the resume countdown
+  if (questionPool.length > 0 && (!titleEl.textContent || titleEl.textContent === '')) {
+    titleEl.className = '';
+    titleEl.textContent = questionPool[questionIndex]?.display || '';
+    currentAnswer = questionPool[questionIndex]?.shortcut || '';
+  }
   titleEl.classList.remove('blurred');
   questionCountEl.classList.remove('blurred');
   helpBtn.style.background = '';
@@ -3305,8 +3379,16 @@ function unpause() {
   timerInterval = setInterval(updateTimer, 100);
 }
 
+function _closeAllModalsInstant() {
+  var km = document.getElementById('kbModal');
+  var bm = document.getElementById('browserModal');
+  if (kbModalOpen && km)      { km.classList.remove('visible'); km.style.animation = ''; km.style.pointerEvents = ''; kbModalOpen = false; }
+  if (browserModalOpen && bm) { bm.classList.remove('visible'); bm.style.animation = ''; bm.style.pointerEvents = ''; browserModalOpen = false; }
+}
+
 function enterConfirmReset() {
   _confirmFromFinished = (gameState === 'finished');
+  _closeAllModalsInstant();
   gameState = 'confirm-reset';
   if (currentMedal && !_confirmFromFinished) resetTimerBox();
   titleEl.classList.remove('blurred');
@@ -3359,7 +3441,7 @@ function confirmResetNo() {
     return;
   }
   // If a game was in progress, return to paused; otherwise go to idle
-  if (questionPool.length > 0 && answersLeft > 0 && answersLeft < 10) {
+  if (_wasPlaying && questionPool.length > 0 && answersLeft > 0) {
     gameState = 'paused';
     titleEl.classList.add('blurred');
     titleEl.textContent = questionPool[questionIndex]?.display || '';
@@ -3374,6 +3456,7 @@ function confirmResetNo() {
 
 function resetToIdle() {
   gameState = 'idle';
+  _wasPlaying = false;
   setAppSelectorGameActive(false);
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
@@ -3425,11 +3508,20 @@ function matchesShortcut(event, str) {
   // e.code gives the physical key regardless of modifier remapping.
   // e.g. Option+C fires event.key='ç' but event.code='KeyC'.
   // We derive a plain char from e.code for Option-combo matching.
+  // codeChar: physical key char regardless of modifier remapping.
+  // Covers letters (KeyC→C), digits (Digit2→2), and punctuation (BracketRight→]).
   const codeChar = (() => {
     const c = event.code;
-    if (c && c.startsWith('Key'))   return c.slice(3);      // 'KeyC' → 'C'
-    if (c && c.startsWith('Digit')) return c.slice(5);      // 'Digit2' → '2'
-    return null;
+    if (!c) return null;
+    if (c.startsWith('Key'))   return c.slice(3);      // 'KeyC' → 'C'
+    if (c.startsWith('Digit')) return c.slice(5);      // 'Digit2' → '2'
+    // Punctuation keys whose e.key changes under modifiers on various layouts
+    const punctMap = {
+      'BracketLeft':'[', 'BracketRight':']', 'Semicolon':';', 'Quote':"'",
+      'Equal':'=', 'Minus':'-', 'Slash':'/', 'Backslash':'\\',
+      'Backquote':'`', 'Period':'.', 'Comma':',',
+    };
+    return punctMap[c] || null;
   })();
 
   // Helper: does the event key match the expected bare char/token?
@@ -3443,8 +3535,8 @@ function matchesShortcut(event, str) {
     if (exp === 'ARROWDOWN')  return k === 'ArrowDown';
     if (exp === 'HOME') return k === 'Home';
     if (exp === 'END')  return k === 'End';
-    if (exp === '[')    return k === '[' || (k === '{' && sh);
-    if (exp === ']')    return k === ']' || (k === '}' && sh);
+    if (exp === '[')    return k === '[' || (k === '{' && sh) || codeChar === '[';
+    if (exp === ']')    return k === ']' || (k === '}' && sh) || codeChar === ']';
     if (exp === '/')    return k === '/';
     if (exp === '.')    return k === '.';
     if (exp === ',')    return k === ',';
@@ -3474,8 +3566,8 @@ function matchesShortcut(event, str) {
   if (s === 'HOME')   return k === 'Home'        && nocmd && !opt && !sh;
   if (s === 'END')    return k === 'End'         && nocmd && !opt && !sh;
   if (s === 'ENTER')  return k === 'Enter'       && nocmd && !opt && !sh;
-  if (s === '[')      return k === '['           && nocmd && !opt && !sh;
-  if (s === ']')      return k === ']'           && nocmd && !opt && !sh;
+  if (s === '[')      return (k === '[' || codeChar === '[') && nocmd && !opt && !sh;
+  if (s === ']')      return (k === ']' || codeChar === ']') && nocmd && !opt && !sh;
   if (s === '.')      return k === '.'           && nocmd && !opt && !sh;
   if (s === ',')      return k === ','           && nocmd && !opt && !sh;
 
@@ -3505,8 +3597,8 @@ function matchesShortcut(event, str) {
   if (s === 'OPTION+ARROWDOWN')  return k === 'ArrowDown'  && opt && nocmd && !sh;
 
   // ── OPTION + bracket ───────────────────────────────────────────────────────
-  if (s === 'OPTION+[') return k === '[' && opt && nocmd && !sh;
-  if (s === 'OPTION+]') return k === ']' && opt && nocmd && !sh;
+  if (s === 'OPTION+[') return (k === '[' || codeChar === '[') && opt && nocmd && !sh;
+  if (s === 'OPTION+]') return (k === ']' || codeChar === ']') && opt && nocmd && !sh;
 
   // ── OPTION + SHIFT + key ───────────────────────────────────────────────────
   if (s.startsWith('OPTION+SHIFT+')) {
@@ -3760,7 +3852,21 @@ function applyVariant(flashCodes) {
   }
 }
 
+// Sync kbLeftCount / kbFnLeft from the stored variant string for the current OS.
+// Needed after OS switch so the modal toggles reflect the keyboard that's actually shown.
+function _syncKbCountFromVariant() {
+  var v = (currentOs === 'mac') ? kbVariantMac : kbVariantPc;
+  if (v === 'mac-3key' || v === 'pc-no-fn') {
+    kbLeftCount = 3; kbFnLeft = true;
+  } else if (v === 'mac-4key' || v === 'pc-fn-left') {
+    kbLeftCount = 4; kbFnLeft = true;
+  } else if (v === 'mac-4key-ctrl-left' || v === 'pc-fn-right') {
+    kbLeftCount = 4; kbFnLeft = false;
+  }
+}
+
 function updateModalToggles() {
+  _syncKbCountFromVariant(); // ensure toggles reflect the actual keyboard shown
   // 3/4 key count knob
   var knob3 = document.getElementById('modalOsKnobEl');
   var tog3  = document.getElementById('modalOsToggle');
@@ -3824,36 +3930,70 @@ var kbModalOpen = false;
 var browserModalOpen = false;
 
 var MODAL_W = 340;
-var MODAL_H = 420;
+var MODAL_H = 400;
 var BROWSER_MODAL_W = 340;
-var BROWSER_MODAL_H = 380;
+var BROWSER_MODAL_H = 400;
 
 function _kbPanelRect() {
   var p = document.getElementById('keyboardPanel');
   return p ? p.getBoundingClientRect() : null;
 }
 
-function positionKbModal() {
-  var modal = document.getElementById('kbModal');
-  var r     = _kbPanelRect();
-  if (!modal || !r) return;
-  // Right of panel centre (clears cmd/alt labels), pulled up above keyboard
-  var cx    = r.left + window.scrollX + r.width / 2;
-  modal.style.top   = Math.round(r.top + window.scrollY - 80) + 'px';
-  modal.style.left  = Math.round(cx - MODAL_W / 2 + 40) + 'px';
+var MODAL_OFFSET = 30;
+
+function _modalBasePos() {
+  var r = _kbPanelRect();
+  if (!r) return {top: 100, left: 100};
+  // Anchor: bottom-left corner of modal at centre of C key
+  // C key centre ≈ panel.left + 32.5% width, panel.top + 72.6% height
+  var cKeyX = r.left + window.scrollX + r.width  * 0.325;
+  var cKeyY = r.top  + window.scrollY + r.height * 0.726;
+  var top  = Math.round(cKeyY - MODAL_H);
+  var left = Math.round(cKeyX);
+  // Clamp to viewport
+  top  = Math.max(top,  window.scrollY + 8);
+  left = Math.max(left, 8);
+  left = Math.min(left, window.innerWidth - MODAL_W - 8);
+  return {top: top, left: left};
+}
+
+// KB modal: always top-left (base pos). Browser modal: always bottom-right (base + offset).
+// Only z-index changes when bring-to-front; positions never swap.
+function _applyKbPos(modal) {
+  var p = _modalBasePos();
+  modal.style.top   = p.top  + 'px';
+  modal.style.left  = p.left + 'px';
   modal.style.width = MODAL_W + 'px';
   if (!modal.style.height) modal.style.height = MODAL_H + 'px';
+}
+function _applyBrowserPos(modal) {
+  var p = _modalBasePos();
+  modal.style.top   = (p.top  + MODAL_OFFSET) + 'px';
+  modal.style.left  = (p.left + MODAL_OFFSET) + 'px';
+  modal.style.width = MODAL_W + 'px';
+  if (!modal.style.height) modal.style.height = MODAL_H + 'px';
+}
+
+function positionKbModal() {
+  var modal = document.getElementById('kbModal');
+  if (!modal) return;
+  _applyKbPos(modal);
 }
 
 function openKbModal() {
   var km = document.getElementById('kbModal');
   var bm = document.getElementById('browserModal');
+  if (bm && browserModalOpen) bm.style.zIndex = '201';
   km.style.zIndex = '202';
-  if (bm) bm.style.zIndex = '201';
-  positionKbModal();
+  km.style.height = MODAL_H + 'px';
+  _applyKbPos(km);
+  km.classList.remove('visible');
+  km.style.animation = '';
+  void km.offsetWidth;
   km.classList.add('visible');
   kbModalOpen = true;
   if (gameState === 'playing') enterPause();
+  else if (gameState === 'paused') _modalWasOpenOnPause = true;
 }
 
 // Wrap to also update modal toggles on open
@@ -3867,14 +4007,21 @@ openKbModal = function() {
 function closeKbModal() {
   kbModalOpen = false;
   var modal = document.getElementById('kbModal');
-  modal.style.animation = 'paperFurl 0.55s cubic-bezier(0.64, 0, 0.78, 0) forwards';
+  var isFront = !browserModalOpen || modal.style.zIndex === '202';
+  var anim = isFront
+    ? 'paperFurlFront 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards'
+    : 'paperFurl 0.55s cubic-bezier(0.64, 0, 0.78, 0) forwards';
+  modal.style.animation = anim;
   modal.style.pointerEvents = 'none';
   setTimeout(function() {
     modal.classList.remove('visible');
     modal.style.animation = '';
     modal.style.pointerEvents = '';
-  }, 550);
-  // Do NOT auto-unpause — player resumes via timer circle or lock key
+  }, isFront ? 450 : 550);
+  if (browserModalOpen) {
+    var bm = document.getElementById('browserModal');
+    if (bm) { bm.style.zIndex = '202'; }
+  }
 }
 
 function toggleKbModal() {
@@ -3883,14 +4030,8 @@ function toggleKbModal() {
 
 function positionBrowserModal() {
   var modal = document.getElementById('browserModal');
-  var r     = _kbPanelRect();
-  if (!modal || !r) return;
-  // Further right + slightly lower than kb modal so both X buttons stay clear
-  var cx    = r.left + window.scrollX + r.width / 2;
-  modal.style.top   = Math.round(r.top + window.scrollY - 60) + 'px';
-  modal.style.left  = Math.round(cx - BROWSER_MODAL_W / 2 + 80) + 'px';
-  modal.style.width = BROWSER_MODAL_W + 'px';
-  if (!modal.style.height) modal.style.height = BROWSER_MODAL_H + 'px';
+  if (!modal) return;
+  _applyBrowserPos(modal);
 }
 
 function _renderKeyChips(label) {
@@ -3944,7 +4085,9 @@ function _makeConflictRadio(canonicalKey) {
     + '<circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>'
     + '<circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>'
     + '</svg>';
-  wrap.addEventListener('click', function() {
+  wrap.addEventListener('click', function(e) {
+    var bm = document.getElementById('browserModal');
+    if (bm && e.clientX >= bm.getBoundingClientRect().right - 35) return;
     var li = wrap.closest('li');
     if (dismissedConflicts.has(canonicalKey)) {
       // Restore
@@ -3965,7 +4108,7 @@ function _makeConflictRadio(canonicalKey) {
   return wrap;
 }
 
-function openBrowserModal() {
+function _refreshBrowserContent() {
   var d     = getBrowserConflicts();
   var bname = d.name;
 
@@ -4004,9 +4147,13 @@ function openBrowserModal() {
       label.className = 'conflict-label';
       label.appendChild(_renderKeyChips(s));
       li.appendChild(label);
-      // Clicking anywhere on the row also toggles
       li.addEventListener('click', function(e) {
-        if (e.target.closest('.modal-radio')) return; // radio handles its own click
+        var bm = document.getElementById('browserModal');
+        if (bm) {
+          var bmRight = bm.getBoundingClientRect().right;
+          if (e.clientX >= bmRight - 35) return;
+        }
+        if (e.target.closest('.modal-radio')) return;
         li.querySelector('.modal-radio').click();
       });
       ul.appendChild(li);
@@ -4015,29 +4162,44 @@ function openBrowserModal() {
 
   var ft = document.getElementById('browserCompatFooter');
   if (ft) ft.textContent = 'We will try not to ask you any questions that use these specific key combinations, but if we do get interrupted during play, just click back into our window to continue training.';
+}
+
+function openBrowserModal() {
+  _refreshBrowserContent();
 
   var bm = document.getElementById('browserModal');
   var km = document.getElementById('kbModal');
+  if (km && kbModalOpen) km.style.zIndex = '201';
   bm.style.zIndex = '202';
-  if (km) km.style.zIndex = '201';
-  positionBrowserModal();
+  bm.style.height = BROWSER_MODAL_H + 'px';
+  _applyBrowserPos(bm);
   bm.classList.remove('visible');
   bm.style.animation = '';
-  bm.style.height = '';
+  void bm.offsetWidth;
   bm.classList.add('visible');
   browserModalOpen = true;
+  if (gameState === 'playing') enterPause();
+  else if (gameState === 'paused') _modalWasOpenOnPause = true;
 }
-
 function closeBrowserModal() {
   browserModalOpen = false;
   var modal = document.getElementById('browserModal');
-  modal.style.animation = 'paperFurl 0.55s cubic-bezier(0.64, 0, 0.78, 0) forwards';
+  var isFront = !kbModalOpen || modal.style.zIndex === '202';
+  var dur = isFront ? 450 : 550;
+  var anim = isFront
+    ? 'paperFurlFront 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards'
+    : 'paperFurl 0.55s cubic-bezier(0.64, 0, 0.78, 0) forwards';
+  modal.style.animation = anim;
   modal.style.pointerEvents = 'none';
   setTimeout(function() {
     modal.classList.remove('visible');
     modal.style.animation = '';
     modal.style.pointerEvents = '';
-  }, 550);
+    if (kbModalOpen) {
+      var km = document.getElementById('kbModal');
+      if (km) { km.style.zIndex = '202'; }
+    }
+  }, dur);
 }
 
 function toggleBrowserModal() {
@@ -4055,27 +4217,53 @@ document.getElementById('browserIcon').addEventListener('click', function(e) {
   toggleBrowserModal();
 });
 
-// ── Unified outside-click: dismiss both, except safe zones ───────────────────
+// ── Tapping the back modal brings it to front (deferred: modals are after script tag) ──
+function _bringKbToFront(e) {
+  var km = document.getElementById('kbModal');
+  var bm = document.getElementById('browserModal');
+  if (!browserModalOpen || km.style.zIndex === '202') return;
+  if (e) {
+    var frontRect = bm.getBoundingClientRect();
+    var cx = e.clientX !== undefined ? e.clientX : (e.touches ? e.touches[0].clientX : null);
+    var cy = e.clientY !== undefined ? e.clientY : (e.touches ? e.touches[0].clientY : null);
+    if (cx !== null && cx >= frontRect.left && cx <= frontRect.right &&
+        cy >= frontRect.top && cy <= frontRect.bottom) return;
+  }
+  km.style.zIndex = '202';
+  bm.style.zIndex = '201';
+}
+function _bringBrowserToFront(e) {
+  var bm = document.getElementById('browserModal');
+  var km = document.getElementById('kbModal');
+  if (!kbModalOpen || bm.style.zIndex === '202') return;
+  if (e) {
+    var frontRect = km.getBoundingClientRect();
+    var cx = e.clientX !== undefined ? e.clientX : (e.touches ? e.touches[0].clientX : null);
+    var cy = e.clientY !== undefined ? e.clientY : (e.touches ? e.touches[0].clientY : null);
+    if (cx !== null && cx >= frontRect.left && cx <= frontRect.right &&
+        cy >= frontRect.top && cy <= frontRect.bottom) return;
+  }
+  bm.style.zIndex = '202';
+  km.style.zIndex = '201';
+}
+window.addEventListener('load', function() {
+  document.getElementById('kbModal').addEventListener('mousedown',  _bringKbToFront);
+  document.getElementById('kbModal').addEventListener('touchstart', _bringKbToFront, {passive: true});
+  document.getElementById('browserModal').addEventListener('mousedown',  _bringBrowserToFront);
+  document.getElementById('browserModal').addEventListener('touchstart', _bringBrowserToFront, {passive: true});
+});
+
+// ── Outside-click: modals no longer dismissed by clicking empty space.
+//    Only X buttons or resuming play closes them.
 document.addEventListener('click', function(e) {
   if (!kbModalOpen && !browserModalOpen) return;
-  var kbM    = document.getElementById('kbModal');
-  var brM    = document.getElementById('browserModal');
-  var kbI    = document.getElementById('kbIcon');
-  var brI    = document.getElementById('browserIcon');
-  var osWrap = document.getElementById('osToggleWrap');
-  var appP   = document.getElementById('appPill');
-  var appD   = document.getElementById('appDropdown');
-  var safe   = (kbM  && kbM.contains(e.target))  ||
-               (brM  && brM.contains(e.target))   ||
-               (kbI  && kbI.contains(e.target))   ||
-               (brI  && brI.contains(e.target))   ||
-               (osWrap && osWrap.contains(e.target));
-  // App pill/dropdown: safe only when not mid-game
   var midGame = (gameState === 'playing' || gameState === 'paused');
-  if (!midGame && ((appP && appP.contains(e.target)) || (appD && appD.contains(e.target)))) safe = true;
-  if (safe) return;
-  if (kbModalOpen)      closeKbModal();
-  if (browserModalOpen) closeBrowserModal();
+  if (!midGame) return;
+  var appP = document.getElementById('appPill');
+  var appD = document.getElementById('appDropdown');
+  if ((appP && appP.contains(e.target)) || (appD && appD.contains(e.target))) {
+    e.stopPropagation();
+  }
 });
 
 window.addEventListener('resize', function() {
@@ -4527,12 +4715,18 @@ function cancelCountdown() {
   titleEl.style.position = '';
   mainBtn.disabled  = false;
   helpBtn.disabled  = false;
-  resetToIdle();
+  if (_countdownMode === 'resume') {
+    _countdownMode = 'start';
+    enterPause();
+  } else {
+    resetToIdle();
+  }
 }
 
 function beginCountdown() {
   // Prevent double-triggers during countdown
   if (_countdownTimer) return;
+  _countdownMode = 'start';
   gameState = 'counting';
   mainBtn.textContent = '';
   mainBtn.disabled = true;
@@ -4541,6 +4735,22 @@ function beginCountdown() {
     mainBtn.disabled = false;
     helpBtn.disabled = false;
     startGame();
+  });
+}
+
+function beginResumeCountdown() {
+  if (_countdownTimer) return;
+  _countdownMode = 'resume';
+  _modalWasOpenOnPause = false;
+  gameState = 'counting';
+  mainBtn.textContent = '';
+  mainBtn.disabled = true;
+  helpBtn.disabled = true;
+  runCountdown(function() {
+    mainBtn.disabled = false;
+    helpBtn.disabled = false;
+    _countdownMode = 'start';
+    unpause();
   });
 }
 
@@ -4584,6 +4794,7 @@ function startGame() {
 
 function skipShortcut() {
   if (transitioning) return;
+  _wasPlaying = true;
   transitioning = true;
   clearHelp();
   titleEl.classList.add('strike');
@@ -4635,6 +4846,7 @@ function recordAnswer() {
     dbgRefreshCtx(); dbgRefreshAccuracy();
   }
   // Called only on a correct keypress — decrements the answer counter
+  _wasPlaying = true;
   answersLeft--;
   if (answersLeft <= 0) {
     endGame();
