@@ -4609,126 +4609,20 @@ function onGyroDeny() {
    Evaluated lazily so currentOs is known.
 ══════════════════════════════════════ */
 function getBrowserConflicts() {
-  var ua      = navigator.userAgent || '';
-  var isMacOs = currentOs === 'mac';
-
-  // Detect browser
-  var browser;
-  if      (/Edg\//.test(ua))                              browser = 'Edge';
-  else if (/Firefox\//.test(ua))                          browser = 'Firefox';
-  else if (/Safari\//.test(ua) && !/Chrome\//.test(ua))  browser = 'Safari';
-  else if (/OPR\//.test(ua))                              browser = 'Opera';
-  else if (/Chrome\//.test(ua))                           browser = 'Chrome';
-  else                                                     browser = null;
-
-  // Conflict tables — Mac shortcuts use Cmd, PC use Ctrl (same token in our shortcut strings)
-  // Values are the canonical shortcut strings used in SHORTCUTS[].shortcut
-  var mac = {
-    Edge:    ['CMD+OPTION+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Firefox: ['CMD+OPTION+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Safari:  ['CMD+OPTION+U','CMD+OPTION+I','CMD+OPTION+C','CMD+SHIFT+H','CMD+SHIFT+I','CMD+SHIFT+L'],
-    Opera:   ['CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Chrome:  ['CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
-  };
-  var pc = {
-    Edge:    ['CMD+SHIFT+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Firefox: ['CMD+SHIFT+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Opera:   ['CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Chrome:  ['CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+C','CMD+SHIFT+N'],
-  };
-
-  // Human-readable labels — Mac vs PC, browser-specific
-  var macLabels = {
-    Edge: [
-      'Cmd+Opt+I \u2014 opens DevTools',
-      'Cmd+Shift+C \u2014 opens DevTools inspector',
-      'Cmd+Shift+J \u2014 opens DevTools console',
-      'Cmd+Shift+H \u2014 opens History',
-      'Cmd+Shift+D \u2014 saves all tabs',
-      'Cmd+Shift+N \u2014 opens InPrivate window',
-    ],
-    Firefox: [
-      'Cmd+Opt+I \u2014 opens DevTools',
-      'Cmd+Shift+A \u2014 opens Add-ons',
-      'Cmd+Shift+H \u2014 opens History',
-      'Cmd+Shift+U \u2014 opens Page Source',
-      'Cmd+Shift+D \u2014 bookmarks page',
-      'Cmd+Shift+N \u2014 opens Private window',
-    ],
-    Safari: [
-      'Cmd+Opt+U \u2014 opens Page Source',
-      'Cmd+Opt+I \u2014 opens Web Inspector',
-      'Cmd+Opt+C \u2014 opens Inspector Console',
-      'Cmd+Shift+H \u2014 opens Home \u2215 History',
-      'Cmd+Shift+I \u2014 opens Mail',
-      'Cmd+Shift+L \u2014 opens Sidebar',
-    ],
-    Opera: [
-      'Cmd+Opt+I \u2014 opens DevTools',
-      'Cmd+Opt+J \u2014 opens DevTools console',
-      'Cmd+Shift+D \u2014 saves bookmark',
-      'Cmd+Shift+N \u2014 opens Private window',
-    ],
-    Chrome: [
-      'Cmd+Opt+I \u2014 opens DevTools',
-      'Cmd+Opt+J \u2014 opens DevTools console',
-      'Cmd+Shift+C \u2014 opens DevTools inspector',
-      'Cmd+Shift+N \u2014 opens Incognito window',
-    ],
-  };
-  var pcLabels = {
-    Edge: [
-      'Ctrl+Shift+I \u2014 opens DevTools',
-      'Ctrl+Shift+C \u2014 opens DevTools inspector',
-      'Ctrl+Shift+J \u2014 opens DevTools console',
-      'Ctrl+Shift+H \u2014 opens History',
-      'Ctrl+Shift+D \u2014 saves all tabs',
-      'Ctrl+Shift+N \u2014 opens InPrivate window',
-    ],
-    Firefox: [
-      'Ctrl+Shift+I \u2014 opens DevTools',
-      'Ctrl+Shift+A \u2014 opens Add-ons',
-      'Ctrl+Shift+H \u2014 opens History',
-      'Ctrl+Shift+U \u2014 opens Page Source',
-      'Ctrl+Shift+D \u2014 bookmarks page',
-      'Ctrl+Shift+N \u2014 opens Private window',
-    ],
-    Opera: [
-      'Ctrl+Shift+I \u2014 opens DevTools',
-      'Ctrl+Shift+J \u2014 opens DevTools console',
-      'Ctrl+Shift+D \u2014 saves bookmark',
-      'Ctrl+Shift+N \u2014 opens Private window',
-    ],
-    Chrome: [
-      'Ctrl+Shift+I \u2014 opens DevTools',
-      'Ctrl+Shift+J \u2014 opens DevTools console',
-      'Ctrl+Shift+C \u2014 opens DevTools inspector',
-      'Ctrl+Shift+N \u2014 opens Incognito window',
-    ],
-  };
-
-  var conflictKeys = [];
-  var labels       = [];
-
-  if (browser) {
-    var keyTable   = isMacOs ? mac   : pc;
-    var labelTable = isMacOs ? macLabels : pcLabels;
-    conflictKeys = (keyTable[browser]   || []).slice();
-    labels       = (labelTable[browser] || []).slice();
-  } else {
-    // Generic fallback — show both platforms' most universal conflicts
-    conflictKeys = isMacOs
-      ? ['CMD+OPTION+I','CMD+SHIFT+H','CMD+SHIFT+N']
-      : ['CMD+SHIFT+I', 'CMD+SHIFT+H','CMD+SHIFT+N'];
-    labels = isMacOs
-      ? ['Cmd+Opt+I \u2014 opens DevTools','Cmd+Shift+H \u2014 opens History','Cmd+Shift+N \u2014 opens Private window']
-      : ['Ctrl+Shift+I \u2014 opens DevTools','Ctrl+Shift+H \u2014 opens History','Ctrl+Shift+N \u2014 opens Private window'];
-  }
-
+  // The conflict keys are the same for all tablet browsers — Cmd+Shift+H and
+  // Cmd+Shift+N are the most universally intercepted shortcuts on tablet platforms.
+  // We only vary the display name so the report is honest about what we detected.
+  var ua = navigator.userAgent || '';
+  var isIpadSafari = (/iPad/.test(ua) || (navigator.maxTouchPoints > 1 && /Mac/.test(ua)))
+                     && /Safari\//.test(ua) && !/Chrome\//.test(ua) && !/Edg\//.test(ua);
+  var name = isIpadSafari ? 'Safari on iPadOS' : 'your browser';
   return {
-    name:        browser || 'your browser',
-    keys:        conflictKeys,   // canonical shortcut strings for pool filtering
-    labels:      labels,         // human-readable strings for display
+    name:   name,
+    keys:   ['CMD+SHIFT+H', 'CMD+SHIFT+N'],
+    labels: [
+      'Cmd+Shift+H \u2014 opens Bookmarks / History',
+      'Cmd+Shift+N \u2014 opens a Private tab',
+    ],
   };
 }
 
