@@ -4373,7 +4373,9 @@ function dbgNextQuestion() {
 ══════════════════════════════════════ */
 function getBrowserConflicts() {
   var ua      = navigator.userAgent || '';
-  var isMacOs = currentOs === 'mac';
+  // Use the real detected OS, not the UI toggle — browser shortcuts are a physical
+  // fact about the machine, unaffected by which platform the user is practising.
+  var isMacOs = (detectedOs === 'mac' || detectedOs === 'mobile');
 
   // Detect browser
   var browser;
