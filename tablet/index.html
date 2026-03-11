@@ -102,6 +102,11 @@ body {
 #helpBtn { background: #6b7280; color: white; font-size: 12px; transition: background 0.8s ease; }
 #helpBtn:hover { background: #4b5563; }
 #helpBtn:active { background: #9ca3af; transition: background 0s; }
+#mainBtn:disabled, #helpBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
 
 /* ══════════════════════════════════════
    TIMER
@@ -339,6 +344,8 @@ body {
 #title.hidden  { opacity: 0; }
 #title.strike  { text-decoration: line-through; opacity: 0.45; }
 #title.blurred { filter: blur(6px); opacity: 0.6; user-select: none; }
+#title.blur-instant,
+#questionRow.blur-instant { transition: none !important; }
 #questionRow.blurred { filter: blur(3px); opacity: 0.6; user-select: none; }
 
 /* ══════════════════════════════════════
@@ -1404,6 +1411,7 @@ body {
   align-items: stretch;
   /* default: iPad 10th gen / Air / Pro 11" landscape */
   width: 1060px;
+  cursor: pointer;
 }
 
 #gameContainer {
@@ -1503,7 +1511,7 @@ body {
   z-index: 200;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.15s ease, height 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
   overflow: hidden;
   transform-origin: top center;
 }
@@ -1612,6 +1620,10 @@ li.conflict-dismissed .conflict-desc {
 #keyboardWrap #kbIcon.pulse {
   animation: kbIconPulseTablet 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
+#keyboardWrap #kbIcon:not(.pulse):hover {
+  transform: scale(1.12);
+  transition: transform 0.18s ease;
+}
 /* Tablet browser icon — mirrors kbIcon on the right side */
 #keyboardWrap #browserIcon {
   top: 129px !important;
@@ -1632,6 +1644,10 @@ li.conflict-dismissed .conflict-desc {
 }
 #keyboardWrap #browserIcon.pulse {
   animation: browserIconPulseTablet 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+#keyboardWrap #browserIcon:not(.pulse):hover {
+  transform: scale(1.12);
+  transition: transform 0.18s ease;
 }
 
 
@@ -2599,8 +2615,7 @@ window.addEventListener('resize', function() {
 });
 
 // ── Game-area click pulses the contextually useful button ────────────────────
-var _gcEl = document.getElementById('ipadLayout') || document.getElementById('gameContainer');
-if (_gcEl) _gcEl.addEventListener('click', function(e) {
+function _gameAreaClick(e) {
   var tag = e.target.tagName;
   if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'LABEL' || tag === 'A') return;
   if (e.target.closest('button, input, label, a, #timerBox, #kbIcon, #browserIcon, #appPill, #appDropdown, #debugOverlay')) return;
@@ -2620,7 +2635,13 @@ if (_gcEl) _gcEl.addEventListener('click', function(e) {
     if (sr && sr.textContent) { sr.classList.remove('stat-pulse'); void sr.offsetWidth; sr.classList.add('stat-pulse'); }
     return;
   }
-});
+}
+// gameContainer holds the topRow (title, buttons, timer); ipadLayout holds stats + keyboard.
+// Both need the handler since they are siblings, not parent/child.
+var _gc = document.getElementById('gameContainer');
+var _il = document.getElementById('ipadLayout');
+if (_gc) _gc.addEventListener('click', _gameAreaClick);
+if (_il) _il.addEventListener('click', _gameAreaClick);
 // iPad fork: always full keyboard, never mini
 currentKbMode = 'full';
 keyboardWrap.style.display = 'flex';
@@ -3111,6 +3132,13 @@ function hideProgressDots() {
 }
 const statLeftEl      = document.getElementById('statLeft');
 const statRightEl     = document.getElementById('statRight');
+
+function _statClickHint(e) {
+  if (!bestRecord || bestRecord.time === null) return;
+  showModeToast('Reset high scores from the pause screen.');
+}
+statLeftEl.addEventListener('click',  _statClickHint);
+statRightEl.addEventListener('click', _statClickHint);
 const accuracyEl      = document.getElementById('timerAccuracy');
 
 function calcAccuracy() {
@@ -3199,6 +3227,7 @@ function _closeAllModals() {
 function mainButtonClick() {
   mainBtn.blur();
   if (gameState === 'idle' || gameState === 'finished') { _closeAllModals(); beginCountdown(); return; }
+  if (gameState === 'counting')      { cancelCountdown(); return; }
   if (gameState === 'playing')       { skipShortcut(); return; }
   if (gameState === 'paused') {
     var needsCountdown = _modalWasOpenOnPause || kbModalOpen || browserModalOpen;
@@ -3238,6 +3267,10 @@ function timerBoxClick() {
     var needsCountdown = _modalWasOpenOnPause || kbModalOpen || browserModalOpen;
     _closeAllModals();
     if (needsCountdown) { beginResumeCountdown(); } else { unpause(); }
+    return;
+  }
+  if (gameState === 'confirm-reset' && _wasPlaying) {
+    confirmResetNo();
     return;
   }
 }
@@ -3340,13 +3373,21 @@ function togglePause() {
   }
 }
 
-function enterPause() {
+function enterPause(instantBlur) {
   gameState = 'paused';
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
   transitioning = false; // clear skip-in-progress if pause interrupts it
   clearHelp();
 
+  if (instantBlur) {
+    titleEl.classList.add('blur-instant');
+    questionCountEl.classList.add('blur-instant');
+    requestAnimationFrame(function() {
+      titleEl.classList.remove('blur-instant');
+      questionCountEl.classList.remove('blur-instant');
+    });
+  }
   titleEl.classList.add('blurred');
   questionCountEl.classList.add('blurred');
   titleEl.classList.remove('strike','hidden');
@@ -3440,8 +3481,9 @@ function confirmResetNo() {
     showTip(tipIndex);
     return;
   }
-  // If a game was in progress, return to paused; otherwise go to idle
+  // If a game was in progress, count straight back in — no stop at paused
   if (_wasPlaying && questionPool.length > 0 && answersLeft > 0) {
+    // Set up paused UI so enterPause state is correct, then immediately resume
     gameState = 'paused';
     titleEl.classList.add('blurred');
     titleEl.textContent = questionPool[questionIndex]?.display || '';
@@ -3449,6 +3491,7 @@ function confirmResetNo() {
     helpBtn.textContent = 'Reset';
     helpBtn.style.background = '#6b7280';
     helpBtn.style.color = 'white';
+    beginResumeCountdown();
   } else {
     resetToIdle();
   }
@@ -3930,9 +3973,16 @@ var kbModalOpen = false;
 var browserModalOpen = false;
 
 var MODAL_W = 340;
-var MODAL_H = 400;
+var MODAL_H = 412;
 var BROWSER_MODAL_W = 340;
-var BROWSER_MODAL_H = 400;
+var BROWSER_MODAL_H = 412;
+var BROWSER_ROW_PX  = 26;   // extra px per conflict row beyond the 4 that fit at base height
+var BROWSER_BASE_ROWS = 4;  // rows that fit comfortably at BROWSER_MODAL_H
+
+function getBrowserModalHeight() {
+  var n = getBrowserConflicts().keys.length;
+  return BROWSER_MODAL_H + Math.max(0, n - BROWSER_BASE_ROWS) * BROWSER_ROW_PX;
+}
 
 function _kbPanelRect() {
   var p = document.getElementById('keyboardPanel');
@@ -3992,8 +4042,9 @@ function openKbModal() {
   void km.offsetWidth;
   km.classList.add('visible');
   kbModalOpen = true;
-  if (gameState === 'playing') enterPause();
-  else if (gameState === 'paused') _modalWasOpenOnPause = true;
+  if (gameState === 'playing') { enterPause(true); }
+  else if (gameState === 'counting') { cancelCountdown(); _modalWasOpenOnPause = true; }
+  else if (gameState === 'paused') { _modalWasOpenOnPause = true; }
 }
 
 // Wrap to also update modal toggles on open
@@ -4008,20 +4059,23 @@ function closeKbModal() {
   kbModalOpen = false;
   var modal = document.getElementById('kbModal');
   var isFront = !browserModalOpen || modal.style.zIndex === '202';
+  var dur = isFront ? 450 : 550;
   var anim = isFront
     ? 'paperFurlFront 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards'
     : 'paperFurl 0.55s cubic-bezier(0.64, 0, 0.78, 0) forwards';
+  modal.style.transition = 'none';
   modal.style.animation = anim;
   modal.style.pointerEvents = 'none';
   setTimeout(function() {
     modal.classList.remove('visible');
     modal.style.animation = '';
+    modal.style.transition = '';
     modal.style.pointerEvents = '';
-  }, isFront ? 450 : 550);
-  if (browserModalOpen) {
-    var bm = document.getElementById('browserModal');
-    if (bm) { bm.style.zIndex = '202'; }
-  }
+    if (browserModalOpen) {
+      var bm = document.getElementById('browserModal');
+      if (bm) { bm.style.zIndex = '202'; }
+    }
+  }, dur);
 }
 
 function toggleKbModal() {
@@ -4162,6 +4216,11 @@ function _refreshBrowserContent() {
 
   var ft = document.getElementById('browserCompatFooter');
   if (ft) ft.textContent = 'We will try not to ask you any questions that use these specific key combinations, but if we do get interrupted during play, just click back into our window to continue training.';
+  // Update modal height live (e.g. OS toggle changes conflict count)
+  if (browserModalOpen) {
+    var bm2 = document.getElementById('browserModal');
+    if (bm2) bm2.style.height = getBrowserModalHeight() + 'px';
+  }
 }
 
 function openBrowserModal() {
@@ -4171,15 +4230,16 @@ function openBrowserModal() {
   var km = document.getElementById('kbModal');
   if (km && kbModalOpen) km.style.zIndex = '201';
   bm.style.zIndex = '202';
-  bm.style.height = BROWSER_MODAL_H + 'px';
+  bm.style.height = getBrowserModalHeight() + 'px';
   _applyBrowserPos(bm);
   bm.classList.remove('visible');
   bm.style.animation = '';
   void bm.offsetWidth;
   bm.classList.add('visible');
   browserModalOpen = true;
-  if (gameState === 'playing') enterPause();
-  else if (gameState === 'paused') _modalWasOpenOnPause = true;
+  if (gameState === 'playing') { enterPause(true); }
+  else if (gameState === 'counting') { cancelCountdown(); _modalWasOpenOnPause = true; }
+  else if (gameState === 'paused') { _modalWasOpenOnPause = true; }
 }
 function closeBrowserModal() {
   browserModalOpen = false;
@@ -4189,11 +4249,13 @@ function closeBrowserModal() {
   var anim = isFront
     ? 'paperFurlFront 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards'
     : 'paperFurl 0.55s cubic-bezier(0.64, 0, 0.78, 0) forwards';
+  modal.style.transition = 'none';
   modal.style.animation = anim;
   modal.style.pointerEvents = 'none';
   setTimeout(function() {
     modal.classList.remove('visible');
     modal.style.animation = '';
+    modal.style.transition = '';
     modal.style.pointerEvents = '';
     if (kbModalOpen) {
       var km = document.getElementById('kbModal');
@@ -4222,6 +4284,7 @@ function _bringKbToFront(e) {
   var km = document.getElementById('kbModal');
   var bm = document.getElementById('browserModal');
   if (!browserModalOpen || km.style.zIndex === '202') return;
+  if (e && e.target && e.target.closest('.modal-dismiss-btn')) return;
   if (e) {
     var frontRect = bm.getBoundingClientRect();
     var cx = e.clientX !== undefined ? e.clientX : (e.touches ? e.touches[0].clientX : null);
@@ -4236,6 +4299,7 @@ function _bringBrowserToFront(e) {
   var bm = document.getElementById('browserModal');
   var km = document.getElementById('kbModal');
   if (!kbModalOpen || bm.style.zIndex === '202') return;
+  if (e && e.target && e.target.closest('.modal-dismiss-btn')) return;
   if (e) {
     var frontRect = km.getBoundingClientRect();
     var cx = e.clientX !== undefined ? e.clientX : (e.touches ? e.touches[0].clientX : null);
@@ -4728,8 +4792,8 @@ function beginCountdown() {
   if (_countdownTimer) return;
   _countdownMode = 'start';
   gameState = 'counting';
-  mainBtn.textContent = '';
-  mainBtn.disabled = true;
+  mainBtn.textContent = 'Cancel';
+  mainBtn.disabled = false;
   helpBtn.disabled = true;
   runCountdown(function() {
     mainBtn.disabled = false;
@@ -4743,8 +4807,8 @@ function beginResumeCountdown() {
   _countdownMode = 'resume';
   _modalWasOpenOnPause = false;
   gameState = 'counting';
-  mainBtn.textContent = '';
-  mainBtn.disabled = true;
+  mainBtn.textContent = 'Cancel';
+  mainBtn.disabled = false;
   helpBtn.disabled = true;
   runCountdown(function() {
     mainBtn.disabled = false;
