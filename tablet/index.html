@@ -2577,16 +2577,9 @@ function buildKeyboard(isMini) {
 const kbToastEl = document.getElementById('kbToast');
 let toastTimer = null;
 
-var modeToastTimer   = null;
-var modeToastOrigText    = null;
-var modeToastOrigVisible = false;
+var modeToastTimer = null;
 
 function showModeToast(msg) {
-  // Capture the original state only before the first toast in a sequence
-  if (!modeToastTimer) {
-    modeToastOrigText    = osMismatchEl.textContent;
-    modeToastOrigVisible = osMismatchEl.classList.contains('show');
-  }
   clearTimeout(modeToastTimer);
   osMismatchEl.textContent = msg;
   osMismatchEl.classList.add('show');
@@ -2594,8 +2587,7 @@ function showModeToast(msg) {
     modeToastTimer = null;
     osMismatchEl.classList.remove('show');
     setTimeout(function() {
-      osMismatchEl.textContent = modeToastOrigText;
-      if (modeToastOrigVisible) osMismatchEl.classList.add('show');
+      updateMismatchPill();
     }, 300);
   }, 2000);
 }
@@ -2758,8 +2750,12 @@ function applyOsMode(os) {
 
 function updateMismatchPill() {
   if (detectedOs === 'mobile') {
-    osMismatchEl.textContent = 'We recommend training with a real mechanical keyboard.';
-    osMismatchEl.classList.add('show');
+    if (touchEnabled) {
+      osMismatchEl.textContent = 'We recommend training with a real mechanical keyboard.';
+      osMismatchEl.classList.add('show');
+    } else {
+      osMismatchEl.classList.remove('show');
+    }
     return;
   }
   if (detectedOs === 'other') {
@@ -4144,8 +4140,18 @@ function onTouchToggle() {
   } else {
     setStickyKeys(false);
     document.getElementById('stickyRow').classList.remove('disabled');
-    showModeToast('On-Screen Keyboard = Display Only');
-    osMismatchEl.classList.remove('show');
+    // Show the keyboard-size toast, then keep the pill permanently hidden.
+    // We clear the modeToastTimer after the show so updateMismatchPill is
+    // never called — the pill stays hidden until touch is re-enabled.
+    var _kbLabel = hasFullKeyboard ? 'Keyboard: Extended' : 'Keyboard: Compact';
+    clearTimeout(modeToastTimer);
+    osMismatchEl.textContent = _kbLabel;
+    osMismatchEl.classList.add('show');
+    modeToastTimer = setTimeout(function() {
+      modeToastTimer = null;
+      osMismatchEl.classList.remove('show');
+      // Do NOT call updateMismatchPill — pill should stay hidden when touch is off.
+    }, 2000);
   }
 }
 
@@ -4353,6 +4359,13 @@ openKbModal = function() {
 
 function closeKbModal() {
   kbModalOpen = false;
+  // If touch is off, ensure the mismatch pill stays hidden on close —
+  // the mode toast may still be running from the touch toggle.
+  if (!touchEnabled) {
+    clearTimeout(modeToastTimer);
+    modeToastTimer = null;
+    osMismatchEl.classList.remove('show');
+  }
   var modal = document.getElementById('kbModal');
   var isFront = !browserModalOpen || modal.style.zIndex === '202';
   var dur = isFront ? 450 : 550;
