@@ -1,26 +1,68 @@
+<!-- build:comp1 -->
 <!DOCTYPE html>
 <html>
 <head>
+<script>const DBG_DEVICE = 'comp1';</script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Keyboard Warriors — Tablet</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Keyboard Warriors</title>
 <script>
-  // Show unsupported message immediately for phones (small touch screens)
+  // Redirect iPad users to the optimised iPad build
   (function() {
     var ua = navigator.userAgent || '';
-    var isPhone = /iPhone|iPod/.test(ua) ||
-                  (/Android/.test(ua) && /Mobile/.test(ua));
+    var isPhone = /iPhone|iPod/.test(ua) || (/Android/.test(ua) && /Mobile/.test(ua));
+    var isTablet = !isPhone && (
+      /iPad/.test(ua) ||
+      (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ||
+      (/Android/.test(ua) && !/Mobile/.test(ua)) ||
+      (navigator.maxTouchPoints > 1 && window.screen.width >= 768)
+    );
+    if (isTablet && window.location.pathname.indexOf('tablet') === -1) {
+      window.location.replace('tablet/index.html');
+    }
     if (isPhone) {
-      // Wait for DOM then show phone prompt, hide everything else
       document.addEventListener('DOMContentLoaded', function() {
-        var p = document.getElementById('phonePrompt');
-        if (p) p.style.display = 'flex';
+        var el = document.getElementById('phonePrompt');
+        if (el) el.style.display = 'flex';
       });
     }
   })();
 </script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
+
+#phonePrompt {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #f0f4f8;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px 28px;
+  text-align: center;
+  font-family: 'Lato', system-ui, sans-serif;
+}
+#phonePrompt svg {
+  flex-shrink: 0;
+  fill: #1e3a5f;
+  opacity: 0.6;
+}
+.prompt-sorry {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e3a5f;
+  margin: 0;
+  line-height: 1.4;
+}
+.prompt-info {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+  max-width: 300px;
+}
 
 body {
   font-family: system-ui, -apple-system, sans-serif;
@@ -633,6 +675,7 @@ body.pc-mode #extKeyPill {
   100% { opacity: 0; transform: perspective(800px) rotateX(-20deg) scale(1.05); }
 }
 @keyframes paperFurlFront {
+  /* Front modal dismiss: rises up and tilts bottom toward viewer */
   0%   { opacity: 1; transform: perspective(800px) rotateX(0deg)   translateY(0)     scale(1); }
   100% { opacity: 0; transform: perspective(800px) rotateX(14deg)  translateY(-24px) scale(0.97); }
 }
@@ -716,7 +759,174 @@ body.pc-mode #extKeyPill {
 #kbIcon.pulse {
   animation: kbIconPulse 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
+#kbIcon:hover {
+  transform: translateY(-50%) scale(1.12);
+  transition: transform 0.18s ease;
+}
+#kbIcon.pulse:hover {
+  /* don't interfere with pulse animation */
+  transform: none;
+  transition: none;
+}
 
+
+/* ── Browser icon (mirrors kbIcon, right side) ─────────────────── */
+#browserIcon {
+  display: block;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 0;
+  pointer-events: auto;
+  cursor: pointer;
+}
+@keyframes browserIconPulse {
+  0%   { transform: translateY(-50%) scale(1); }
+  40%  { transform: translateY(-50%) scale(1.22); }
+  100% { transform: translateY(-50%) scale(1); }
+}
+#browserIcon.pulse {
+  animation: browserIconPulse 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+#browserIcon:hover {
+  transform: translateY(-50%) scale(1.12);
+  transition: transform 0.18s ease;
+}
+#browserIcon.pulse:hover {
+  transform: none;
+  transition: none;
+}
+
+/* ── Difficulty icon ───────────────────────────────── */
+/* ── Difficulty gauge icon ── */
+#diffIcon .gauge-stroke { fill:none; stroke:#9ca3af; stroke-width:2px; stroke-linecap:round; stroke-miterlimit:10; }
+#diffIcon #Needle { fill:#9ca3af; transform-origin:45px 50.9px; transition:transform 0.45s cubic-bezier(0.34,1.56,0.64,1); }
+#diffIconWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+}
+#diffIcon {
+  display: block;
+  fill: #9ca3af;
+  cursor: pointer;
+  transition: transform 0.18s ease;
+}
+#diffIcon:hover { transform: scale(1.12); }
+
+/* ── Shared icon tooltip ───────────────────────────── */
+#iconTooltip {
+  position: fixed;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: center;
+  line-height: 1.4;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  z-index: 9000;
+  white-space: pre;
+}
+#iconTooltip.visible { opacity: 1; }
+
+/* ── Browser modal (same spec as kbModal) ──────────────────────── */
+#browserModal {
+  position: fixed;
+  background: white;
+  border-radius: 0;
+  box-shadow:
+    0 6px 16px rgba(0,0,0,0.18),
+    0 18px 40px rgba(0,0,0,0.24);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, height 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
+  overflow: hidden;
+  transform-origin: top center;
+}
+#browserModal.visible {
+  opacity: 1;
+  pointer-events: auto;
+  animation: paperUnfurl 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+/* ── Modal dismiss X (shared style) ───────────────────────────── */
+.modal-dismiss-btn {
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 17px;
+  line-height: 1;
+  border: none; background: none; padding: 0;
+  z-index: 10;
+  transition: color 0.15s;
+}
+.modal-dismiss-btn:hover { color: #374151; }
+
+/* ── Browser modal inner content ──────────────────────────────── */
+#browserModalInner {
+  width: 100%;
+  padding: 16px 20px 18px;
+  box-sizing: border-box;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.55;
+}
+#browserModalInner .compat-heading {
+  font-size: 12px;
+  font-weight: 400;
+  color: #374151;
+  margin: 0 0 0 0;
+  padding-right: 24px;
+  line-height: 1.6;
+}
+#browserModalInner .compat-intro {
+  font-size: 12px;
+  color: #374151;
+  margin: 10px 0 8px;
+  line-height: 1.6;
+}
+
+#browserModalInner ul {
+  margin: 0 0 12px 0;
+  padding-left: 0;
+  list-style: none;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.75;
+}
+#browserModalInner ul li { margin-bottom: 2px; }
+/* Default conflict chip — flat, no fill, no shadow */
+.conflict-chip {
+  background: transparent;
+  box-shadow: none;
+}
+/* Dismissed row: chips "light up" as available; description struck through */
+li.conflict-dismissed .conflict-chip {
+  background: #f3f4f6;
+  box-shadow: 0 1.5px 0 #c9cdd3;
+}
+li.conflict-dismissed .conflict-desc {
+  text-decoration: line-through;
+  color: #c0c5cc;
+}
+#browserModalInner .compat-footer {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.6;
+  margin: 0;
+}
+#browserModalInner .compat-debug-hint {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.6;
+  margin: 0;
+}
 /* ══════════════════════════════════════
    KEYBOARD PANEL
    Outer: 14px → corner keys: 9px → base keys: 4px
@@ -742,7 +952,10 @@ body.pc-mode #extKeyPill {
   z-index: 20;
 }
 #diffToast.visible { opacity: 1; }
-/* ── Unified notification toast ── */
+/* ── Unified notification toast ─────────────────────────────────────────────
+   position:fixed so it floats above everything including modals.
+   JS positions it: centred above keyboard normally, or top-of-modal when
+   a modal is open. Drop shadow with top-left light source.              ── */
 #kwToast {
   position: fixed;
   background: rgba(28, 28, 32, 0.92);
@@ -752,6 +965,7 @@ body.pc-mode #extKeyPill {
   font-weight: 500;
   padding: 7px 18px;
   border-radius: 12px;
+  white-space: nowrap;
   pointer-events: none;
   opacity: 0;
   transform: translate(-50%, 0);
@@ -1136,6 +1350,7 @@ body.pc-mode #extKeyPill {
 @media (max-width: 599px) {
   #keyboardWrap { display: none; }
   #kbIcon { display: none; }
+  #kbModal { display: none !important; }
 
   body { padding: 12px; }
 
@@ -1291,6 +1506,17 @@ body.pc-mode #extKeyPill {
   height: auto;
   max-height: 123px;
 }
+/* Flip class: used when there is not enough room above to expand upward,
+   so the pill drops down as an overlay instead */
+#appPill.open.drop-down {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 500;
+  width: max-content;
+  min-width: 100%;
+  border-radius: 0 0 10px 10px;
+}
 /* During game: border and background vanish — looks like plain text.
    JS blocks interaction via gameState check. Pill stays in layout. */
 #appPill.game-active {
@@ -1357,329 +1583,6 @@ body.pc-mode #extKeyPill {
   transform: rotate(90deg);   /* points down ▼ when open */
 }
 
-/* ══════════════════════════════════════
-   iPAD FIXED LAYOUT
-   Landscape only — portrait shows rotate prompt
-══════════════════════════════════════ */
-
-/* Portrait: hide everything, show rotate prompt */
-@media (orientation: portrait) {
-  body > *:not(#rotatePrompt) { display: none !important; }
-  #rotatePrompt { display: flex !important; }
-}
-@media (orientation: landscape) {
-  #rotatePrompt { display: none !important; }
-}
-
-#rotatePrompt {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: #f0f4f8;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  font-family: system-ui, -apple-system, sans-serif;
-  color: #374151;
-  z-index: 9999;
-}
-#rotatePrompt svg { opacity: 0.55; }
-#rotatePrompt p { font-size: 18px; color: #6b7280; }
-
-#phonePrompt {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: #f0f4f8;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  padding: 40px;
-  font-family: 'Lato', system-ui, sans-serif;
-  z-index: 10000;
-  text-align: center;
-}
-#phonePrompt svg {
-  flex-shrink: 0;
-  fill: #1e3a5f;
-  opacity: 0.6;
-}
-.prompt-sorry {
-  font-size: 20px;
-  font-weight: 600;
-  color: #374151;
-}
-.prompt-info {
-  font-size: 16px;
-  color: #6b7280;
-  max-width: 320px;
-  line-height: 1.6;
-}
-
-/* Fixed body — centred column */
-body {
-  padding: 0 !important;
-  min-height: 100vh !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  gap: 0 !important;
-}
-
-/* Single wrapper — everything inherits this width so columns line up */
-#ipadLayout {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  /* default: iPad 10th gen / Air / Pro 11" landscape */
-  width: 1060px;
-  cursor: pointer;
-}
-
-#gameContainer {
-  width: 100% !important;
-  padding: 6px 50px 20px !important;
-}
-
-/* Stats: same padding as gameContainer so columns align */
-#statsRow {
-  width: 100% !important;
-  padding-left: 50px !important;
-  padding-right: 50px !important;
-}
-#statLeft  { width: 140px !important; text-align: left  !important; }
-#statRight { width: 130px !important; text-align: right !important; }
-
-#keyboardWrap {
-  width: 100% !important;
-}
-
-/* Keyboard scaling — scale up from 40px base keys using CSS transform.
-   transform-origin top center keeps it anchored; margin-bottom compensates
-   for the space the scaled-up panel would otherwise overflow into. */
-#keyboardWrap {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  overflow: visible;
-}
-#keyboardPanel {
-  transform-origin: top center;
-}
-
-/* Default (iPad Air/Pro 11" / iPad 10th gen — ~1180px wide) */
-#keyboardPanel { transform: scale(1.28); }
-#keyboardWrap  { margin-bottom: 84px; } /* (scale-1) * natural kb height ~330px * 0.28 ≈ 84 */
-
-/* iPad mini 6 landscape: 1133×744 */
-@media (max-width: 1140px) {
-  #ipadLayout { width: 980px; }
-  #gameContainer { padding: 4px 40px 16px !important; }
-  .topRow { min-height: 90px !important; }
-  .leftPanel { width: 120px !important; }
-  #mainBtn, #helpBtn { width: 120px !important; font-size: 13px !important; }
-  .rightPanel { width: 110px !important; }
-  .timerBox { width: 84px !important; height: 84px !important; }
-  #keyboardPanel { transform: scale(1.18); }
-  #keyboardWrap  { margin-bottom: 56px; }
-  #statsRow  { padding-left: 40px !important; padding-right: 40px !important; }
-  #statLeft  { width: 120px !important; }
-  #statRight { width: 110px !important; }
-}
-
-/* iPad Pro 12.9" landscape: 1366×1024 */
-@media (min-width: 1340px) {
-  #ipadLayout { width: 1240px; }
-  #gameContainer { padding: 8px 60px 28px !important; }
-  #keyboardPanel { transform: scale(1.48); }
-  #keyboardWrap  { margin-bottom: 144px; }
-  #statsRow  { padding-left: 60px !important; padding-right: 60px !important; }
-  #statLeft  { width: 140px !important; }
-  #statRight { width: 130px !important; }
-}
-
-/* Pill fixed width so it never collapses */
-#appPill { width: 128px; }
-
-
-/* ── Browser icon (mirrors kbIcon, right side) ─────────────────── */
-#browserIcon {
-  display: block;
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 0;
-  pointer-events: auto;
-  cursor: pointer;
-}
-@keyframes browserIconPulse {
-  0%   { transform: translateY(-50%) scale(1); }
-  40%  { transform: translateY(-50%) scale(1.22); }
-  100% { transform: translateY(-50%) scale(1); }
-}
-#browserIcon.pulse {
-  animation: browserIconPulse 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-/* ── Browser modal (same spec as kbModal) ──────────────────────── */
-#browserModal {
-  position: fixed;
-  background: white;
-  border-radius: 0;
-  box-shadow:
-    0 6px 16px rgba(0,0,0,0.18),
-    0 18px 40px rgba(0,0,0,0.24);
-  z-index: 200;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease, height 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
-  overflow: hidden;
-  transform-origin: top center;
-}
-#browserModal.visible {
-  opacity: 1;
-  pointer-events: auto;
-  animation: paperUnfurl 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
-}
-
-/* ── Modal dismiss X (shared style) ───────────────────────────── */
-.modal-dismiss-btn {
-  position: absolute;
-  top: 10px; right: 10px;
-  width: 24px; height: 24px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  color: #9ca3af;
-  font-size: 17px;
-  line-height: 1;
-  border: none; background: none; padding: 0;
-  z-index: 10;
-  transition: color 0.15s;
-}
-.modal-dismiss-btn:hover { color: #374151; }
-
-/* ── Browser modal inner content ──────────────────────────────── */
-#browserModalInner {
-  width: 100%;
-  padding: 16px 20px 18px;
-  box-sizing: border-box;
-  font-family: 'Lato', system-ui, sans-serif;
-  font-size: 12px;
-  color: #374151;
-  line-height: 1.55;
-}
-#browserModalInner .compat-heading {
-  font-size: 12px;
-  font-weight: 400;
-  color: #374151;
-  margin: 0 0 0 0;
-  padding-right: 24px;
-  line-height: 1.6;
-}
-#browserModalInner .compat-intro {
-  font-size: 12px;
-  color: #374151;
-  margin: 10px 0 8px;
-  line-height: 1.6;
-}
-
-#browserModalInner ul {
-  margin: 0 0 12px 0;
-  padding-left: 0;
-  list-style: none;
-  font-size: 12px;
-  color: #6b7280;
-  line-height: 1.75;
-}
-#browserModalInner ul li { margin-bottom: 2px; }
-/* Default conflict chip — flat, no fill, no shadow */
-.conflict-chip {
-  background: transparent;
-  box-shadow: none;
-}
-/* Dismissed row: chips "light up" as available; description struck through */
-li.conflict-dismissed .conflict-chip {
-  background: #f3f4f6;
-  box-shadow: 0 1.5px 0 #c9cdd3;
-}
-li.conflict-dismissed .conflict-desc {
-  text-decoration: line-through;
-  color: #c0c5cc;
-}
-#browserModalInner .compat-footer {
-  font-size: 12px;
-  color: #374151;
-  line-height: 1.6;
-  margin: 0;
-}
-#browserModalInner .compat-debug-hint {
-  font-size: 12px;
-  color: #374151;
-  line-height: 1.6;
-  margin: 0;
-}
-/* kbIcon: vertically aligned to gap between Q row and A row (Tab/CapsLock gap).
-   q row bottom = 116px unscaled; a row top = 120px; centre = 118px.
-   Scaled: ×1.28→151px, ×1.18→139px, ×1.48→175px. Icon 44px tall → subtract 22.
-   Horizontally: leftPanel centre minus half icon (22px) minus 10px breathing room. */
-#keyboardWrap #kbIcon {
-  top: 129px !important;
-  transform: none !important;
-  left: 88px !important;
-}
-@media (max-width: 1140px) {
-  #keyboardWrap #kbIcon { top: 117px !important; left: 68px !important; }
-}
-@media (min-width: 1340px) {
-  #keyboardWrap #kbIcon { top: 153px !important; left: 98px !important; }
-}
-@keyframes kbIconPulseTablet {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.22); }
-  100% { transform: scale(1); }
-}
-#keyboardWrap #kbIcon.pulse {
-  animation: kbIconPulseTablet 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-#keyboardWrap #kbIcon:not(.pulse):hover {
-  transform: scale(1.12);
-  transition: transform 0.18s ease;
-}
-/* Tablet browser icon — mirrors kbIcon on the right side */
-#keyboardWrap #browserIcon {
-  top: 129px !important;
-  transform: none !important;
-  right: 88px !important;
-  left: auto !important;
-}
-@media (max-width: 1140px) {
-  #keyboardWrap #browserIcon { top: 117px !important; right: 68px !important; }
-}
-@media (min-width: 1340px) {
-  #keyboardWrap #browserIcon { top: 153px !important; right: 98px !important; }
-}
-@keyframes browserIconPulseTablet {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.22); }
-  100% { transform: scale(1); }
-}
-#keyboardWrap #browserIcon.pulse {
-  animation: browserIconPulseTablet 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-#keyboardWrap #browserIcon:not(.pulse):hover {
-  transform: scale(1.12);
-  transition: transform 0.18s ease;
-}
-
-
 /* Countdown overlay inside #title area */
 @keyframes questionPop {
   0%   { opacity: 0; transform: scale(0.94); }
@@ -1718,30 +1621,18 @@ li.conflict-dismissed .conflict-desc {
 </style>
 </head>
 <body>
+
+<!-- OS toggle row: sits above the game panel -->
 <div id="phonePrompt">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 60" width="72" height="90">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 60" width="72" height="90" fill="white">
     <path d="M31.3,9h-14.6c-2.6,0-4.7,2.1-4.7,4.7v34.6c0,2.6,2.1,4.7,4.7,4.7h14.6c2.6,0,4.7-2.1,4.7-4.7V13.7c0-2.6-2.1-4.7-4.7-4.7ZM31.3,51h-14.6c-1.5,0-2.7-1.2-2.7-2.7v-16.9c.7,1,1.9,1.7,3.2,1.7,2.2,0,3.9-1.8,3.9-3.9s-1.8-3.9-3.9-3.9-2.5.7-3.2,1.7v-13.3c0-1.5,1.2-2.7,2.7-2.7h14.6c1.5,0,2.7,1.2,2.7,2.7v13.3c-.7-1-1.9-1.7-3.2-1.7-2.2,0-3.9,1.8-3.9,3.9s1.8,3.9,3.9,3.9,2.5-.7,3.2-1.7v16.9c0,1.5-1.2,2.7-2.7,2.7Z"/>
     <path d="M28,14c0-.6-.4-1-1-1h-6c-.6,0-1,.4-1,1s.4,1,1,1h6c.6,0,1-.4,1-1Z"/>
     <path d="M25.5,39.3c-2.9-1-6,.6-7.2,3.9-.3.8-.1,1.5.5,1.8.4.2,1.1,0,1.3-.7.7-1.8,2.1-2.9,3.8-2.9,1.7,0,3.1,1.1,3.8,2.9.2.7.9.9,1.3.7,1.6-.9-.4-4.8-3.4-5.8Z"/>
   </svg>
   <p class="prompt-sorry">Sorry, your screen is too small for Keyboard Warriors.</p>
-  <p class="prompt-info">It works on larger touch screens like iPads, but for the best training experience we recommend a device with a physical keyboard attached.</p>
+  <p class="prompt-info">For the best training experience, we recommend a device with a physical keyboard attached.</p>
 </div>
 
-<div id="rotatePrompt">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 111.6 110.2" width="90" height="90">
-    <defs><style>.rp-white{fill:#fff;}</style></defs>
-    <rect class="rp-white" x="29.6" y="42.8" width="74.1" height="59.4" rx="5.1" ry="5.1"/>
-    <path d="M96.8,40.4h-26.8c0-.1-.2-.2-.3-.3V13.8c0-4.7-3.3-8.4-7.9-9.1H13.5c-4.6.7-7.9,4.4-7.9,9.1v60.6c0,4,3.4,8.9,7.8,8.9h13.9v13.4c.7,4.5,4.3,7.9,8.9,7.9h60.8c4,0,8.7-3.5,8.7-7.8v-48.6c-.8-4.4-4.3-7.8-8.9-7.8ZM14.6,79.6c-3,0-5.5-2.3-5.5-5.4V13.7c0-3.1,2.4-5.4,5.5-5.4h46.1c3,0,5.5,2.3,5.5,5.3v22.8c-5.9-5.2-13.4-8.2-21.4-8.2s-2,.9-2,2,.9,2,2,2c7.5,0,14.5,3,19.8,8.1h-28.5c-4.5,0-8,3.5-8.8,7.9v31.4s-12.7,0-12.7,0ZM102.2,95.6c0,2.9-2.3,5.3-5.3,5.3h-60.6c-3,0-5.5-2.3-5.5-5.3v-46.4c0-3,2.4-5.3,5.4-5.3h30.3s1.3,0,1.3,0c1.9,2.5,3.5,5.2,4.7,8.3l-4.7-1.8,9.1,14.6,3.7-16.8-4,3.4c-1-2.8-2.3-5.3-3.8-7.7h24.1c3,0,5.4,2.4,5.4,5.5v46.3Z"/>
-    <path d="M32.4,15.4h10.6c1.1,0,1.8-.8,1.9-1.7,0-1-.8-1.8-1.9-1.8h-10.5c-1.1,0-1.8.8-1.8,1.8,0,.9.8,1.7,1.8,1.7Z"/>
-    <path d="M96.8,65.3c-.9,0-1.7.8-1.7,1.8v10.6c0,1.1.8,1.8,1.7,1.9,1,0,1.8-.8,1.8-1.9v-10.5c0-1.1-.8-1.8-1.8-1.8Z"/>
-    <circle cx="38" cy="72.5" r="3.8"/>
-  </svg>
-  <p>Please rotate your device to landscape to play.</p>
-</div>
-
-
-<!-- OS toggle row: sits above the game panel -->
 <div id="osRow">
   <div id="osToggleWrap">
     <span class="os-label" id="osLabelLeft"></span>
@@ -1816,8 +1707,7 @@ li.conflict-dismissed .conflict-desc {
   </div>
 </div>
 
-<div id="ipadLayout">
-
+<!-- Stats bar: always visible -->
 <div id="statsRow">
   <span id="statLeft"></span>
   <div id="kbToast">This keyboard is for display only. Play with an actual Mac keyboard.</div>
@@ -1849,40 +1739,6 @@ li.conflict-dismissed .conflict-desc {
   <path d="M42.5,23.4c-6,0-11.4,2.1-14.9,5.4h0c0,0-.1.1-.2.2-2.4,2.3-3.8,5.2-3.8,8.4s1.4,6,3.8,8.4c0,0,0,.1.2.2,3.4,3.3,8.8,5.4,14.9,5.4s11.4-2.1,14.9-5.4h0c0,0,.1-.1.2-.2,0,0,0,0,0,0,2.4-2.3,3.8-5.2,3.8-8.4s-1.4-6-3.8-8.4c0,0-.1-.1-.2-.2-3.4-3.3-8.8-5.4-14.9-5.4h0ZM41.3,25.3v5.4c-1.9,0-3.7-.2-5.4-.4.3-.6.7-1.2,1-1.7,1.3-1.7,2.8-2.8,4.4-3.2h0ZM43.7,25.3c1.6.4,3.1,1.5,4.4,3.2.4.5.7,1.1,1.1,1.7-1.7.2-3.5.4-5.4.4v-5.3ZM49,26.2c2.1.7,4,1.7,5.5,2.9-.9.3-1.9.5-2.9.8-.4-.8-.8-1.5-1.3-2.2-.4-.5-.8-1-1.3-1.5h0ZM36,26.2c-.5.4-.9.9-1.2,1.5-.5.7-.9,1.4-1.3,2.2-1.1-.2-2.1-.5-2.9-.8,1.5-1.2,3.4-2.2,5.5-2.9h0ZM28.9,30.6c1.1.4,2.4.8,3.8,1-.5,1.5-.8,3.1-.9,4.8h-5.6c.2-2.1,1.2-4.1,2.7-5.8h0ZM56.1,30.6c1.5,1.7,2.5,3.7,2.7,5.8h-5.6c0-1.7-.4-3.3-.9-4.8,1.4-.3,2.7-.6,3.8-1h0ZM35.1,32c1.9.3,4,.4,6.1.5v3.9h-7c0-1.5.4-3,.8-4.3h0ZM49.9,32c.4,1.3.7,2.8.8,4.3h-7v-3.9c2.2,0,4.2-.2,6.1-.5h0ZM26.2,38.2h5.6c0,1.7.4,3.3.9,4.8-1.4.3-2.7.6-3.8,1-1.5-1.7-2.5-3.7-2.7-5.8h0ZM34.3,38.2h7v3.9c-2.2,0-4.2.2-6.1.5-.4-1.3-.7-2.8-.8-4.3h0ZM43.7,38.2h7c0,1.5-.4,3-.8,4.3-1.9-.3-4-.4-6.1-.5v-3.9ZM53.2,38.2h5.6c-.2,2.1-1.2,4.1-2.7,5.8-1.1-.4-2.4-.8-3.8-1,.5-1.5.8-3.1.9-4.8h0ZM41.3,43.9v5.4c-1.6-.4-3.1-1.4-4.4-3.2-.4-.5-.7-1.1-1.1-1.7,1.7-.2,3.5-.4,5.4-.4h0ZM43.7,43.9c1.9,0,3.7.2,5.4.4-.3.6-.7,1.2-1.1,1.7-1.3,1.7-2.8,2.8-4.4,3.2v-5.3ZM33.4,44.7c.4.8.8,1.5,1.3,2.2.4.5.8,1,1.2,1.5-2.1-.7-4-1.7-5.5-2.9.9-.3,1.9-.5,2.9-.8h0ZM51.6,44.7c1.1.2,2.1.5,2.9.8-1.5,1.2-3.4,2.2-5.5,2.9.5-.4.9-.9,1.3-1.5.5-.7.9-1.4,1.3-2.2h0Z"/>
   </svg>
 </div>
-
-
-<p id="credit">Built for learners. This digital toy was created by Wednesday Dessauer as open-source &amp; free to adapt under <small>GNU GPL v3.0</small></p>
-<div id="diffIconWrap">
-  <svg id="diffIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90" style="width:44px;height:auto;" cursor="pointer">
-    <g id="DiffStatic">
-      <g id="notches">
-        <line class="gauge-stroke" x1="44.7" y1="24.1" x2="44.7" y2="19.8"/>
-        <line class="gauge-stroke" x1="25.9" y1="32.1" x2="22.8" y2="29.1"/>
-        <line class="gauge-stroke" x1="18.2" y1="51.1" x2="13.9" y2="51.1"/>
-        <line class="gauge-stroke" x1="71.7" y1="50.6" x2="76.1" y2="50.6"/>
-        <line class="gauge-stroke" x1="63.7" y1="31.8" x2="66.8" y2="28.7"/>
-        <line class="gauge-stroke" x1="37.8" y1="25.1" x2="37.2" y2="22.9"/>
-        <line class="gauge-stroke" x1="31.4" y1="27.8" x2="30.3" y2="25.8"/>
-        <line class="gauge-stroke" x1="21.7" y1="37.7" x2="19.7" y2="36.5"/>
-        <line class="gauge-stroke" x1="19.1" y1="44.2" x2="16.9" y2="43.6"/>
-        <line class="gauge-stroke" x1="19.2" y1="58" x2="17" y2="58.6"/>
-        <line class="gauge-stroke" x1="70.9" y1="57.5" x2="73.1" y2="58.1"/>
-        <line class="gauge-stroke" x1="70.8" y1="43.7" x2="73" y2="43.1"/>
-        <line class="gauge-stroke" x1="68" y1="37.3" x2="70" y2="36.1"/>
-        <line class="gauge-stroke" x1="58.1" y1="27.6" x2="59.3" y2="25.6"/>
-        <line class="gauge-stroke" x1="51.7" y1="25" x2="52.3" y2="22.7"/>
-      </g>
-      <path class="gauge-stroke" d="M11.9,59.9c-.8-2.9-1.2-5.9-1.2-9,0-18.9,15.3-34.3,34.3-34.3s34.3,15.3,34.3,34.3-.4,5.9-1.1,8.6"/>
-    </g>
-    <g id="Needle" style="transform:rotate(0deg)">
-      <path class="gauge-stroke" d="M50.1,40.4c3.9,1.9,6.5,5.9,6.5,10.5s-5.2,11.7-11.7,11.7-11.7-5.2-11.7-11.7,2.6-8.5,6.5-10.5"/>
-      <path d="M46.9,45.1l-1.1-16.9c0-1.2-1.8-1.2-1.9,0l-1.1,17c0,.8-.4,1.6-1,2.1-1.1,1-1.8,2.6-1.4,4.4s1.8,3.3,3.6,3.6c3,.6,5.7-1.7,5.7-4.6s-.7-2.8-1.8-3.7-.9-1.2-1-2ZM44.2,54.4c-1.3-.3-2.4-1.2-2.8-2.5s-.1-2.2.4-3c0,0,0,0,0-.1,0-.1.2-.3.3-.4,0,0,.1-.1.2-.2,0,0,0-.1.2-.2h0c.6-.5,1.4-.8,2.3-.8s1.5.2,2.1.7h0c1,.6,1.6,1.7,1.6,3,0,2.3-2.1,4.1-4.4,3.6Z"/>
-      <circle cx="45" cy="50.9" r="2.7"/>
-    </g>
-  </svg>
-</div>
-<div id="iconTooltip"></div>
-</div><!-- /#ipadLayout -->
 
 <div id="debugOverlay" style="position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;border-radius:8px;z-index:9999;pointer-events:auto;line-height:1.5;display:none;flex-direction:row;gap:0;align-items:flex-start;overflow:hidden;max-height:800px;transition:max-height 0.2s ease,border-radius 0.2s ease;" aria-hidden="true">
   <!-- Left column -->
@@ -1937,6 +1793,40 @@ li.conflict-dismissed .conflict-desc {
     </div>
   </div>
 </div>
+<p id="credit">Built for learners. This digital toy was created by Wednesday Dessauer as open-source &amp; free to adapt under <small>GNU GPL v3.0</small></p>
+<div id="diffIconWrap">
+  <svg id="diffIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90" style="width:44px;height:auto;" cursor="pointer">
+    <g id="DiffStatic">
+      <g id="notches">
+        <line class="gauge-stroke" x1="44.7" y1="24.1" x2="44.7" y2="19.8"/>
+        <line class="gauge-stroke" x1="25.9" y1="32.1" x2="22.8" y2="29.1"/>
+        <line class="gauge-stroke" x1="18.2" y1="51.1" x2="13.9" y2="51.1"/>
+        <line class="gauge-stroke" x1="71.7" y1="50.6" x2="76.1" y2="50.6"/>
+        <line class="gauge-stroke" x1="63.7" y1="31.8" x2="66.8" y2="28.7"/>
+        <line class="gauge-stroke" x1="37.8" y1="25.1" x2="37.2" y2="22.9"/>
+        <line class="gauge-stroke" x1="31.4" y1="27.8" x2="30.3" y2="25.8"/>
+        <line class="gauge-stroke" x1="21.7" y1="37.7" x2="19.7" y2="36.5"/>
+        <line class="gauge-stroke" x1="19.1" y1="44.2" x2="16.9" y2="43.6"/>
+        <line class="gauge-stroke" x1="19.2" y1="58" x2="17" y2="58.6"/>
+        <line class="gauge-stroke" x1="70.9" y1="57.5" x2="73.1" y2="58.1"/>
+        <line class="gauge-stroke" x1="70.8" y1="43.7" x2="73" y2="43.1"/>
+        <line class="gauge-stroke" x1="68" y1="37.3" x2="70" y2="36.1"/>
+        <line class="gauge-stroke" x1="58.1" y1="27.6" x2="59.3" y2="25.6"/>
+        <line class="gauge-stroke" x1="51.7" y1="25" x2="52.3" y2="22.7"/>
+      </g>
+      <path class="gauge-stroke" d="M11.9,59.9c-.8-2.9-1.2-5.9-1.2-9,0-18.9,15.3-34.3,34.3-34.3s34.3,15.3,34.3,34.3-.4,5.9-1.1,8.6"/>
+    </g>
+    <g id="Needle" style="transform:rotate(0deg)">
+      <path class="gauge-stroke" d="M50.1,40.4c3.9,1.9,6.5,5.9,6.5,10.5s-5.2,11.7-11.7,11.7-11.7-5.2-11.7-11.7,2.6-8.5,6.5-10.5"/>
+      <path d="M46.9,45.1l-1.1-16.9c0-1.2-1.8-1.2-1.9,0l-1.1,17c0,.8-.4,1.6-1,2.1-1.1,1-1.8,2.6-1.4,4.4s1.8,3.3,3.6,3.6c3,.6,5.7-1.7,5.7-4.6s-.7-2.8-1.8-3.7-.9-1.2-1-2ZM44.2,54.4c-1.3-.3-2.4-1.2-2.8-2.5s-.1-2.2.4-3c0,0,0,0,0-.1,0-.1.2-.3.3-.4,0,0,.1-.1.2-.2,0,0,0-.1.2-.2h0c.6-.5,1.4-.8,2.3-.8s1.5.2,2.1.7h0c1,.6,1.6,1.7,1.6,3,0,2.3-2.1,4.1-4.4,3.6Z"/>
+      <circle cx="45" cy="50.9" r="2.7"/>
+    </g>
+  </svg>
+</div>
+
+<div id="iconTooltip"></div>
+
+
 <script>
 /* ══════════════════════════════════════
    SHORTCUTS — generated from shortcuts_final.csv
@@ -2379,7 +2269,7 @@ function buildKey(cfg, isMini) {
       el.addEventListener('mousedown', function(ev){ touchEnabled ? handleKeyTouch(ev, el) : showKbToast(ev); });
       break;
     case 'winkey':
-      el.innerHTML = `<svg class="win-svg" width="14" height="14" viewBox="0 0 102.73 104.6" fill="currentColor" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>`;
+      el.innerHTML = `<svg class="win-svg" width="14" height="14" viewBox="0 0 102.73 104.6" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>`;
       el.addEventListener('mousedown', function(ev){ touchEnabled ? handleKeyTouch(ev, el) : showKbToast(ev); });
       break;
   }
@@ -2616,11 +2506,13 @@ function showToast(msg, duration) {
   duration = duration || 2400;
   var el = document.getElementById('kwToast');
   if (!el) return;
+  // Position: centred above the keyboard panel, or top-of-front-modal if open
   var modalFront = null;
   if (kbModalOpen || browserModalOpen) {
     var kbM  = document.getElementById('kbModal');
     var brM  = document.getElementById('browserModal');
     if (kbModalOpen && browserModalOpen) {
+      // whichever has higher z-index is in front
       var kbZ  = parseInt(kbM.style.zIndex  || 200);
       var brZ  = parseInt(brM.style.zIndex  || 200);
       modalFront = kbZ >= brZ ? kbM : brM;
@@ -2650,6 +2542,7 @@ function showToast(msg, duration) {
   }, duration);
 }
 
+// Legacy alias — keeps any remaining internal calls working
 function showModeToast(msg) { showToast(msg); }
 
 function pulseBtn(el) {
@@ -2702,6 +2595,7 @@ function handleKeyTouch(e, el) {
     altKey:   code === 'AltLeft'     || code === 'AltRight',
     metaKey:  code === 'MetaLeft'    || code === 'MetaRight',
     ctrlKey:  code === 'ControlLeft' || code === 'ControlRight',
+    _fromTouch: true,
   };
   handleKeydown(synth);
   // In sticky mode the key stays lit; in non-sticky mode release after the
@@ -2750,8 +2644,8 @@ const osMismatchEl   = document.getElementById('osMismatchPill');
 const osKnobEl  = document.getElementById('osKnobEl');
 
 // MAC_SVG / PC_SVG inline strings for label rendering
-const MAC_ICON_SVG = '<svg width="10" height="12" viewBox="0 0 686.7 761.2" fill="#9ca3af" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org"><path d="M563.7,589c-27.7,41.3-57,81.7-101.7,82.3-44.7,1-59-26.3-109.7-26.3s-66.7,25.7-109,27.3c-43.7,1.7-76.7-44-104.7-84.3-57-82.3-100.7-234-42-336,29-50.7,81-82.7,137.3-83.7,42.7-.7,83.3,29,109.7,29s75.3-35.7,127-30.3c21.7,1,82.3,8.7,121.3,66-3,2-72.3,42.7-71.7,127,1,100.7,88.3,134.3,89.3,134.7-1,2.3-14,48-46,94.3h0ZM373.3,55.7c24.3-27.7,64.7-48.7,98-50,4.3,39-11.3,78.3-34.7,106.3-23,28.3-61,50.3-98.3,47.3-5-38.3,13.7-78.3,35-103.7h0Z"/></svg>';
-const PC_ICON_SVG  = '<svg width="11" height="11" viewBox="0 0 102.73 104.6" fill="#9ca3af" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>';
+const MAC_ICON_SVG = '<svg width="10" height="12" viewBox="0 0 686.7 761.2" fill="#9ca3af" xmlns="http://www.w3.org/2000/svg"><path d="M563.7,589c-27.7,41.3-57,81.7-101.7,82.3-44.7,1-59-26.3-109.7-26.3s-66.7,25.7-109,27.3c-43.7,1.7-76.7-44-104.7-84.3-57-82.3-100.7-234-42-336,29-50.7,81-82.7,137.3-83.7,42.7-.7,83.3,29,109.7,29s75.3-35.7,127-30.3c21.7,1,82.3,8.7,121.3,66-3,2-72.3,42.7-71.7,127,1,100.7,88.3,134.3,89.3,134.7-1,2.3-14,48-46,94.3h0ZM373.3,55.7c24.3-27.7,64.7-48.7,98-50,4.3,39-11.3,78.3-34.7,106.3-23,28.3-61,50.3-98.3,47.3-5-38.3,13.7-78.3,35-103.7h0Z"/></svg>';
+const PC_ICON_SVG  = '<svg width="11" height="11" viewBox="0 0 102.73 104.6" fill="#9ca3af" xmlns="http://www.w3.org/2000/svg"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>';
 
 function buildOsLabels() {
   // Detected device is always on the LEFT (white dot = current).
@@ -2814,7 +2708,7 @@ function applyOsMode(os) {
 }
 
 function updateMismatchPill() {
-  if (detectedOs === 'mobile') return;
+  if (detectedOs === 'mobile') return; // mobile message shown once at init
   if (detectedOs === 'other') return;
   const mismatch = (detectedOs === 'mac' && currentOs === 'pc') ||
                    (detectedOs === 'pc'  && currentOs === 'mac');
@@ -2834,7 +2728,13 @@ function onOsToggle() {
   if (browserModalOpen) _refreshBrowserContent();
 }
 
-
+// On mobile: auto-enable sticky + touch modes, show updated message
+if (detectedOs === 'mobile') {
+  setStickyKeys(true);
+  setTouchEnabled(true);
+  document.getElementById('stickyRow').classList.add('disabled');
+  showToast('We recommend training with a real mechanical keyboard.', 4000);
+}
 
 // Set the initial toggle position to match the detected OS
 // (defaults to PC for unknown/other systems)
@@ -2872,63 +2772,23 @@ function alignKbIcon() {
   icon.style.left = (kpanelLeft - iconW * 2) + 'px';
 }
 
-// iPad: resize only repositions modal if open
 window.addEventListener('resize', function() {
+  updateKeyboardMode();
   alignKbIcon();
-  if (kbModalOpen) positionKbModal();
+  if (kbModalOpen) {
+    if (window.innerWidth < 600) {
+      closeKbModal();
+    } else {
+      positionKbModal();
+    }
+  }
 });
-
-// ── Game-area click pulses the contextually useful button ────────────────────
-function _gameAreaClick(e) {
-  var tag = e.target.tagName;
-  if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'LABEL' || tag === 'A') return;
-  if (e.target.closest('button, input, label, a, #timerBox, #kbIcon, #browserIcon, #appPill, #appDropdown, #debugOverlay')) return;
-  if (gameState === 'paused') {
-    pulseBtn(document.getElementById('mainBtn'));
-    return;
-  }
-  if (gameState === 'idle') {
-    pulseBtn(document.getElementById('mainBtn'));
-    return;
-  }
-  if (gameState === 'finished') {
-    pulseBtn(document.getElementById('mainBtn'));
-    var sl = document.getElementById('statLeft');
-    var sr = document.getElementById('statRight');
-    if (sl && sl.textContent) { sl.classList.remove('stat-pulse'); void sl.offsetWidth; sl.classList.add('stat-pulse'); }
-    if (sr && sr.textContent) { sr.classList.remove('stat-pulse'); void sr.offsetWidth; sr.classList.add('stat-pulse'); }
-    return;
-  }
-}
-// gameContainer holds the topRow (title, buttons, timer); ipadLayout holds stats + keyboard.
-// Both need the handler since they are siblings, not parent/child.
-var _gc = document.getElementById('gameContainer');
-var _il = document.getElementById('ipadLayout');
-if (_gc) _gc.addEventListener('click', _gameAreaClick);
-if (_il) _il.addEventListener('click', _gameAreaClick);
-// iPad fork: always full keyboard, never mini
-currentKbMode = 'full';
-keyboardWrap.style.display = 'flex';
-
-// Double-rAF ensures layout is complete before we measure or build anything
-requestAnimationFrame(function() {
-  requestAnimationFrame(function() {
-    buildKeyboard(false);
-    document.getElementById('keyboardPanel').classList.toggle('pc-keys', currentOs === 'pc');
-    alignKbIcon();
-    (function() {
-      var btn = document.getElementById('mainBtn');
-      if (btn) btn.textContent = 'Start';
-    })();
-    // iPad fork: unconditionally enable touch + sticky.
-    // Users only arrive here after the root index identified a touch device.
-    setStickyKeys(true);
-    setTouchEnabled(true);
-    var stickyRow = document.getElementById('stickyRow');
-    if (stickyRow) stickyRow.classList.add('disabled');
-    showToast('We recommend training with a real mechanical keyboard.', 4000);
-  });
-});
+updateKeyboardMode();
+setTimeout(alignKbIcon, 50);
+// Show mismatch pill after initial keyboard build
+updateMismatchPill();
+// Apply rounded style if starting in PC mode
+document.getElementById('keyboardPanel').classList.toggle('pc-keys', currentOs === 'pc');
 
 /* ══════════════════════════════════════
    SHORTCUT → KEY CODES
@@ -3035,6 +2895,9 @@ function charToCode(ch) {
     'ARROWUP':'ArrowUp','ARROWDOWN':'ArrowDown',
     'HOME':'Home','END':'End',
     'GRAVE':'Backquote','BACKSLASH':'Backslash',
+    "'":'Quote','QUOTE':'Quote',
+    ';':'Semicolon','SEMICOLON':'Semicolon',
+    '-':'Minus','=':'Equal','[':'BracketLeft',']':'BracketRight','COMMA':'Comma','PERIOD':'Period',
   };
   if (map[ch]) return map[ch];
   if (ch.length === 1 && ch >= 'A' && ch <= 'Z') return 'Key' + ch;
@@ -3253,6 +3116,7 @@ function updateKeyboardLighting(e, isDown) {
     }
     // Otherwise light it
     heldKeys.add(code);
+    // Outside a round, always green — currentAnswer is empty so correctness is meaningless
     const isCorrect = gameState !== 'playing' || isKeyPartOfShortcut(e, currentAnswer);
     const colour = isCorrect ? 'green' : 'orange';
     stickyLit.set(code, colour);
@@ -3409,7 +3273,9 @@ function hideProgressDots() {
 const statLeftEl      = document.getElementById('statLeft');
 const statRightEl     = document.getElementById('statRight');
 
+// Clicking either stat record shows a hint about where to reset
 function _statClickHint(e) {
+  // Only fire when stats are actually showing (finished state or idle with a record)
   if (!bestRecord || bestRecord.time === null) return;
   showModeToast('Reset high scores from the pause screen.');
 }
@@ -3555,12 +3421,14 @@ function helpButtonClick() {
 function timerBoxClick() {
   if (gameState === 'playing') { enterPause(); return; }
   if (gameState === 'paused') {
+    // Treat exactly like the Unpause button: close modals, countdown if needed
     var needsCountdown = _modalWasOpenOnPause || kbModalOpen || browserModalOpen;
     _closeAllModals();
     if (needsCountdown) { beginResumeCountdown(); } else { unpause(); }
     return;
   }
   if (gameState === 'confirm-reset' && _wasPlaying) {
+    // Pause icon is still visible — tapping it means "cancel reset, go back"
     confirmResetNo();
     return;
   }
@@ -3674,6 +3542,7 @@ function enterPause(instantBlur) {
   if (instantBlur) {
     titleEl.classList.add('blur-instant');
     questionCountEl.classList.add('blur-instant');
+    // Remove the instant flag next frame so future transitions are restored
     requestAnimationFrame(function() {
       titleEl.classList.remove('blur-instant');
       questionCountEl.classList.remove('blur-instant');
@@ -3682,7 +3551,7 @@ function enterPause(instantBlur) {
   titleEl.classList.add('blurred');
   questionCountEl.classList.add('blurred');
   titleEl.classList.remove('strike','hidden');
-  timerDiv.innerHTML = '<svg width="26" height="26" viewBox="0 0 26 26" style="display:block;vertical-align:top;" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org"><rect x="6" y="2" width="4" height="22" rx="1.5" fill="white"/><rect x="16" y="2" width="4" height="22" rx="1.5" fill="white"/></svg>';
+  timerDiv.innerHTML = '<svg width="26" height="26" viewBox="0 0 26 26" style="display:block;vertical-align:top;" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="2" width="4" height="22" rx="1.5" fill="white"/><rect x="16" y="2" width="4" height="22" rx="1.5" fill="white"/></svg>';
   setTimerState('paused');
   mainBtn.textContent = 'Unpause';
   helpBtn.textContent = 'Reset';
@@ -3712,6 +3581,7 @@ function unpause() {
 }
 
 function _closeAllModalsInstant() {
+  // Dismiss modals without animation — used when confirm-reset overlay needs clear focus
   var km = document.getElementById('kbModal');
   var bm = document.getElementById('browserModal');
   if (kbModalOpen && km)      { km.classList.remove('visible'); km.style.animation = ''; km.style.pointerEvents = ''; kbModalOpen = false; }
@@ -4085,12 +3955,23 @@ function toggleAppDropdown() {
 }
 
 function openAppPill() {
+  var rect      = appPillEl.getBoundingClientRect();
+  var spaceBelow = window.innerHeight - rect.bottom - 8;
+  var needsDrop  = spaceBelow < 123;  // not enough room to expand upward
+  appPillEl.style.maxHeight = '';     // let CSS control it
+  appPillEl.classList.toggle('drop-down', needsDrop);
+  if (needsDrop) {
+    // Cap height to available space below
+    var cap = Math.min(123, Math.max(48, spaceBelow));
+    appPillEl.style.maxHeight = cap + 'px';
+  }
   appPillEl.classList.add('open');
   appPillEl.scrollTop = 0;
 }
 
 function closeAppPill() {
-  appPillEl.classList.remove('open');
+  appPillEl.classList.remove('open', 'drop-down');
+  appPillEl.style.maxHeight = '';
   // After transition, scroll to selected row
   setTimeout(scrollPillToSelected, 230);
 }
@@ -4187,13 +4068,11 @@ function onTouchToggle() {
   if (touchEnabled) {
     setStickyKeys(true);
     document.getElementById('stickyRow').classList.add('disabled');
-    showToast('On-Screen Keyboard Active');
+    showModeToast('On-Screen Keyboard Active');
   } else {
     setStickyKeys(false);
     document.getElementById('stickyRow').classList.remove('disabled');
-    // Show the keyboard-size toast, then keep the pill permanently hidden.
-    var _kbLabel = hasFullKeyboard ? 'Keyboard: Extended' : 'Keyboard: Compact';
-    showToast(_kbLabel);
+    showModeToast('On-Screen Keyboard = Display Only');
   }
 }
 
@@ -4316,12 +4195,26 @@ function onModalFnToggle() {
 var kbModalOpen = false;
 var browserModalOpen = false;
 
+
+function positionIcons() {
+  var panel = document.getElementById('keyboardPanel');
+  var wrap  = document.getElementById('keyboardWrap');
+  var kb    = document.getElementById('kbIcon');
+  var br    = document.getElementById('browserIcon');
+  if (!panel || !wrap) return;
+  var pRect = panel.getBoundingClientRect();
+  var wRect = wrap.getBoundingClientRect();
+  var KB_GAP = 18;  // left: keyboard icon
+  var BR_GAP = 36;  // right: browser icon (wider SVG needs more air)
+  if (kb) kb.style.left = Math.round(pRect.left - wRect.left - kb.offsetWidth - KB_GAP) + 'px';
+  if (br) br.style.left = Math.round(pRect.right - wRect.left + BR_GAP) + 'px';
+}
 var MODAL_W = 340;
 var MODAL_H = 460;
 var BROWSER_MODAL_W = 340;
-var BROWSER_MODAL_H = 412;
-var BROWSER_ROW_PX  = 26;   // extra px per conflict row beyond the 4 that fit at base height
-var BROWSER_BASE_ROWS = 4;  // rows that fit comfortably at BROWSER_MODAL_H
+var BROWSER_MODAL_H = 450;
+var BROWSER_ROW_PX  = 26;   // extra px per conflict row beyond the base
+var BROWSER_BASE_ROWS = 3;  // rows that fit comfortably at BROWSER_MODAL_H
 
 function getBrowserModalHeight() {
   var n = getBrowserConflicts().keys.length;
@@ -4377,10 +4270,12 @@ function positionKbModal() {
 function openKbModal() {
   var km = document.getElementById('kbModal');
   var bm = document.getElementById('browserModal');
+  // If browser modal is already showing, demote it to rear instantly (no animation restart)
   if (bm && browserModalOpen) bm.style.zIndex = '201';
   km.style.zIndex = '202';
   km.style.height = MODAL_H + 'px';
   _applyKbPos(km);
+  // Reset animation state so paperUnfurl plays fresh
   km.classList.remove('visible');
   km.style.animation = '';
   void km.offsetWidth;
@@ -4401,26 +4296,22 @@ openKbModal = function() {
 
 function closeKbModal() {
   kbModalOpen = false;
-  // If touch is off, ensure the mismatch pill stays hidden on close —
-  // the mode toast may still be running from the touch toggle.
-  if (!touchEnabled) {
-    clearTimeout(_kwToastTimer);
-    _kwToastTimer = null;
-  }
   var modal = document.getElementById('kbModal');
+  // Snapshot front/rear NOW before any z-index changes
   var isFront = !browserModalOpen || modal.style.zIndex === '202';
   var dur = isFront ? 450 : 550;
   var anim = isFront
     ? 'paperFurlFront 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards'
     : 'paperFurl 0.55s cubic-bezier(0.64, 0, 0.78, 0) forwards';
-  modal.style.transition = 'none';
   modal.style.animation = anim;
   modal.style.pointerEvents = 'none';
+  // If kb was rear, promote browser to front ONLY after kb has fully disappeared
+  // If kb was front, browser is already at z=201 and needs no change during animation
   setTimeout(function() {
     modal.classList.remove('visible');
     modal.style.animation = '';
-    modal.style.transition = '';
     modal.style.pointerEvents = '';
+    // Promote surviving modal only after animation is complete
     if (browserModalOpen) {
       var bm = document.getElementById('browserModal');
       if (bm) { bm.style.zIndex = '202'; }
@@ -4485,11 +4376,12 @@ function _makeConflictRadio(canonicalKey) {
   var wrap = document.createElement('span');
   wrap.className = 'modal-radio' + (isDismissed ? ' on' : '');
   wrap.style.cssText = 'flex-shrink:0;margin-right:7px;cursor:pointer;';
-  wrap.innerHTML = '<svg class="modal-radio-dot" width="16" height="16" viewBox="0 0 19 19" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org">'
+  wrap.innerHTML = '<svg class="modal-radio-dot" width="16" height="16" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">'
     + '<circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>'
     + '<circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>'
     + '</svg>';
   wrap.addEventListener('click', function(e) {
+    // Ignore taps near the right edge of the modal
     var bm = document.getElementById('browserModal');
     if (bm && e.clientX >= bm.getBoundingClientRect().right - 35) return;
     var li = wrap.closest('li');
@@ -4513,6 +4405,7 @@ function _makeConflictRadio(canonicalKey) {
 }
 
 function _refreshBrowserContent() {
+  // Rebuild browser modal text/list to reflect current OS — no animation or z-index changes.
   var d     = getBrowserConflicts();
   var bname = d.name;
 
@@ -4551,13 +4444,15 @@ function _refreshBrowserContent() {
       label.className = 'conflict-label';
       label.appendChild(_renderKeyChips(s));
       li.appendChild(label);
+      // Clicking anywhere on the row also toggles
       li.addEventListener('click', function(e) {
+        // Ignore taps near the right edge (used to bring modal to front, not interact)
         var bm = document.getElementById('browserModal');
         if (bm) {
           var bmRight = bm.getBoundingClientRect().right;
           if (e.clientX >= bmRight - 35) return;
         }
-        if (e.target.closest('.modal-radio')) return;
+        if (e.target.closest('.modal-radio')) return; // radio handles its own click
         li.querySelector('.modal-radio').click();
       });
       ul.appendChild(li);
@@ -4578,10 +4473,12 @@ function openBrowserModal() {
 
   var bm = document.getElementById('browserModal');
   var km = document.getElementById('kbModal');
+  // If kb modal is already showing, demote it to rear instantly (no animation restart)
   if (km && kbModalOpen) km.style.zIndex = '201';
   bm.style.zIndex = '202';
   bm.style.height = getBrowserModalHeight() + 'px';
   _applyBrowserPos(bm);
+  // Reset animation state so paperUnfurl plays fresh
   bm.classList.remove('visible');
   bm.style.animation = '';
   void bm.offsetWidth;
@@ -4591,22 +4488,23 @@ function openBrowserModal() {
   else if (gameState === 'counting') { cancelCountdown(); _modalWasOpenOnPause = true; }
   else if (gameState === 'paused') { _modalWasOpenOnPause = true; }
 }
+
 function closeBrowserModal() {
   browserModalOpen = false;
   var modal = document.getElementById('browserModal');
+  // Snapshot front/rear NOW before any z-index changes
   var isFront = !kbModalOpen || modal.style.zIndex === '202';
   var dur = isFront ? 450 : 550;
   var anim = isFront
     ? 'paperFurlFront 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards'
     : 'paperFurl 0.55s cubic-bezier(0.64, 0, 0.78, 0) forwards';
-  modal.style.transition = 'none';
   modal.style.animation = anim;
   modal.style.pointerEvents = 'none';
   setTimeout(function() {
     modal.classList.remove('visible');
     modal.style.animation = '';
-    modal.style.transition = '';
     modal.style.pointerEvents = '';
+    // Promote surviving modal only after animation is complete
     if (kbModalOpen) {
       var km = document.getElementById('kbModal');
       if (km) { km.style.zIndex = '202'; }
@@ -4629,46 +4527,39 @@ document.getElementById('browserIcon').addEventListener('click', function(e) {
   toggleBrowserModal();
 });
 
-// ── Tapping the back modal brings it to front (deferred: modals are after script tag) ──
-function _bringKbToFront(e) {
-  var km = document.getElementById('kbModal');
-  var bm = document.getElementById('browserModal');
-  if (!browserModalOpen || km.style.zIndex === '202') return;
-  if (e && e.target && e.target.closest('.modal-dismiss-btn')) return;
-  if (e) {
-    var frontRect = bm.getBoundingClientRect();
-    var cx = e.clientX !== undefined ? e.clientX : (e.touches ? e.touches[0].clientX : null);
-    var cy = e.clientY !== undefined ? e.clientY : (e.touches ? e.touches[0].clientY : null);
-    if (cx !== null && cx >= frontRect.left && cx <= frontRect.right &&
-        cy >= frontRect.top && cy <= frontRect.bottom) return;
-  }
-  km.style.zIndex = '202';
-  bm.style.zIndex = '201';
-}
-function _bringBrowserToFront(e) {
-  var bm = document.getElementById('browserModal');
-  var km = document.getElementById('kbModal');
-  if (!kbModalOpen || bm.style.zIndex === '202') return;
-  if (e && e.target && e.target.closest('.modal-dismiss-btn')) return;
-  if (e) {
-    var frontRect = km.getBoundingClientRect();
-    var cx = e.clientX !== undefined ? e.clientX : (e.touches ? e.touches[0].clientX : null);
-    var cy = e.clientY !== undefined ? e.clientY : (e.touches ? e.touches[0].clientY : null);
-    if (cx !== null && cx >= frontRect.left && cx <= frontRect.right &&
-        cy >= frontRect.top && cy <= frontRect.bottom) return;
-  }
-  bm.style.zIndex = '202';
-  km.style.zIndex = '201';
-}
+// ── Clicking the back modal brings it to front (deferred: modals are after script tag) ──
 window.addEventListener('load', function() {
-  document.getElementById('kbModal').addEventListener('mousedown',  _bringKbToFront);
-  document.getElementById('kbModal').addEventListener('touchstart', _bringKbToFront, {passive: true});
-  document.getElementById('browserModal').addEventListener('mousedown',  _bringBrowserToFront);
-  document.getElementById('browserModal').addEventListener('touchstart', _bringBrowserToFront, {passive: true});
+  document.getElementById('kbModal').addEventListener('mousedown', function(e) {
+    var km = document.getElementById('kbModal');
+    var bm = document.getElementById('browserModal');
+    if (!browserModalOpen || km.style.zIndex === '202') return;
+    // X button must never trigger bring-to-front
+    if (e.target.closest('.modal-dismiss-btn')) return;
+    // Only bring to front if the click point is NOT inside the front modal
+    var frontRect = bm.getBoundingClientRect();
+    if (e.clientX >= frontRect.left && e.clientX <= frontRect.right &&
+        e.clientY >= frontRect.top  && e.clientY <= frontRect.bottom) return;
+    km.style.zIndex = '202';
+    bm.style.zIndex = '201';
+  });
+  document.getElementById('browserModal').addEventListener('mousedown', function(e) {
+    var bm = document.getElementById('browserModal');
+    var km = document.getElementById('kbModal');
+    if (!kbModalOpen || bm.style.zIndex === '202') return;
+    // X button must never trigger bring-to-front
+    if (e.target.closest('.modal-dismiss-btn')) return;
+    // Only bring to front if the click point is NOT inside the front modal
+    var frontRect = km.getBoundingClientRect();
+    if (e.clientX >= frontRect.left && e.clientX <= frontRect.right &&
+        e.clientY >= frontRect.top  && e.clientY <= frontRect.bottom) return;
+    bm.style.zIndex = '202';
+    km.style.zIndex = '201';
+  });
 });
 
-// ── Outside-click: modals no longer dismissed by clicking empty space.
+// ── Outside-click: modals are no longer dismissed by clicking empty space.
 //    Only X buttons or resuming play closes them.
+//    App pill is still blocked during play.
 document.addEventListener('click', function(e) {
   if (!kbModalOpen && !browserModalOpen) return;
   var midGame = (gameState === 'playing' || gameState === 'paused');
@@ -4681,8 +4572,35 @@ document.addEventListener('click', function(e) {
 });
 
 window.addEventListener('resize', function() {
+  positionIcons();
   if (kbModalOpen)      positionKbModal();
   if (browserModalOpen) positionBrowserModal();
+});
+
+// ── Game-area click pulses the contextually useful button ────────────────────
+document.getElementById('gameContainer').addEventListener('click', function(e) {
+  // Don't intercept clicks on actual buttons/interactive elements
+  var tag = e.target.tagName;
+  if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'LABEL' || tag === 'A') return;
+  if (e.target.closest('button, input, label, a, #timerBox, #kbIcon, #browserIcon, #appPill, #appDropdown, #debugOverlay')) return;
+
+  if (gameState === 'paused') {
+    pulseBtn(document.getElementById('mainBtn'));
+    return;
+  }
+  if (gameState === 'idle') {
+    pulseBtn(document.getElementById('mainBtn'));
+    return;
+  }
+  if (gameState === 'finished') {
+    // Pulse Try Again? button and both stat records
+    pulseBtn(document.getElementById('mainBtn'));
+    var sl = document.getElementById('statLeft');
+    var sr = document.getElementById('statRight');
+    if (sl && sl.textContent) { sl.classList.remove('stat-pulse'); void sl.offsetWidth; sl.classList.add('stat-pulse'); }
+    if (sr && sr.textContent) { sr.classList.remove('stat-pulse'); void sr.offsetWidth; sr.classList.add('stat-pulse'); }
+    return;
+  }
 });
 
 
@@ -4691,66 +4609,32 @@ window.addEventListener('resize', function() {
 let escHoldTimer = null;
 let escHoldFired = false;
 
-function _escHoldOpen() {
-  escHoldFired = true;
-  const dbg = document.getElementById('debugOverlay');
-  dbg.style.display = 'flex';
-  document.getElementById('dbgAnswer').textContent = 'debug on — press a key during play';
-  document.getElementById('dbgKey').textContent = '';
-  document.getElementById('dbgMatch').textContent = '';
-  dbgRefreshCtx(); dbgRefreshAccuracy();
-}
-
-function _escHoldClose() {
-  const dbg = document.getElementById('debugOverlay');
-  if (dbg.style.display !== 'none') dbg.style.display = 'none';
-}
-
-// Physical keyboard hold-to-open / single-press-to-close
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape' || e.repeat) return;
   if (document.getElementById('debugOverlay').style.display !== 'none') return;
   escHoldFired = false;
-  escHoldTimer = setTimeout(_escHoldOpen, 2000);
+  escHoldTimer = setTimeout(() => {
+    escHoldFired = true;
+    const dbg = document.getElementById('debugOverlay');
+    dbg.style.display = 'flex';
+    document.getElementById('dbgAnswer').textContent = 'debug on — press a key during play';
+    document.getElementById('dbgKey').textContent = '';
+    document.getElementById('dbgMatch').textContent = '';
+    dbgRefreshCtx(); dbgRefreshAccuracy();
+  }, 2000);
 });
 
 document.addEventListener('keyup', e => {
   if (e.key !== 'Escape') return;
   clearTimeout(escHoldTimer);
   escHoldTimer = null;
-  if (escHoldFired) { escHoldFired = false; return; }
-  _escHoldClose();
-});
-
-// Touch hold-to-open / single tap-to-close on the on-screen Escape key
-// Uses event delegation on keyboardPanel so it works after any keyboard rebuild.
-document.getElementById('keyboardPanel').addEventListener('touchstart', function(e) {
-  var el = e.target.closest('[data-key="Escape"]');
-  if (!el) return;
-  const dbg = document.getElementById('debugOverlay');
-  // If already open, a tap closes it
-  if (dbg.style.display !== 'none') {
-    _escHoldClose();
+  if (escHoldFired) {
+    escHoldFired = false;
     return;
   }
-  escHoldFired = false;
-  escHoldTimer = setTimeout(_escHoldOpen, 2000);
-}, { passive: true });
-
-document.getElementById('keyboardPanel').addEventListener('touchend', function(e) {
-  var el = e.target.closest('[data-key="Escape"]');
-  if (!el) return;
-  clearTimeout(escHoldTimer);
-  escHoldTimer = null;
-  // escHoldFired already reset by _escHoldOpen; no-op on quick release
-}, { passive: true });
-
-document.getElementById('keyboardPanel').addEventListener('touchcancel', function(e) {
-  var el = e.target.closest('[data-key="Escape"]');
-  if (!el) return;
-  clearTimeout(escHoldTimer);
-  escHoldTimer = null;
-}, { passive: true });
+  const dbg = document.getElementById('debugOverlay');
+  if (dbg.style.display !== 'none') dbg.style.display = 'none';
+});
 
 // ── Debug context display ────────────────────────────────────────────────────
 function dbgToggle() {
@@ -4822,8 +4706,6 @@ function dbgReport() {
   window.location.href = 'mailto:Wednesday%20Dessauer%20%3Cddessauer%40swin.edu.au%3E?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
 }
 
-var DBG_DEVICE = 'Tablet';
-
 function dbgRefreshCtx() {
   const top = document.getElementById('dbgCtxTop');
   const sub = document.getElementById('dbgCtxSub');
@@ -4831,7 +4713,7 @@ function dbgRefreshCtx() {
   const appLabels = {Ps:'Photoshop', Ai:'Illustrator', In:'InDesign', Ae:'After Effects', Fi:'Figma'};
   const appName  = appLabels[currentApp] || currentApp;
   const osName   = currentOs === 'pc' ? 'PC/Windows' : 'Mac';
-  const device   = DBG_DEVICE;
+  const device   = typeof DBG_DEVICE !== 'undefined' ? DBG_DEVICE : 'computer';
   const state    = gameState;
   const pool     = questionPool.length;
   const qi       = pool > 0 ? (questionIndex % pool) + 1 : '—';
@@ -4888,102 +4770,160 @@ function dbgNextQuestion() {
   clearHelp(); transitioning = false;
 }
 
-/* Browser banner removed — tablet version uses gyro permission modal instead */
-
-/* ══════════════════════════════════════
-   GYRO PERMISSION MODAL
-   Shows once per session on tablets.
-   Replaces browser banner.
-══════════════════════════════════════ */
-(function() {
-  // Android: DeviceOrientationEvent fires without permission prompt — start directly
-  var needsPermission = typeof DeviceOrientationEvent !== 'undefined' &&
-                        typeof DeviceOrientationEvent.requestPermission === 'function';
-
-  if (!needsPermission) {
-    // Android or desktop fallback — just wire up directly, no modal needed
-    startGyro();
-    return;
-  }
-
-  // iOS 13+ — show the modal unless already answered this session
-  if (sessionStorage.getItem('gyroDecided')) {
-    if (sessionStorage.getItem('gyroDecided') === 'granted') startGyro();
-    return;
-  }
-
-  function showGyroModal() {
-    var backdrop = document.getElementById('gyroBackdrop');
-    var modal    = document.getElementById('gyroModal');
-    if (!backdrop || !modal) return;
-    backdrop.style.display = 'block';
-    modal.style.display    = 'block';
-    positionGyroModal();
-    modal.classList.add('visible');
-    window.addEventListener('resize', positionGyroModal);
-  }
-
-  // Show after a brief delay so the app is visible behind the modal
-  setTimeout(showGyroModal, 600);
-})();
-
-function positionGyroModal() {
-  var modal = document.getElementById('gyroModal');
-  if (!modal || modal.style.display === 'none') return;
-  modal.style.left = Math.round((window.innerWidth  - 300) / 2) + 'px';
-  modal.style.top  = Math.round((window.innerHeight - modal.offsetHeight) / 2) + 'px';
-}
-
-function hideGyroModal() {
-  var backdrop = document.getElementById('gyroBackdrop');
-  var modal    = document.getElementById('gyroModal');
-  if (backdrop) backdrop.style.display = 'none';
-  if (modal)    { modal.classList.remove('visible'); modal.style.display = 'none'; }
-  window.removeEventListener('resize', positionGyroModal);
-}
-
-function onGyroAllow() {
-  hideGyroModal();
-  if (typeof DeviceOrientationEvent !== 'undefined' &&
-      typeof DeviceOrientationEvent.requestPermission === 'function') {
-    DeviceOrientationEvent.requestPermission().then(function(state) {
-      sessionStorage.setItem('gyroDecided', state);
-      if (state === 'granted') startGyro();
-    }).catch(function() {
-      sessionStorage.setItem('gyroDecided', 'denied');
-    });
-  } else {
-    sessionStorage.setItem('gyroDecided', 'granted');
-    startGyro();
-  }
-}
-
-function onGyroDeny() {
-  sessionStorage.setItem('gyroDecided', 'denied');
-  hideGyroModal();
-}
-
 
 /* ══════════════════════════════════════
    BROWSER + OS CONFLICT DATA
    Evaluated lazily so currentOs is known.
 ══════════════════════════════════════ */
 function getBrowserConflicts() {
-  // The conflict keys are the same for all tablet browsers — Cmd+Shift+H and
-  // Cmd+Shift+N are the most universally intercepted shortcuts on tablet platforms.
-  // We only vary the display name so the report is honest about what we detected.
-  var ua = navigator.userAgent || '';
-  var isIpadSafari = (/iPad/.test(ua) || (navigator.maxTouchPoints > 1 && /Mac/.test(ua)))
-                     && /Safari\//.test(ua) && !/Chrome\//.test(ua) && !/Edg\//.test(ua);
-  var name = isIpadSafari ? 'Safari on iPadOS' : 'your browser';
-  return {
-    name:   name,
-    keys:   ['CMD+T', 'CMD+SHIFT+H', 'CMD+SHIFT+N'],
-    labels: [
+  var ua      = navigator.userAgent || '';
+  // Use the real detected OS, not the UI toggle — browser shortcuts are a physical
+  // fact about the machine, unaffected by which platform the user is practising.
+  var isMacOs = (detectedOs === 'mac' || detectedOs === 'mobile');
+
+  // Detect browser
+  var browser;
+  if      (/Edg\//.test(ua))                                         browser = 'Edge';
+  else if (/Firefox\//.test(ua))                                     browser = 'Firefox';
+  else if (/Safari\//.test(ua) && !/Chrome\//.test(ua))             browser = 'Safari';
+  else if (/OPR\//.test(ua))                                         browser = 'Opera';
+  else if (/Brave\//.test(ua) || navigator.brave !== undefined)      browser = 'Chromium';
+  else if (/Chrome\//.test(ua))                                      browser = 'Chromium';
+  else                                                                browser = null;
+
+  // Conflict tables — Mac shortcuts use Cmd, PC use Ctrl (same token in our shortcut strings)
+  // Values are the canonical shortcut strings used in SHORTCUTS[].shortcut
+  var mac = {
+    Edge:    ['CMD+T','CMD+OPTION+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Firefox: ['CMD+T','CMD+OPTION+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Safari:  ['CMD+T','CMD+OPTION+U','CMD+OPTION+I','CMD+OPTION+C','CMD+SHIFT+H','CMD+SHIFT+I','CMD+SHIFT+L'],
+    Opera:   ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Chrome:    ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
+    Chromium:  ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
+  };
+  var pc = {
+    Edge:    ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Firefox: ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Opera:   ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Chrome:    ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+C','CMD+SHIFT+N'],
+    Chromium:  ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+C','CMD+SHIFT+N'],
+  };
+
+  // Human-readable labels — Mac vs PC, browser-specific
+  var macLabels = {
+    Edge: [
       'Cmd+T \u2014 opens new tab',
-      'Cmd+Shift+H \u2014 opens Bookmarks / History',
-      'Cmd+Shift+N \u2014 opens a Private tab',
+      'Cmd+Opt+I \u2014 opens DevTools',
+      'Cmd+Shift+C \u2014 opens DevTools inspector',
+      'Cmd+Shift+J \u2014 opens DevTools console',
+      'Cmd+Shift+H \u2014 opens History',
+      'Cmd+Shift+D \u2014 saves all tabs',
+      'Cmd+Shift+N \u2014 opens InPrivate window',
     ],
+    Firefox: [
+      'Cmd+T \u2014 opens new tab',
+      'Cmd+Opt+I \u2014 opens DevTools',
+      'Cmd+Shift+A \u2014 opens Add-ons',
+      'Cmd+Shift+H \u2014 opens History',
+      'Cmd+Shift+U \u2014 opens Page Source',
+      'Cmd+Shift+D \u2014 bookmarks page',
+      'Cmd+Shift+N \u2014 opens Private window',
+    ],
+    Safari: [
+      'Cmd+T \u2014 opens new tab',
+      'Cmd+Opt+U \u2014 opens Page Source',
+      'Cmd+Opt+I \u2014 opens Web Inspector',
+      'Cmd+Opt+C \u2014 opens Inspector Console',
+      'Cmd+Shift+H \u2014 opens Home \u2215 History',
+      'Cmd+Shift+I \u2014 opens Mail',
+      'Cmd+Shift+L \u2014 opens Sidebar',
+    ],
+    Opera: [
+      'Cmd+T \u2014 opens new tab',
+      'Cmd+Opt+I \u2014 opens DevTools',
+      'Cmd+Opt+J \u2014 opens DevTools console',
+      'Cmd+Shift+D \u2014 saves bookmark',
+      'Cmd+Shift+N \u2014 opens Private window',
+    ],
+    Chrome: [
+      'Cmd+T \u2014 opens new tab',
+      'Cmd+Opt+I \u2014 opens DevTools',
+      'Cmd+Opt+J \u2014 opens DevTools console',
+      'Cmd+Shift+C \u2014 opens DevTools inspector',
+      'Cmd+Shift+N \u2014 opens Incognito window',
+    ],
+    Chromium: [
+      'Cmd+T \u2014 opens new tab',
+      'Cmd+Opt+I \u2014 opens DevTools',
+      'Cmd+Opt+J \u2014 opens DevTools console',
+      'Cmd+Shift+C \u2014 opens DevTools inspector',
+      'Cmd+Shift+N \u2014 opens Incognito window',
+    ],
+  };
+  var pcLabels = {
+    Edge: [
+      'Ctrl+T \u2014 opens new tab',
+      'Ctrl+Shift+I \u2014 opens DevTools',
+      'Ctrl+Shift+C \u2014 opens DevTools inspector',
+      'Ctrl+Shift+J \u2014 opens DevTools console',
+      'Ctrl+Shift+H \u2014 opens History',
+      'Ctrl+Shift+D \u2014 saves all tabs',
+      'Ctrl+Shift+N \u2014 opens InPrivate window',
+    ],
+    Firefox: [
+      'Ctrl+T \u2014 opens new tab',
+      'Ctrl+Shift+I \u2014 opens DevTools',
+      'Ctrl+Shift+A \u2014 opens Add-ons',
+      'Ctrl+Shift+H \u2014 opens History',
+      'Ctrl+Shift+U \u2014 opens Page Source',
+      'Ctrl+Shift+D \u2014 bookmarks page',
+      'Ctrl+Shift+N \u2014 opens Private window',
+    ],
+    Opera: [
+      'Ctrl+T \u2014 opens new tab',
+      'Ctrl+Shift+I \u2014 opens DevTools',
+      'Ctrl+Shift+J \u2014 opens DevTools console',
+      'Ctrl+Shift+D \u2014 saves bookmark',
+      'Ctrl+Shift+N \u2014 opens Private window',
+    ],
+    Chrome: [
+      'Ctrl+T \u2014 opens new tab',
+      'Ctrl+Shift+I \u2014 opens DevTools',
+      'Ctrl+Shift+J \u2014 opens DevTools console',
+      'Ctrl+Shift+C \u2014 opens DevTools inspector',
+      'Ctrl+Shift+N \u2014 opens Incognito window',
+    ],
+    Chromium: [
+      'Ctrl+T \u2014 opens new tab',
+      'Ctrl+Shift+I \u2014 opens DevTools',
+      'Ctrl+Shift+J \u2014 opens DevTools console',
+      'Ctrl+Shift+C \u2014 opens DevTools inspector',
+      'Ctrl+Shift+N \u2014 opens Incognito window',
+    ],
+  };
+
+  var conflictKeys = [];
+  var labels       = [];
+
+  if (browser) {
+    var keyTable   = isMacOs ? mac   : pc;
+    var labelTable = isMacOs ? macLabels : pcLabels;
+    conflictKeys = (keyTable[browser]   || []).slice();
+    labels       = (labelTable[browser] || []).slice();
+  } else {
+    // Generic fallback — show both platforms' most universal conflicts
+    conflictKeys = isMacOs
+      ? ['CMD+T','CMD+OPTION+I','CMD+SHIFT+H','CMD+SHIFT+N']
+      : ['CMD+T','CMD+SHIFT+I', 'CMD+SHIFT+H','CMD+SHIFT+N'];
+    labels = isMacOs
+      ? ['Cmd+T \u2014 opens new tab','Cmd+Opt+I \u2014 opens DevTools','Cmd+Shift+H \u2014 opens History','Cmd+Shift+N \u2014 opens Private window']
+      : ['Ctrl+T \u2014 opens new tab','Ctrl+Shift+I \u2014 opens DevTools','Ctrl+Shift+H \u2014 opens History','Ctrl+Shift+N \u2014 opens Private window'];
+  }
+
+  return {
+    name:        browser || 'your browser',
+    keys:        conflictKeys,   // canonical shortcut strings for pool filtering
+    labels:      labels,         // human-readable strings for display
   };
 }
 
@@ -4999,6 +4939,7 @@ function getBrowserConflictSet() {
 
 // Initialise
 buildAppPill();
+positionIcons();
 
 
 /* ══════════════════════════════════════
@@ -5274,7 +5215,7 @@ function rimTick() {
   const force    = (rimTarget - rimCurrent) * RIM_STIFFNESS;
   rimVelocity    = rimVelocity * RIM_DAMPING + force;
   rimCurrent    += rimVelocity;
-  const faceAngle = Math.round((rimTarget / 15) * 12); // ±12° face, keyed off target
+  const faceAngle = Math.round((rimTarget / 15) * 5); // ±5° face, keyed off target
   timerBox.style.background = MEDAL_RIM[currentMedal](rimCurrent);
   updateMedalFaceStyle(faceAngle);
   // Keep ticking until settled
@@ -5286,33 +5227,33 @@ function rimTick() {
   }
 }
 
-// Gyroscope drives rim sheen on the tablet version (replaces mousemove)
-// gamma = left/right tilt, ±90°. We map ±30° of tilt to ±15° rim rotation.
-function onDeviceOrientation(e) {
+// Medal tilt on press/release
+function medalPressDown(clientX) {
   if (!currentMedal) return;
-  if (gameState !== 'finished' && gameState !== 'confirm-reset') return;
-  const gamma = e.gamma || 0; // degrees: negative = tilted left, positive = right
-  rimTarget = Math.max(-15, Math.min(15, (gamma / 20) * 15)); // ±20° tilt = full range (was ±30°)
+  var rect = timerBox.getBoundingClientRect();
+  var side = (clientX - rect.left) / rect.width < 0.5 ? -1 : 1;
+  rimTarget = side * 28; // kick it hard to one side
+  if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
+}
+function medalPressUp() {
+  if (!currentMedal) return;
+  rimTarget = 0; // snap back toward centre
   if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
 }
 
-function startGyro() {
-  window.addEventListener('deviceorientation', onDeviceOrientation);
-}
+document.addEventListener('mousemove', e => {
+  if (!currentMedal) return;
+  if (gameState !== 'finished' && gameState !== 'confirm-reset') return;
+  const d = (e.clientX / window.innerWidth) - 0.5; // -0.5..+0.5
+  rimTarget = d * 30; // ±15°
+  if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
+});
 
-// Called after permission granted (or on Android which needs no permission)
-function initGyro() {
-  if (typeof DeviceOrientationEvent !== 'undefined' &&
-      typeof DeviceOrientationEvent.requestPermission === 'function') {
-    // iOS 13+ — permission already granted at this point, just start
-    startGyro();
-  } else {
-    // Android / other — no permission needed
-    startGyro();
-  }
-}
-
-
+timerBox.addEventListener('mousedown', e => { medalPressDown(e.clientX); });
+timerBox.addEventListener('mouseup',   () => { medalPressUp(); });
+timerBox.addEventListener('mouseleave',() => { medalPressUp(); });
+timerBox.addEventListener('touchstart', e => { if (e.touches.length) medalPressDown(e.touches[0].clientX); }, { passive: true });
+timerBox.addEventListener('touchend',   () => { medalPressUp(); }, { passive: true });
 
 // Key lighting active at all times, not just during play
 
@@ -5393,21 +5334,6 @@ function runCountdown(onComplete) {
 document.addEventListener('keydown', handleKeydown);
 document.addEventListener('keyup',   handleKeyup);
 
-// Hide the "recommend a real keyboard" pill permanently once a physical key is detected
-(function() {
-  var physicalKeyDetected = false;
-  document.addEventListener('keydown', function(e) {
-    if (physicalKeyDetected || !e.isTrusted) return;
-    physicalKeyDetected = true;
-    var pill = document.getElementById('osMismatchPill');
-    if (pill) {
-      pill.style.transition = 'opacity 0.5s ease';
-      pill.style.opacity = '0';
-      setTimeout(function() { pill.style.display = 'none'; }, 500);
-    }
-  }, { capture: true });
-})();
-
 function showTip(index) {
   tipIndex = ((index % IMPROVEMENT_TIPS.length) + IMPROVEMENT_TIPS.length) % IMPROVEMENT_TIPS.length;
   titleEl.textContent = IMPROVEMENT_TIPS[tipIndex];
@@ -5450,9 +5376,11 @@ function handleKeydown(e) {
     clearHelp();
     clearInterval(timerInterval);
     setTimerState('green', 'right');
-    titleEl.classList.add('hidden');
+    titleEl.style.color = '#10b981'; // instant green — directs attention before hiding
+    requestAnimationFrame(() => titleEl.classList.add('hidden'));
     fillProgressDot(10 - answersLeft);
     setTimeout(() => {
+      titleEl.style.color = '';
       clearAllLit();
       heldKeys.clear();
       stickyLit.clear();
@@ -5541,7 +5469,7 @@ function showDiffToast(msg) {
 
 /* ── Difficulty icon — needle states ──────────────── */
 var _diffState = 0;   // -1 = left/basics, 0 = centre/normal, 1 = right/hardcore
-var _diffFirst = true; // suppress toast on first load
+var _diffFirst = false; // no suppression needed — nothing calls setDiffState at init
 
 var DIFF_ANGLES = { '-1': -60, '0': 0, '1': 60 };
 var DIFF_TOASTS = {
@@ -5615,18 +5543,6 @@ function setDiffState(newState) {
 })();
 
 </script>
-<div id="gyroBackdrop" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.35);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);"></div>
-
-<div id="gyroModal" role="dialog" aria-modal="true" style="display:none;position:fixed;z-index:1001;background:white;border-radius:0;box-shadow:0 4px 10px rgba(0,0,0,0.13),0 12px 28px rgba(0,0,0,0.16);width:300px;padding:28px 26px 22px;box-sizing:border-box;font-family:'Lato',system-ui,sans-serif;transform-origin:top center;">
-  <p style="font-size:15px;font-weight:700;color:#1e3a5f;margin:0 0 12px;">One quick thing</p>
-  <p style="font-size:13px;color:#374151;line-height:1.6;margin:0 0 10px;">When you earn a medal, tilting your device brings the shine to life.</p>
-  <p style="font-size:13px;color:#374151;line-height:1.6;margin:0 0 22px;">May we use your device's motion sensor for this?</p>
-  <div style="display:flex;flex-direction:column;gap:10px;">
-    <button id="gyroAllowBtn" onclick="onGyroAllow()" style="background:#1e3a5f;color:white;border:none;border-radius:6px;padding:11px 0;font-size:14px;font-family:'Lato',system-ui,sans-serif;font-weight:600;cursor:pointer;width:100%;">Yes, allow motion</button>
-    <button id="gyroDenyBtn"  onclick="onGyroDeny()"  style="background:none;color:#6b7280;border:none;padding:6px 0;font-size:13px;font-family:'Lato',system-ui,sans-serif;cursor:pointer;width:100%;">No thanks</button>
-  </div>
-</div>
-
 <div id="kbModal" role="dialog" aria-modal="true">
   <button class="modal-dismiss-btn" onclick="closeKbModal()">&times;</button>
   <div id="kbModalInner">
@@ -5770,48 +5686,7 @@ function setDiffState(newState) {
   opacity: 0.38;
   pointer-events: none;
 }
-@keyframes gyroUnfurl {
-  0%   { opacity: 0; transform: perspective(800px) rotateX(22deg) scale(1.1); }
-  100% { opacity: 1; transform: perspective(800px) rotateX(0deg)  scale(1); }
-}
-#gyroModal.visible {
-  animation: gyroUnfurl 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
-}
 </style>
 
 </body>
 </html>
-
-/* ── Difficulty icon ───────────────────────────────── */
-/* ── Difficulty gauge icon ── */
-#diffIcon .gauge-stroke { fill:none; stroke:#9ca3af; stroke-width:2px; stroke-linecap:round; stroke-miterlimit:10; }
-#diffIcon #Needle { fill:#9ca3af; transform-origin:45px 50.9px; transition:transform 0.45s cubic-bezier(0.34,1.56,0.64,1); }
-#diffIconWrap {
-  display: flex;
-  justify-content: center;
-  margin-top: 4px;
-}
-#diffIcon {
-  display: block;
-  fill: #9ca3af;
-  cursor: pointer;
-  transition: transform 0.18s ease;
-}
-#diffIcon:hover { transform: scale(1.12); }
-
-/* ── Shared icon tooltip ───────────────────────────── */
-#iconTooltip {
-  position: fixed;
-  font-family: 'Lato', system-ui, sans-serif;
-  font-size: 11px;
-  color: #9ca3af;
-  text-align: center;
-  line-height: 1.4;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.18s ease;
-  z-index: 9000;
-  white-space: pre;
-}
-#iconTooltip.visible { opacity: 1; }
-
