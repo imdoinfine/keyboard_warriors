@@ -795,6 +795,39 @@ body.pc-mode #extKeyPill {
   transition: none;
 }
 
+/* ── Difficulty icon ───────────────────────────────── */
+/* ── Difficulty gauge icon ── */
+#diffIcon .gauge-stroke { fill:none; stroke:#9ca3af; stroke-width:2px; stroke-linecap:round; stroke-miterlimit:10; }
+#diffIcon #Needle { fill:#9ca3af; transform-origin:45px 50.9px; transition:transform 0.45s cubic-bezier(0.34,1.56,0.64,1); }
+#diffIconWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+}
+#diffIcon {
+  display: block;
+  fill: #9ca3af;
+  cursor: pointer;
+  transition: transform 0.18s ease;
+}
+#diffIcon:hover { transform: scale(1.12); }
+
+/* ── Shared icon tooltip ───────────────────────────── */
+#iconTooltip {
+  position: fixed;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: center;
+  line-height: 1.4;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  z-index: 9000;
+  white-space: pre;
+}
+#iconTooltip.visible { opacity: 1; }
+
 /* ── Browser modal (same spec as kbModal) ──────────────────────── */
 #browserModal {
   position: fixed;
@@ -896,6 +929,53 @@ li.conflict-dismissed .conflict-desc {
    KEYBOARD PANEL
    Outer: 14px → corner keys: 9px → base keys: 4px
 ══════════════════════════════════════ */
+
+/* ── Difficulty toast — appears over the keyboard ── */
+#diffToast {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(30, 30, 35, 0.88);
+  color: #f3f4f6;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 16px;
+  border-radius: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 20;
+}
+#diffToast.visible { opacity: 1; }
+/* ── Unified notification toast ─────────────────────────────────────────────
+   position:fixed so it floats above everything including modals.
+   JS positions it: centred above keyboard normally, or top-of-modal when
+   a modal is open. Drop shadow with top-left light source.              ── */
+#kwToast {
+  position: fixed;
+  background: rgba(28, 28, 32, 0.92);
+  color: #f3f4f6;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 18px;
+  border-radius: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 0);
+  transition: opacity 0.22s ease;
+  box-shadow: 2px 3px 12px rgba(0,0,0,0.48), 1px 1px 3px rgba(0,0,0,0.28);
+  z-index: 210;
+  max-width: 340px;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.4;
+}
+#kwToast.visible { opacity: 1; }
 #keyboardPanel {
   background: #b2b8c0;
   border-radius: 14px;
@@ -1375,21 +1455,7 @@ li.conflict-dismissed .conflict-desc {
 }
 
 #osMismatchPill {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #f59e0b;
-  color: white;
-  font-family: 'Lato', system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 5px 14px;
-  border-radius: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-  z-index: 10;
+  display: none; /* retired — notifications now use #kwToast */
 }
 #osMismatchPill.show { opacity: 1; }
 /* ══════════════════════════════════════
@@ -1648,6 +1714,8 @@ li.conflict-dismissed .conflict-desc {
 </div>
 
 <div id="keyboardWrap">
+  <div id="diffToast"></div>
+  <div id="kwToast"></div>
   <svg id="kbIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;fill:#9ca3af;">
     <path d="M98.6,32.4H11.4c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h87.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM99.9,65.9c0,.7-.6,1.3-1.3,1.3H11.4c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h87.2c.7,0,1.3.6,1.3,1.3v29.6ZM15.2,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM15.2,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM95.9,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM15.2,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM65.8,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM95.9,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM24.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM33,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.1,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM49.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM57.4,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM65.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM73.7,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM27.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM40.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM44.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM57.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM66.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM74.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM83.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM36.3,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM44.3,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM53.1,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM56.7,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.7,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.5,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM81.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.9,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM35.4,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM28.3,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM21.2,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM73.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM81,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM88.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM95.9,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/>
   </svg>
@@ -1724,6 +1792,38 @@ li.conflict-dismissed .conflict-desc {
   </div>
 </div>
 <p id="credit">Built for learners. This digital toy was created by Wednesday Dessauer as open-source &amp; free to adapt under <small>GNU GPL v3.0</small></p>
+<div id="diffIconWrap">
+  <svg id="diffIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90" style="width:44px;height:auto;" cursor="pointer">
+    <g id="DiffStatic">
+      <g id="notches">
+        <line class="gauge-stroke" x1="44.7" y1="24.1" x2="44.7" y2="19.8"/>
+        <line class="gauge-stroke" x1="25.9" y1="32.1" x2="22.8" y2="29.1"/>
+        <line class="gauge-stroke" x1="18.2" y1="51.1" x2="13.9" y2="51.1"/>
+        <line class="gauge-stroke" x1="71.7" y1="50.6" x2="76.1" y2="50.6"/>
+        <line class="gauge-stroke" x1="63.7" y1="31.8" x2="66.8" y2="28.7"/>
+        <line class="gauge-stroke" x1="37.8" y1="25.1" x2="37.2" y2="22.9"/>
+        <line class="gauge-stroke" x1="31.4" y1="27.8" x2="30.3" y2="25.8"/>
+        <line class="gauge-stroke" x1="21.7" y1="37.7" x2="19.7" y2="36.5"/>
+        <line class="gauge-stroke" x1="19.1" y1="44.2" x2="16.9" y2="43.6"/>
+        <line class="gauge-stroke" x1="19.2" y1="58" x2="17" y2="58.6"/>
+        <line class="gauge-stroke" x1="70.9" y1="57.5" x2="73.1" y2="58.1"/>
+        <line class="gauge-stroke" x1="70.8" y1="43.7" x2="73" y2="43.1"/>
+        <line class="gauge-stroke" x1="68" y1="37.3" x2="70" y2="36.1"/>
+        <line class="gauge-stroke" x1="58.1" y1="27.6" x2="59.3" y2="25.6"/>
+        <line class="gauge-stroke" x1="51.7" y1="25" x2="52.3" y2="22.7"/>
+      </g>
+      <path class="gauge-stroke" d="M11.9,59.9c-.8-2.9-1.2-5.9-1.2-9,0-18.9,15.3-34.3,34.3-34.3s34.3,15.3,34.3,34.3-.4,5.9-1.1,8.6"/>
+    </g>
+    <g id="Needle" style="transform:rotate(0deg)">
+      <path class="gauge-stroke" d="M50.1,40.4c3.9,1.9,6.5,5.9,6.5,10.5s-5.2,11.7-11.7,11.7-11.7-5.2-11.7-11.7,2.6-8.5,6.5-10.5"/>
+      <path d="M46.9,45.1l-1.1-16.9c0-1.2-1.8-1.2-1.9,0l-1.1,17c0,.8-.4,1.6-1,2.1-1.1,1-1.8,2.6-1.4,4.4s1.8,3.3,3.6,3.6c3,.6,5.7-1.7,5.7-4.6s-.7-2.8-1.8-3.7-.9-1.2-1-2ZM44.2,54.4c-1.3-.3-2.4-1.2-2.8-2.5s-.1-2.2.4-3c0,0,0,0,0-.1,0-.1.2-.3.3-.4,0,0,.1-.1.2-.2,0,0,0-.1.2-.2h0c.6-.5,1.4-.8,2.3-.8s1.5.2,2.1.7h0c1,.6,1.6,1.7,1.6,3,0,2.3-2.1,4.1-4.4,3.6Z"/>
+      <circle cx="45" cy="50.9" r="2.7"/>
+    </g>
+  </svg>
+</div>
+
+<div id="iconTooltip"></div>
+
 
 <script>
 /* ══════════════════════════════════════
@@ -1732,393 +1832,365 @@ li.conflict-dismissed .conflict-desc {
            pc_safe, ps, ai, indd, ae, fi
 ══════════════════════════════════════ */
 const SHORTCUTS = [
-  {shortcut:"CMD+1",display:"View at 100% zoom",mac_sc:"⌘ 1",pc_sc:"—",pc_safe:false,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+2",display:"View at 200% zoom",mac_sc:"⌘ 2",pc_sc:"—",pc_safe:false,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+4",display:"View at 400% zoom",mac_sc:"⌘ 4",pc_sc:"—",pc_safe:false,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"V",display:"Switch to the Selection tool",mac_sc:"V",pc_sc:"V",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"A",display:"Switch to the Direct Selection tool",mac_sc:"A",pc_sc:"A",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"P",display:"Pick up the Pen tool",mac_sc:"P",pc_sc:"P",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"B",display:"Pick up the Brush tool",mac_sc:"B",pc_sc:"B",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"E",display:"Grab the Eraser tool",mac_sc:"E",pc_sc:"E",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"E",display:"Switch to the Free Transform tool",mac_sc:"E",pc_sc:"E",pc_safe:true,hardcore:false,ps:false,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"T",display:"Switch to the Type tool",mac_sc:"T",pc_sc:"T",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"L",display:"Switch to the Ellipse tool",mac_sc:"L",pc_sc:"L",pc_safe:true,hardcore:false,ps:false,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"L",display:"Switch to the Lasso tool",mac_sc:"L",pc_sc:"L",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"L",display:"Switch to the Line tool",mac_sc:"L",pc_sc:"L",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"O",display:"Switch to the Ellipse tool",mac_sc:"O",pc_sc:"O",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"M",display:"Switch to the Rectangle tool",mac_sc:"M",pc_sc:"M",pc_safe:true,hardcore:false,ps:false,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"M",display:"Switch to the Rectangular Marquee tool",mac_sc:"M",pc_sc:"M",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"I",display:"Pick up the Eyedropper",mac_sc:"I",pc_sc:"I",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"Z",display:"Pick up the Magnifying Glass",mac_sc:"Z",pc_sc:"Z",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"C",display:"Switch to the Crop tool",mac_sc:"C",pc_sc:"C",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"C",display:"Switch to the Scissors tool",mac_sc:"C",pc_sc:"C",pc_safe:true,hardcore:false,ps:false,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"C",display:"Select the Comment tool",mac_sc:"C",pc_sc:"C",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"G",display:"Switch to the Gradient tool",mac_sc:"G",pc_sc:"G",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"H",display:"Select the Hand tool",mac_sc:"H",pc_sc:"H",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"K",display:"Pick up the Paint Bucket tool",mac_sc:"K",pc_sc:"K",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"K",display:"Jump to the next keyframe or marker",mac_sc:"K",pc_sc:"K",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"R",display:"Switch to the Rotate tool",mac_sc:"R",pc_sc:"R",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"R",display:"Select the Rotate View tool",mac_sc:"R",pc_sc:"R",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"R",display:"Reveal Rotation property on selected layer",mac_sc:"R",pc_sc:"R",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"S",display:"Switch to the Scale tool",mac_sc:"S",pc_sc:"S",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"S",display:"Switch to the Clone Stamp tool",mac_sc:"S",pc_sc:"S",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"S",display:"Reveal Scale property on selected layer",mac_sc:"S",pc_sc:"S",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"W",display:"Switch to the Magic Wand / Object Selection tool",mac_sc:"W",pc_sc:"W",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"W",display:"Switch to the Warp tool",mac_sc:"W",pc_sc:"W",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"W",display:"Toggle Preview mode",mac_sc:"W",pc_sc:"W",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"N",display:"Pick up the Pencil tool",mac_sc:"N",pc_sc:"N",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"N",display:"Set work area Out point to current time",mac_sc:"N",pc_sc:"N",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"F",display:"Switch to the Frame tool",mac_sc:"F",pc_sc:"F",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"F",display:"Cycle through the screen modes",mac_sc:"F",pc_sc:"F",pc_safe:true,hardcore:false,ps:true,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"D",display:"Reset colours to black & white",mac_sc:"D",pc_sc:"D",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"X",display:"Swap the foreground & background colours",mac_sc:"X",pc_sc:"X",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"J",display:"Jump to the previous keyframe or marker",mac_sc:"J",pc_sc:"J",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"U",display:"Reveal all keyframed properties on selected layer",mac_sc:"U",pc_sc:"U",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"I",display:"Move the playhead to the In point of the selected layer",mac_sc:"I",pc_sc:"I",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"O",display:"Move the playhead to the Out point of the selected layer",mac_sc:"O",pc_sc:"O",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"B",display:"Set the work area In point to the current time",mac_sc:"B",pc_sc:"B",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"P",display:"Reveal Position property on selected layer",mac_sc:"P",pc_sc:"P",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"T",display:"Reveal Opacity property on selected layer",mac_sc:"T",pc_sc:"T",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"A",display:"Reveal Anchor Point property on selected layer",mac_sc:"A",pc_sc:"A",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"E",display:"Reveal Effects on selected layer",mac_sc:"E",pc_sc:"E",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SPACE",display:"Hold to temporarily activate the Hand tool and pan",mac_sc:"Space",pc_sc:"Space",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"SHIFT",display:"Hold to constrain proportions while transforming",mac_sc:"⇧ Shift",pc_sc:"⇧ Shift",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"SHIFT",display:"Hold to add to an active selection",mac_sc:"⇧ Shift",pc_sc:"⇧ Shift",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"OPTION",display:"Hold to transform from the centre outward",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"OPTION",display:"Hold to subtract from an active selection",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,hardcore:false,ps:true,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"TAB",display:"Hide or show all panels",mac_sc:"Tab",pc_sc:"Tab",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+=",display:"Zoom in",mac_sc:"⌘ =",pc_sc:"Ctrl =",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+-",display:"Zoom out",mac_sc:"⌘ -",pc_sc:"Ctrl -",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+0",display:"Fit the page to your screen",mac_sc:"⌘ 0",pc_sc:"Ctrl 0",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+;",display:"Show or hide guides",mac_sc:"⌘ ;",pc_sc:"Ctrl ;",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+OPTION+;",display:"Lock or unlock all guides",mac_sc:"⌘ ⌥ ;",pc_sc:"Ctrl Alt ;",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+U",display:"Show or hide smart guides",mac_sc:"⌘ U",pc_sc:"Ctrl U",pc_safe:true,hardcore:false,ps:true,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+U",display:"Open the Hue / Saturation adjustment",mac_sc:"⌘ U",pc_sc:"Ctrl U",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+Y",display:"Toggle Preview / Outline view",mac_sc:"⌘ Y",pc_sc:"Ctrl Y",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+Y",display:"Toggle Pixel Preview",mac_sc:"⌘ ⌥ Y",pc_sc:"Ctrl Alt Y",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+'",display:"Show or hide the grid",mac_sc:"⌘ ⌥ U",pc_sc:"Ctrl Alt U",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+H",display:"Hide or show Extras (non-printing items)",mac_sc:"⌘ ⇧ H",pc_sc:"Ctrl ⇧ H",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+H",display:"Fit content to screen",mac_sc:"⌘ ⇧ H",pc_sc:"Ctrl ⇧ H",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+I",display:"Show or hide non-printing characters",mac_sc:"⌘ ⌥ I",pc_sc:"Ctrl Alt I",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+I",display:"Open the Image Size dialog",mac_sc:"⌘ ⌥ I",pc_sc:"Ctrl Alt I",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+G",display:"Group selected objects",mac_sc:"⌘ G",pc_sc:"Ctrl G",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+SHIFT+G",display:"Ungroup selected objects",mac_sc:"⌘ ⇧ G",pc_sc:"Ctrl ⇧ G",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+]",display:"Raise object one level in the stack",mac_sc:"⌘ ]",pc_sc:"Ctrl ]",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+[",display:"Lower object one level in the stack",mac_sc:"⌘ [",pc_sc:"Ctrl [",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+D",display:"Duplicate the selection",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+D",display:"Transform Again",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+D",display:"Place",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+D",display:"Deselect all pixels",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+A",display:"Deselect all",mac_sc:"⌘ ⇧ A",pc_sc:"Ctrl ⇧ A",pc_safe:true,hardcore:false,ps:false,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+OPTION+2",display:"Unlock all locked objects in current layer",mac_sc:"⌘ ⌥ 2",pc_sc:"Ctrl Alt 2",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+3",display:"Unhide everything",mac_sc:"⌘ ⌥ 3",pc_sc:"Ctrl Alt 3",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+J",display:"Copy to new layer",mac_sc:"⌘ J",pc_sc:"Ctrl J",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+J",display:"Join selected paths",mac_sc:"⌘ J",pc_sc:"Ctrl J",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+G",display:"Group the selection into a Frame",mac_sc:"⌘ ⌥ G",pc_sc:"Ctrl Alt G",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+E",display:"Merge layers",mac_sc:"⌘ E",pc_sc:"Ctrl E",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+E",display:"Flatten the selection",mac_sc:"⌘ E",pc_sc:"Ctrl E",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+I",display:"Invert the selection",mac_sc:"⌘ ⇧ I",pc_sc:"Ctrl ⇧ I",pc_safe:true,hardcore:false,ps:true,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+I",display:"Invert image",mac_sc:"⌘ I",pc_sc:"Ctrl I",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+A",display:"Select all objects on the active layer",mac_sc:"⌘ ⌥ A",pc_sc:"Ctrl Alt A",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT+A",display:"Add Auto Layout",mac_sc:"⇧ A",pc_sc:"⇧ A",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+B",display:"Paste in Back",mac_sc:"⌘ B",pc_sc:"Ctrl B",pc_safe:true,hardcore:false,ps:false,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+B",display:"Make a Blend",mac_sc:"⌘ ⌥ B",pc_sc:"Ctrl Alt B",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+8",display:"Release a Compound Path",mac_sc:"⌘ ⌥ 8",pc_sc:"Ctrl Alt 8",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+C",display:"Open the Canvas Size dialog",mac_sc:"⌘ ⌥ C",pc_sc:"Ctrl Alt C",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+B",display:"Open the Colour Balance adjustment",mac_sc:"⌘ B",pc_sc:"Ctrl B",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+U",display:"Desaturate (convert to greyscale tones)",mac_sc:"⌘ ⇧ U",pc_sc:"Ctrl ⇧ U",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+F",display:"Fade the last filter or adjustment",mac_sc:"⌘ ⇧ F",pc_sc:"Ctrl ⇧ F",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+E",display:"Merge all visible layers",mac_sc:"⌘ ⇧ E",pc_sc:"Ctrl ⇧ E",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+E",display:"Make a document snapshot layer",mac_sc:"⌘ ⌥ E",pc_sc:"Ctrl Alt E",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+D",display:"Split the selected layer at the playhead",mac_sc:"⌘ ⇧ D",pc_sc:"Ctrl ⇧ D",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+>",display:"Increase font size",mac_sc:"⌘ ⇧ >",pc_sc:"Ctrl ⇧ >",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+<",display:"Decrease font size",mac_sc:"⌘ ⇧ <",pc_sc:"Ctrl ⇧ <",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+L",display:"Align text left",mac_sc:"⌘ ⇧ L",pc_sc:"Ctrl ⇧ L",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+C",display:"Align text to centre",mac_sc:"⌘ ⇧ C",pc_sc:"Ctrl ⇧ C",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"OPTION+ARROWLEFT",display:"Decrease kerning or tracking",mac_sc:"⌥ ←",pc_sc:"Alt ←",pc_safe:false,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"OPTION+ARROWRIGHT",display:"Increase kerning or tracking",mac_sc:"⌥ →",pc_sc:"Alt →",pc_safe:false,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"OPTION+ARROWUP",display:"Decrease leading",mac_sc:"⌥ ↑",pc_sc:"Alt ↑",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"OPTION+ARROWDOWN",display:"Increase leading",mac_sc:"⌥ ↓",pc_sc:"Alt ↓",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+P",display:"Place a file",mac_sc:"⌘ ⇧ P",pc_sc:"Ctrl ⇧ P",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"ARROWLEFT",display:"Move back 1 frame",mac_sc:"←",pc_sc:"←",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"ARROWRIGHT",display:"Move forward 1 frame",mac_sc:"→",pc_sc:"→",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+ARROWLEFT",display:"Move back 10 frames",mac_sc:"⇧ ←",pc_sc:"⇧ ←",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+ARROWRIGHT",display:"Move forward 10 frames",mac_sc:"⇧ →",pc_sc:"⇧ →",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"HOME",display:"Move the playhead to the start of the composition",mac_sc:"Home",pc_sc:"Home",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"END",display:"Move the playhead to the end of the composition",mac_sc:"End",pc_sc:"End",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"[",display:"Trim layer In-point to the current time",mac_sc:"[",pc_sc:"[",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"]",display:"Trim layer Out-point to the current time",mac_sc:"]",pc_sc:"]",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+[",display:"Set layer In-point to the current time",mac_sc:"⌥ [",pc_sc:"Alt [",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+]",display:"Set layer Out-point to the current time",mac_sc:"⌥ ]",pc_sc:"Alt ]",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+ARROWUP",display:"Select the layer above in the timeline",mac_sc:"⌘ ↑",pc_sc:"Ctrl ↑",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+ARROWDOWN",display:"Select the layer below in the timeline",mac_sc:"⌘ ↓",pc_sc:"Ctrl ↓",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+C",display:"Pre-compose selected layers",mac_sc:"⌘ ⇧ C",pc_sc:"Ctrl ⇧ C",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+F",display:"Scale footage to fit the composition",mac_sc:"⌘ ⌥ F",pc_sc:"Ctrl Alt F",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+F",display:"Scale and crop footage to fill the composition",mac_sc:"⌘ ⇧ ⌥ F",pc_sc:"Ctrl ⇧ Alt F",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+SHIFT+P",display:"Add or remove a Position keyframe",mac_sc:"⌥ ⇧ P",pc_sc:"Alt ⇧ P",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+SHIFT+S",display:"Add or remove a Scale keyframe",mac_sc:"⌥ ⇧ S",pc_sc:"Alt ⇧ S",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+SHIFT+R",display:"Add or remove a Rotation keyframe",mac_sc:"⌥ ⇧ R",pc_sc:"Alt ⇧ R",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+SHIFT+T",display:"Add or remove an Opacity keyframe",mac_sc:"⌥ ⇧ T",pc_sc:"Alt ⇧ T",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+K",display:"Open Composition Settings",mac_sc:"⌘ K",pc_sc:"Ctrl K",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+K",display:"Open Layer Settings",mac_sc:"⌘ ⇧ K",pc_sc:"Ctrl ⇧ K",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:",",display:"Zoom out in the composition viewer",mac_sc:",",pc_sc:",",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:".",display:"Zoom in in the composition viewer",mac_sc:".",pc_sc:".",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"ARROWLEFT",display:"Nudge selection 1px to the left",mac_sc:"←",pc_sc:"←",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"ARROWRIGHT",display:"Nudge selection 1px to the right",mac_sc:"→",pc_sc:"→",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"ARROWUP",display:"Nudge selection 1px upward",mac_sc:"↑",pc_sc:"↑",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"ARROWDOWN",display:"Nudge selection 1px downward",mac_sc:"↓",pc_sc:"↓",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"SHIFT+ARROWLEFT",display:"Nudge selection 10px to the left",mac_sc:"⇧ ←",pc_sc:"⇧ ←",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"SHIFT+ARROWRIGHT",display:"Nudge selection 10px to the right",mac_sc:"⇧ →",pc_sc:"⇧ →",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"SHIFT+ARROWUP",display:"Nudge selection 10px upward",mac_sc:"⇧ ↑",pc_sc:"⇧ ↑",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"SHIFT+ARROWDOWN",display:"Nudge selection 10px downward",mac_sc:"⇧ ↓",pc_sc:"⇧ ↓",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+/",display:"Open Quick Actions search",mac_sc:"⌘ /",pc_sc:"Ctrl /",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"B",display:"Pick up the Brush tool",mac_sc:"B",pc_sc:"B",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"C",display:"Select the Comment tool",mac_sc:"C",pc_sc:"C",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"D",display:"Reset colours to black & white",mac_sc:"D",pc_sc:"D",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"E",display:"Grab the Eraser tool",mac_sc:"E",pc_sc:"E",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"F",display:"Cycle through the screen modes",mac_sc:"F",pc_sc:"F",pc_safe:true,hardcore:false,ps:true,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"H",display:"Select the Hand tool",mac_sc:"H",pc_sc:"H",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"K",display:"Pick up the Paint Bucket tool",mac_sc:"K",pc_sc:"K",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"N",display:"Pick up the Pencil tool",mac_sc:"N",pc_sc:"N",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"P",display:"Pick up the Pen tool",mac_sc:"P",pc_sc:"P",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"R",display:"Select the Rotate View tool",mac_sc:"R",pc_sc:"R",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"W",display:"Toggle Preview mode",mac_sc:"W",pc_sc:"W",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"X",display:"Swap the foreground & background colours",mac_sc:"X",pc_sc:"X",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"X",display:"Swap the fill & stroke colours",mac_sc:"X",pc_sc:"X",pc_safe:true,hardcore:false,ps:false,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"Z",display:"Pick up the Magnifying Glass",mac_sc:"Z",pc_sc:"Z",pc_safe:true,hardcore:false,ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"SHIFT+B",display:"Switch to the Blob Brush tool",mac_sc:"⇧ B",pc_sc:"⇧ B",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+T",display:"Switch to the Type tool",mac_sc:"⌘ T",pc_sc:"Ctrl T",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+K",display:"Create a Component",mac_sc:"⌘ ⌥ K",pc_sc:"Ctrl Alt K",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+B",display:"Detach Instance",mac_sc:"⌘ ⌥ B",pc_sc:"Ctrl Alt B",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+/",display:"Swap Instance",mac_sc:"⌘ ⌥ /",pc_sc:"Ctrl Alt /",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+C",display:"Copy Properties",mac_sc:"⌘ ⌥ C",pc_sc:"Ctrl Alt C",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+V",display:"Paste Properties",mac_sc:"⌘ ⌥ V",pc_sc:"Ctrl Alt V",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"N",display:"Zoom to Next Frame",mac_sc:"N",pc_sc:"N",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+N",display:"Zoom to Previous Frame",mac_sc:"⇧ N",pc_sc:"⇧ N",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"]",display:"Send Layer to Front",mac_sc:"]",pc_sc:"]",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"[",display:"Send Layer to Back",mac_sc:"[",pc_sc:"[",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"ENTER",display:"Dive into group (select Child)",mac_sc:"⏎ Enter",pc_sc:"Enter",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+ENTER",display:"Select Parent Container",mac_sc:"⇧ ⏎",pc_sc:"⇧ Enter",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"[",display:"Decrease brush size",mac_sc:"[",pc_sc:"[",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"]",display:"Increase brush size",mac_sc:"]",pc_sc:"]",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT+[",display:"Decrease brush hardness",mac_sc:"⇧ [",pc_sc:"⇧ [",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT+]",display:"Increase brush hardness",mac_sc:"⇧ ]",pc_sc:"⇧ ]",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+R",display:"Open Select & Mask",mac_sc:"⌘ ⌥ R",pc_sc:"Ctrl Alt R",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+N",display:"Create and setup a new layer (opens dialogue box)",mac_sc:"⌘ ⇧ N",pc_sc:"Ctrl ⇧ N",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+G",display:"Create or release a clipping path",mac_sc:"⌘ ⌥ G",pc_sc:"Ctrl Alt G",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+T",display:"Transform the selection",mac_sc:"⌘ T",pc_sc:"Ctrl T",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+K",display:"Open the Keyboard Shortcuts visual editor",mac_sc:"⌘ ⇧ ⌥ K",pc_sc:"Ctrl ⇧ Alt K",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+A",display:"Select all the layers except the background",mac_sc:"⌘ ⌥ A",pc_sc:"Ctrl Alt A",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"OPTION",display:"Hold this and click layer eye to toggle other layers' visibility",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"BACKSLASH",display:"Toggle red layer mask overlay view",mac_sc:"\\",pc_sc:"\\",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT",display:"Cycle through layer blending modes",mac_sc:"⇧ Shift",pc_sc:"⇧",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+B",display:"Open the black & white adjustment",mac_sc:"⌘ ⇧ ⌥ B",pc_sc:"Ctrl ⇧ Alt B",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD",display:"Hold this and click layer thumbnail to select the pixels",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"OPTION",display:"Hold this while you drag to duplicate",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SPACE",display:"Hold these and drag left-right to quick zoom",mac_sc:"⌘ Space",pc_sc:"Ctrl Space",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+I",display:"Specify Image size",mac_sc:"⌘ ⌥ I",pc_sc:"Ctrl Alt I",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+C",display:"Specify Canvas size",mac_sc:"⌘ ⌥ C",pc_sc:"Ctrl Alt C",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+X",display:"Liquify",mac_sc:"⌘ ⇧ X",pc_sc:"Ctrl ⇧ X",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+R",display:"Lens Correction",mac_sc:"⌘ ⇧ R",pc_sc:"Ctrl ⇧ R",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+Y",display:"Gamut Warning",mac_sc:"⌘ ⇧ Y",pc_sc:"Ctrl ⇧ Y",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+Y",display:"Proof Colours",mac_sc:"⌘ Y",pc_sc:"Ctrl Y",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+R",display:"Toggle Rulers",mac_sc:"⌘ R",pc_sc:"Ctrl R",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"F5",display:"Open Brush settings",mac_sc:"F5",pc_sc:"F5",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"OPTION+F9",display:"Open Actions palette",mac_sc:"⌥ F9",pc_sc:"Alt F9",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"F6",display:"Open Colour panel",mac_sc:"F6",pc_sc:"F6",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"F8",display:"Open Info pane",mac_sc:"F8",pc_sc:"F8",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"F7",display:"Open Layers palette",mac_sc:"F7",pc_sc:"F7",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+;",display:"Toggle Snap",mac_sc:"⌘ ⇧ ;",pc_sc:"Ctrl ⇧ ;",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+I",display:"View/Edit File Info metadata",mac_sc:"⌘ ⇧ ⌥ I",pc_sc:"Ctrl ⇧ Alt I",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+GRAVE",display:"Toggle Grid visibility",mac_sc:"⌘ '",pc_sc:"Ctrl '",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD",display:"Temporarily active Selection Tool while using Pen Tool",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,hardcore:false,ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+T",display:"Show/Hide the Character panel",mac_sc:"⌘ T",pc_sc:"Ctrl T",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT+M",display:"Select the Shape Builder tool",mac_sc:"⇧ M",pc_sc:"⇧ M",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT+O",display:"Select the Art Board tool",mac_sc:"⇧ O",pc_sc:"⇧ O",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT+X",display:"Swap colours between the fill & stroke",mac_sc:"⇧ X",pc_sc:"⇧ X",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"[",display:"Decrease brush or blob size",mac_sc:"[",pc_sc:"[",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"]",display:"Increase brush or blob size",mac_sc:"]",pc_sc:"]",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+2",display:"Lock the selection",mac_sc:"⌘ 2",pc_sc:"Ctrl 2",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+3",display:"Hide the selection",mac_sc:"⌘ 3",pc_sc:"Ctrl 3",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+F",display:"Paste in Front",mac_sc:"⌘ F",pc_sc:"Ctrl F",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+V",display:"Paste on All Art Boards!",mac_sc:"⌘ ⇧ ⌥ V",pc_sc:"Ctrl ⇧ Alt V",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+W",display:"Wrap with Top Object (Envelope Distort)",mac_sc:"⌘ ⇧ ⌥ W",pc_sc:"Ctrl ⇧ Alt W",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+7",display:"Create a Clipping Mask",mac_sc:"⌘ 7",pc_sc:"Ctrl 7",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+7",display:"Release a Clipping Mask",mac_sc:"⌘ ⌥ 7",pc_sc:"Ctrl Alt 7",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT+~",display:"Hold to draw multiple shapes at once with the Tilde trick",mac_sc:"⇧ ~",pc_sc:"⇧ ~",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"OPTION",display:"Hold this as you click New Layer to get the Options dialogue",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+D",display:"Transform Each",mac_sc:"⌘ ⇧ ⌥ D",pc_sc:"Ctrl ⇧ Alt D",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"OPTION",display:"Hold this while you drag to duplicate",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+K",display:"Open the Keyboard Shortcuts visual editor",mac_sc:"⌘ ⇧ ⌥ K",pc_sc:"Ctrl ⇧ Alt K",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SPACE",display:"Hold these and drag left-right to quick zoom",mac_sc:"⌘ Space",pc_sc:"Ctrl Space",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+R",display:"Toggle Rulers",mac_sc:"⌘ R",pc_sc:"Ctrl R",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+GRAVE",display:"Toggle Grid visibility",mac_sc:"⌘ '",pc_sc:"Ctrl '",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+J",display:"Average points",mac_sc:"⌘ ⌥ J",pc_sc:"Ctrl Alt J",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+1",display:"Reset Rotate View",mac_sc:"⌘ ⇧ 1",pc_sc:"Ctrl ⇧ 1",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+0",display:"Create Outlines",mac_sc:"⌘ ⇧ 0",pc_sc:"Ctrl ⇧ 0",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+X",display:"Make Live Paint",mac_sc:"⌘ ⇧ X",pc_sc:"Ctrl ⇧ X",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+E",display:"Apply last effect imediately",mac_sc:"⌘ ⇧ E",pc_sc:"Ctrl ⇧ E",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+E",display:"Open last effect'spanel",mac_sc:"⌘ ⇧ ⌥ E",pc_sc:"Ctrl ⇧ Alt E",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+2",display:"Unlock All",mac_sc:"⌘ ⌥ 2",pc_sc:"Ctrl Alt 2",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+3",display:"Show All",mac_sc:"⌘ ⌥ 3",pc_sc:"Ctrl Alt 3",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+I",display:"Check Spelling",mac_sc:"⌘ I",pc_sc:"Ctrl I",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD",display:"Temporarily active Selection Tool while using Pen Tool",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,hardcore:false,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"OPTION",display:"Hold this while you drag to duplicate",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+C",display:"Fit Frame to Content",mac_sc:"⌘ ⌥ C",pc_sc:"Ctrl Alt C",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+E",display:"Fit Content Proportionally",mac_sc:"⌘ ⌥ E",pc_sc:"Ctrl Alt E",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+L",display:"Lock the selected object",mac_sc:"⌘ L",pc_sc:"Ctrl L",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+L",display:"Unlock all on current spread",mac_sc:"⌘ ⌥ L",pc_sc:"Ctrl Alt L",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+T",display:"Open the Tabs panel",mac_sc:"⌘ ⇧ T",pc_sc:"Ctrl ⇧ T",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+N",display:"Create a new document with the options dialogue",mac_sc:"⌘ ⌥ N",pc_sc:"Ctrl Alt N",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+D",display:"Duplicate and Step",mac_sc:"⌘ ⇧ ⌥ D",pc_sc:"Ctrl ⇧ Alt D",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+ENTER",display:"Quick Apply a paragraph or character style",mac_sc:"⌘ ⏎",pc_sc:"Ctrl Enter",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+F7",display:"Open the Alignment panel",mac_sc:"⇧ F7",pc_sc:"⇧ F7",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+K",display:"Keep Options",mac_sc:"⌘ ⌥ K",pc_sc:"Ctrl Alt K",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+J",display:"Go to a Specific Page",mac_sc:"⌘ J",pc_sc:"Ctrl J",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+P",display:"Package the document for print/hand-off",mac_sc:"⌘ ⇧ ⌥ P",pc_sc:"Ctrl ⇧ Alt P",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT",display:"Hold while dragging to scale frame & content together",mac_sc:"⌘ ⇧",pc_sc:"Ctrl ⇧",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+R",display:"Toggle Rulers",mac_sc:"⌘ R",pc_sc:"Ctrl R",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+I",display:"Check Spelling",mac_sc:"⌘ I",pc_sc:"Ctrl I",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+D",display:"Place image",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+K",display:"Open Preferences",mac_sc:"⌘ K",pc_sc:"Ctrl K",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+I",display:"Open File Info",mac_sc:"⌘ ⇧ ⌥ I",pc_sc:"Ctrl ⇧ Alt I",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+V",display:"Paste without Formatting",mac_sc:"⌘ ⇧ V",pc_sc:"Ctrl ⇧ V",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+U",display:"Step & Repeat",mac_sc:"⌘ ⌥ U",pc_sc:"Ctrl Alt U",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+PAGEUP",display:"Go to First Page",mac_sc:"⌘ ⇧ Page↑",pc_sc:"Ctrl ⇧ Page Up",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+PAGEDOWN",display:"Go to Last Page",mac_sc:"⌘ ⇧ Page↓",pc_sc:"Ctrl ⇧ Page Down",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+PAGEUP",display:"Go Back",mac_sc:"⌘ Page↑",pc_sc:"Ctrl Page Up",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+PAGEDOWN",display:"Go Forward",mac_sc:"⌘ Page↓",pc_sc:"Ctrl Page Down",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+PAGEUP",display:"Got to Previous Page",mac_sc:"⇧ Page↑",pc_sc:"⇧ Page Up",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+PAGEDOWN",display:"Got to Next Page",mac_sc:"⇧ Page↓",pc_sc:"⇧ Page Down",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+OPTION+P",display:"Add Page",mac_sc:"⇧ ⌥ P",pc_sc:"⇧ Alt P",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+O",display:"Create Outlines",mac_sc:"⌘ ⇧ O",pc_sc:"Ctrl ⇧ O",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+O",display:"Create Outlines without deleting text",mac_sc:"⌘ ⇧ ⌥ O",pc_sc:"Ctrl ⇧ Alt O",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+ENTER",display:"Insert forced Line-Break",mac_sc:"⇧ ⏎",pc_sc:"⇧ Enter",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+ENTER",display:"Insert Page-Break",mac_sc:"⌘ ⏎",pc_sc:"Ctrl Enter",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+X",display:"Insert Non-Breaking Space",mac_sc:"⌘ ⌥ X",pc_sc:"Ctrl Alt X",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+T",display:"Create Table",mac_sc:"⌘ ⇧ ⌥ T",pc_sc:"Ctrl ⇧ Alt T",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+Y",display:"Show Text threads",mac_sc:"⌘ ⌥ Y",pc_sc:"Ctrl Alt Y",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+GRAVE",display:"Snap to Grid",mac_sc:"⌘ ⇧ '",pc_sc:"Ctrl ⇧ '",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"F7",display:"Open Layers Panel",mac_sc:"F7",pc_sc:"F7",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+F6",display:"Seperations Preview",mac_sc:"⇧ F6",pc_sc:"⇧ F6",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+OPTION+ARROWDOWN",display:"Nudge Down 10px and Duplicate",mac_sc:"⇧ ⌥ ↓",pc_sc:"⇧ Alt ↓",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+OPTION+V",display:"Resize Vertical",mac_sc:"⇧ ⌥ V",pc_sc:"⇧ Alt V",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+ARROWUP",display:"Pin Top Edge",mac_sc:"⌘ ⌥ ↑",pc_sc:"Ctrl Alt ↑",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+G",display:"Select All Guides",mac_sc:"⌘ ⌥ G",pc_sc:"Ctrl Alt G",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+L",display:"Override All Master Page",mac_sc:"⌘ ⇧ ⌥ L",pc_sc:"Ctrl ⇧ Alt L",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"=",display:"Add Anchor Point",mac_sc:"=",pc_sc:"=",pc_safe:true,hardcore:true,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+T",display:"Type on a Path Tool",mac_sc:"⇧ T",pc_sc:"⇧ T",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD",display:"Temporarily active Selection Tool while using Pen Tool",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,hardcore:false,ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"OPTION",display:"Hold this while you drag to duplicate",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+HOME",display:"Centre the Anchor Point in the layer content",mac_sc:"⌘ ⌥ Home",pc_sc:"Ctrl Alt Home",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+HOME",display:"Centre layer in composition",mac_sc:"⌘ Home",pc_sc:"Ctrl Home",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"F9",display:"Apply Easy Ease to selected keyframes",mac_sc:"F9",pc_sc:"F9",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+T",display:"Enable Time Remapping",mac_sc:"⌘ ⌥ T",pc_sc:"Ctrl Alt T",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+F3",display:"Toogle the Graph Editor",mac_sc:"⇧ F3",pc_sc:"⇧ F3",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+I",display:"Import",mac_sc:"⌘ I",pc_sc:"Ctrl I",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+F",display:"Find in Timeline Panel",mac_sc:"⌘ F",pc_sc:"Ctrl F",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+Y",display:"New Layer",mac_sc:"⌘ Y",pc_sc:"Ctrl Y",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"1",display:"Orbit Camera Tool",mac_sc:"1",pc_sc:"1",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"2",display:"Pan Camera Tool",mac_sc:"2",pc_sc:"2",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"3",display:"Dolly Camera Tool",mac_sc:"3",pc_sc:"3",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"W",display:"Rotate Tool",mac_sc:"W",pc_sc:"W",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"Q",display:"Rectangle Tool",mac_sc:"Q",pc_sc:"Q",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"G",display:"Pen Tool",mac_sc:"G",pc_sc:"G",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+P",display:"Toggle between Puppet Pin Tools",mac_sc:"⌘ P",pc_sc:"Ctrl P",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+CTRL+M",display:"Add to Render Queue",mac_sc:"⌘ ⌃ M",pc_sc:"Ctrl Alt M",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+R",display:"Toggle Rulers",mac_sc:"⌘ R",pc_sc:"Ctrl R",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+;",display:"Toggle Guide Lock",mac_sc:"⌘ ⇧ ⌥ ;",pc_sc:"Ctrl ⇧ Alt ;",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+[",display:"Move Layer Down",mac_sc:"⌘ [",pc_sc:"Ctrl [",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+]",display:"Move Layer Up",mac_sc:"⌘ ]",pc_sc:"Ctrl ]",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+[",display:"Move Layer to Bottom",mac_sc:"⌘ ⇧ [",pc_sc:"Ctrl ⇧ [",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+]",display:"Move Layer to Top",mac_sc:"⌘ ⇧ ]",pc_sc:"Ctrl ⇧ ]",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+L",display:"Lock layer",mac_sc:"⌘ L",pc_sc:"Ctrl L",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+L",display:"Unlock all layers",mac_sc:"⌘ ⇧ L",pc_sc:"Ctrl ⇧ L",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+F9",display:"Add Easy Ease-In",mac_sc:"⇧ F9",pc_sc:"⇧ F9",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+F9",display:"Add Easy Ease-Out",mac_sc:"⌘ ⇧ F9",pc_sc:"Ctrl ⇧ F9",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD",display:"Hold this and click a keyframe to remove its Easing",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION",display:"Hold this and click the stopwatch to add an expression",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+ARROWRIGHT",display:"Move selected keyframe forward one frame",mac_sc:"⌥ →",pc_sc:"Alt →",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+ARROWLEFT",display:"Move selected keyframe back one frame",mac_sc:"⌥ ←",pc_sc:"Alt ←",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+OPTION+ARROWRIGHT",display:"Move selected keyframe forward ten frames",mac_sc:"⇧ ⌥ →",pc_sc:"⇧ Alt →",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+OPTION+ARROWLEFT",display:"Move selected keyframe back ten frames",mac_sc:"⇧ ⌥ ←",pc_sc:"⇧ Alt ←",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+/",display:"Replace Footage",mac_sc:"⌘ ⌥ /",pc_sc:"Ctrl Alt /",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+GRAVE",display:"Open the Keyboard Shortcuts editor",mac_sc:"⌘ ⌥ '",pc_sc:"Ctrl Alt '",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+ARROWDOWN",display:"Extend selection to next item",mac_sc:"⇧ ↓",pc_sc:"⇧ ↓",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+ARROWUP",display:"Extend selection to previous item",mac_sc:"⇧ ↑",pc_sc:"⇧ ↑",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+K",display:"Open Project Settings",mac_sc:"⌘ ⇧ ⌥ K",pc_sc:"Ctrl ⇧ Alt K",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+;",display:"Open Preferences",mac_sc:"⌘ ⌥ ;",pc_sc:"Ctrl Alt ;",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+1",display:"Toggle Tools Panel",mac_sc:"⌘ 1",pc_sc:"Ctrl 1",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+2",display:"Toggle Info Panel",mac_sc:"⌘ 2",pc_sc:"Ctrl 2",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+3",display:"Toggle Preview Panel",mac_sc:"⌘ 3",pc_sc:"Ctrl 3",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+4",display:"Toggle Audio Panel",mac_sc:"⌘ 4",pc_sc:"Ctrl 4",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+5",display:"Toggle Effects & Presets Panel",mac_sc:"⌘ 5",pc_sc:"Ctrl 5",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+6",display:"Toggle Character Panel",mac_sc:"⌘ 6",pc_sc:"Ctrl 6",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+7",display:"Toggle Paragraph Panel",mac_sc:"⌘ 7",pc_sc:"Ctrl 7",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+8",display:"Toggle Paint Panel",mac_sc:"⌘ 8",pc_sc:"Ctrl 8",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+9",display:"Toggle Brushes Panel",mac_sc:"⌘ 9",pc_sc:"Ctrl 9",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+0",display:"Toggle Project Panel",mac_sc:"⌘ 0",pc_sc:"Ctrl 0",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+0",display:"Toggle Render Queue Panel",mac_sc:"⌘ ⌥ 0",pc_sc:"Ctrl Alt 0",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"C",display:"Cycle through Camera Tools",mac_sc:"C",pc_sc:"C",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD",display:"Temporarily active Selection Tool while using Pen",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+OPTION+J",display:"Go to specific Time",mac_sc:"⇧ ⌥ J",pc_sc:"⇧ Alt J",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD",display:"Hold this while dragging time indicator to scrub through footage",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"GRAVE",display:"Toggle Safe Zone visibility",mac_sc:"'",pc_sc:"'",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+DEL",display:"Delete footage withoutb warning",mac_sc:"⌘ ⌫",pc_sc:"Ctrl Backspace",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+Y",display:"New Adjustment Layer",mac_sc:"⌘ ⌥ Y",pc_sc:"Ctrl Alt Y",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+V",display:"Paste in Place",mac_sc:"⌘ ⇧ V",pc_sc:"Ctrl ⇧ V",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+I",display:"Open Resources (Components/Plugins) search bar",mac_sc:"⇧ I",pc_sc:"⇧ I",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"OPTION",display:"Hold this while you drag to duplicate",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+BACKSLASH",display:"Show/Hide UI",mac_sc:"⌘ \\",pc_sc:"Ctrl \\",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+H",display:"Flip Horizontal",mac_sc:"⇧ H",pc_sc:"⇧ H",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+V",display:"Flip Vertical",mac_sc:"⇧ V",pc_sc:"⇧ V",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+R",display:"Toggle Rulers",mac_sc:"⇧ R",pc_sc:"⇧ R",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"1",display:"Set Opacity to 10%",mac_sc:"1",pc_sc:"1",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"2",display:"Set Opacity to 20%",mac_sc:"2",pc_sc:"2",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"3",display:"Set Opacity to 30%",mac_sc:"3",pc_sc:"3",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"4",display:"Set Opacity to 40%",mac_sc:"4",pc_sc:"4",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"5",display:"Set Opacity to 50%",mac_sc:"5",pc_sc:"5",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"6",display:"Set Opacity to 60%",mac_sc:"6",pc_sc:"6",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"7",display:"Set Opacity to 70%",mac_sc:"7",pc_sc:"7",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"8",display:"Set Opacity to 80%",mac_sc:"8",pc_sc:"8",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"9",display:"Set Opacity to 90%",mac_sc:"9",pc_sc:"9",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+S",display:"Save version history checkpoint with note",mac_sc:"⌘ ⌥ S",pc_sc:"Ctrl Alt S",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"OPTION+W",display:"Align selected object to Top",mac_sc:"⌥ W",pc_sc:"Alt W",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"OPTION+A",display:"Align selected object to Left",mac_sc:"⌥ A",pc_sc:"Alt A",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"OPTION+S",display:"Align selected object to Bottom",mac_sc:"⌥ S",pc_sc:"Alt S",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"OPTION+D",display:"Align selected object to Right",mac_sc:"⌥ D",pc_sc:"Alt D",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+E",display:"Toggle between Design& Prototype tabs",mac_sc:"⇧ E",pc_sc:"⇧ E",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD",display:"Hold this while resixing to override constraints",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+T",display:"Tidy Up",mac_sc:"⌘ ⌥ T",pc_sc:"Ctrl Alt T",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+1",display:"Zoom to Fit",mac_sc:"⇧ 1",pc_sc:"⇧ 1",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+2",display:"Zoom to Selection",mac_sc:"⇧ 2",pc_sc:"⇧ 2",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+L",display:"Toggle Lock",mac_sc:"⌘ ⌥ L",pc_sc:"Ctrl Alt L",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"OPTION+1",display:"Open the Layers Panel",mac_sc:"⌥ 1",pc_sc:"Alt 1",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"OPTION+2",display:"Open the Assets Panel",mac_sc:"⌥ 2",pc_sc:"Alt 2",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+OPTION+C",display:"Copy as a PNG",mac_sc:"⌘ ⇧ ⌥ C",pc_sc:"Ctrl ⇧ Alt C",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+P",display:"Run last Plugin",mac_sc:"⌘ ⌥ P",pc_sc:"Ctrl Alt P",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+G",display:"Toggle Guide visibility",mac_sc:"⇧ G",pc_sc:"⇧ G",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+BACKSLASH",display:"Toggle Multiplayer Cursor visibility",mac_sc:"⌘ ⌥ \\",pc_sc:"Ctrl Alt \\",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+GRAVE",display:"Toggle Pixel Grid",mac_sc:"⇧ '",pc_sc:"⇧ '",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+C",display:"Toggle Comments visibility",mac_sc:"⇧ C",pc_sc:"⇧ C",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+Y",display:"Toggle Annotations visibility",mac_sc:"⇧ Y",pc_sc:"⇧ Y",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+P",display:"Toggle Pixel preview",mac_sc:"⌘ ⇧ P",pc_sc:"Ctrl ⇧ P",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+BACKSLASH",display:"Minimise UI",mac_sc:"⌘ ⇧ \\",pc_sc:"Ctrl ⇧ \\",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+DEL",display:"Delete and heal the selection",mac_sc:"⌘ ⌫",pc_sc:"Ctrl Backspace",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+F",display:"Flatten",mac_sc:"⌘ ⇧ F",pc_sc:"Ctrl ⇧ F",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+OPTION+H",display:"Dristribute Horizontally",mac_sc:"⇧ ⌥ H",pc_sc:"⇧ Alt H",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+OPTION+V",display:"Dristribute Vertically",mac_sc:"⇧ ⌥ V",pc_sc:"⇧ Alt V",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+J",display:"Join vectors",mac_sc:"⌘ J",pc_sc:"Ctrl J",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+J",display:"Smooth vectors",mac_sc:"⌘ ⇧ J",pc_sc:"Ctrl ⇧ J",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+A",display:"Select All",mac_sc:"⌘ A",pc_sc:"Ctrl A",pc_safe:true,hardcore:false,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+A",display:"Select Matching Layers",mac_sc:"⌘ ⌥ A",pc_sc:"Ctrl Alt A",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"fn+E",display:"Open Emoji picker",mac_sc:"fn E",pc_sc:"fn E",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+E",display:"Remove all effects from the selected layer",mac_sc:"⌘ ⇧ E",pc_sc:"Ctrl ⇧ E",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+E",display:"Re-apply the last effect with the same settings",mac_sc:"⌘ ⇧ ⌥ E",pc_sc:"Ctrl ⇧ Alt E",pc_safe:true,hardcore:true,ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+V",display:"Paste in Place on the active art board",mac_sc:"⌘ ⇧ V",pc_sc:"Ctrl ⇧ V",pc_safe:true,hardcore:true,ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT++",display:"Cycle through layer blending modes",mac_sc:"⇧ +",pc_sc:"⇧ +",pc_safe:true,hardcore:true,ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+1",display:"View at 100% zoom",mac_sc:"⌘ 1",pc_sc:"—",pc_safe:false,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"CMD+2",display:"View at 200% zoom",mac_sc:"⌘ 2",pc_sc:"—",pc_safe:false,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+4",display:"View at 400% zoom",mac_sc:"⌘ 4",pc_sc:"—",pc_safe:false,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"V",display:"Switch to the Selection tool",mac_sc:"V",pc_sc:"V",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"A",display:"Switch to the Direct Selection tool",mac_sc:"A",pc_sc:"A",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"P",display:"Pick up the Pen tool",mac_sc:"P",pc_sc:"P",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"B",display:"Pick up the Brush tool",mac_sc:"B",pc_sc:"B",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"E",display:"Grab the Eraser tool",mac_sc:"E",pc_sc:"E",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"E",display:"Switch to the Free Transform tool",mac_sc:"E",pc_sc:"E",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"T",display:"Switch to the Type tool",mac_sc:"T",pc_sc:"T",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"L",display:"Switch to the Ellipse tool",mac_sc:"L",pc_sc:"L",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"L",display:"Switch to the Lasso tool",mac_sc:"L",pc_sc:"L",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"L",display:"Switch to the Line tool",mac_sc:"L",pc_sc:"L",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"O",display:"Switch to the Ellipse tool",mac_sc:"O",pc_sc:"O",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"M",display:"Switch to the Rectangle tool",mac_sc:"M",pc_sc:"M",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"M",display:"Switch to the Rectangular Marquee tool",mac_sc:"M",pc_sc:"M",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"I",display:"Pick up the Eyedropper",mac_sc:"I",pc_sc:"I",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"Z",display:"Pick up the Magnifying Glass",mac_sc:"Z",pc_sc:"Z",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"C",display:"Switch to the Crop tool",mac_sc:"C",pc_sc:"C",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"C",display:"Switch to the Scissors tool",mac_sc:"C",pc_sc:"C",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"C",display:"Select the Comment tool",mac_sc:"C",pc_sc:"C",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"G",display:"Switch to the Gradient tool",mac_sc:"G",pc_sc:"G",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"H",display:"Select the Hand tool",mac_sc:"H",pc_sc:"H",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"K",display:"Pick up the Paint Bucket tool",mac_sc:"K",pc_sc:"K",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"K",display:"Jump to the next keyframe or marker",mac_sc:"K",pc_sc:"K",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"R",display:"Switch to the Rotate tool",mac_sc:"R",pc_sc:"R",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"R",display:"Select the Rotate View tool",mac_sc:"R",pc_sc:"R",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"R",display:"Reveal Rotation property on selected layer",mac_sc:"R",pc_sc:"R",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"S",display:"Switch to the Scale tool",mac_sc:"S",pc_sc:"S",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"S",display:"Switch to the Clone Stamp tool",mac_sc:"S",pc_sc:"S",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"S",display:"Reveal Scale property on selected layer",mac_sc:"S",pc_sc:"S",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"W",display:"Switch to the Magic Wand / Object Selection tool",mac_sc:"W",pc_sc:"W",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"W",display:"Switch to the Warp tool",mac_sc:"W",pc_sc:"W",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"W",display:"Toggle Preview mode",mac_sc:"W",pc_sc:"W",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"N",display:"Pick up the Pencil tool",mac_sc:"N",pc_sc:"N",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"N",display:"Set work area Out point to current time",mac_sc:"N",pc_sc:"N",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"F",display:"Switch to the Frame tool",mac_sc:"F",pc_sc:"F",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"F",display:"Cycle through the screen modes",mac_sc:"F",pc_sc:"F",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"D",display:"Reset colours to black & white",mac_sc:"D",pc_sc:"D",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"X",display:"Swap the foreground & background colours",mac_sc:"X",pc_sc:"X",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"J",display:"Jump to the previous keyframe or marker",mac_sc:"J",pc_sc:"J",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"U",display:"Reveal all keyframed properties on selected layer",mac_sc:"U",pc_sc:"U",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"I",display:"Move the playhead to the In point of the selected layer",mac_sc:"I",pc_sc:"I",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"O",display:"Move the playhead to the Out point of the selected layer",mac_sc:"O",pc_sc:"O",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"B",display:"Set the work area In point to the current time",mac_sc:"B",pc_sc:"B",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"P",display:"Reveal Position property on selected layer",mac_sc:"P",pc_sc:"P",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"T",display:"Reveal Opacity property on selected layer",mac_sc:"T",pc_sc:"T",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"A",display:"Reveal Anchor Point property on selected layer",mac_sc:"A",pc_sc:"A",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"E",display:"Reveal Effects on selected layer",mac_sc:"E",pc_sc:"E",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"SPACE",display:"Hold to temporarily activate the Hand tool and pan",mac_sc:"Space",pc_sc:"Space",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"SHIFT",display:"Hold to constrain proportions while transforming",mac_sc:"⇧ Shift",pc_sc:"⇧ Shift",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"SHIFT",display:"Hold to add to an active selection",mac_sc:"⇧ Shift",pc_sc:"⇧ Shift",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"OPTION",display:"Hold to transform from the centre outward",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"OPTION",display:"Hold to subtract from an active selection",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"TAB",display:"Hide or show all panels",mac_sc:"Tab",pc_sc:"Tab",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+=",display:"Zoom in",mac_sc:"⌘ =",pc_sc:"Ctrl =",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"CMD+-",display:"Zoom out",mac_sc:"⌘ -",pc_sc:"Ctrl -",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"CMD+0",display:"Fit the page to your screen",mac_sc:"⌘ 0",pc_sc:"Ctrl 0",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+;",display:"Show or hide guides",mac_sc:"⌘ ;",pc_sc:"Ctrl ;",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"CMD+OPTION+;",display:"Lock or unlock all guides",mac_sc:"⌘ ⌥ ;",pc_sc:"Ctrl Alt ;",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+U",display:"Show or hide smart guides",mac_sc:"⌘ U",pc_sc:"Ctrl U",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+U",display:"Open the Hue / Saturation adjustment",mac_sc:"⌘ U",pc_sc:"Ctrl U",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+Y",display:"Toggle Preview / Outline view",mac_sc:"⌘ Y",pc_sc:"Ctrl Y",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+Y",display:"Toggle Pixel Preview",mac_sc:"⌘ ⌥ Y",pc_sc:"Ctrl Alt Y",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+'",display:"Show or hide the grid",mac_sc:"⌘ ⌥ U",pc_sc:"Ctrl Alt U",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+H",display:"Hide or show Extras (non-printing items)",mac_sc:"⌘ ⇧ H",pc_sc:"Ctrl ⇧ H",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+H",display:"Fit content to screen",mac_sc:"⌘ ⇧ H",pc_sc:"Ctrl ⇧ H",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+OPTION+I",display:"Show or hide non-printing characters",mac_sc:"⌘ ⌥ I",pc_sc:"Ctrl Alt I",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+I",display:"Open the Image Size dialog",mac_sc:"⌘ ⌥ I",pc_sc:"Ctrl Alt I",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+G",display:"Group selected objects",mac_sc:"⌘ G",pc_sc:"Ctrl G",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"CMD+SHIFT+G",display:"Ungroup selected objects",mac_sc:"⌘ ⇧ G",pc_sc:"Ctrl ⇧ G",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"CMD+]",display:"Raise object one level in the stack",mac_sc:"⌘ ]",pc_sc:"Ctrl ]",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"CMD+[",display:"Lower object one level in the stack",mac_sc:"⌘ [",pc_sc:"Ctrl [",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"CMD+D",display:"Duplicate the selection",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+D",display:"Transform Again",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+D",display:"Place",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+D",display:"Deselect all pixels",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+A",display:"Deselect all",mac_sc:"⌘ ⇧ A",pc_sc:"Ctrl ⇧ A",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"CMD+OPTION+2",display:"Unlock all locked objects in current layer",mac_sc:"⌘ ⌥ 2",pc_sc:"Ctrl Alt 2",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+3",display:"Unhide everything",mac_sc:"⌘ ⌥ 3",pc_sc:"Ctrl Alt 3",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+J",display:"Copy to new layer",mac_sc:"⌘ J",pc_sc:"Ctrl J",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+J",display:"Join selected paths",mac_sc:"⌘ J",pc_sc:"Ctrl J",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+G",display:"Group the selection into a Frame",mac_sc:"⌘ ⌥ G",pc_sc:"Ctrl Alt G",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+E",display:"Merge layers",mac_sc:"⌘ E",pc_sc:"Ctrl E",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+E",display:"Flatten the selection",mac_sc:"⌘ E",pc_sc:"Ctrl E",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+SHIFT+I",display:"Invert the selection",mac_sc:"⌘ ⇧ I",pc_sc:"Ctrl ⇧ I",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+I",display:"Invert image",mac_sc:"⌘ I",pc_sc:"Ctrl I",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+A",display:"Select all objects on the active layer",mac_sc:"⌘ ⌥ A",pc_sc:"Ctrl Alt A",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"SHIFT+A",display:"Add Auto Layout",mac_sc:"⇧ A",pc_sc:"⇧ A",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+B",display:"Paste in Back",mac_sc:"⌘ B",pc_sc:"Ctrl B",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+B",display:"Make a Blend",mac_sc:"⌘ ⌥ B",pc_sc:"Ctrl Alt B",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+8",display:"Release a Compound Path",mac_sc:"⌘ ⌥ 8",pc_sc:"Ctrl Alt 8",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+C",display:"Open the Canvas Size dialog",mac_sc:"⌘ ⌥ C",pc_sc:"Ctrl Alt C",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+B",display:"Open the Colour Balance adjustment",mac_sc:"⌘ B",pc_sc:"Ctrl B",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+U",display:"Desaturate (convert to greyscale tones)",mac_sc:"⌘ ⇧ U",pc_sc:"Ctrl ⇧ U",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+F",display:"Fade the last filter or adjustment",mac_sc:"⌘ ⇧ F",pc_sc:"Ctrl ⇧ F",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+E",display:"Merge all visible layers",mac_sc:"⌘ ⇧ E",pc_sc:"Ctrl ⇧ E",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+E",display:"Make a document snapshot layer",mac_sc:"⌘ ⌥ E",pc_sc:"Ctrl Alt E",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+D",display:"Split the selected layer at the playhead",mac_sc:"⌘ ⇧ D",pc_sc:"Ctrl ⇧ D",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+SHIFT+>",display:"Increase font size",mac_sc:"⌘ ⇧ >",pc_sc:"Ctrl ⇧ >",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"CMD+SHIFT+<",display:"Decrease font size",mac_sc:"⌘ ⇧ <",pc_sc:"Ctrl ⇧ <",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"CMD+SHIFT+L",display:"Align text left",mac_sc:"⌘ ⇧ L",pc_sc:"Ctrl ⇧ L",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"CMD+SHIFT+C",display:"Align text to centre",mac_sc:"⌘ ⇧ C",pc_sc:"Ctrl ⇧ C",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"OPTION+ARROWLEFT",display:"Decrease kerning or tracking",mac_sc:"⌥ ←",pc_sc:"Alt ←",pc_safe:false,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"OPTION+ARROWRIGHT",display:"Increase kerning or tracking",mac_sc:"⌥ →",pc_sc:"Alt →",pc_safe:false,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"OPTION+ARROWUP",display:"Decrease leading",mac_sc:"⌥ ↑",pc_sc:"Alt ↑",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"OPTION+ARROWDOWN",display:"Increase leading",mac_sc:"⌥ ↓",pc_sc:"Alt ↓",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+P",display:"Place a file",mac_sc:"⌘ ⇧ P",pc_sc:"Ctrl ⇧ P",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"ARROWLEFT",display:"Move back 1 frame",mac_sc:"←",pc_sc:"←",pc_safe:true,difficulty:1,group:"nudge",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"ARROWRIGHT",display:"Move forward 1 frame",mac_sc:"→",pc_sc:"→",pc_safe:true,difficulty:1,group:"nudge",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"SHIFT+ARROWLEFT",display:"Move back 10 frames",mac_sc:"⇧ ←",pc_sc:"⇧ ←",pc_safe:true,difficulty:1,group:"nudge",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"SHIFT+ARROWRIGHT",display:"Move forward 10 frames",mac_sc:"⇧ →",pc_sc:"⇧ →",pc_safe:true,difficulty:1,group:"nudge",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"HOME",display:"Move the playhead to the start of the composition",mac_sc:"Home",pc_sc:"Home",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"END",display:"Move the playhead to the end of the composition",mac_sc:"End",pc_sc:"End",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"[",display:"Trim layer In-point to the current time",mac_sc:"[",pc_sc:"[",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"]",display:"Trim layer Out-point to the current time",mac_sc:"]",pc_sc:"]",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"OPTION+[",display:"Set layer In-point to the current time",mac_sc:"⌥ [",pc_sc:"Alt [",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"OPTION+]",display:"Set layer Out-point to the current time",mac_sc:"⌥ ]",pc_sc:"Alt ]",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+ARROWUP",display:"Select the layer above in the timeline",mac_sc:"⌘ ↑",pc_sc:"Ctrl ↑",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+ARROWDOWN",display:"Select the layer below in the timeline",mac_sc:"⌘ ↓",pc_sc:"Ctrl ↓",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+SHIFT+C",display:"Pre-compose selected layers",mac_sc:"⌘ ⇧ C",pc_sc:"Ctrl ⇧ C",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+OPTION+F",display:"Scale footage to fit the composition",mac_sc:"⌘ ⌥ F",pc_sc:"Ctrl Alt F",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+F",display:"Scale and crop footage to fill the composition",mac_sc:"⌘ ⇧ ⌥ F",pc_sc:"Ctrl ⇧ Alt F",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"OPTION+SHIFT+P",display:"Add or remove a Position keyframe",mac_sc:"⌥ ⇧ P",pc_sc:"Alt ⇧ P",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"OPTION+SHIFT+S",display:"Add or remove a Scale keyframe",mac_sc:"⌥ ⇧ S",pc_sc:"Alt ⇧ S",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"OPTION+SHIFT+R",display:"Add or remove a Rotation keyframe",mac_sc:"⌥ ⇧ R",pc_sc:"Alt ⇧ R",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"OPTION+SHIFT+T",display:"Add or remove an Opacity keyframe",mac_sc:"⌥ ⇧ T",pc_sc:"Alt ⇧ T",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+K",display:"Open Composition Settings",mac_sc:"⌘ K",pc_sc:"Ctrl K",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+SHIFT+K",display:"Open Layer Settings",mac_sc:"⌘ ⇧ K",pc_sc:"Ctrl ⇧ K",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:",",display:"Zoom out in the composition viewer",mac_sc:",",pc_sc:",",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:".",display:"Zoom in in the composition viewer",mac_sc:".",pc_sc:".",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"ARROWLEFT",display:"Nudge selection 1px to the left",mac_sc:"←",pc_sc:"←",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"ARROWRIGHT",display:"Nudge selection 1px to the right",mac_sc:"→",pc_sc:"→",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"ARROWUP",display:"Nudge selection 1px upward",mac_sc:"↑",pc_sc:"↑",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"ARROWDOWN",display:"Nudge selection 1px downward",mac_sc:"↓",pc_sc:"↓",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"SHIFT+ARROWLEFT",display:"Nudge selection 10px to the left",mac_sc:"⇧ ←",pc_sc:"⇧ ←",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"SHIFT+ARROWRIGHT",display:"Nudge selection 10px to the right",mac_sc:"⇧ →",pc_sc:"⇧ →",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"SHIFT+ARROWUP",display:"Nudge selection 10px upward",mac_sc:"⇧ ↑",pc_sc:"⇧ ↑",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"SHIFT+ARROWDOWN",display:"Nudge selection 10px downward",mac_sc:"⇧ ↓",pc_sc:"⇧ ↓",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
+  {shortcut:"CMD+/",display:"Open Quick Actions search",mac_sc:"⌘ /",pc_sc:"Ctrl /",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"X",display:"Swap the fill & stroke colours",mac_sc:"X",pc_sc:"X",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"SHIFT+B",display:"Switch to the Blob Brush tool",mac_sc:"⇧ B",pc_sc:"⇧ B",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+T",display:"Switch to the Type tool",mac_sc:"⌘ T",pc_sc:"Ctrl T",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+OPTION+K",display:"Create a Component",mac_sc:"⌘ ⌥ K",pc_sc:"Ctrl Alt K",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+OPTION+B",display:"Detach Instance",mac_sc:"⌘ ⌥ B",pc_sc:"Ctrl Alt B",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+OPTION+/",display:"Swap Instance",mac_sc:"⌘ ⌥ /",pc_sc:"Ctrl Alt /",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+OPTION+C",display:"Copy Properties",mac_sc:"⌘ ⌥ C",pc_sc:"Ctrl Alt C",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+OPTION+V",display:"Paste Properties",mac_sc:"⌘ ⌥ V",pc_sc:"Ctrl Alt V",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"N",display:"Zoom to Next Frame",mac_sc:"N",pc_sc:"N",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+N",display:"Zoom to Previous Frame",mac_sc:"⇧ N",pc_sc:"⇧ N",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"]",display:"Send Layer to Front",mac_sc:"]",pc_sc:"]",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"[",display:"Send Layer to Back",mac_sc:"[",pc_sc:"[",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"ENTER",display:"Dive into group (select Child)",mac_sc:"⏎ Enter",pc_sc:"Enter",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+ENTER",display:"Select Parent Container",mac_sc:"⇧ ⏎",pc_sc:"⇧ Enter",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"[",display:"Decrease brush size",mac_sc:"[",pc_sc:"[",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"]",display:"Increase brush size",mac_sc:"]",pc_sc:"]",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"SHIFT+[",display:"Decrease brush hardness",mac_sc:"⇧ [",pc_sc:"⇧ [",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"SHIFT+]",display:"Increase brush hardness",mac_sc:"⇧ ]",pc_sc:"⇧ ]",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+R",display:"Open Select & Mask",mac_sc:"⌘ ⌥ R",pc_sc:"Ctrl Alt R",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+N",display:"Create and setup a new layer (opens dialogue box)",mac_sc:"⌘ ⇧ N",pc_sc:"Ctrl ⇧ N",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+G",display:"Create or release a clipping path",mac_sc:"⌘ ⌥ G",pc_sc:"Ctrl Alt G",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+T",display:"Transform the selection",mac_sc:"⌘ T",pc_sc:"Ctrl T",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+K",display:"Open the Keyboard Shortcuts visual editor",mac_sc:"⌘ ⇧ ⌥ K",pc_sc:"Ctrl ⇧ Alt K",pc_safe:true,difficulty:5,group:"",ps:true,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+A",display:"Select all the layers except the background",mac_sc:"⌘ ⌥ A",pc_sc:"Ctrl Alt A",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"OPTION",display:"Hold this and click layer eye to toggle other layers' visibility",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"BACKSLASH",display:"Toggle red layer mask overlay view",mac_sc:"\\",pc_sc:"\\",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+B",display:"Open the black & white adjustment",mac_sc:"⌘ ⇧ ⌥ B",pc_sc:"Ctrl ⇧ Alt B",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD",display:"Hold this and click layer thumbnail to select the pixels",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"OPTION",display:"Hold this while you drag to duplicate",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
+  {shortcut:"CMD+SPACE",display:"Hold these and drag left-right to quick zoom",mac_sc:"⌘ Space",pc_sc:"Ctrl Space",pc_safe:true,difficulty:5,group:"",ps:true,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+I",display:"Specify Image size",mac_sc:"⌘ ⌥ I",pc_sc:"Ctrl Alt I",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+C",display:"Specify Canvas size",mac_sc:"⌘ ⌥ C",pc_sc:"Ctrl Alt C",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+X",display:"Liquify",mac_sc:"⌘ ⇧ X",pc_sc:"Ctrl ⇧ X",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+R",display:"Lens Correction",mac_sc:"⌘ ⇧ R",pc_sc:"Ctrl ⇧ R",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+Y",display:"Gamut Warning",mac_sc:"⌘ ⇧ Y",pc_sc:"Ctrl ⇧ Y",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+Y",display:"Proof Colours",mac_sc:"⌘ Y",pc_sc:"Ctrl Y",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+R",display:"Toggle Rulers",mac_sc:"⌘ R",pc_sc:"Ctrl R",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:false},
+  {shortcut:"F5",display:"Open Brush settings",mac_sc:"F5",pc_sc:"F5",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"OPTION+F9",display:"Open Actions palette",mac_sc:"⌥ F9",pc_sc:"Alt F9",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"F6",display:"Open Colour panel",mac_sc:"F6",pc_sc:"F6",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"F8",display:"Open Info pane",mac_sc:"F8",pc_sc:"F8",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"F7",display:"Open Layers palette",mac_sc:"F7",pc_sc:"F7",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+;",display:"Toggle Snap",mac_sc:"⌘ ⇧ ;",pc_sc:"Ctrl ⇧ ;",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+I",display:"View/Edit File Info metadata",mac_sc:"⌘ ⇧ ⌥ I",pc_sc:"Ctrl ⇧ Alt I",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+GRAVE",display:"Toggle Grid visibility",mac_sc:"⌘ '",pc_sc:"Ctrl '",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD",display:"Temporarily active Selection Tool while using Pen Tool",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+T",display:"Show/Hide the Character panel",mac_sc:"⌘ T",pc_sc:"Ctrl T",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"SHIFT+M",display:"Select the Shape Builder tool",mac_sc:"⇧ M",pc_sc:"⇧ M",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"SHIFT+O",display:"Select the Art Board tool",mac_sc:"⇧ O",pc_sc:"⇧ O",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"SHIFT+X",display:"Swap colours between the fill & stroke",mac_sc:"⇧ X",pc_sc:"⇧ X",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"[",display:"Decrease brush or blob size",mac_sc:"[",pc_sc:"[",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"]",display:"Increase brush or blob size",mac_sc:"]",pc_sc:"]",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+2",display:"Lock the selection",mac_sc:"⌘ 2",pc_sc:"Ctrl 2",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+3",display:"Hide the selection",mac_sc:"⌘ 3",pc_sc:"Ctrl 3",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+F",display:"Paste in Front",mac_sc:"⌘ F",pc_sc:"Ctrl F",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+V",display:"Paste on All Art Boards!",mac_sc:"⌘ ⇧ ⌥ V",pc_sc:"Ctrl ⇧ Alt V",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+W",display:"Wrap with Top Object (Envelope Distort)",mac_sc:"⌘ ⇧ ⌥ W",pc_sc:"Ctrl ⇧ Alt W",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+7",display:"Create a Clipping Mask",mac_sc:"⌘ 7",pc_sc:"Ctrl 7",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+7",display:"Release a Clipping Mask",mac_sc:"⌘ ⌥ 7",pc_sc:"Ctrl Alt 7",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"SHIFT+~",display:"Hold to draw multiple shapes at once with the Tilde trick",mac_sc:"⇧ ~",pc_sc:"⇧ ~",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"OPTION",display:"Hold this as you click New Layer to get the Options dialogue",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+D",display:"Transform Each",mac_sc:"⌘ ⇧ ⌥ D",pc_sc:"Ctrl ⇧ Alt D",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+J",display:"Average points",mac_sc:"⌘ ⌥ J",pc_sc:"Ctrl Alt J",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+1",display:"Reset Rotate View",mac_sc:"⌘ ⇧ 1",pc_sc:"Ctrl ⇧ 1",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+0",display:"Create Outlines",mac_sc:"⌘ ⇧ 0",pc_sc:"Ctrl ⇧ 0",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+X",display:"Make Live Paint",mac_sc:"⌘ ⇧ X",pc_sc:"Ctrl ⇧ X",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+E",display:"Apply last effect imediately",mac_sc:"⌘ ⇧ E",pc_sc:"Ctrl ⇧ E",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+E",display:"Open last effect'spanel",mac_sc:"⌘ ⇧ ⌥ E",pc_sc:"Ctrl ⇧ Alt E",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+2",display:"Unlock All",mac_sc:"⌘ ⌥ 2",pc_sc:"Ctrl Alt 2",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+3",display:"Show All",mac_sc:"⌘ ⌥ 3",pc_sc:"Ctrl Alt 3",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"CMD+I",display:"Check Spelling",mac_sc:"⌘ I",pc_sc:"Ctrl I",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+C",display:"Fit Frame to Content",mac_sc:"⌘ ⌥ C",pc_sc:"Ctrl Alt C",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+E",display:"Fit Content Proportionally",mac_sc:"⌘ ⌥ E",pc_sc:"Ctrl Alt E",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+L",display:"Lock the selected object",mac_sc:"⌘ L",pc_sc:"Ctrl L",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+L",display:"Unlock all on current spread",mac_sc:"⌘ ⌥ L",pc_sc:"Ctrl Alt L",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+T",display:"Open the Tabs panel",mac_sc:"⌘ ⇧ T",pc_sc:"Ctrl ⇧ T",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+N",display:"Create a new document with the options dialogue",mac_sc:"⌘ ⌥ N",pc_sc:"Ctrl Alt N",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+D",display:"Duplicate and Step",mac_sc:"⌘ ⇧ ⌥ D",pc_sc:"Ctrl ⇧ Alt D",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+ENTER",display:"Quick Apply a paragraph or character style",mac_sc:"⌘ ⏎",pc_sc:"Ctrl Enter",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"SHIFT+F7",display:"Open the Alignment panel",mac_sc:"⇧ F7",pc_sc:"⇧ F7",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+K",display:"Keep Options",mac_sc:"⌘ ⌥ K",pc_sc:"Ctrl Alt K",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+J",display:"Go to a Specific Page",mac_sc:"⌘ J",pc_sc:"Ctrl J",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+P",display:"Package the document for print/hand-off",mac_sc:"⌘ ⇧ ⌥ P",pc_sc:"Ctrl ⇧ Alt P",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT",display:"Hold while dragging to scale frame & content together",mac_sc:"⌘ ⇧",pc_sc:"Ctrl ⇧",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+D",display:"Place image",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+K",display:"Open Preferences",mac_sc:"⌘ K",pc_sc:"Ctrl K",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+I",display:"Open File Info",mac_sc:"⌘ ⇧ ⌥ I",pc_sc:"Ctrl ⇧ Alt I",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+V",display:"Paste without Formatting",mac_sc:"⌘ ⇧ V",pc_sc:"Ctrl ⇧ V",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+U",display:"Step & Repeat",mac_sc:"⌘ ⌥ U",pc_sc:"Ctrl Alt U",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+PAGEUP",display:"Go to First Page",mac_sc:"⌘ ⇧ Page↑",pc_sc:"Ctrl ⇧ Page Up",pc_safe:true,difficulty:3,group:"pages",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+PAGEDOWN",display:"Go to Last Page",mac_sc:"⌘ ⇧ Page↓",pc_sc:"Ctrl ⇧ Page Down",pc_safe:true,difficulty:3,group:"pages",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+PAGEUP",display:"Go Back",mac_sc:"⌘ Page↑",pc_sc:"Ctrl Page Up",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+PAGEDOWN",display:"Go Forward",mac_sc:"⌘ Page↓",pc_sc:"Ctrl Page Down",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"SHIFT+PAGEUP",display:"Got to Previous Page",mac_sc:"⇧ Page↑",pc_sc:"⇧ Page Up",pc_safe:true,difficulty:3,group:"pages",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"SHIFT+PAGEDOWN",display:"Got to Next Page",mac_sc:"⇧ Page↓",pc_sc:"⇧ Page Down",pc_safe:true,difficulty:3,group:"pages",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"SHIFT+OPTION+P",display:"Add Page",mac_sc:"⇧ ⌥ P",pc_sc:"⇧ Alt P",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+O",display:"Create Outlines",mac_sc:"⌘ ⇧ O",pc_sc:"Ctrl ⇧ O",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+O",display:"Create Outlines without deleting text",mac_sc:"⌘ ⇧ ⌥ O",pc_sc:"Ctrl ⇧ Alt O",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"SHIFT+ENTER",display:"Insert forced Line-Break",mac_sc:"⇧ ⏎",pc_sc:"⇧ Enter",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+ENTER",display:"Insert Page-Break",mac_sc:"⌘ ⏎",pc_sc:"Ctrl Enter",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+X",display:"Insert Non-Breaking Space",mac_sc:"⌘ ⌥ X",pc_sc:"Ctrl Alt X",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+T",display:"Create Table",mac_sc:"⌘ ⇧ ⌥ T",pc_sc:"Ctrl ⇧ Alt T",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+Y",display:"Show Text threads",mac_sc:"⌘ ⌥ Y",pc_sc:"Ctrl Alt Y",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+GRAVE",display:"Snap to Grid",mac_sc:"⌘ ⇧ '",pc_sc:"Ctrl ⇧ '",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"F7",display:"Open Layers Panel",mac_sc:"F7",pc_sc:"F7",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"SHIFT+F6",display:"Seperations Preview",mac_sc:"⇧ F6",pc_sc:"⇧ F6",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"SHIFT+OPTION+ARROWDOWN",display:"Nudge Down 10px and Duplicate",mac_sc:"⇧ ⌥ ↓",pc_sc:"⇧ Alt ↓",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"SHIFT+OPTION+V",display:"Resize Vertical",mac_sc:"⇧ ⌥ V",pc_sc:"⇧ Alt V",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+ARROWUP",display:"Pin Top Edge",mac_sc:"⌘ ⌥ ↑",pc_sc:"Ctrl Alt ↑",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+G",display:"Select All Guides",mac_sc:"⌘ ⌥ G",pc_sc:"Ctrl Alt G",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+L",display:"Override All Master Page",mac_sc:"⌘ ⇧ ⌥ L",pc_sc:"Ctrl ⇧ Alt L",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"=",display:"Add Anchor Point",mac_sc:"=",pc_sc:"=",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"SHIFT+T",display:"Type on a Path Tool",mac_sc:"⇧ T",pc_sc:"⇧ T",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
+  {shortcut:"CMD+OPTION+HOME",display:"Centre the Anchor Point in the layer content",mac_sc:"⌘ ⌥ Home",pc_sc:"Ctrl Alt Home",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+HOME",display:"Centre layer in composition",mac_sc:"⌘ Home",pc_sc:"Ctrl Home",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"F9",display:"Apply Easy Ease to selected keyframes",mac_sc:"F9",pc_sc:"F9",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+OPTION+T",display:"Enable Time Remapping",mac_sc:"⌘ ⌥ T",pc_sc:"Ctrl Alt T",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"SHIFT+F3",display:"Toogle the Graph Editor",mac_sc:"⇧ F3",pc_sc:"⇧ F3",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+I",display:"Import",mac_sc:"⌘ I",pc_sc:"Ctrl I",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+F",display:"Find in Timeline Panel",mac_sc:"⌘ F",pc_sc:"Ctrl F",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+Y",display:"New Layer",mac_sc:"⌘ Y",pc_sc:"Ctrl Y",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"1",display:"Orbit Camera Tool",mac_sc:"1",pc_sc:"1",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"2",display:"Pan Camera Tool",mac_sc:"2",pc_sc:"2",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"3",display:"Dolly Camera Tool",mac_sc:"3",pc_sc:"3",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"W",display:"Rotate Tool",mac_sc:"W",pc_sc:"W",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"Q",display:"Rectangle Tool",mac_sc:"Q",pc_sc:"Q",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"G",display:"Pen Tool",mac_sc:"G",pc_sc:"G",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+P",display:"Toggle between Puppet Pin Tools",mac_sc:"⌘ P",pc_sc:"Ctrl P",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+CTRL+M",display:"Add to Render Queue",mac_sc:"⌘ ⌃ M",pc_sc:"Ctrl Alt M",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+;",display:"Toggle Guide Lock",mac_sc:"⌘ ⇧ ⌥ ;",pc_sc:"Ctrl ⇧ Alt ;",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+[",display:"Move Layer Down",mac_sc:"⌘ [",pc_sc:"Ctrl [",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+]",display:"Move Layer Up",mac_sc:"⌘ ]",pc_sc:"Ctrl ]",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+SHIFT+[",display:"Move Layer to Bottom",mac_sc:"⌘ ⇧ [",pc_sc:"Ctrl ⇧ [",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+SHIFT+]",display:"Move Layer to Top",mac_sc:"⌘ ⇧ ]",pc_sc:"Ctrl ⇧ ]",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+L",display:"Lock layer",mac_sc:"⌘ L",pc_sc:"Ctrl L",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+SHIFT+L",display:"Unlock all layers",mac_sc:"⌘ ⇧ L",pc_sc:"Ctrl ⇧ L",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"SHIFT+F9",display:"Add Easy Ease-In",mac_sc:"⇧ F9",pc_sc:"⇧ F9",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+SHIFT+F9",display:"Add Easy Ease-Out",mac_sc:"⌘ ⇧ F9",pc_sc:"Ctrl ⇧ F9",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD",display:"Hold this and click a keyframe to remove its Easing",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"OPTION",display:"Hold this and click the stopwatch to add an expression",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"OPTION+ARROWRIGHT",display:"Move selected keyframe forward one frame",mac_sc:"⌥ →",pc_sc:"Alt →",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"OPTION+ARROWLEFT",display:"Move selected keyframe back one frame",mac_sc:"⌥ ←",pc_sc:"Alt ←",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"SHIFT+OPTION+ARROWRIGHT",display:"Move selected keyframe forward ten frames",mac_sc:"⇧ ⌥ →",pc_sc:"⇧ Alt →",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"SHIFT+OPTION+ARROWLEFT",display:"Move selected keyframe back ten frames",mac_sc:"⇧ ⌥ ←",pc_sc:"⇧ Alt ←",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+OPTION+/",display:"Replace Footage",mac_sc:"⌘ ⌥ /",pc_sc:"Ctrl Alt /",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+OPTION+GRAVE",display:"Open the Keyboard Shortcuts editor",mac_sc:"⌘ ⌥ '",pc_sc:"Ctrl Alt '",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"SHIFT+ARROWDOWN",display:"Extend selection to next item",mac_sc:"⇧ ↓",pc_sc:"⇧ ↓",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"SHIFT+ARROWUP",display:"Extend selection to previous item",mac_sc:"⇧ ↑",pc_sc:"⇧ ↑",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+K",display:"Open Project Settings",mac_sc:"⌘ ⇧ ⌥ K",pc_sc:"Ctrl ⇧ Alt K",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+OPTION+;",display:"Open Preferences",mac_sc:"⌘ ⌥ ;",pc_sc:"Ctrl Alt ;",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+1",display:"Toggle Tools Panel",mac_sc:"⌘ 1",pc_sc:"Ctrl 1",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+2",display:"Toggle Info Panel",mac_sc:"⌘ 2",pc_sc:"Ctrl 2",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+3",display:"Toggle Preview Panel",mac_sc:"⌘ 3",pc_sc:"Ctrl 3",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+4",display:"Toggle Audio Panel",mac_sc:"⌘ 4",pc_sc:"Ctrl 4",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+5",display:"Toggle Effects & Presets Panel",mac_sc:"⌘ 5",pc_sc:"Ctrl 5",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+6",display:"Toggle Character Panel",mac_sc:"⌘ 6",pc_sc:"Ctrl 6",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+7",display:"Toggle Paragraph Panel",mac_sc:"⌘ 7",pc_sc:"Ctrl 7",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+8",display:"Toggle Paint Panel",mac_sc:"⌘ 8",pc_sc:"Ctrl 8",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+9",display:"Toggle Brushes Panel",mac_sc:"⌘ 9",pc_sc:"Ctrl 9",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+0",display:"Toggle Project Panel",mac_sc:"⌘ 0",pc_sc:"Ctrl 0",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+OPTION+0",display:"Toggle Render Queue Panel",mac_sc:"⌘ ⌥ 0",pc_sc:"Ctrl Alt 0",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"C",display:"Cycle through Camera Tools",mac_sc:"C",pc_sc:"C",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD",display:"Temporarily active Selection Tool while using Pen",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"SHIFT+OPTION+J",display:"Go to specific Time",mac_sc:"⇧ ⌥ J",pc_sc:"⇧ Alt J",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD",display:"Hold this while dragging time indicator to scrub through footage",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"GRAVE",display:"Toggle Safe Zone visibility",mac_sc:"'",pc_sc:"'",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+DEL",display:"Delete footage withoutb warning",mac_sc:"⌘ ⌫",pc_sc:"Ctrl Backspace",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+OPTION+Y",display:"New Adjustment Layer",mac_sc:"⌘ ⌥ Y",pc_sc:"Ctrl Alt Y",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+SHIFT+V",display:"Paste in Place",mac_sc:"⌘ ⇧ V",pc_sc:"Ctrl ⇧ V",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+I",display:"Open Resources (Components/Plugins) search bar",mac_sc:"⇧ I",pc_sc:"⇧ I",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+BACKSLASH",display:"Show/Hide UI",mac_sc:"⌘ \\",pc_sc:"Ctrl \\",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+H",display:"Flip Horizontal",mac_sc:"⇧ H",pc_sc:"⇧ H",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+V",display:"Flip Vertical",mac_sc:"⇧ V",pc_sc:"⇧ V",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+R",display:"Toggle Rulers",mac_sc:"⇧ R",pc_sc:"⇧ R",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"1",display:"Set Opacity to 10%",mac_sc:"1",pc_sc:"1",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"2",display:"Set Opacity to 20%",mac_sc:"2",pc_sc:"2",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"3",display:"Set Opacity to 30%",mac_sc:"3",pc_sc:"3",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"4",display:"Set Opacity to 40%",mac_sc:"4",pc_sc:"4",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"5",display:"Set Opacity to 50%",mac_sc:"5",pc_sc:"5",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"6",display:"Set Opacity to 60%",mac_sc:"6",pc_sc:"6",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"7",display:"Set Opacity to 70%",mac_sc:"7",pc_sc:"7",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"8",display:"Set Opacity to 80%",mac_sc:"8",pc_sc:"8",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"9",display:"Set Opacity to 90%",mac_sc:"9",pc_sc:"9",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+OPTION+S",display:"Save version history checkpoint with note",mac_sc:"⌘ ⌥ S",pc_sc:"Ctrl Alt S",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"OPTION+W",display:"Align selected object to Top",mac_sc:"⌥ W",pc_sc:"Alt W",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"OPTION+A",display:"Align selected object to Left",mac_sc:"⌥ A",pc_sc:"Alt A",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"OPTION+S",display:"Align selected object to Bottom",mac_sc:"⌥ S",pc_sc:"Alt S",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"OPTION+D",display:"Align selected object to Right",mac_sc:"⌥ D",pc_sc:"Alt D",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+E",display:"Toggle between Design& Prototype tabs",mac_sc:"⇧ E",pc_sc:"⇧ E",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD",display:"Hold this while resixing to override constraints",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+OPTION+T",display:"Tidy Up",mac_sc:"⌘ ⌥ T",pc_sc:"Ctrl Alt T",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+1",display:"Zoom to Fit",mac_sc:"⇧ 1",pc_sc:"⇧ 1",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+2",display:"Zoom to Selection",mac_sc:"⇧ 2",pc_sc:"⇧ 2",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+OPTION+L",display:"Toggle Lock",mac_sc:"⌘ ⌥ L",pc_sc:"Ctrl Alt L",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"OPTION+1",display:"Open the Layers Panel",mac_sc:"⌥ 1",pc_sc:"Alt 1",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"OPTION+2",display:"Open the Assets Panel",mac_sc:"⌥ 2",pc_sc:"Alt 2",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+SHIFT+OPTION+C",display:"Copy as a PNG",mac_sc:"⌘ ⇧ ⌥ C",pc_sc:"Ctrl ⇧ Alt C",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+OPTION+P",display:"Run last Plugin",mac_sc:"⌘ ⌥ P",pc_sc:"Ctrl Alt P",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+G",display:"Toggle Guide visibility",mac_sc:"⇧ G",pc_sc:"⇧ G",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+OPTION+BACKSLASH",display:"Toggle Multiplayer Cursor visibility",mac_sc:"⌘ ⌥ \\",pc_sc:"Ctrl Alt \\",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+GRAVE",display:"Toggle Pixel Grid",mac_sc:"⇧ '",pc_sc:"⇧ '",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+C",display:"Toggle Comments visibility",mac_sc:"⇧ C",pc_sc:"⇧ C",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+Y",display:"Toggle Annotations visibility",mac_sc:"⇧ Y",pc_sc:"⇧ Y",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+SHIFT+P",display:"Toggle Pixel preview",mac_sc:"⌘ ⇧ P",pc_sc:"Ctrl ⇧ P",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+SHIFT+BACKSLASH",display:"Minimise UI",mac_sc:"⌘ ⇧ \\",pc_sc:"Ctrl ⇧ \\",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+DEL",display:"Delete and heal the selection",mac_sc:"⌘ ⌫",pc_sc:"Ctrl Backspace",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+SHIFT+F",display:"Flatten",mac_sc:"⌘ ⇧ F",pc_sc:"Ctrl ⇧ F",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+OPTION+H",display:"Dristribute Horizontally",mac_sc:"⇧ ⌥ H",pc_sc:"⇧ Alt H",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"SHIFT+OPTION+V",display:"Dristribute Vertically",mac_sc:"⇧ ⌥ V",pc_sc:"⇧ Alt V",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+J",display:"Join vectors",mac_sc:"⌘ J",pc_sc:"Ctrl J",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+SHIFT+J",display:"Smooth vectors",mac_sc:"⌘ ⇧ J",pc_sc:"Ctrl ⇧ J",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+A",display:"Select All",mac_sc:"⌘ A",pc_sc:"Ctrl A",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+OPTION+A",display:"Select Matching Layers",mac_sc:"⌘ ⌥ A",pc_sc:"Ctrl Alt A",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"fn+E",display:"Open Emoji picker",mac_sc:"fn E",pc_sc:"fn E",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
+  {shortcut:"CMD+SHIFT+E",display:"Remove all effects from the selected layer",mac_sc:"⌘ ⇧ E",pc_sc:"Ctrl ⇧ E",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+SHIFT+OPTION+E",display:"Re-apply the last effect with the same settings",mac_sc:"⌘ ⇧ ⌥ E",pc_sc:"Ctrl ⇧ Alt E",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
+  {shortcut:"CMD+SHIFT+V",display:"Paste in Place on the active art board",mac_sc:"⌘ ⇧ V",pc_sc:"Ctrl ⇧ V",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
+  {shortcut:"SHIFT++",display:"Cycle through layer blending modes",mac_sc:"⇧ +",pc_sc:"⇧ +",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false}
 ];
-
 /* ══════════════════════════════════════
    KEYBOARD BUILDER
 ══════════════════════════════════════ */
@@ -2195,7 +2267,7 @@ function buildKey(cfg, isMini) {
       el.addEventListener('mousedown', function(ev){ touchEnabled ? handleKeyTouch(ev, el) : showKbToast(ev); });
       break;
     case 'winkey':
-      el.innerHTML = `<svg class="win-svg" width="14" height="14" viewBox="0 0 102.73 104.6" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>`;
+      el.innerHTML = `<svg class="win-svg" width="14" height="14" viewBox="0 0 102.73 104.6" fill="currentColor" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>`;
       el.addEventListener('mousedown', function(ev){ touchEnabled ? handleKeyTouch(ev, el) : showKbToast(ev); });
       break;
   }
@@ -2426,28 +2498,50 @@ function buildKeyboard(isMini) {
 const kbToastEl = document.getElementById('kbToast');
 let toastTimer = null;
 
-var modeToastTimer   = null;
-var modeToastOrigText    = null;
-var modeToastOrigVisible = false;
+var _kwToastTimer = null;
 
-function showModeToast(msg) {
-  // Capture the original state only before the first toast in a sequence
-  if (!modeToastTimer) {
-    modeToastOrigText    = osMismatchEl.textContent;
-    modeToastOrigVisible = osMismatchEl.classList.contains('show');
+function showToast(msg, duration) {
+  duration = duration || 2400;
+  var el = document.getElementById('kwToast');
+  if (!el) return;
+  // Position: centred above the keyboard panel, or top-of-front-modal if open
+  var modalFront = null;
+  if (kbModalOpen || browserModalOpen) {
+    var kbM  = document.getElementById('kbModal');
+    var brM  = document.getElementById('browserModal');
+    if (kbModalOpen && browserModalOpen) {
+      // whichever has higher z-index is in front
+      var kbZ  = parseInt(kbM.style.zIndex  || 200);
+      var brZ  = parseInt(brM.style.zIndex  || 200);
+      modalFront = kbZ >= brZ ? kbM : brM;
+    } else {
+      modalFront = kbModalOpen ? kbM : brM;
+    }
   }
-  clearTimeout(modeToastTimer);
-  osMismatchEl.textContent = msg;
-  osMismatchEl.classList.add('show');
-  modeToastTimer = setTimeout(function() {
-    modeToastTimer = null;
-    osMismatchEl.classList.remove('show');
-    setTimeout(function() {
-      osMismatchEl.textContent = modeToastOrigText;
-      if (modeToastOrigVisible) osMismatchEl.classList.add('show');
-    }, 300);
-  }, 2000);
+  if (modalFront) {
+    var mr = modalFront.getBoundingClientRect();
+    el.style.left = Math.round(mr.left + mr.width / 2) + 'px';
+    el.style.top  = Math.round(mr.top + 18) + 'px';
+  } else {
+    var r = _kbPanelRect();
+    if (r) {
+      el.style.left = Math.round(r.left + window.scrollX + r.width / 2) + 'px';
+      el.style.top  = Math.round(r.top  + window.scrollY + r.height / 2) + 'px';
+    } else {
+      el.style.left = '50%';
+      el.style.top  = '50%';
+    }
+  }
+  clearTimeout(_kwToastTimer);
+  el.textContent = msg;
+  el.classList.add('visible');
+  _kwToastTimer = setTimeout(function() {
+    el.classList.remove('visible');
+  }, duration);
 }
+
+// Legacy alias — keeps any remaining internal calls working
+function showModeToast(msg) { showToast(msg); }
 
 function pulseBtn(el) {
   if (!el) return;
@@ -2492,14 +2586,19 @@ function handleKeyTouch(e, el) {
   const code = el.dataset.key;
   if (!code) return;
   playKeyClick();
-  // Build a minimal synthetic event carrying the code we need
-  // We dispatch through our own handlers directly (real KeyboardEvent
-  // requires trusted origin for some keys, so we call handlers directly).
-  const synth = { code: code, key: code, preventDefault: function(){},
-                  shiftKey: false, altKey: false, metaKey: false, ctrlKey: false };
+  // Set modifier flags so isKeyPartOfShortcut recognises modifier keys correctly
+  const synth = {
+    code: code, key: code, preventDefault: function(){},
+    shiftKey: code === 'ShiftLeft'   || code === 'ShiftRight',
+    altKey:   code === 'AltLeft'     || code === 'AltRight',
+    metaKey:  code === 'MetaLeft'    || code === 'MetaRight',
+    ctrlKey:  code === 'ControlLeft' || code === 'ControlRight',
+  };
   handleKeydown(synth);
-  // In sticky mode the key stays; in non-sticky mode we release immediately
-  if (!stickyKeysOn) {
+  // In sticky mode the key stays lit; in non-sticky mode release after the
+  // current frame — but only during active play. On the idle/start screen
+  // keep keys held so they behave like real physical key presses.
+  if (!stickyKeysOn && gameState === 'playing') {
     requestAnimationFrame(() => handleKeyup(synth));
   }
 }
@@ -2542,8 +2641,8 @@ const osMismatchEl   = document.getElementById('osMismatchPill');
 const osKnobEl  = document.getElementById('osKnobEl');
 
 // MAC_SVG / PC_SVG inline strings for label rendering
-const MAC_ICON_SVG = '<svg width="10" height="12" viewBox="0 0 686.7 761.2" fill="#9ca3af" xmlns="http://www.w3.org/2000/svg"><path d="M563.7,589c-27.7,41.3-57,81.7-101.7,82.3-44.7,1-59-26.3-109.7-26.3s-66.7,25.7-109,27.3c-43.7,1.7-76.7-44-104.7-84.3-57-82.3-100.7-234-42-336,29-50.7,81-82.7,137.3-83.7,42.7-.7,83.3,29,109.7,29s75.3-35.7,127-30.3c21.7,1,82.3,8.7,121.3,66-3,2-72.3,42.7-71.7,127,1,100.7,88.3,134.3,89.3,134.7-1,2.3-14,48-46,94.3h0ZM373.3,55.7c24.3-27.7,64.7-48.7,98-50,4.3,39-11.3,78.3-34.7,106.3-23,28.3-61,50.3-98.3,47.3-5-38.3,13.7-78.3,35-103.7h0Z"/></svg>';
-const PC_ICON_SVG  = '<svg width="11" height="11" viewBox="0 0 102.73 104.6" fill="#9ca3af" xmlns="http://www.w3.org/2000/svg"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>';
+const MAC_ICON_SVG = '<svg width="10" height="12" viewBox="0 0 686.7 761.2" fill="#9ca3af" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org"><path d="M563.7,589c-27.7,41.3-57,81.7-101.7,82.3-44.7,1-59-26.3-109.7-26.3s-66.7,25.7-109,27.3c-43.7,1.7-76.7-44-104.7-84.3-57-82.3-100.7-234-42-336,29-50.7,81-82.7,137.3-83.7,42.7-.7,83.3,29,109.7,29s75.3-35.7,127-30.3c21.7,1,82.3,8.7,121.3,66-3,2-72.3,42.7-71.7,127,1,100.7,88.3,134.3,89.3,134.7-1,2.3-14,48-46,94.3h0ZM373.3,55.7c24.3-27.7,64.7-48.7,98-50,4.3,39-11.3,78.3-34.7,106.3-23,28.3-61,50.3-98.3,47.3-5-38.3,13.7-78.3,35-103.7h0Z"/></svg>';
+const PC_ICON_SVG  = '<svg width="11" height="11" viewBox="0 0 102.73 104.6" fill="#9ca3af" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>';
 
 function buildOsLabels() {
   // Detected device is always on the LEFT (white dot = current).
@@ -2606,24 +2705,14 @@ function applyOsMode(os) {
 }
 
 function updateMismatchPill() {
-  if (detectedOs === 'mobile') {
-    osMismatchEl.textContent = 'We recommend training with a real mechanical keyboard.';
-    osMismatchEl.classList.add('show');
-    return;
-  }
-  if (detectedOs === 'other') {
-    osMismatchEl.classList.remove('show');
-    return;
-  }
+  if (detectedOs === 'mobile') return; // mobile message shown once at init
+  if (detectedOs === 'other') return;
   const mismatch = (detectedOs === 'mac' && currentOs === 'pc') ||
                    (detectedOs === 'pc'  && currentOs === 'mac');
   if (mismatch) {
     const playing = currentOs === 'pc' ? 'PC' : 'Mac';
     const machine = detectedOs === 'mac' ? 'a Mac' : 'a PC';
-    osMismatchEl.textContent = `Playing ${playing} mode on ${machine}`;
-    osMismatchEl.classList.add('show');
-  } else {
-    osMismatchEl.classList.remove('show');
+    showToast('Playing ' + playing + ' mode on ' + machine);
   }
 }
 
@@ -2641,8 +2730,7 @@ if (detectedOs === 'mobile') {
   setStickyKeys(true);
   setTouchEnabled(true);
   document.getElementById('stickyRow').classList.add('disabled');
-  osMismatchEl.textContent = 'We recommend training with a real mechanical keyboard.';
-  osMismatchEl.classList.add('show');
+  showToast('We recommend training with a real mechanical keyboard.', 4000);
 }
 
 // Set the initial toggle position to match the detected OS
@@ -2709,6 +2797,7 @@ function shortcutToCodes(s) {
   const OPT  = ['AltLeft','AltRight'];
   const SH   = ['ShiftLeft','ShiftRight'];
 
+  if (u === 'CMD')   return CMD;
   if (u === 'SPACE')  return ['Space'];
   if (u === 'TAB')    return ['Tab'];
   if (u === 'HOME')      return ['Home'];
@@ -2802,6 +2891,7 @@ function charToCode(ch) {
     'ARROWLEFT':'ArrowLeft','ARROWRIGHT':'ArrowRight',
     'ARROWUP':'ArrowUp','ARROWDOWN':'ArrowDown',
     'HOME':'Home','END':'End',
+    'GRAVE':'Backquote','BACKSLASH':'Backslash',
   };
   if (map[ch]) return map[ch];
   if (ch.length === 1 && ch >= 'A' && ch <= 'Z') return 'Key' + ch;
@@ -3020,7 +3110,8 @@ function updateKeyboardLighting(e, isDown) {
     }
     // Otherwise light it
     heldKeys.add(code);
-    const isCorrect = isKeyPartOfShortcut(e, currentAnswer);
+    // Outside a round, always green — currentAnswer is empty so correctness is meaningless
+    const isCorrect = gameState !== 'playing' || isKeyPartOfShortcut(e, currentAnswer);
     const colour = isCorrect ? 'green' : 'orange';
     stickyLit.set(code, colour);
     if (isCorrect) {
@@ -3454,7 +3545,7 @@ function enterPause(instantBlur) {
   titleEl.classList.add('blurred');
   questionCountEl.classList.add('blurred');
   titleEl.classList.remove('strike','hidden');
-  timerDiv.innerHTML = '<svg width="26" height="26" viewBox="0 0 26 26" style="display:block;vertical-align:top;" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="2" width="4" height="22" rx="1.5" fill="white"/><rect x="16" y="2" width="4" height="22" rx="1.5" fill="white"/></svg>';
+  timerDiv.innerHTML = '<svg width="26" height="26" viewBox="0 0 26 26" style="display:block;vertical-align:top;" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org"><rect x="6" y="2" width="4" height="22" rx="1.5" fill="white"/><rect x="16" y="2" width="4" height="22" rx="1.5" fill="white"/></svg>';
   setTimerState('paused');
   mainBtn.textContent = 'Unpause';
   helpBtn.textContent = 'Reset';
@@ -3635,7 +3726,7 @@ function matchesShortcut(event, str) {
 
   // Helper: does the event key match the expected bare char/token?
   function keyIs(exp) {
-    if (exp === '='   ) return k === '=' || k === '+';
+    if (exp === '='   ) return k === '=' || k === '+' || codeChar === '=';
     if (exp === 'RETURN') return k === 'Enter';
     if (exp === 'ENTER')  return k === 'Enter';
     if (exp === 'ARROWLEFT')  return k === 'ArrowLeft';
@@ -3646,11 +3737,11 @@ function matchesShortcut(event, str) {
     if (exp === 'END')  return k === 'End';
     if (exp === '[')    return k === '[' || (k === '{' && sh) || codeChar === '[';
     if (exp === ']')    return k === ']' || (k === '}' && sh) || codeChar === ']';
-    if (exp === '/')    return k === '/';
-    if (exp === '.')    return k === '.';
-    if (exp === ',')    return k === ',';
-    if (exp === ';')    return k === ';' || k === '…';
-    if (exp === '-')    return k === '-';
+    if (exp === '/')    return k === '/' || codeChar === '/';
+    if (exp === '.')    return k === '.' || codeChar === '.';
+    if (exp === ',')    return k === ',' || codeChar === ',';
+    if (exp === ';')    return k === ';' || k === '…' || codeChar === ';';
+    if (exp === '-')    return k === '-' || codeChar === '-';
     if (exp === '<')    return k === '<' || (k === ',' && sh);
     if (exp === '>')    return k === '>' || (k === '.' && sh);
     if (exp === '2')    return k === '2' || k === '™';
@@ -3666,8 +3757,9 @@ function matchesShortcut(event, str) {
   }
 
   // ── Bare modifiers ─────────────────────────────────────────────────────────
-  if (s === 'SHIFT')  return k === 'Shift' && nocmd && !opt;
-  if (s === 'OPTION') return k === 'Alt'   && nocmd && !sh;
+  if (s === 'SHIFT')  return k === 'Shift'   && nocmd && !opt;
+  if (s === 'OPTION') return k === 'Alt'     && nocmd && !sh;
+  if (s === 'CMD')    return (currentOs === 'pc' ? event.ctrlKey : event.metaKey) && !event.altKey && !event.shiftKey && (k === 'Control' || k === 'Meta');
 
   // ── Bare non-modifier keys ─────────────────────────────────────────────────
   if (s === 'SPACE')  return k === ' '          && nocmd && !opt && !sh;
@@ -4278,7 +4370,7 @@ function _makeConflictRadio(canonicalKey) {
   var wrap = document.createElement('span');
   wrap.className = 'modal-radio' + (isDismissed ? ' on' : '');
   wrap.style.cssText = 'flex-shrink:0;margin-right:7px;cursor:pointer;';
-  wrap.innerHTML = '<svg class="modal-radio-dot" width="16" height="16" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">'
+  wrap.innerHTML = '<svg class="modal-radio-dot" width="16" height="16" viewBox="0 0 19 19" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org">'
     + '<circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>'
     + '<circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>'
     + '</svg>';
@@ -4317,16 +4409,16 @@ function _refreshBrowserContent() {
     var t1 = document.createElement('strong');
     t1.style.color = '#1e3a5f';
     t1.textContent = 'Keyboard Warriors';
-    var t2 = document.createTextNode(', the shortcuts coach, is compatible with your browser, ');
+    var t2 = document.createTextNode(bname === 'Chromium' ? ', the shortcuts coach, is compatible with your Chromium-based browser, ' : ', the shortcuts coach, is compatible with your browser, ');
     var t3 = document.createElement('strong');
-    t3.textContent = bname + '.';
+    t3.textContent = (bname === 'Chromium' ? 'Chrome, Edge, or Brave.' : bname + '.');
     h.appendChild(t1); h.appendChild(t2); h.appendChild(t3);
   }
 
   var intro = document.getElementById('browserCompatIntro');
   if (intro) {
     if (d.labels.length > 0) {
-      intro.textContent = 'But, you may find that ' + bname + ' can take over if it hears one of its favourite shortcuts called:';
+      intro.textContent = 'But, you may find that your ' + (bname === 'Chromium' ? 'Chromium-based browser' : bname) + ' can take over if it hears one of its favourite shortcuts called:';
     } else {
       intro.textContent = 'We haven\u2019t spotted any shortcut conflicts for your current setup \u2014 you\u2019re good to go.';
     }
@@ -4620,8 +4712,18 @@ function dbgRefreshCtx() {
   const pool     = questionPool.length;
   const qi       = pool > 0 ? (questionIndex % pool) + 1 : '—';
   const qStr     = state === 'idle' ? '—/0' : qi + '/' + pool;
+  var browserName = (function() {
+    var ua = navigator.userAgent || '';
+    if (/Edg\//.test(ua))    return 'Edge';
+    if (/Firefox\//.test(ua)) return 'Firefox';
+    if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) return 'Safari';
+    if (/OPR\//.test(ua))    return 'Opera';
+    if (/Brave\//.test(ua) || navigator.brave !== undefined) return 'Brave';
+    if (/Chrome\//.test(ua)) return 'Chrome';
+    return 'unknown';
+  })();
   top.textContent = 'app:' + appName + '  state:' + state + '  Q:' + qStr;
-  if (sub) sub.textContent = 'device:' + device + '  os:' + osName;
+  if (sub) sub.textContent = 'device:' + device + '  os:' + osName + '  browser:' + browserName + '  build:2026.03';
 }
 
 // ── Debug accuracy display ────────────────────────────────────────────────────
@@ -4675,12 +4777,13 @@ function getBrowserConflicts() {
 
   // Detect browser
   var browser;
-  if      (/Edg\//.test(ua))                              browser = 'Edge';
-  else if (/Firefox\//.test(ua))                          browser = 'Firefox';
-  else if (/Safari\//.test(ua) && !/Chrome\//.test(ua))  browser = 'Safari';
-  else if (/OPR\//.test(ua))                              browser = 'Opera';
-  else if (/Chrome\//.test(ua))                           browser = 'Chrome';
-  else                                                     browser = null;
+  if      (/Edg\//.test(ua))                                         browser = 'Edge';
+  else if (/Firefox\//.test(ua))                                     browser = 'Firefox';
+  else if (/Safari\//.test(ua) && !/Chrome\//.test(ua))             browser = 'Safari';
+  else if (/OPR\//.test(ua))                                         browser = 'Opera';
+  else if (/Brave\//.test(ua) || navigator.brave !== undefined)      browser = 'Chromium';
+  else if (/Chrome\//.test(ua))                                      browser = 'Chromium';
+  else                                                                browser = null;
 
   // Conflict tables — Mac shortcuts use Cmd, PC use Ctrl (same token in our shortcut strings)
   // Values are the canonical shortcut strings used in SHORTCUTS[].shortcut
@@ -4689,13 +4792,15 @@ function getBrowserConflicts() {
     Firefox: ['CMD+T','CMD+OPTION+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
     Safari:  ['CMD+T','CMD+OPTION+U','CMD+OPTION+I','CMD+OPTION+C','CMD+SHIFT+H','CMD+SHIFT+I','CMD+SHIFT+L'],
     Opera:   ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Chrome:  ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
+    Chrome:    ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
+    Chromium:  ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
   };
   var pc = {
     Edge:    ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
     Firefox: ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
     Opera:   ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Chrome:  ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+C','CMD+SHIFT+N'],
+    Chrome:    ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+C','CMD+SHIFT+N'],
+    Chromium:  ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+C','CMD+SHIFT+N'],
   };
 
   // Human-readable labels — Mac vs PC, browser-specific
@@ -4741,6 +4846,13 @@ function getBrowserConflicts() {
       'Cmd+Shift+C \u2014 opens DevTools inspector',
       'Cmd+Shift+N \u2014 opens Incognito window',
     ],
+    Chromium: [
+      'Cmd+T \u2014 opens new tab',
+      'Cmd+Opt+I \u2014 opens DevTools',
+      'Cmd+Opt+J \u2014 opens DevTools console',
+      'Cmd+Shift+C \u2014 opens DevTools inspector',
+      'Cmd+Shift+N \u2014 opens Incognito window',
+    ],
   };
   var pcLabels = {
     Edge: [
@@ -4770,6 +4882,12 @@ function getBrowserConflicts() {
     ],
     Chrome: [
       'Ctrl+T \u2014 opens new tab',
+      'Ctrl+Shift+I \u2014 opens DevTools',
+      'Ctrl+Shift+J \u2014 opens DevTools console',
+      'Ctrl+Shift+C \u2014 opens DevTools inspector',
+      'Ctrl+Shift+N \u2014 opens Incognito window',
+    ],
+    Chromium: [
       'Ctrl+T \u2014 opens new tab',
       'Ctrl+Shift+I \u2014 opens DevTools',
       'Ctrl+Shift+J \u2014 opens DevTools console',
@@ -4839,7 +4957,7 @@ function buildPool() {
   return SHORTCUTS.filter(s => {
     if (!s[field]) return false;
     if (!s.pc_safe && currentOs === 'pc') return false;
-    if (s.hardcore) return false;
+    if (s.difficulty > 3) return false;
     if ((touchEnabled || !hasFullKeyboard) && requiresExtKey(s.shortcut)) return false;
     if (browserSkip.has(s.shortcut)) return false;
     return true;
@@ -4898,7 +5016,7 @@ function startGame() {
   transitioning = false;
   questionPool = shuffleArray(buildPool());
   if (currentApp === 'Ae' && !hasFullKeyboard) {
-    showToast('After Effects uses many extended keyboard shortcuts. Switch to Full Keyboard for the best experience.');
+    showModeToast('After Effects uses many extended keyboard shortcuts. Switch to Full Keyboard for the best experience.');
   }
   questionIndex = 0;
   answersLeft = 10;
@@ -5216,6 +5334,7 @@ function showTip(index) {
 }
 
 function handleKeydown(e) {
+  if (e.repeat) { updateKeyboardLighting(e, true); return; }
   updateKeyboardLighting(e, true);
   // DEBUG
   const dbg = document.getElementById('debugOverlay');
@@ -5325,6 +5444,96 @@ function handleKeyup(e) {
     });
   }
 }
+
+
+/* ── Difficulty toast helper ───────────────────────── */
+var _diffToastTimer = null;
+function showDiffToast(msg) {
+  var el = document.getElementById('diffToast');
+  if (!el) { showModeToast(msg); return; }
+  clearTimeout(_diffToastTimer);
+  el.textContent = msg;
+  el.classList.add('visible');
+  _diffToastTimer = setTimeout(function() {
+    el.classList.remove('visible');
+  }, 2200);
+}
+
+/* ── Difficulty icon — needle states ──────────────── */
+var _diffState = 0;   // -1 = left/basics, 0 = centre/normal, 1 = right/hardcore
+var _diffFirst = true; // suppress toast on first load
+
+var DIFF_ANGLES = { '-1': -60, '0': 0, '1': 60 };
+var DIFF_TOASTS = {
+  '-1': 'Basics mode coming soon.',
+   '0': 'You are in normal mode.',
+   '1': 'Hardcore mode coming soon.'
+};
+
+function setDiffState(newState) {
+  var changed = (newState !== _diffState);
+  _diffState = newState;
+  var needle = document.querySelector('#diffIcon #Needle');
+  if (needle) needle.style.transform = 'rotate(' + DIFF_ANGLES[String(newState)] + 'deg)';
+  if (changed && !_diffFirst) showDiffToast(DIFF_TOASTS[String(newState)]);
+  _diffFirst = false;
+}
+
+(function() {
+  var diffWrap = document.getElementById('diffIconWrap');
+  if (!diffWrap) return;
+  diffWrap.addEventListener('click', function() {
+    var next = _diffState + 1;
+    if (next > 1) next = -1;
+    setDiffState(next);
+  });
+})();
+
+/* ── Icon tooltips ─────────────────────────────────── */
+(function() {
+  var tooltipEl   = document.getElementById('iconTooltip');
+  var tooltipTimer  = null;
+  var tooltipHideTimer = null;
+
+  var TOOLTIPS = [
+    { id: 'kbIcon',      text: 'keyboard\nsettings' },
+    { id: 'browserIcon', text: 'browser\nsettings' },
+    { id: 'diffIcon',    text: 'difficulty\nsettings' }
+  ];
+
+  function showTip(el, text) {
+    clearTimeout(tooltipTimer);
+    clearTimeout(tooltipHideTimer);
+    tooltipTimer = setTimeout(function() {
+      var r = el.getBoundingClientRect();
+      tooltipEl.textContent = text;
+      tooltipEl.style.left = (r.left + r.width / 2) + 'px';
+      tooltipEl.style.top  = (r.bottom + 10) + 'px';
+      tooltipEl.style.transform = 'translateX(-50%)';
+      tooltipEl.classList.remove('visible');
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          tooltipEl.classList.add('visible');
+        });
+      });
+    }, 600);
+  }
+
+  function hideTip() {
+    clearTimeout(tooltipTimer);
+    tooltipHideTimer = setTimeout(function() {
+      tooltipEl.classList.remove('visible');
+    }, 80);
+  }
+
+  TOOLTIPS.forEach(function(t) {
+    var el = document.getElementById(t.id);
+    if (!el) return;
+    el.addEventListener('mouseenter', function() { showTip(el, t.text); });
+    el.addEventListener('mouseleave', hideTip);
+  });
+})();
+
 </script>
 <div id="kbModal" role="dialog" aria-modal="true">
   <button class="modal-dismiss-btn" onclick="closeKbModal()">&times;</button>
@@ -5473,3 +5682,4 @@ function handleKeyup(e) {
 
 </body>
 </html>
+
