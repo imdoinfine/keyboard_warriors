@@ -2593,6 +2593,7 @@ function handleKeyTouch(e, el) {
     altKey:   code === 'AltLeft'     || code === 'AltRight',
     metaKey:  code === 'MetaLeft'    || code === 'MetaRight',
     ctrlKey:  code === 'ControlLeft' || code === 'ControlRight',
+    _fromTouch: true,
   };
   handleKeydown(synth);
   // In sticky mode the key stays lit; in non-sticky mode release after the
@@ -2892,6 +2893,9 @@ function charToCode(ch) {
     'ARROWUP':'ArrowUp','ARROWDOWN':'ArrowDown',
     'HOME':'Home','END':'End',
     'GRAVE':'Backquote','BACKSLASH':'Backslash',
+    "'":'Quote','QUOTE':'Quote',
+    ';':'Semicolon','SEMICOLON':'Semicolon',
+    '-':'Minus','=':'Equal','[':'BracketLeft',']':'BracketRight','COMMA':'Comma','PERIOD':'Period',
   };
   if (map[ch]) return map[ch];
   if (ch.length === 1 && ch >= 'A' && ch <= 'Z') return 'Key' + ch;
@@ -5334,7 +5338,6 @@ function showTip(index) {
 }
 
 function handleKeydown(e) {
-  if (touchEnabled) return; // physical keys ignored when on-screen keyboard is active
   if (e.repeat) { updateKeyboardLighting(e, true); return; }
   updateKeyboardLighting(e, true);
   // DEBUG
@@ -5421,7 +5424,6 @@ document.addEventListener('visibilitychange', () => {
 });
 
 function handleKeyup(e) {
-  if (touchEnabled) return;
   updateKeyboardLighting(e, false);
   // In sticky mode, key-up never clears anything (toggle is handled in updateKeyboardLighting)
   if (stickyKeysOn) return;
