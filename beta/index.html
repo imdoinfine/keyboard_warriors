@@ -4,7 +4,7 @@
      and production logic lives in computer.html.
      Do not deploy. Merge approved changes back manually.
      ═══════════════════════════════════════════════════ -->
-<script>const DBG_DEVICE = 'BETA';</script>
+<script>const DBG_DEVICE = 'beta4';</script>
 <!DOCTYPE html>
 <html>
 <head>
@@ -1276,8 +1276,6 @@ li.conflict-dismissed .conflict-desc {
 ══════════════════════════════════════ */
 @media (max-width: 599px) {
   #keyboardWrap { display: none; }
-  #kbIcon { display: none; }
-  #kbModal { display: none !important; }
 
   body { padding: 12px; }
 
@@ -1664,6 +1662,10 @@ li.conflict-dismissed .conflict-desc {
   </div>
   <div id="kbFlipStage">
   <div id="keyboardPanel">
+    <div id="kb-slab-back"></div>
+    <div id="kb-shadow"></div>
+    <div id="kb-wall-top"></div>
+    <div id="kb-wall-bottom"></div>
     <div id="kb-base-edge"></div>
     <div class="kb-row" id="row-fn"></div>
     <div class="kb-row" id="row-num"></div>
@@ -1809,7 +1811,7 @@ function buildKey(cfg, isMini) {
       el.addEventListener('mousedown', function(ev){ touchEnabled ? handleKeyTouch(ev, el) : showKbToast(ev); });
       break;
     case 'winkey':
-      el.innerHTML = `<svg class="win-svg" width="14" height="14" viewBox="0 0 102.73 104.6" fill="currentColor" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>`;
+      el.innerHTML = `<svg class="win-svg" width="14" height="14" viewBox="0 0 102.73 104.6" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>`;
       el.addEventListener('mousedown', function(ev){ touchEnabled ? handleKeyTouch(ev, el) : showKbToast(ev); });
       break;
   }
@@ -2156,8 +2158,8 @@ const osMismatchEl   = document.getElementById('osMismatchPill');
 const osKnobEl  = document.getElementById('osKnobEl');
 
 // MAC_SVG / PC_SVG inline strings for label rendering
-const MAC_ICON_SVG = '<svg width="10" height="12" viewBox="0 0 686.7 761.2" fill="#9ca3af" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org"><path d="M563.7,589c-27.7,41.3-57,81.7-101.7,82.3-44.7,1-59-26.3-109.7-26.3s-66.7,25.7-109,27.3c-43.7,1.7-76.7-44-104.7-84.3-57-82.3-100.7-234-42-336,29-50.7,81-82.7,137.3-83.7,42.7-.7,83.3,29,109.7,29s75.3-35.7,127-30.3c21.7,1,82.3,8.7,121.3,66-3,2-72.3,42.7-71.7,127,1,100.7,88.3,134.3,89.3,134.7-1,2.3-14,48-46,94.3h0ZM373.3,55.7c24.3-27.7,64.7-48.7,98-50,4.3,39-11.3,78.3-34.7,106.3-23,28.3-61,50.3-98.3,47.3-5-38.3,13.7-78.3,35-103.7h0Z"/></svg>';
-const PC_ICON_SVG  = '<svg width="11" height="11" viewBox="0 0 102.73 104.6" fill="#9ca3af" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>';
+const MAC_ICON_SVG = '<svg width="10" height="12" viewBox="0 0 686.7 761.2" fill="#9ca3af" xmlns="http://www.w3.org/2000/svg"><path d="M563.7,589c-27.7,41.3-57,81.7-101.7,82.3-44.7,1-59-26.3-109.7-26.3s-66.7,25.7-109,27.3c-43.7,1.7-76.7-44-104.7-84.3-57-82.3-100.7-234-42-336,29-50.7,81-82.7,137.3-83.7,42.7-.7,83.3,29,109.7,29s75.3-35.7,127-30.3c21.7,1,82.3,8.7,121.3,66-3,2-72.3,42.7-71.7,127,1,100.7,88.3,134.3,89.3,134.7-1,2.3-14,48-46,94.3h0ZM373.3,55.7c24.3-27.7,64.7-48.7,98-50,4.3,39-11.3,78.3-34.7,106.3-23,28.3-61,50.3-98.3,47.3-5-38.3,13.7-78.3,35-103.7h0Z"/></svg>';
+const PC_ICON_SVG  = '<svg width="11" height="11" viewBox="0 0 102.73 104.6" fill="#9ca3af" xmlns="http://www.w3.org/2000/svg"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>';
 
 function buildOsLabels() {
   // Detected device is always on the LEFT (white dot = current).
@@ -3068,7 +3070,7 @@ function enterPause(instantBlur) {
   titleEl.classList.add('blurred');
   questionCountEl.classList.add('blurred');
   titleEl.classList.remove('strike','hidden');
-  timerDiv.innerHTML = '<svg width="26" height="26" viewBox="0 0 26 26" style="display:block;vertical-align:top;" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org"><rect x="6" y="2" width="4" height="22" rx="1.5" fill="white"/><rect x="16" y="2" width="4" height="22" rx="1.5" fill="white"/></svg>';
+  timerDiv.innerHTML = '<svg width="26" height="26" viewBox="0 0 26 26" style="display:block;vertical-align:top;" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="2" width="4" height="22" rx="1.5" fill="white"/><rect x="16" y="2" width="4" height="22" rx="1.5" fill="white"/></svg>';
   setTimerState('paused');
   mainBtn.textContent = 'Unpause';
   helpBtn.textContent = 'Reset';
@@ -3898,7 +3900,7 @@ function _makeConflictRadio(canonicalKey) {
   var wrap = document.createElement('span');
   wrap.className = 'modal-radio' + (isDismissed ? ' on' : '');
   wrap.style.cssText = 'flex-shrink:0;margin-right:7px;cursor:pointer;';
-  wrap.innerHTML = '<svg class="modal-radio-dot" width="16" height="16" viewBox="0 0 19 19" xmlns="https://url.au.m.mimecastprotect.com/s/UyMNCYWKPqHLXlks0fvSxqCH2?domain=w3.org">'
+  wrap.innerHTML = '<svg class="modal-radio-dot" width="16" height="16" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">'
     + '<circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>'
     + '<circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>'
     + '</svg>';
@@ -4241,7 +4243,7 @@ function dbgRefreshCtx() {
   const qi       = pool > 0 ? (questionIndex % pool) + 1 : '—';
   const qStr     = state === 'idle' ? '—/0' : qi + '/' + pool;
   top.textContent = 'app:' + appName + '  state:' + state + '  Q:' + qStr;
-  if (sub) sub.textContent = 'device:' + device + '  os:' + osName;
+  if (sub) sub.textContent = 'build:' + device + '  os:' + osName;
 }
 
 // ── Debug accuracy display ────────────────────────────────────────────────────
@@ -4964,7 +4966,8 @@ function flipToEdge() {
   var wrap  = document.getElementById('keyboardWrap');
 
   wrap.classList.add('kb-flipping');
-  panel.style.transform = 'rotateX(88deg)';
+  stage.style.transform = 'translateY(118px)';  // just above credit line  // screen-space drop to bottom
+  panel.style.transform = 'rotateX(82deg)';     // tilt top away — keyboard folds back from bottom
 
   // Delay darkening so it starts mid-rotation, not instantly
   setTimeout(function() {
@@ -4999,6 +5002,7 @@ function flipToFace() {
 
   // Small pause then begin rotation back
   setTimeout(function() {
+    stage.style.transform = 'translateY(0px)';
     panel.style.transform = 'rotateX(0deg)';
   }, 60);
 
@@ -5209,152 +5213,209 @@ document.addEventListener('DOMContentLoaded', function() {
 /* ── Difficulty icon ──────────────────────────────── */
 /* ── Keyboard flip animation ──────────────────────── */
 
-/* Perspective stage — large perspective so keyboard looks flat at rest */
+/* ─── 3D STAGE ──────────────────────────────────────*/
 #kbFlipStage {
-  perspective: 2400px;
-  perspective-origin: 50% 0%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  height: 280px;
-  overflow: visible;
+  perspective:        1600px;
+  perspective-origin: 50% 50%;
+  transform-style:    preserve-3d;
+  transition:         transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow:           visible;
 }
 
+/* ─── PANEL ──────────────────────────────────────────*/
 #keyboardPanel {
-  transform-origin: center top;
-  transform: rotateX(0deg);
+  transform-style:  preserve-3d;
+  transform-origin: center center;
+  transform:        rotateX(0deg);
   transition:
-    transform  0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transform    0.85s cubic-bezier(0.4, 0, 0.2, 1),
+    background   0.5s  ease 0.2s,
+    box-shadow   0.5s  ease 0.2s;
   will-change: transform;
-  flex-shrink: 0;
-  position: relative; /* so kb-base-edge can be absolute inside it */
-}
-
-/* Key surfaces — darken mid-rotation, not at the start */
-#keyboardPanel .key {
-  transition:
-    background 0.5s ease 0.2s,
-    box-shadow 0.5s ease 0.2s,
-    color      0.4s ease 0.25s;
-}
-#keyboardPanel.kb-edged .key {
-  background: #5a5f66;
-  color:      transparent;
-  box-shadow: none;
-}
-/* Panel body darkens after keys */
-#keyboardPanel {
-  transition:
-    transform    0.8s cubic-bezier(0.4, 0, 0.2, 1),
-    background   0.5s ease 0.2s,
-    box-shadow   0.5s ease 0.2s;
 }
 #keyboardPanel.kb-edged {
-  background: #6b7280;
+  background: #9ca3af;
   box-shadow: none;
 }
 
-/* Row bottom edges — thin strips representing key fronts */
-.kb-row {
-  position: relative;
+/* ─── KEYS ───────────────────────────────────────────
+   preserve-3d so ::before front face participates
+   in the same 3D space. overflow visible so the
+   front face isn't clipped.                          */
+#keyboardPanel .key {
+  transform:       translateZ(8px);
+  transition:
+    background 0.45s ease 0.15s,
+    box-shadow 0.45s ease 0.15s,
+    color      0.35s ease 0.2s,
+    transform  0.5s  ease 0.15s;
 }
-.kb-row::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  opacity: 0;
-  background: #e5e7eb;
+#keyboardPanel.kb-edged .key {
+  background: #d1d5db;
+  color:      transparent;
+  /* Hard shadow lip: simulates the front face of a raised keycap */
+  box-shadow:
+    0 3px 0 0 #a8acb6,
+    inset 0 -1px 0 rgba(0,0,0,0.1);
+  transform:  translateZ(3px);
+}
+
+
+/* ─── SLAB WALLS ─────────────────────────────────────
+   Full edge-to-edge — no inset offsets.
+   Left/right walls use z-index to sit atop top/bottom
+   at corners, filling the gap cleanly.
+   border-radius on the correct corners follows the
+   panel's 14px curve.                                 */
+
+#kb-wall-top, #kb-wall-bottom {
+  position:       absolute;
   pointer-events: none;
-  z-index: 2;
-  transition: opacity 0.35s ease;
+  opacity:        0;
+  transition:     opacity 0.3s ease 0.1s;
 }
-#keyboardPanel.kb-edges-visible .kb-row::after {
+#keyboardPanel.kb-edged #kb-wall-top,
+#keyboardPanel.kb-edged #kb-wall-bottom {
   opacity: 1;
 }
-/* Foreshortening — top rows nearest pivot get thinner edges */
-#row-fn::after  { height: 2px; bottom: -2px; }
-#row-num::after { height: 2px; bottom: -2px; }
-#row-q::after   { height: 3px; bottom: -3px; }
-#row-a::after   { height: 3px; bottom: -3px; }
-#row-z::after   { height: 4px; bottom: -4px; }
-#row-bot::after { height: 5px; bottom: -5px; }
 
-/* Keyboard base front edge — absolute inside keyboardPanel, flush at bottom */
-#kb-base-edge {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 0;
-  background: linear-gradient(to right,
-    #b0b8c4 0%, #dde3ea 20%, #ffffff 50%, #dde3ea 80%, #b0b8c4 100%);
-  border-radius: 4px;
-  opacity: 0;
+/* PC panel has 22px radius — bottom wall corners match */
+#keyboardPanel.pc-keys #kb-wall-bottom {
+  border-radius: 6px 6px 0 0;
+}
+#keyboardPanel.pc-keys #kb-wall-top {
+  border-radius: 0 0 6px 6px;
+}
+
+/* Top wall — full width, hinges backward from top edge */
+#kb-wall-top {
+  top:              0;
+  left:             0;
+  right:            0;
+  height:           7px;
+  z-index:          1;
+  transform-origin: center top;
+  transform:        rotateX(-90deg);
+  background:       linear-gradient(to bottom, #a8aeb8, #989eb0);
+  border-radius:    0 0 4px 4px;
+}
+
+/* Bottom wall — full width, hinges backward from bottom edge.
+   Most visible face when tilting top-away.             */
+#kb-wall-bottom {
+  bottom:           0;
+  left:             0;
+  right:            0;
+  height:           7px;
+  z-index:          1;
+  transform-origin: center bottom;
+  transform:        rotateX(90deg);
+  /* Horizontal metallic ramp: dark edges → light centre → dark edges
+     Gives the illusion of a curved/rounded front face.
+     The top-to-bottom gradient layered on top adds the bevel sheen. */
+  background:
+    linear-gradient(to bottom,
+      rgba(0,0,0,0.30)       0px,
+      rgba(0,0,0,0.30)       1.5px,
+      rgba(0,0,0,0.0)        1.5px,
+      rgba(0,0,0,0.0)        5.5px,
+      rgba(255,255,255,0.70) 5.5px,
+      rgba(255,255,255,0.70) 7px),
+    linear-gradient(to right,
+      #6e7480 0%,
+      #9aa0aa 10%,
+      #bfc4cb 22%,
+      #c8cdd4 35%,
+      #c8cdd4 65%,
+      #bfc4cb 78%,
+      #9aa0aa 90%,
+      #6e7480 100%);
+  border-radius:    4px 4px 0 0;
+}
+
+
+/* ─── SLAB BACK — closes the box, invisible ─────────*/
+#kb-slab-back {
+  position:       absolute;
+  inset:          0;
+  border-radius:  14px;
   pointer-events: none;
-  transition: height 0.25s ease, opacity 0.25s ease;
-  z-index: 3;
+  transform:      translateZ(-7px);
+  background:     transparent;
+  z-index:        0;
+}
+
+/* ─── DROP SHADOW ─────────────────────────────────────
+   Blurred translucent blob at negative Z — floats the
+   keyboard just above the surface, shadow falls on
+   whatever is below (credit line etc).               */
+#kb-shadow {
+  position:       absolute;
+  inset:          12px 24px;
+  border-radius:  20px;
+  pointer-events: none;
+  transform:      translateZ(-10px) translateY(4px);
+  background:     rgba(0,0,0,0.0);
+  filter:         blur(22px);
+  transition:
+    background 0.6s ease 0.1s,
+    transform  0.85s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index:        0;
+}
+#keyboardPanel.kb-edged #kb-shadow {
+  background: rgba(0,0,0,0.6);
+  transform:  translateZ(-10px) translateY(42px);
+}
+
+/* ─── BASE EDGE HIGHLIGHT ─────────────────────────────*/
+#kb-base-edge {
+  position:       absolute;
+  bottom:         0;
+  left:           14px;
+  right:          14px;
+  height:         0;
+  border-radius:  0 0 3px 3px;
+  pointer-events: none;
+  z-index:        5;
+  opacity:        0;
+  transition:     height 0.3s ease, opacity 0.3s ease;
+  background:     rgba(255,255,255,0.55);
 }
 #kbFlipStage.kb-show-base #kb-base-edge {
-  height: 8px;
+  height:  3px;
   opacity: 1;
 }
 
-/* kbIcon and brIcon fade during flip */
-#kbIconWrap, #brIconWrap {
-  transition: opacity 0.3s ease;
-}
-#keyboardWrap.kb-flipping #kbIconWrap,
-#keyboardWrap.kb-flipping #brIconWrap {
-  opacity: 0;
-  pointer-events: none;
-}
+/* ─── ROW STRIPS — suppressed ────────────────────────*/
+.kb-row::after { display: none; }
 
-/* Gauge — static small icon */
-#diffIconWrap {
-  display: flex;
-  justify-content: center;
-  margin-top: 4px;
-}
-#diffIcon {
-  display: block;
-  fill: #9ca3af;
-  pointer-events: auto;
-  cursor: pointer;
-  width: 44px;
-  transition: transform 0.18s ease;
-}
-#diffIcon:hover { transform: scale(1.12); }
-
-/* Needle */
-#diffIcon #Needle {
-  fill: #9ca3af;
-  transform-origin: 45px 50.9px;
-  transform: rotate(-60deg);
-}
-
-/* ── Icon wrapper positioning ────────────────────── */
-#kbIconWrap  { position: absolute; left: 0;  top: 50%; transform: translateY(-50%); }
+/* ─── ICONS ──────────────────────────────────────────*/
+#kbIconWrap, #brIconWrap { transition: opacity 0.3s ease; }
+#kbIconWrap  { position: absolute; left:  0; top: 50%; transform: translateY(-50%); }
 #brIconWrap  { position: absolute; right: 0; top: 50%; transform: translateY(-50%); }
 
-/* ── Shared floating icon tooltip ────────────────── */
+/* ─── DIFF GAUGE ─────────────────────────────────────*/
+#diffIconWrap { display: flex; justify-content: center; margin-top: 4px; }
+#diffIcon {
+  display: block; fill: #9ca3af; pointer-events: auto;
+  cursor: pointer; width: 44px; transition: transform 0.18s ease;
+}
+#diffIcon:hover { transform: scale(1.12); }
+#diffIcon #Needle {
+  fill: #9ca3af; transform-origin: 45px 50.9px; transform: rotate(-60deg);
+}
+
+/* ─── TOOLTIP ────────────────────────────────────────*/
 #iconTooltip {
   position: fixed;
   font-family: 'Lato', system-ui, sans-serif;
-  font-size: 10px;
-  color: #9ca3af;
-  line-height: 1.25;
-  text-align: center;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.18s ease;
-  z-index: 9990;
+  font-size: 10px; color: #9ca3af;
+  line-height: 1.25; text-align: center;
+  white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity 0.18s ease; z-index: 9990;
 }
 #iconTooltip.visible { opacity: 1; }
 </style>
 
 </body>
 </html>
-
