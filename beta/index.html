@@ -4494,6 +4494,8 @@ function loadAppShortcutsIfNeeded(appKey, onReady) {
     return;
   }
 
+  showModeToast('Preparing shortcuts…');
+
   const thisLoadSequence = ++loadSequenceNumber;
 
   const filePath = APP_JSON_FILE_PATH[appKey];
@@ -4547,8 +4549,6 @@ function beginCountdown() {
   mainBtn.textContent = 'Cancel';
   mainBtn.disabled  = true;
   helpBtn.disabled  = true;
-
-  showModeToast('Preparing shortcuts…');
 
   loadAppShortcutsIfNeeded(currentApp, function() {
     mainBtn.disabled = false;
