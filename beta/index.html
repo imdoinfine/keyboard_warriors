@@ -1736,6 +1736,60 @@ li.conflict-dismissed .conflict-desc {
   </div>
 </div>
 
+<div id="debugOverlay" style="position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;border-radius:8px;z-index:9999;pointer-events:auto;line-height:1.5;display:none;flex-direction:row;gap:0;align-items:flex-start;overflow:hidden;max-height:800px;transition:max-height 0.2s ease,border-radius 0.2s ease;" aria-hidden="true">
+  <!-- Left column -->
+  <div style="display:flex;flex-direction:column;justify-content:space-between;width:360px;padding-right:12px;align-self:stretch;">
+    <!-- Header row: app/state/Q only — no wrap, accordion trigger -->
+    <div id="dbgHeader" onclick="dbgToggle()" style="display:flex;align-items:center;gap:6px;padding-bottom:2px;cursor:pointer;user-select:none;">
+      <span id="dbgToggle" style="color:#888;font-size:13px;line-height:1;">&#9660;</span>
+      <div id="dbgCtxTop" style="color:#8af;flex:1;white-space:nowrap;overflow:hidden;"></div>
+    </div>
+    <!-- Sub-header row: device/os -->
+    <div style="padding-bottom:3px;overflow:hidden;">
+      <div id="dbgCtxSub" style="color:#8af;white-space:nowrap;overflow:hidden;font-size:10px;opacity:0.75;"></div>
+    </div>
+    <!-- Collapsible body -->
+    <div id="dbgCollapsible" style="border-top:1px solid #333;margin-top:3px;display:flex;flex-direction:column;justify-content:space-between;flex:1;">
+      <div style="padding-top:3px;">
+        <div id="dbgAnswer"></div>
+        <div id="dbgKey"></div>
+        <div id="dbgMatch"></div>
+      </div>
+      <!-- Button row: two segmented controls with a gap -->
+      <div style="display:flex;gap:6px;margin-top:8px;padding-bottom:2px;">
+        <!-- Segmented control 1: nav arrows -->
+        <div style="display:flex;border:1px solid #0f0;border-radius:4px;overflow:hidden;">
+          <button onclick="dbgPrevQuestion()" style="background:#1a1a1a;color:#0f0;border:none;border-right:1px solid #0f0;padding:4px 16px;font-size:15px;line-height:1;cursor:pointer;font-family:monospace;">&#8592;</button>
+          <button onclick="dbgNextQuestion()" style="background:#1a1a1a;color:#0f0;border:none;padding:4px 16px;font-size:15px;line-height:1;cursor:pointer;font-family:monospace;">&#8594;</button>
+        </div>
+        <!-- Segmented control 2: copy / report -->
+        <div style="display:flex;flex:1;border:1px solid #0f0;border-radius:4px;overflow:hidden;">
+          <button id="dbgCopyBtn" onclick="dbgCopy()" style="flex:1;background:#1a1a1a;color:#0f0;border:none;border-right:1px solid #0f0;padding:4px 0;font-size:10px;cursor:pointer;font-family:monospace;">Copy</button>
+          <button onclick="dbgReport()" style="flex:1;background:#1a1a1a;color:#0f0;border:none;padding:4px 0;font-size:10px;cursor:pointer;font-family:monospace;">Report</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Dashed divider -->
+  <svg width="12" style="flex-shrink:0;overflow:visible;align-self:stretch;" xmlns="http://www.w3.org/2000/svg">
+    <line x1="6" y1="0" x2="6" y2="100%" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 5"/>
+  </svg>
+  <!-- Right column -->
+  <div id="dbgRight" style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-left:12px;width:120px;flex-shrink:0;gap:4px;">
+    <div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding-bottom:3px;width:100%;text-align:center;">Debug View</div>
+    <div id="dbgRightBody">
+      <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1px;text-align:center;">accuracy</div>
+      <div style="display:flex;align-items:baseline;gap:4px;justify-content:center;width:120px;">
+        <span id="dbgGreenHits" style="font-size:22px;font-weight:700;color:#0f0;line-height:1;">0</span>
+        <span style="font-size:13px;color:#666;">/</span>
+        <span id="dbgTotalHits" style="font-size:22px;font-weight:700;color:#aaa;line-height:1;">0</span>
+      </div>
+      <div style="width:60px;height:1px;background:#444;margin:2px auto;"></div>
+      <div id="dbgPct" style="font-size:22px;font-weight:700;color:#888;line-height:1;text-align:center;">&#8212;</div>
+    </div>
+  </div>
+</div>
+
 <p id="credit">Built for learners. This digital toy was created by Wednesday Dessauer as open-source &amp; free to adapt under <small>GNU GPL v3.0</small></p>
 
 <div id="diffIconWrap">
@@ -2750,6 +2804,7 @@ const NUMPAD_MAP = {
 };
 
 function updateKeyboardLighting(e, isDown) {
+  if (isDown && e.repeat) return; // key already lit from initial keydown; repeats do nothing
   const code = NUMPAD_MAP[e.code] || e.code;
   const isExtKey   = code in EXT_KEY_LABELS;
   const isModifier = code === 'MetaLeft'    || code === 'MetaRight'   ||
@@ -4380,7 +4435,7 @@ function dbgReport() {
     btn.textContent = 'Preparing…';
     setTimeout(function() { btn.textContent = 'Report'; }, 2500);
   }
-  var body    = 'Bug report from Keyboard Warriors:\n\n' + dbgBuildReport() + '\n\nPlease describe the issue here:';
+  var body    = '\nBug report from Keyboard Warriors:\n\n' + dbgBuildReport() + '\n\nPlease describe the issue here:\n';
   var subject = 'Keyboard Warriors error report';
   window.location.href = 'mailto:Wednesday%20Dessauer%20%3Cddessauer%40swin.edu.au%3E?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
 }
