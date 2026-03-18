@@ -2192,6 +2192,8 @@ function updateToggleVisual(os) {
 
 function applyOsMode(os) {
   currentOs = os;
+  // If keyboard is flipped, snap it back before rebuilding
+  if (_kbFlipped || _flipBusy) _resetFlipState();
   var nativeMac = (detectedOs === 'mac' || detectedOs === 'mobile');
   osToggleEl.checked = nativeMac ? (os === 'pc') : (os === 'mac');
   updateToggleVisual(os);
@@ -4979,8 +4981,9 @@ function releaseAllKeys() {
 }
 
 window.addEventListener('blur', releaseAllKeys);
+window.addEventListener('blur', function() { _flipBusy = false; });
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) releaseAllKeys();
+  if (document.hidden) { releaseAllKeys(); _flipBusy = false; }
 });
 
 function handleKeyup(e) {
@@ -5012,40 +5015,59 @@ function handleKeyup(e) {
 }
 
 /* ── Keyboard flip ────────────────────────────────── */
-var _kbFlipped = false;
-var _flipBusy  = false;
+var _kbFlipped  = false;
+var _flipBusy   = false;
+var _flipSeq    = 0;   // increments each flip; stale timeouts self-cancel
 
 // DEBUG timing — slow so we can study the animation
 var FLIP_DUR    = 800;   // total flip duration ms
 var EDGE_AT     = 400;   // when row edges appear (ms into flip)
 var BASE_AT     = 650;   // when base edge appears (ms into flip)
 
+function _resetFlipState() {
+  // Instantly snap panel back to face-up, clearing all flip classes/styles.
+  // Safe to call at any point — used by OS toggle and other rebuilds.
+  _flipSeq++;
+  _flipBusy  = false;
+  _kbFlipped = false;
+  var panel = document.getElementById('keyboardPanel');
+  var stage = document.getElementById('kbFlipStage');
+  var wrap  = document.getElementById('keyboardWrap');
+  if (panel) { panel.classList.remove('kb-edged', 'kb-edges-visible'); panel.style.transform = ''; }
+  if (stage) { stage.classList.remove('kb-show-base'); stage.style.transform = ''; }
+  if (wrap)  { wrap.classList.remove('kb-flipping'); }
+}
+
 function flipToEdge() {
   if (_flipBusy) return;
   _flipBusy = true;
+  var seq = ++_flipSeq;
 
   var panel = document.getElementById('keyboardPanel');
   var stage = document.getElementById('kbFlipStage');
   var wrap  = document.getElementById('keyboardWrap');
 
   wrap.classList.add('kb-flipping');
-  stage.style.transform = 'translateY(118px)';  // just above credit line  // screen-space drop to bottom
-  panel.style.transform = 'rotateX(82deg)';     // tilt top away — keyboard folds back from bottom
+  stage.style.transform = 'translateY(118px)';
+  panel.style.transform = 'rotateX(82deg)';
 
-  // Delay darkening so it starts mid-rotation, not instantly
   setTimeout(function() {
+    if (_flipSeq !== seq) return;
     panel.classList.add('kb-edged');
   }, 200);
 
   setTimeout(function() {
+    if (_flipSeq !== seq) return;
     panel.classList.add('kb-edges-visible');
   }, EDGE_AT);
 
   setTimeout(function() {
+    if (_flipSeq !== seq) return;
     stage.classList.add('kb-show-base');
   }, BASE_AT);
 
   setTimeout(function() {
+    if (_flipSeq !== seq) return;
     _flipBusy  = false;
     _kbFlipped = true;
   }, FLIP_DUR);
@@ -5054,6 +5076,7 @@ function flipToEdge() {
 function flipToFace() {
   if (_flipBusy) return;
   _flipBusy = true;
+  var seq = ++_flipSeq;
 
   var panel = document.getElementById('keyboardPanel');
   var stage = document.getElementById('kbFlipStage');
@@ -5063,13 +5086,14 @@ function flipToFace() {
   panel.classList.remove('kb-edges-visible');
   panel.classList.remove('kb-edged');
 
-  // Small pause then begin rotation back
   setTimeout(function() {
+    if (_flipSeq !== seq) return;
     stage.style.transform = 'translateY(0px)';
     panel.style.transform = 'rotateX(0deg)';
   }, 60);
 
   setTimeout(function() {
+    if (_flipSeq !== seq) return;
     wrap.classList.remove('kb-flipping');
     _flipBusy  = false;
     _kbFlipped = false;
@@ -5278,7 +5302,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* ─── 3D STAGE ──────────────────────────────────────*/
 #kbFlipStage {
-  perspective:        1600px;
+  perspective:        6000px;
   perspective-origin: 50% 50%;
   transform-style:    preserve-3d;
   transition:         transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
@@ -5297,8 +5321,11 @@ document.addEventListener('DOMContentLoaded', function() {
   will-change: transform;
 }
 #keyboardPanel.kb-edged {
-  background: #9ca3af;
+  background: #868e99;
   box-shadow: none;
+}
+#keyboardPanel.pc-keys.kb-edged {
+  background: #7a9fa8;
 }
 
 /* ─── KEYS ───────────────────────────────────────────
@@ -5314,13 +5341,15 @@ document.addEventListener('DOMContentLoaded', function() {
     transform  0.5s  ease 0.15s;
 }
 #keyboardPanel.kb-edged .key {
-  background: #d1d5db;
+  background: #e4e7ea;
   color:      transparent;
-  /* Hard shadow lip: simulates the front face of a raised keycap */
-  box-shadow:
-    0 3px 0 0 #a8acb6,
-    inset 0 -1px 0 rgba(0,0,0,0.1);
-  transform:  translateZ(3px);
+  box-shadow: none;
+  transform:  translateZ(8px);
+  transition:
+    background 0.45s ease 0.15s,
+    box-shadow 0.45s ease 0.15s,
+    color      0.35s ease 0.2s,
+    transform  0.5s  ease 0.15s;
 }
 
 
@@ -5344,7 +5373,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* PC panel has 22px radius — bottom wall corners match */
 #keyboardPanel.pc-keys #kb-wall-bottom {
-  border-radius: 6px 6px 0 0;
+  border-radius: 22px 22px 0 0;
 }
 #keyboardPanel.pc-keys #kb-wall-top {
   border-radius: 0 0 6px 6px;
@@ -5361,6 +5390,7 @@ document.addEventListener('DOMContentLoaded', function() {
   transform:        rotateX(-90deg);
   background:       linear-gradient(to bottom, #a8aeb8, #989eb0);
   border-radius:    0 0 4px 4px;
+  display:          none;
 }
 
 /* Bottom wall — full width, hinges backward from bottom edge.
@@ -5393,7 +5423,7 @@ document.addEventListener('DOMContentLoaded', function() {
       #bfc4cb 78%,
       #9aa0aa 90%,
       #6e7480 100%);
-  border-radius:    4px 4px 0 0;
+  border-radius:    14px 14px 0 0;
 }
 
 
