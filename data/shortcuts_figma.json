@@ -69,7 +69,10 @@
     "pc_sc": "I",
     "pc_safe": true,
     "difficulty": 1,
-    "group": ""
+    "group": "",
+    "alternates": [
+      "CTRL+C"
+    ]
   },
   {
     "shortcut": "Z",
@@ -96,7 +99,10 @@
     "pc_sc": "H",
     "pc_safe": true,
     "difficulty": 1,
-    "group": ""
+    "group": "",
+    "alternates": [
+      "SPACE"
+    ]
   },
   {
     "shortcut": "F",
@@ -177,7 +183,10 @@
     "pc_sc": "Ctrl ;",
     "pc_safe": true,
     "difficulty": 1,
-    "group": ""
+    "group": "",
+    "alternates": [
+      "SHIFT+G"
+    ]
   },
   {
     "shortcut": "CMD+SHIFT+H",
@@ -762,15 +771,6 @@
     "pc_sc": "Ctrl Alt P",
     "pc_safe": true,
     "difficulty": 5,
-    "group": ""
-  },
-  {
-    "shortcut": "SHIFT+G",
-    "display": "Toggle Guide visibility",
-    "mac_sc": "⇧  G",
-    "pc_sc": "⇧  G",
-    "pc_safe": true,
-    "difficulty": 1,
     "group": ""
   },
   {

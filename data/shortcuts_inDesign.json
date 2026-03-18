@@ -141,7 +141,10 @@
     "pc_sc": "H",
     "pc_safe": true,
     "difficulty": 1,
-    "group": ""
+    "group": "",
+    "alternates": [
+      "SPACE"
+    ]
   },
   {
     "shortcut": "W",
