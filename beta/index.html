@@ -4,7 +4,7 @@
      and production logic lives in computer.html.
      Do not deploy. Merge approved changes back manually.
      ═══════════════════════════════════════════════════ -->
-<script>const DBG_DEVICE = 'beta5';</script>
+<script>const DBG_DEVICE = 'beta4';</script>
 <!DOCTYPE html>
 <html>
 <head>
@@ -1728,13 +1728,11 @@ li.conflict-dismissed .conflict-desc {
 
 <script>
 /* ══════════════════════════════════════
-   UNIVERSAL_SHORTCUTS — shortcuts that apply to all apps,
-   always included in the question pool regardless of
-   which app is selected. Loaded from this file directly.
+   SHORTCUTS — generated from shortcuts_final.csv
    Fields: shortcut, display, mac_sc, pc_sc,
            pc_safe, difficulty, group
 ══════════════════════════════════════ */
-const UNIVERSAL_SHORTCUTS = [
+const SHORTCUTS = [
   // ─── BETA TEST ENTRY — single question loops for game cycle testing ───
   {shortcut:"CMD+Z",display:"Undo the last action",mac_sc:"⌘ Z",pc_sc:"Ctrl Z",pc_safe:true,difficulty:1,group:""}
 ];/* ══════════════════════════════════════
@@ -4444,26 +4442,10 @@ positionIcons();
 
 /* ══════════════════════════════════════
    POOL BUILDER
-   Builds the question pool from UNIVERSAL_SHORTCUTS
-   plus the loaded app-specific shortcuts JSON.
-   Filters by current OS, difficulty, keyboard, and browser.
+   Filters master SHORTCUTS list by the
+   selected app and current OS mode.
 ══════════════════════════════════════ */
-
-// Maps each app key to its JSON filename (no extension)
-const APP_JSON_FILENAME = {
-  Ps: 'shortcuts_photoshop',
-  Ai: 'shortcuts_illustrator',
-  In: 'shortcuts_inDesign',
-  Ae: 'shortcuts_afterEffects',
-  Fi: 'shortcuts_figma'
-};
-
-// The app key whose shortcuts are currently held in memory (null = nothing loaded yet)
-let loadedAppName      = null;
-// The shortcuts loaded from the current app's JSON file
-let loadedAppShortcuts = [];
-// Increments each time a load is requested, used to ignore stale fetch responses
-let loadSequenceNumber = 0;
+const APP_FIELD = {Ps:'ps', Ai:'ai', In:'indd', Ae:'ae', Fi:'fi'};
 
 // Codes that only exist on the extended keyboard (not on the graphical layout)
 const EXT_CODES = new Set(Object.keys(EXT_KEY_LABELS));
@@ -4474,51 +4456,16 @@ function requiresExtKey(shortcut) {
 }
 
 function buildPool() {
-  const browserSkip   = getBrowserConflictSet();
-  const allShortcuts  = UNIVERSAL_SHORTCUTS.concat(loadedAppShortcuts);
-  return allShortcuts.filter(s => {
+  const field        = APP_FIELD[currentApp] || 'ps';
+  const browserSkip  = getBrowserConflictSet();
+  return SHORTCUTS.filter(s => {
+    if (!s[field]) return false;
     if (!s.pc_safe && currentOs === 'pc') return false;
     if (s.difficulty > 3) return false;
     if ((touchEnabled || !hasFullKeyboard) && requiresExtKey(s.shortcut)) return false;
     if (browserSkip.has(s.shortcut)) return false;
     return true;
   });
-}
-
-// Loads the JSON for the given app key into memory, then calls onReady.
-// If the correct app is already loaded, calls onReady immediately.
-// The Cancel button must be disabled before calling this function.
-function loadAppShortcutsIfNeeded(appKey, onReady) {
-  if (loadedAppName === appKey) {
-    onReady();
-    return;
-  }
-
-  const thisLoadSequence = ++loadSequenceNumber;
-  const filename         = APP_JSON_FILENAME[appKey];
-
-  fetch('/data/' + filename + '.json')
-    .then(function(response) {
-      if (!response.ok) throw new Error('HTTP ' + response.status);
-      return response.json();
-    })
-    .then(function(shortcuts) {
-      // Only apply if no newer load has been requested since this one started
-      if (thisLoadSequence === loadSequenceNumber) {
-        loadedAppShortcuts = shortcuts;
-        loadedAppName      = appKey;
-      }
-      onReady();
-    })
-    .catch(function(error) {
-      console.warn('Could not load shortcuts for ' + appKey + ':', error);
-      // Fall back to universal shortcuts only rather than blocking the game
-      if (thisLoadSequence === loadSequenceNumber) {
-        loadedAppShortcuts = [];
-        loadedAppName      = appKey;
-      }
-      onReady();
-    });
 }
 function cancelCountdown() {
   if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
@@ -4538,21 +4485,15 @@ function cancelCountdown() {
 function beginCountdown() {
   // Prevent double-triggers during countdown
   if (_countdownTimer) return;
-  _countdownMode    = 'start';
-  gameState         = 'counting';
+  _countdownMode = 'start';
+  gameState = 'counting';
   mainBtn.textContent = 'Cancel';
-  mainBtn.disabled  = true;
-  helpBtn.disabled  = true;
-
-  showModeToast('Preparing shortcuts…');
-
-  loadAppShortcutsIfNeeded(currentApp, function() {
+  mainBtn.disabled = false;
+  helpBtn.disabled = true;
+  runCountdown(function() {
     mainBtn.disabled = false;
-    runCountdown(function() {
-      mainBtn.disabled = false;
-      helpBtn.disabled = false;
-      startGame();
-    });
+    helpBtn.disabled = false;
+    startGame();
   });
 }
 
