@@ -1,3 +1,10 @@
+<!-- ═══════════════════════════════════════════════════
+     BETA index.html — UI/UX experiment branch
+     Single test question (CMD+Z). Full SHORTCUTS data
+     and production logic lives in computer.html.
+     Do not deploy. Merge approved changes back manually.
+     ═══════════════════════════════════════════════════ -->
+<script>const DBG_DEVICE = 'comp1.001';</script>
 <!DOCTYPE html>
 <html>
 <head>
@@ -421,7 +428,7 @@ body {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 8px 60px 10px;
+  padding: 8px 60px 4px;
   position: relative;
   box-sizing: border-box;
   min-height: 37px;
@@ -604,22 +611,11 @@ body.pc-mode #extKeyPill {
 
 /* ── Keyboard modal shell ─────────────────────────────────────── */
 
-/* ── Modal dismiss X ──────────────────────────────────────────── */
-
-#kbModalInner {
-  width: 100%;
-  padding: 16px 22px;
-  box-sizing: border-box;
-  font-family: 'Lato', system-ui, sans-serif;
-  font-size: 13px;
-  color: #374151;
-  line-height: 1.5;
-}
 .modal-toggle-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   user-select: none;
 }
 .modal-toggle-row label {
@@ -636,7 +632,7 @@ body.pc-mode #extKeyPill {
   font-size: 13px;
   color: #374151;
 }
-.modal-section-gap { height: 8px; }
+.modal-section-gap { height: 4px; }
 .modal-section-title {
   font-size: 12px;
   font-weight: 700;
@@ -663,20 +659,137 @@ body.pc-mode #extKeyPill {
 .modal-radio-fill { opacity: 0; transition: opacity 0.15s ease; }
 .modal-radio.on .modal-radio-fill { opacity: 1; }
 
-@keyframes paperUnfurl {
-  0%   { opacity: 0; transform: perspective(800px) rotateX(22deg) scale(1.1); }
-  100% { opacity: 1; transform: perspective(800px) rotateX(0deg)  scale(1); }
+/* ══════════════════════════════════════
+   SETTINGS PANEL
+   Absolutely positioned inside #keyboardWrap, top-aligned.
+   As the keyboard tilts down it reveals this content above it.
+   Width/left aligned to keyboardPanel by JS.
+══════════════════════════════════════ */
+
+#settingsPanel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1; /* above bg, below keyboard 3D stage */
+  overflow: hidden;
 }
-@keyframes paperFurl {
-  /* Top edge rises toward the viewer first — rotateX negative tilts top forward */
-  0%   { opacity: 1; transform: perspective(800px) rotateX(0deg)   scale(1); }
-  100% { opacity: 0; transform: perspective(800px) rotateX(-20deg) scale(1.05); }
+
+#settingsPanelInner {
+  position: absolute;
+  top: 0;
+  /* left and width set by JS to match keyboardPanel */
+  padding: 0 0 8px;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.55;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity   0.3s ease 0.25s,
+    transform 0.3s ease 0.25s;
+  pointer-events: none;
 }
-@keyframes paperFurlFront {
-  /* Front modal dismiss: rises up and tilts bottom toward viewer */
-  0%   { opacity: 1; transform: perspective(800px) rotateX(0deg)   translateY(0)     scale(1); }
-  100% { opacity: 0; transform: perspective(800px) rotateX(14deg)  translateY(-24px) scale(0.97); }
+
+#settingsPanel.sp-open #settingsPanelInner {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
+
+/* ── Two-column grid ──────────────────────────────── */
+.sp-page {
+  display: none;
+  gap: 0;
+  width: 100%;
+}
+.sp-page.sp-active {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Gutter: a 1px line at the midpoint — centred above diffIcon */
+.sp-page.sp-active::after {
+  content: '';
+  position: absolute;
+  top: 16px;
+  bottom: 12px;
+  left: 50%;
+  width: 1px;
+  background: #e5e7eb;
+  pointer-events: none;
+}
+
+.sp-col {
+  min-width: 0;
+}
+.sp-col-left  { padding-right: 20px; }
+.sp-col-right { padding-left:  20px; }
+
+/* ── Typography ──────────────────────────────────── */
+.sp-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+  margin: 4px 0 5px 0;
+}
+.sp-body {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.6;
+  margin: 0 0 10px 0;
+}
+.sp-hint {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 8px;
+}
+.sp-key-chip {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  color: #1e3a5f;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  padding: 1px 4px 0;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+/* ── Browser conflict list ───────────────────────── */
+.sp-conflict-list {
+  margin: 0 0 8px 0;
+  padding-left: 0;
+  list-style: none;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.75;
+}
+.sp-conflict-list li {
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0;
+  line-height: 1.6;
+  cursor: pointer;
+}
+
+/* ── Page switch wipe animation ──────────────────── */
+@keyframes spWipeIn {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+@keyframes spWipeInLeft {
+  from { opacity: 0; transform: translateX(-18px); }
+  to   { opacity: 1; transform: translateX(0);     }
+}
+.sp-page.sp-wipe-in       { animation: spWipeIn     0.22s ease forwards; }
+.sp-page.sp-wipe-in-left  { animation: spWipeInLeft 0.22s ease forwards; }
+
 @keyframes btnPulse {
   0%   { transform: scale(1); }
   35%  { transform: scale(1.13); }
@@ -685,25 +798,6 @@ body.pc-mode #extKeyPill {
 }
 #mainBtn.pulse {
   animation: btnPulse 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-#kbModal {
-  position: fixed;
-  background: white;
-  border-radius: 0;
-  box-shadow:
-    0 6px 16px rgba(0,0,0,0.18),
-    0 18px 40px rgba(0,0,0,0.24);
-  z-index: 200;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-  overflow: hidden;
-  transform-origin: top center;
-}
-#kbModal.visible {
-  opacity: 1;
-  pointer-events: auto;
-  animation: paperUnfurl 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 
 
@@ -728,208 +822,6 @@ body.pc-mode #extKeyPill {
 #kbToast.show { opacity: 1; }
 #kbToast.warning { background: #f59e0b; }
 
-/* ══════════════════════════════════════
-   KEYBOARD WRAPPER
-══════════════════════════════════════ */
-#keyboardWrap {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin-top: 4px;
-  position: relative;
-}
-#kbIcon {
-  display: block;
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 0;
-  pointer-events: auto;
-  cursor: pointer;
-}
-@keyframes kbIconPulse {
-  0%   { transform: translateY(-50%) scale(1); }
-  40%  { transform: translateY(-50%) scale(1.22); }
-  100% { transform: translateY(-50%) scale(1); }
-}
-#kbIcon.pulse {
-  animation: kbIconPulse 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-#kbIcon:hover {
-  transform: translateY(-50%) scale(1.12);
-  transition: transform 0.18s ease;
-}
-#kbIcon.pulse:hover {
-  /* don't interfere with pulse animation */
-  transform: none;
-  transition: none;
-}
-
-
-/* ── Browser icon (mirrors kbIcon, right side) ─────────────────── */
-#browserIcon {
-  display: block;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 0;
-  pointer-events: auto;
-  cursor: pointer;
-}
-@keyframes browserIconPulse {
-  0%   { transform: translateY(-50%) scale(1); }
-  40%  { transform: translateY(-50%) scale(1.22); }
-  100% { transform: translateY(-50%) scale(1); }
-}
-#browserIcon.pulse {
-  animation: browserIconPulse 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-#browserIcon:hover {
-  transform: translateY(-50%) scale(1.12);
-  transition: transform 0.18s ease;
-}
-#browserIcon.pulse:hover {
-  transform: none;
-  transition: none;
-}
-
-/* ── Difficulty icon ───────────────────────────────── */
-/* ── Difficulty gauge icon ── */
-#diffIcon .gauge-stroke { fill:none; stroke:#9ca3af; stroke-width:2px; stroke-linecap:round; stroke-miterlimit:10; }
-#diffIcon #Needle { fill:#9ca3af; transform-origin:45px 50.9px; transition:transform 0.45s cubic-bezier(0.34,1.56,0.64,1); }
-#diffIconWrap {
-  display: flex;
-  justify-content: center;
-  margin-top: 4px;
-}
-#diffIcon {
-  display: block;
-  fill: #9ca3af;
-  cursor: pointer;
-  transition: transform 0.18s ease;
-}
-#diffIcon:hover { transform: scale(1.12); }
-
-/* ── Shared icon tooltip ───────────────────────────── */
-#iconTooltip {
-  position: fixed;
-  font-family: 'Lato', system-ui, sans-serif;
-  font-size: 11px;
-  color: #9ca3af;
-  text-align: center;
-  line-height: 1.4;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.18s ease;
-  z-index: 9000;
-  white-space: pre;
-}
-#iconTooltip.visible { opacity: 1; }
-
-/* ── Browser modal (same spec as kbModal) ──────────────────────── */
-#browserModal {
-  position: fixed;
-  background: white;
-  border-radius: 0;
-  box-shadow:
-    0 6px 16px rgba(0,0,0,0.18),
-    0 18px 40px rgba(0,0,0,0.24);
-  z-index: 200;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease, height 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
-  overflow: hidden;
-  transform-origin: top center;
-}
-#browserModal.visible {
-  opacity: 1;
-  pointer-events: auto;
-  animation: paperUnfurl 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
-}
-
-/* ── Modal dismiss X (shared style) ───────────────────────────── */
-.modal-dismiss-btn {
-  position: absolute;
-  top: 10px; right: 10px;
-  width: 24px; height: 24px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  color: #9ca3af;
-  font-size: 17px;
-  line-height: 1;
-  border: none; background: none; padding: 0;
-  z-index: 10;
-  transition: color 0.15s;
-}
-.modal-dismiss-btn:hover { color: #374151; }
-
-/* ── Browser modal inner content ──────────────────────────────── */
-#browserModalInner {
-  width: 100%;
-  padding: 16px 20px 18px;
-  box-sizing: border-box;
-  font-family: 'Lato', system-ui, sans-serif;
-  font-size: 12px;
-  color: #374151;
-  line-height: 1.55;
-}
-#browserModalInner .compat-heading {
-  font-size: 12px;
-  font-weight: 400;
-  color: #374151;
-  margin: 0 0 0 0;
-  padding-right: 24px;
-  line-height: 1.6;
-}
-#browserModalInner .compat-intro {
-  font-size: 12px;
-  color: #374151;
-  margin: 10px 0 8px;
-  line-height: 1.6;
-}
-
-#browserModalInner ul {
-  margin: 0 0 12px 0;
-  padding-left: 0;
-  list-style: none;
-  font-size: 12px;
-  color: #6b7280;
-  line-height: 1.75;
-}
-#browserModalInner ul li { margin-bottom: 2px; }
-/* Default conflict chip — flat, no fill, no shadow */
-.conflict-chip {
-  background: transparent;
-  box-shadow: none;
-}
-/* Dismissed row: chips "light up" as available; description struck through */
-li.conflict-dismissed .conflict-chip {
-  background: #f3f4f6;
-  box-shadow: 0 1.5px 0 #c9cdd3;
-}
-li.conflict-dismissed .conflict-desc {
-  text-decoration: line-through;
-  color: #c0c5cc;
-}
-#browserModalInner .compat-footer {
-  font-size: 12px;
-  color: #374151;
-  line-height: 1.6;
-  margin: 0;
-}
-#browserModalInner .compat-debug-hint {
-  font-size: 12px;
-  color: #374151;
-  line-height: 1.6;
-  margin: 0;
-}
-/* ══════════════════════════════════════
-   KEYBOARD PANEL
-   Outer: 14px → corner keys: 9px → base keys: 4px
-══════════════════════════════════════ */
-
 /* ── Difficulty toast — appears over the keyboard ── */
 #diffToast {
   position: absolute;
@@ -950,6 +842,7 @@ li.conflict-dismissed .conflict-desc {
   z-index: 20;
 }
 #diffToast.visible { opacity: 1; }
+
 /* ── Unified notification toast ─────────────────────────────────────────────
    position:fixed so it floats above everything including modals.
    JS positions it: centred above keyboard normally, or top-of-modal when
@@ -976,6 +869,87 @@ li.conflict-dismissed .conflict-desc {
   line-height: 1.4;
 }
 #kwToast.visible { opacity: 1; }
+
+/* ══════════════════════════════════════
+   KEYBOARD WRAPPER
+══════════════════════════════════════ */
+#keyboardWrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 0;
+  position: relative;
+  min-height: 282px;
+  transition: min-height 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#kbIcon {
+  display: block;
+  cursor: pointer;
+  fill: #9ca3af;
+  transition: fill 0.2s ease;
+}
+@keyframes kbIconPulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+#kbIcon.pulse {
+  animation: kbIconPulse 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+#kbIcon:hover {
+  transform: scale(1.12);
+  transition: transform 0.18s ease;
+}
+#kbIcon.pulse:hover {
+  transform: none;
+  transition: none;
+}
+
+
+/* ── Browser icon (mirrors kbIcon, right side) ─────────────────── */
+#browserIcon {
+  display: block;
+  cursor: pointer;
+  fill: #9ca3af;
+  transition: fill 0.2s ease;
+}
+@keyframes browserIconPulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+#browserIcon.pulse {
+  animation: browserIconPulse 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+#browserIcon:hover {
+  transform: scale(1.12);
+  transition: transform 0.18s ease;
+}
+#browserIcon.pulse:hover {
+  transform: none;
+  transition: none;
+}
+
+/* ── Browser modal inner content ──────────────────────────────── */
+/* Conflict chip and dismissed styles — still used in settings panel */
+.conflict-chip {
+  background: transparent;
+  box-shadow: none;
+}
+/* Dismissed row: chips "light up" as available; description struck through */
+li.conflict-dismissed .conflict-chip {
+  background: #f3f4f6;
+  box-shadow: 0 1.5px 0 #c9cdd3;
+}
+li.conflict-dismissed .conflict-desc {
+  text-decoration: line-through;
+  color: #c0c5cc;
+}
+/* ══════════════════════════════════════
+   KEYBOARD PANEL
+   Outer: 14px → corner keys: 9px → base keys: 4px
+══════════════════════════════════════ */
 #keyboardPanel {
   background: #b2b8c0;
   border-radius: 14px;
@@ -990,6 +964,7 @@ li.conflict-dismissed .conflict-desc {
 .kb-row {
   display: flex;
   gap: 4px;
+  position: relative;
 }
 
 /* Base key */
@@ -1347,8 +1322,6 @@ li.conflict-dismissed .conflict-desc {
 ══════════════════════════════════════ */
 @media (max-width: 599px) {
   #keyboardWrap { display: none; }
-  #kbIcon { display: none; }
-  #kbModal { display: none !important; }
 
   body { padding: 12px; }
 
@@ -1455,7 +1428,21 @@ li.conflict-dismissed .conflict-desc {
 }
 
 #osMismatchPill {
-  display: none; /* retired — notifications now use #kwToast */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f59e0b;
+  color: white;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 10;
 }
 #osMismatchPill.show { opacity: 1; }
 /* ══════════════════════════════════════
@@ -1714,12 +1701,159 @@ li.conflict-dismissed .conflict-desc {
 </div>
 
 <div id="keyboardWrap">
-  <div id="diffToast"></div>
-  <div id="kwToast"></div>
-  <svg id="kbIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;fill:#9ca3af;">
+  <div id="kbIconWrap">
+  <svg id="kbIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;">
     <path d="M98.6,32.4H11.4c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h87.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM99.9,65.9c0,.7-.6,1.3-1.3,1.3H11.4c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h87.2c.7,0,1.3.6,1.3,1.3v29.6ZM15.2,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM15.2,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM95.9,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM15.2,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM65.8,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM95.9,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM24.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM33,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.1,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM49.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM57.4,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM65.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM73.7,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM27.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM40.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM44.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM57.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM66.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM74.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM83.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM36.3,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM44.3,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM53.1,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM56.7,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.7,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.5,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM81.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.9,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM35.4,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM28.3,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM21.2,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM73.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM81,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM88.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM95.9,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/>
   </svg>
+  <span class="icon-tip">keyboard<br>settings</span>
+  </div>
+  <div id="settingsPanel" aria-hidden="true">
+    <div id="settingsPanelInner">
+
+    <!-- ── Browser Settings ─────────────────────────────── -->
+    <div id="spBrowser" class="sp-page">
+      <div class="sp-col sp-col-left">
+        <p class="sp-body" id="browserCompatHeading"></p>
+        <p class="sp-body" id="browserCompatIntro"></p>
+        <p class="sp-body" id="browserCompatFooter"></p>
+      </div>
+      <div class="sp-col sp-col-right">
+        <ul id="browserCompatList" class="sp-conflict-list"></ul>
+        <p class="sp-body sp-hint">If you encounter an error, hold down
+          <span class="sp-key-chip">Esc</span>
+          to open the debug window and send a report.</p>
+      </div>
+    </div>
+
+    <!-- ── Pause Screen ──────────────────────────────── -->
+    <div id="spPause" class="sp-page">
+      <div class="sp-col sp-col-left">
+        <p class="sp-body"><strong>Your game is paused.</strong></p>
+      </div>
+      <div class="sp-col sp-col-right">
+        <p class="sp-body"><strong>Privacy statement:</strong></p>
+        <p class="sp-body"><em>Digital produce that thinks local.</em></p>
+        <p class="sp-body">Made for you, and stored with you, 'Keyboard Warriors' runs entirely on your device using local memory. No clouds, no crumbs.</p>
+      </div>
+    </div>
+
+    <!-- ── Difficulty Settings ──────────────────────────── -->
+    <div id="spDifficulty" class="sp-page">
+      <div class="sp-col sp-col-left">
+        <p class="sp-title">Difficulty</p>
+        <p class="sp-body">Coming soon: Fundamentals &amp; Hardcore modes.</p>
+      </div>
+      <div class="sp-col sp-col-right"></div>
+    </div>
+
+    <!-- ── Keyboard Settings ────────────────────────────── -->
+    <div id="spKeyboard" class="sp-page">
+      <div class="sp-col sp-col-left">
+        <p class="sp-title">Keyboard Behaviour</p>
+
+        <div class="modal-toggle-row" id="touchRow">
+          <label onclick="onTouchToggle()">
+            <span class="modal-radio" id="touchRadio">
+              <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
+                <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
+              </svg>
+            </span>
+            <span class="modal-toggle-label">Touch Enabled (soft keys)</span>
+          </label>
+        </div>
+
+        <div style="display:flex;gap:20px;align-items:center;margin-bottom:6px;">
+          <div class="modal-toggle-row" id="stickyRow" style="margin-bottom:0;">
+            <label onclick="onStickyKeysToggle()">
+              <span class="modal-radio" id="stickyRadio">
+                <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
+                  <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
+                </svg>
+              </span>
+              <span class="modal-toggle-label">Sticky Keys</span>
+            </label>
+          </div>
+          <div class="modal-toggle-row disabled" id="audibleRow" style="margin-bottom:0;">
+            <label onclick="onAudibleToggle()">
+              <span class="modal-radio" id="audibleRadio">
+                <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
+                  <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
+                </svg>
+              </span>
+              <span class="modal-toggle-label">Audible</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-section-gap"></div>
+        <p class="sp-title">Keyboard Layout</p>
+
+        <div class="modal-layout-rows">
+          <div class="modal-inline-row">
+            <div class="modal-left-label"><span>3</span></div>
+            <div class="modal-switch-wrap">
+              <label class="os-switch" title="Keys left of space" style="cursor:pointer;">
+                <input type="checkbox" id="modalOsToggle" onchange="onModalOsToggle()">
+                <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect id="modalOsTrackRect" x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+                  <circle id="modalOsKnobEl" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
+                          style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
+                </svg>
+              </label>
+            </div>
+            <div class="modal-right-label"><span class="modal-inline-val">4</span>&ensp;<span class="modal-inline-label">keys to the left of spacebar</span></div>
+          </div>
+          <div class="modal-inline-row" id="modalFnRow">
+            <div class="modal-left-label"><span id="modalFnLabelLeft"></span></div>
+            <div class="modal-switch-wrap">
+              <label class="os-switch" title="Leftmost key" style="cursor:pointer;">
+                <input type="checkbox" id="modalFnToggle" onchange="onModalFnToggle()">
+                <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+                  <circle id="modalFnKnobEl" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
+                          style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
+                </svg>
+              </label>
+            </div>
+            <div class="modal-right-label"><span id="modalFnLabelRight" class="modal-inline-val"></span>&ensp;<span class="modal-inline-label">is the leftmost key</span></div>
+          </div>
+        </div>
+      </div><!-- /.sp-col-left -->
+
+      <div class="sp-col sp-col-right">
+        <div id="modalKbSizeSection">
+          <p class="sp-body">The on-screen display shows a compact keyboard, but the game also accepts input from full-sized keyboards with their extended keys.</p>
+          <p class="sp-body">Don&#8217;t have a full-sized keyboard? Let us know so we won&#8217;t ask you any impossible questions:</p>
+          <div class="modal-kbsize-row" id="modalKbSizeRow">
+            <div class="modal-left-label"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 167 101.8" style="width:66px;height:auto;fill:#9ca3af;flex-shrink:0;"><path d="M142.1,32.4H24.9c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h117.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM143.4,65.9c0,.7-.6,1.3-1.3,1.3H24.9c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h117.2c.7,0,1.3.6,1.3,1.3v29.6ZM28.7,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM28.7,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM109.4,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM28.7,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM79.3,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM109.4,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM38.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM46.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM54.6,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM62.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.9,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM79,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM87.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.3,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM54.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM58.3,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM71.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM88.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM96.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM49.8,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM57.8,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM66.6,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM70.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM84.2,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM93,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM118.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM109.4,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM118.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM118.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM118.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM48.9,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM41.8,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM34.7,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM87,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM94.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM102,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM109.4,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/></svg></div>
+            <div class="modal-switch-wrap">
+              <label class="os-switch" title="Keyboard size" style="cursor:pointer;">
+                <input type="checkbox" id="modalKbSizeToggle" onchange="onKbSizeToggle()">
+                <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+                  <circle id="modalKbSizeKnob" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
+                          style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
+                </svg>
+              </label>
+            </div>
+            <div class="modal-right-label"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;fill:#9ca3af;"><path d="M98.6,32.4H11.4c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h87.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM99.9,65.9c0,.7-.6,1.3-1.3,1.3H11.4c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h87.2c.7,0,1.3.6,1.3,1.3v29.6ZM15.2,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM15.2,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM95.9,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM15.2,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM65.8,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM95.9,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM24.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM33,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.1,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM49.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM57.4,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM65.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM73.7,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM27.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM40.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM44.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM57.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM66.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM74.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM83.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM36.3,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM44.3,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM53.1,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM56.7,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.7,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.5,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM81.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.9,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM35.4,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM28.3,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM21.2,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM73.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM81,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM88.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM95.9,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/></svg></div>
+          </div>
+        </div><!-- /#modalKbSizeSection -->
+      </div><!-- /.sp-col-right -->
+    </div><!-- /#spKeyboard -->
+
+  </div><!-- /#settingsPanelInner -->
+  </div><!-- /#settingsPanel -->
+  <div id="kbFlipStage">
   <div id="keyboardPanel">
+    <div id="kb-slab-back"></div>
+    <div id="kb-shadow"></div>
+    <div id="kb-wall-top"></div>
+    <div id="kb-wall-bottom"></div>
+    <div id="kb-base-edge"></div>
     <div class="kb-row" id="row-fn"></div>
     <div class="kb-row" id="row-num"></div>
     <div class="kb-row" id="row-q"></div>
@@ -1727,7 +1861,9 @@ li.conflict-dismissed .conflict-desc {
     <div class="kb-row" id="row-z"></div>
     <div class="kb-row" id="row-bot"></div>
   </div>
-  <svg id="browserIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 86 64.1" style="width:44px;height:auto;fill:#9ca3af;" cursor="pointer">
+  </div>
+  <div id="brIconWrap">
+  <svg id="browserIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 86 64.1" style="width:44px;height:auto;" cursor="pointer">
     <g>
     <path d="M7,11.7v42c0,2.2,1.8,4,4,4h63c2.2,0,4-1.8,4-4V11.7c0-2.2-1.8-4-4-4H11c-2.2,0-4,1.8-4,4ZM9,19.7h67v34c0,1.1-.9,2-2,2H11c-1.1,0-2-.9-2-2V19.7ZM9,11.7c0-1.1.9-2,2-2h63c1.1,0,2,.9,2,2v6H9v-6Z"/>
     <circle cx="19.3" cy="13.7" r="2"/>
@@ -1736,6 +1872,8 @@ li.conflict-dismissed .conflict-desc {
   </g>
   <path d="M42.5,23.4c-6,0-11.4,2.1-14.9,5.4h0c0,0-.1.1-.2.2-2.4,2.3-3.8,5.2-3.8,8.4s1.4,6,3.8,8.4c0,0,0,.1.2.2,3.4,3.3,8.8,5.4,14.9,5.4s11.4-2.1,14.9-5.4h0c0,0,.1-.1.2-.2,0,0,0,0,0,0,2.4-2.3,3.8-5.2,3.8-8.4s-1.4-6-3.8-8.4c0,0-.1-.1-.2-.2-3.4-3.3-8.8-5.4-14.9-5.4h0ZM41.3,25.3v5.4c-1.9,0-3.7-.2-5.4-.4.3-.6.7-1.2,1-1.7,1.3-1.7,2.8-2.8,4.4-3.2h0ZM43.7,25.3c1.6.4,3.1,1.5,4.4,3.2.4.5.7,1.1,1.1,1.7-1.7.2-3.5.4-5.4.4v-5.3ZM49,26.2c2.1.7,4,1.7,5.5,2.9-.9.3-1.9.5-2.9.8-.4-.8-.8-1.5-1.3-2.2-.4-.5-.8-1-1.3-1.5h0ZM36,26.2c-.5.4-.9.9-1.2,1.5-.5.7-.9,1.4-1.3,2.2-1.1-.2-2.1-.5-2.9-.8,1.5-1.2,3.4-2.2,5.5-2.9h0ZM28.9,30.6c1.1.4,2.4.8,3.8,1-.5,1.5-.8,3.1-.9,4.8h-5.6c.2-2.1,1.2-4.1,2.7-5.8h0ZM56.1,30.6c1.5,1.7,2.5,3.7,2.7,5.8h-5.6c0-1.7-.4-3.3-.9-4.8,1.4-.3,2.7-.6,3.8-1h0ZM35.1,32c1.9.3,4,.4,6.1.5v3.9h-7c0-1.5.4-3,.8-4.3h0ZM49.9,32c.4,1.3.7,2.8.8,4.3h-7v-3.9c2.2,0,4.2-.2,6.1-.5h0ZM26.2,38.2h5.6c0,1.7.4,3.3.9,4.8-1.4.3-2.7.6-3.8,1-1.5-1.7-2.5-3.7-2.7-5.8h0ZM34.3,38.2h7v3.9c-2.2,0-4.2.2-6.1.5-.4-1.3-.7-2.8-.8-4.3h0ZM43.7,38.2h7c0,1.5-.4,3-.8,4.3-1.9-.3-4-.4-6.1-.5v-3.9ZM53.2,38.2h5.6c-.2,2.1-1.2,4.1-2.7,5.8-1.1-.4-2.4-.8-3.8-1,.5-1.5.8-3.1.9-4.8h0ZM41.3,43.9v5.4c-1.6-.4-3.1-1.4-4.4-3.2-.4-.5-.7-1.1-1.1-1.7,1.7-.2,3.5-.4,5.4-.4h0ZM43.7,43.9c1.9,0,3.7.2,5.4.4-.3.6-.7,1.2-1.1,1.7-1.3,1.7-2.8,2.8-4.4,3.2v-5.3ZM33.4,44.7c.4.8.8,1.5,1.3,2.2.4.5.8,1,1.2,1.5-2.1-.7-4-1.7-5.5-2.9.9-.3,1.9-.5,2.9-.8h0ZM51.6,44.7c1.1.2,2.1.5,2.9.8-1.5,1.2-3.4,2.2-5.5,2.9.5-.4.9-.9,1.3-1.5.5-.7.9-1.4,1.3-2.2h0Z"/>
   </svg>
+  <span class="icon-tip">browser<br>settings</span>
+  </div>
 </div>
 
 <div id="debugOverlay" style="position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;border-radius:8px;z-index:9999;pointer-events:auto;line-height:1.5;display:none;flex-direction:row;gap:0;align-items:flex-start;overflow:hidden;max-height:800px;transition:max-height 0.2s ease,border-radius 0.2s ease;" aria-hidden="true">
@@ -1791,9 +1929,15 @@ li.conflict-dismissed .conflict-desc {
     </div>
   </div>
 </div>
+
 <p id="credit">Built for learners. This digital toy was created by Wednesday Dessauer as open-source &amp; free to adapt under <small>GNU GPL v3.0</small></p>
+
 <div id="diffIconWrap">
   <svg id="diffIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90" style="width:44px;height:auto;" cursor="pointer">
+    <style>
+      #diffIcon .gauge-stroke { fill:none; stroke:#9ca3af; stroke-width:2px; stroke-linecap:round; stroke-miterlimit:10; }
+      #diffIcon #Needle { fill:#9ca3af; transform-origin:45px 50.9px; transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+    </style>
     <g id="DiffStatic">
       <g id="notches">
         <line class="gauge-stroke" x1="44.7" y1="24.1" x2="44.7" y2="19.8"/>
@@ -1814,384 +1958,30 @@ li.conflict-dismissed .conflict-desc {
       </g>
       <path class="gauge-stroke" d="M11.9,59.9c-.8-2.9-1.2-5.9-1.2-9,0-18.9,15.3-34.3,34.3-34.3s34.3,15.3,34.3,34.3-.4,5.9-1.1,8.6"/>
     </g>
-    <g id="Needle" style="transform:rotate(0deg)">
+    <g id="Needle" style="transform:rotate(-60deg)">
       <path class="gauge-stroke" d="M50.1,40.4c3.9,1.9,6.5,5.9,6.5,10.5s-5.2,11.7-11.7,11.7-11.7-5.2-11.7-11.7,2.6-8.5,6.5-10.5"/>
       <path d="M46.9,45.1l-1.1-16.9c0-1.2-1.8-1.2-1.9,0l-1.1,17c0,.8-.4,1.6-1,2.1-1.1,1-1.8,2.6-1.4,4.4s1.8,3.3,3.6,3.6c3,.6,5.7-1.7,5.7-4.6s-.7-2.8-1.8-3.7-.9-1.2-1-2ZM44.2,54.4c-1.3-.3-2.4-1.2-2.8-2.5s-.1-2.2.4-3c0,0,0,0,0-.1,0-.1.2-.3.3-.4,0,0,.1-.1.2-.2,0,0,0-.1.2-.2h0c.6-.5,1.4-.8,2.3-.8s1.5.2,2.1.7h0c1,.6,1.6,1.7,1.6,3,0,2.3-2.1,4.1-4.4,3.6Z"/>
       <circle cx="45" cy="50.9" r="2.7"/>
     </g>
   </svg>
+  <span class="icon-tip">difficulty<br>settings</span>
 </div>
 
-<div id="iconTooltip"></div>
-
+<div id="diffToast"></div>
+<div id="kwToast"></div>
 
 <script>
 /* ══════════════════════════════════════
-   SHORTCUTS — generated from shortcuts_final.csv
+   UNIVERSAL_SHORTCUTS — shortcuts that apply to all apps,
+   always included in the question pool regardless of
+   which app is selected. Loaded from this file directly.
    Fields: shortcut, display, mac_sc, pc_sc,
-           pc_safe, ps, ai, indd, ae, fi
+           pc_safe, difficulty, group
 ══════════════════════════════════════ */
-const SHORTCUTS = [
-  {shortcut:"CMD+1",display:"View at 100% zoom",mac_sc:"⌘ 1",pc_sc:"—",pc_safe:false,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+2",display:"View at 200% zoom",mac_sc:"⌘ 2",pc_sc:"—",pc_safe:false,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+4",display:"View at 400% zoom",mac_sc:"⌘ 4",pc_sc:"—",pc_safe:false,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"V",display:"Switch to the Selection tool",mac_sc:"V",pc_sc:"V",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"A",display:"Switch to the Direct Selection tool",mac_sc:"A",pc_sc:"A",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"P",display:"Pick up the Pen tool",mac_sc:"P",pc_sc:"P",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"B",display:"Pick up the Brush tool",mac_sc:"B",pc_sc:"B",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"E",display:"Grab the Eraser tool",mac_sc:"E",pc_sc:"E",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"E",display:"Switch to the Free Transform tool",mac_sc:"E",pc_sc:"E",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"T",display:"Switch to the Type tool",mac_sc:"T",pc_sc:"T",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"L",display:"Switch to the Ellipse tool",mac_sc:"L",pc_sc:"L",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"L",display:"Switch to the Lasso tool",mac_sc:"L",pc_sc:"L",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"L",display:"Switch to the Line tool",mac_sc:"L",pc_sc:"L",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"O",display:"Switch to the Ellipse tool",mac_sc:"O",pc_sc:"O",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"M",display:"Switch to the Rectangle tool",mac_sc:"M",pc_sc:"M",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"M",display:"Switch to the Rectangular Marquee tool",mac_sc:"M",pc_sc:"M",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"I",display:"Pick up the Eyedropper",mac_sc:"I",pc_sc:"I",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"Z",display:"Pick up the Magnifying Glass",mac_sc:"Z",pc_sc:"Z",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"C",display:"Switch to the Crop tool",mac_sc:"C",pc_sc:"C",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"C",display:"Switch to the Scissors tool",mac_sc:"C",pc_sc:"C",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"C",display:"Select the Comment tool",mac_sc:"C",pc_sc:"C",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"G",display:"Switch to the Gradient tool",mac_sc:"G",pc_sc:"G",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"H",display:"Select the Hand tool",mac_sc:"H",pc_sc:"H",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"K",display:"Pick up the Paint Bucket tool",mac_sc:"K",pc_sc:"K",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"K",display:"Jump to the next keyframe or marker",mac_sc:"K",pc_sc:"K",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"R",display:"Switch to the Rotate tool",mac_sc:"R",pc_sc:"R",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"R",display:"Select the Rotate View tool",mac_sc:"R",pc_sc:"R",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"R",display:"Reveal Rotation property on selected layer",mac_sc:"R",pc_sc:"R",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"S",display:"Switch to the Scale tool",mac_sc:"S",pc_sc:"S",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"S",display:"Switch to the Clone Stamp tool",mac_sc:"S",pc_sc:"S",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"S",display:"Reveal Scale property on selected layer",mac_sc:"S",pc_sc:"S",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"W",display:"Switch to the Magic Wand / Object Selection tool",mac_sc:"W",pc_sc:"W",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"W",display:"Switch to the Warp tool",mac_sc:"W",pc_sc:"W",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"W",display:"Toggle Preview mode",mac_sc:"W",pc_sc:"W",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"N",display:"Pick up the Pencil tool",mac_sc:"N",pc_sc:"N",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"N",display:"Set work area Out point to current time",mac_sc:"N",pc_sc:"N",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"F",display:"Switch to the Frame tool",mac_sc:"F",pc_sc:"F",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"F",display:"Cycle through the screen modes",mac_sc:"F",pc_sc:"F",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"D",display:"Reset colours to black & white",mac_sc:"D",pc_sc:"D",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"X",display:"Swap the foreground & background colours",mac_sc:"X",pc_sc:"X",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"J",display:"Jump to the previous keyframe or marker",mac_sc:"J",pc_sc:"J",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"U",display:"Reveal all keyframed properties on selected layer",mac_sc:"U",pc_sc:"U",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"I",display:"Move the playhead to the In point of the selected layer",mac_sc:"I",pc_sc:"I",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"O",display:"Move the playhead to the Out point of the selected layer",mac_sc:"O",pc_sc:"O",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"B",display:"Set the work area In point to the current time",mac_sc:"B",pc_sc:"B",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"P",display:"Reveal Position property on selected layer",mac_sc:"P",pc_sc:"P",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"T",display:"Reveal Opacity property on selected layer",mac_sc:"T",pc_sc:"T",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"A",display:"Reveal Anchor Point property on selected layer",mac_sc:"A",pc_sc:"A",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"E",display:"Reveal Effects on selected layer",mac_sc:"E",pc_sc:"E",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SPACE",display:"Hold to temporarily activate the Hand tool and pan",mac_sc:"Space",pc_sc:"Space",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"SHIFT",display:"Hold to constrain proportions while transforming",mac_sc:"⇧ Shift",pc_sc:"⇧ Shift",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"SHIFT",display:"Hold to add to an active selection",mac_sc:"⇧ Shift",pc_sc:"⇧ Shift",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"OPTION",display:"Hold to transform from the centre outward",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"OPTION",display:"Hold to subtract from an active selection",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"TAB",display:"Hide or show all panels",mac_sc:"Tab",pc_sc:"Tab",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+=",display:"Zoom in",mac_sc:"⌘ =",pc_sc:"Ctrl =",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+-",display:"Zoom out",mac_sc:"⌘ -",pc_sc:"Ctrl -",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+0",display:"Fit the page to your screen",mac_sc:"⌘ 0",pc_sc:"Ctrl 0",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+;",display:"Show or hide guides",mac_sc:"⌘ ;",pc_sc:"Ctrl ;",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+OPTION+;",display:"Lock or unlock all guides",mac_sc:"⌘ ⌥ ;",pc_sc:"Ctrl Alt ;",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+U",display:"Show or hide smart guides",mac_sc:"⌘ U",pc_sc:"Ctrl U",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+U",display:"Open the Hue / Saturation adjustment",mac_sc:"⌘ U",pc_sc:"Ctrl U",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+Y",display:"Toggle Preview / Outline view",mac_sc:"⌘ Y",pc_sc:"Ctrl Y",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+Y",display:"Toggle Pixel Preview",mac_sc:"⌘ ⌥ Y",pc_sc:"Ctrl Alt Y",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+'",display:"Show or hide the grid",mac_sc:"⌘ ⌥ U",pc_sc:"Ctrl Alt U",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+H",display:"Hide or show Extras (non-printing items)",mac_sc:"⌘ ⇧ H",pc_sc:"Ctrl ⇧ H",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+H",display:"Fit content to screen",mac_sc:"⌘ ⇧ H",pc_sc:"Ctrl ⇧ H",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+I",display:"Show or hide non-printing characters",mac_sc:"⌘ ⌥ I",pc_sc:"Ctrl Alt I",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+I",display:"Open the Image Size dialog",mac_sc:"⌘ ⌥ I",pc_sc:"Ctrl Alt I",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+G",display:"Group selected objects",mac_sc:"⌘ G",pc_sc:"Ctrl G",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+SHIFT+G",display:"Ungroup selected objects",mac_sc:"⌘ ⇧ G",pc_sc:"Ctrl ⇧ G",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+]",display:"Raise object one level in the stack",mac_sc:"⌘ ]",pc_sc:"Ctrl ]",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+[",display:"Lower object one level in the stack",mac_sc:"⌘ [",pc_sc:"Ctrl [",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+D",display:"Duplicate the selection",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+D",display:"Transform Again",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+D",display:"Place",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+D",display:"Deselect all pixels",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,difficulty:1,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+A",display:"Deselect all",mac_sc:"⌘ ⇧ A",pc_sc:"Ctrl ⇧ A",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+OPTION+2",display:"Unlock all locked objects in current layer",mac_sc:"⌘ ⌥ 2",pc_sc:"Ctrl Alt 2",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+3",display:"Unhide everything",mac_sc:"⌘ ⌥ 3",pc_sc:"Ctrl Alt 3",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+J",display:"Copy to new layer",mac_sc:"⌘ J",pc_sc:"Ctrl J",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+J",display:"Join selected paths",mac_sc:"⌘ J",pc_sc:"Ctrl J",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+G",display:"Group the selection into a Frame",mac_sc:"⌘ ⌥ G",pc_sc:"Ctrl Alt G",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+E",display:"Merge layers",mac_sc:"⌘ E",pc_sc:"Ctrl E",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+E",display:"Flatten the selection",mac_sc:"⌘ E",pc_sc:"Ctrl E",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+I",display:"Invert the selection",mac_sc:"⌘ ⇧ I",pc_sc:"Ctrl ⇧ I",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+I",display:"Invert image",mac_sc:"⌘ I",pc_sc:"Ctrl I",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+A",display:"Select all objects on the active layer",mac_sc:"⌘ ⌥ A",pc_sc:"Ctrl Alt A",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT+A",display:"Add Auto Layout",mac_sc:"⇧ A",pc_sc:"⇧ A",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+B",display:"Paste in Back",mac_sc:"⌘ B",pc_sc:"Ctrl B",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+B",display:"Make a Blend",mac_sc:"⌘ ⌥ B",pc_sc:"Ctrl Alt B",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+8",display:"Release a Compound Path",mac_sc:"⌘ ⌥ 8",pc_sc:"Ctrl Alt 8",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+C",display:"Open the Canvas Size dialog",mac_sc:"⌘ ⌥ C",pc_sc:"Ctrl Alt C",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+B",display:"Open the Colour Balance adjustment",mac_sc:"⌘ B",pc_sc:"Ctrl B",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+U",display:"Desaturate (convert to greyscale tones)",mac_sc:"⌘ ⇧ U",pc_sc:"Ctrl ⇧ U",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+F",display:"Fade the last filter or adjustment",mac_sc:"⌘ ⇧ F",pc_sc:"Ctrl ⇧ F",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+E",display:"Merge all visible layers",mac_sc:"⌘ ⇧ E",pc_sc:"Ctrl ⇧ E",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+E",display:"Make a document snapshot layer",mac_sc:"⌘ ⌥ E",pc_sc:"Ctrl Alt E",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+D",display:"Split the selected layer at the playhead",mac_sc:"⌘ ⇧ D",pc_sc:"Ctrl ⇧ D",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+>",display:"Increase font size",mac_sc:"⌘ ⇧ >",pc_sc:"Ctrl ⇧ >",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+<",display:"Decrease font size",mac_sc:"⌘ ⇧ <",pc_sc:"Ctrl ⇧ <",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+L",display:"Align text left",mac_sc:"⌘ ⇧ L",pc_sc:"Ctrl ⇧ L",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+C",display:"Align text to centre",mac_sc:"⌘ ⇧ C",pc_sc:"Ctrl ⇧ C",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"OPTION+ARROWLEFT",display:"Decrease kerning or tracking",mac_sc:"⌥ ←",pc_sc:"Alt ←",pc_safe:false,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"OPTION+ARROWRIGHT",display:"Increase kerning or tracking",mac_sc:"⌥ →",pc_sc:"Alt →",pc_safe:false,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"OPTION+ARROWUP",display:"Decrease leading",mac_sc:"⌥ ↑",pc_sc:"Alt ↑",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"OPTION+ARROWDOWN",display:"Increase leading",mac_sc:"⌥ ↓",pc_sc:"Alt ↓",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+P",display:"Place a file",mac_sc:"⌘ ⇧ P",pc_sc:"Ctrl ⇧ P",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"ARROWLEFT",display:"Move back 1 frame",mac_sc:"←",pc_sc:"←",pc_safe:true,difficulty:1,group:"nudge",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"ARROWRIGHT",display:"Move forward 1 frame",mac_sc:"→",pc_sc:"→",pc_safe:true,difficulty:1,group:"nudge",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+ARROWLEFT",display:"Move back 10 frames",mac_sc:"⇧ ←",pc_sc:"⇧ ←",pc_safe:true,difficulty:1,group:"nudge",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+ARROWRIGHT",display:"Move forward 10 frames",mac_sc:"⇧ →",pc_sc:"⇧ →",pc_safe:true,difficulty:1,group:"nudge",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"HOME",display:"Move the playhead to the start of the composition",mac_sc:"Home",pc_sc:"Home",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"END",display:"Move the playhead to the end of the composition",mac_sc:"End",pc_sc:"End",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"[",display:"Trim layer In-point to the current time",mac_sc:"[",pc_sc:"[",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"]",display:"Trim layer Out-point to the current time",mac_sc:"]",pc_sc:"]",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+[",display:"Set layer In-point to the current time",mac_sc:"⌥ [",pc_sc:"Alt [",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+]",display:"Set layer Out-point to the current time",mac_sc:"⌥ ]",pc_sc:"Alt ]",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+ARROWUP",display:"Select the layer above in the timeline",mac_sc:"⌘ ↑",pc_sc:"Ctrl ↑",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+ARROWDOWN",display:"Select the layer below in the timeline",mac_sc:"⌘ ↓",pc_sc:"Ctrl ↓",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+C",display:"Pre-compose selected layers",mac_sc:"⌘ ⇧ C",pc_sc:"Ctrl ⇧ C",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+F",display:"Scale footage to fit the composition",mac_sc:"⌘ ⌥ F",pc_sc:"Ctrl Alt F",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+F",display:"Scale and crop footage to fill the composition",mac_sc:"⌘ ⇧ ⌥ F",pc_sc:"Ctrl ⇧ Alt F",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+SHIFT+P",display:"Add or remove a Position keyframe",mac_sc:"⌥ ⇧ P",pc_sc:"Alt ⇧ P",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+SHIFT+S",display:"Add or remove a Scale keyframe",mac_sc:"⌥ ⇧ S",pc_sc:"Alt ⇧ S",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+SHIFT+R",display:"Add or remove a Rotation keyframe",mac_sc:"⌥ ⇧ R",pc_sc:"Alt ⇧ R",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+SHIFT+T",display:"Add or remove an Opacity keyframe",mac_sc:"⌥ ⇧ T",pc_sc:"Alt ⇧ T",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+K",display:"Open Composition Settings",mac_sc:"⌘ K",pc_sc:"Ctrl K",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+K",display:"Open Layer Settings",mac_sc:"⌘ ⇧ K",pc_sc:"Ctrl ⇧ K",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:",",display:"Zoom out in the composition viewer",mac_sc:",",pc_sc:",",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:".",display:"Zoom in in the composition viewer",mac_sc:".",pc_sc:".",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"ARROWLEFT",display:"Nudge selection 1px to the left",mac_sc:"←",pc_sc:"←",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"ARROWRIGHT",display:"Nudge selection 1px to the right",mac_sc:"→",pc_sc:"→",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"ARROWUP",display:"Nudge selection 1px upward",mac_sc:"↑",pc_sc:"↑",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"ARROWDOWN",display:"Nudge selection 1px downward",mac_sc:"↓",pc_sc:"↓",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"SHIFT+ARROWLEFT",display:"Nudge selection 10px to the left",mac_sc:"⇧ ←",pc_sc:"⇧ ←",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"SHIFT+ARROWRIGHT",display:"Nudge selection 10px to the right",mac_sc:"⇧ →",pc_sc:"⇧ →",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"SHIFT+ARROWUP",display:"Nudge selection 10px upward",mac_sc:"⇧ ↑",pc_sc:"⇧ ↑",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"SHIFT+ARROWDOWN",display:"Nudge selection 10px downward",mac_sc:"⇧ ↓",pc_sc:"⇧ ↓",pc_safe:true,difficulty:1,group:"nudge",ps:true,ai:true,indd:true,ae:false,fi:true},
-  {shortcut:"CMD+/",display:"Open Quick Actions search",mac_sc:"⌘ /",pc_sc:"Ctrl /",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"X",display:"Swap the fill & stroke colours",mac_sc:"X",pc_sc:"X",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+B",display:"Switch to the Blob Brush tool",mac_sc:"⇧ B",pc_sc:"⇧ B",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+T",display:"Switch to the Type tool",mac_sc:"⌘ T",pc_sc:"Ctrl T",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+K",display:"Create a Component",mac_sc:"⌘ ⌥ K",pc_sc:"Ctrl Alt K",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+B",display:"Detach Instance",mac_sc:"⌘ ⌥ B",pc_sc:"Ctrl Alt B",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+/",display:"Swap Instance",mac_sc:"⌘ ⌥ /",pc_sc:"Ctrl Alt /",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+C",display:"Copy Properties",mac_sc:"⌘ ⌥ C",pc_sc:"Ctrl Alt C",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+V",display:"Paste Properties",mac_sc:"⌘ ⌥ V",pc_sc:"Ctrl Alt V",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"N",display:"Zoom to Next Frame",mac_sc:"N",pc_sc:"N",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+N",display:"Zoom to Previous Frame",mac_sc:"⇧ N",pc_sc:"⇧ N",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"]",display:"Send Layer to Front",mac_sc:"]",pc_sc:"]",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"[",display:"Send Layer to Back",mac_sc:"[",pc_sc:"[",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"ENTER",display:"Dive into group (select Child)",mac_sc:"⏎ Enter",pc_sc:"Enter",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+ENTER",display:"Select Parent Container",mac_sc:"⇧ ⏎",pc_sc:"⇧ Enter",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"[",display:"Decrease brush size",mac_sc:"[",pc_sc:"[",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"]",display:"Increase brush size",mac_sc:"]",pc_sc:"]",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT+[",display:"Decrease brush hardness",mac_sc:"⇧ [",pc_sc:"⇧ [",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT+]",display:"Increase brush hardness",mac_sc:"⇧ ]",pc_sc:"⇧ ]",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+R",display:"Open Select & Mask",mac_sc:"⌘ ⌥ R",pc_sc:"Ctrl Alt R",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+N",display:"Create and setup a new layer (opens dialogue box)",mac_sc:"⌘ ⇧ N",pc_sc:"Ctrl ⇧ N",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+G",display:"Create or release a clipping path",mac_sc:"⌘ ⌥ G",pc_sc:"Ctrl Alt G",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+T",display:"Transform the selection",mac_sc:"⌘ T",pc_sc:"Ctrl T",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+K",display:"Open the Keyboard Shortcuts visual editor",mac_sc:"⌘ ⇧ ⌥ K",pc_sc:"Ctrl ⇧ Alt K",pc_safe:true,difficulty:5,group:"",ps:true,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+A",display:"Select all the layers except the background",mac_sc:"⌘ ⌥ A",pc_sc:"Ctrl Alt A",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"OPTION",display:"Hold this and click layer eye to toggle other layers' visibility",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"BACKSLASH",display:"Toggle red layer mask overlay view",mac_sc:"\\",pc_sc:"\\",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+B",display:"Open the black & white adjustment",mac_sc:"⌘ ⇧ ⌥ B",pc_sc:"Ctrl ⇧ Alt B",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD",display:"Hold this and click layer thumbnail to select the pixels",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"OPTION",display:"Hold this while you drag to duplicate",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,difficulty:3,group:"",ps:true,ai:true,indd:true,ae:true,fi:true},
-  {shortcut:"CMD+SPACE",display:"Hold these and drag left-right to quick zoom",mac_sc:"⌘ Space",pc_sc:"Ctrl Space",pc_safe:true,difficulty:5,group:"",ps:true,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+I",display:"Specify Image size",mac_sc:"⌘ ⌥ I",pc_sc:"Ctrl Alt I",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+C",display:"Specify Canvas size",mac_sc:"⌘ ⌥ C",pc_sc:"Ctrl Alt C",pc_safe:true,difficulty:3,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+X",display:"Liquify",mac_sc:"⌘ ⇧ X",pc_sc:"Ctrl ⇧ X",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+R",display:"Lens Correction",mac_sc:"⌘ ⇧ R",pc_sc:"Ctrl ⇧ R",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+Y",display:"Gamut Warning",mac_sc:"⌘ ⇧ Y",pc_sc:"Ctrl ⇧ Y",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+Y",display:"Proof Colours",mac_sc:"⌘ Y",pc_sc:"Ctrl Y",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+R",display:"Toggle Rulers",mac_sc:"⌘ R",pc_sc:"Ctrl R",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:true,fi:false},
-  {shortcut:"F5",display:"Open Brush settings",mac_sc:"F5",pc_sc:"F5",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"OPTION+F9",display:"Open Actions palette",mac_sc:"⌥ F9",pc_sc:"Alt F9",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"F6",display:"Open Colour panel",mac_sc:"F6",pc_sc:"F6",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"F8",display:"Open Info pane",mac_sc:"F8",pc_sc:"F8",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"F7",display:"Open Layers palette",mac_sc:"F7",pc_sc:"F7",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+;",display:"Toggle Snap",mac_sc:"⌘ ⇧ ;",pc_sc:"Ctrl ⇧ ;",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+I",display:"View/Edit File Info metadata",mac_sc:"⌘ ⇧ ⌥ I",pc_sc:"Ctrl ⇧ Alt I",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+GRAVE",display:"Toggle Grid visibility",mac_sc:"⌘ '",pc_sc:"Ctrl '",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD",display:"Temporarily active Selection Tool while using Pen Tool",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,difficulty:1,group:"",ps:true,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+T",display:"Show/Hide the Character panel",mac_sc:"⌘ T",pc_sc:"Ctrl T",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT+M",display:"Select the Shape Builder tool",mac_sc:"⇧ M",pc_sc:"⇧ M",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT+O",display:"Select the Art Board tool",mac_sc:"⇧ O",pc_sc:"⇧ O",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT+X",display:"Swap colours between the fill & stroke",mac_sc:"⇧ X",pc_sc:"⇧ X",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"[",display:"Decrease brush or blob size",mac_sc:"[",pc_sc:"[",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"]",display:"Increase brush or blob size",mac_sc:"]",pc_sc:"]",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+2",display:"Lock the selection",mac_sc:"⌘ 2",pc_sc:"Ctrl 2",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+3",display:"Hide the selection",mac_sc:"⌘ 3",pc_sc:"Ctrl 3",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+F",display:"Paste in Front",mac_sc:"⌘ F",pc_sc:"Ctrl F",pc_safe:true,difficulty:1,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+V",display:"Paste on All Art Boards!",mac_sc:"⌘ ⇧ ⌥ V",pc_sc:"Ctrl ⇧ Alt V",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+W",display:"Wrap with Top Object (Envelope Distort)",mac_sc:"⌘ ⇧ ⌥ W",pc_sc:"Ctrl ⇧ Alt W",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+7",display:"Create a Clipping Mask",mac_sc:"⌘ 7",pc_sc:"Ctrl 7",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+7",display:"Release a Clipping Mask",mac_sc:"⌘ ⌥ 7",pc_sc:"Ctrl Alt 7",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT+~",display:"Hold to draw multiple shapes at once with the Tilde trick",mac_sc:"⇧ ~",pc_sc:"⇧ ~",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"OPTION",display:"Hold this as you click New Layer to get the Options dialogue",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+D",display:"Transform Each",mac_sc:"⌘ ⇧ ⌥ D",pc_sc:"Ctrl ⇧ Alt D",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+J",display:"Average points",mac_sc:"⌘ ⌥ J",pc_sc:"Ctrl Alt J",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+1",display:"Reset Rotate View",mac_sc:"⌘ ⇧ 1",pc_sc:"Ctrl ⇧ 1",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+0",display:"Create Outlines",mac_sc:"⌘ ⇧ 0",pc_sc:"Ctrl ⇧ 0",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+X",display:"Make Live Paint",mac_sc:"⌘ ⇧ X",pc_sc:"Ctrl ⇧ X",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+E",display:"Apply last effect imediately",mac_sc:"⌘ ⇧ E",pc_sc:"Ctrl ⇧ E",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+E",display:"Open last effect'spanel",mac_sc:"⌘ ⇧ ⌥ E",pc_sc:"Ctrl ⇧ Alt E",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+2",display:"Unlock All",mac_sc:"⌘ ⌥ 2",pc_sc:"Ctrl Alt 2",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+3",display:"Show All",mac_sc:"⌘ ⌥ 3",pc_sc:"Ctrl Alt 3",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"CMD+I",display:"Check Spelling",mac_sc:"⌘ I",pc_sc:"Ctrl I",pc_safe:true,difficulty:3,group:"",ps:false,ai:true,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+C",display:"Fit Frame to Content",mac_sc:"⌘ ⌥ C",pc_sc:"Ctrl Alt C",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+E",display:"Fit Content Proportionally",mac_sc:"⌘ ⌥ E",pc_sc:"Ctrl Alt E",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+L",display:"Lock the selected object",mac_sc:"⌘ L",pc_sc:"Ctrl L",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+L",display:"Unlock all on current spread",mac_sc:"⌘ ⌥ L",pc_sc:"Ctrl Alt L",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+T",display:"Open the Tabs panel",mac_sc:"⌘ ⇧ T",pc_sc:"Ctrl ⇧ T",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+N",display:"Create a new document with the options dialogue",mac_sc:"⌘ ⌥ N",pc_sc:"Ctrl Alt N",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+D",display:"Duplicate and Step",mac_sc:"⌘ ⇧ ⌥ D",pc_sc:"Ctrl ⇧ Alt D",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+ENTER",display:"Quick Apply a paragraph or character style",mac_sc:"⌘ ⏎",pc_sc:"Ctrl Enter",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+F7",display:"Open the Alignment panel",mac_sc:"⇧ F7",pc_sc:"⇧ F7",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+K",display:"Keep Options",mac_sc:"⌘ ⌥ K",pc_sc:"Ctrl Alt K",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+J",display:"Go to a Specific Page",mac_sc:"⌘ J",pc_sc:"Ctrl J",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+P",display:"Package the document for print/hand-off",mac_sc:"⌘ ⇧ ⌥ P",pc_sc:"Ctrl ⇧ Alt P",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT",display:"Hold while dragging to scale frame & content together",mac_sc:"⌘ ⇧",pc_sc:"Ctrl ⇧",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+D",display:"Place image",mac_sc:"⌘ D",pc_sc:"Ctrl D",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+K",display:"Open Preferences",mac_sc:"⌘ K",pc_sc:"Ctrl K",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+I",display:"Open File Info",mac_sc:"⌘ ⇧ ⌥ I",pc_sc:"Ctrl ⇧ Alt I",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+V",display:"Paste without Formatting",mac_sc:"⌘ ⇧ V",pc_sc:"Ctrl ⇧ V",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+U",display:"Step & Repeat",mac_sc:"⌘ ⌥ U",pc_sc:"Ctrl Alt U",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+PAGEUP",display:"Go to First Page",mac_sc:"⌘ ⇧ Page↑",pc_sc:"Ctrl ⇧ Page Up",pc_safe:true,difficulty:3,group:"pages",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+PAGEDOWN",display:"Go to Last Page",mac_sc:"⌘ ⇧ Page↓",pc_sc:"Ctrl ⇧ Page Down",pc_safe:true,difficulty:3,group:"pages",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+PAGEUP",display:"Go Back",mac_sc:"⌘ Page↑",pc_sc:"Ctrl Page Up",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+PAGEDOWN",display:"Go Forward",mac_sc:"⌘ Page↓",pc_sc:"Ctrl Page Down",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+PAGEUP",display:"Got to Previous Page",mac_sc:"⇧ Page↑",pc_sc:"⇧ Page Up",pc_safe:true,difficulty:3,group:"pages",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+PAGEDOWN",display:"Got to Next Page",mac_sc:"⇧ Page↓",pc_sc:"⇧ Page Down",pc_safe:true,difficulty:3,group:"pages",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+OPTION+P",display:"Add Page",mac_sc:"⇧ ⌥ P",pc_sc:"⇧ Alt P",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+O",display:"Create Outlines",mac_sc:"⌘ ⇧ O",pc_sc:"Ctrl ⇧ O",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+O",display:"Create Outlines without deleting text",mac_sc:"⌘ ⇧ ⌥ O",pc_sc:"Ctrl ⇧ Alt O",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+ENTER",display:"Insert forced Line-Break",mac_sc:"⇧ ⏎",pc_sc:"⇧ Enter",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+ENTER",display:"Insert Page-Break",mac_sc:"⌘ ⏎",pc_sc:"Ctrl Enter",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+X",display:"Insert Non-Breaking Space",mac_sc:"⌘ ⌥ X",pc_sc:"Ctrl Alt X",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+T",display:"Create Table",mac_sc:"⌘ ⇧ ⌥ T",pc_sc:"Ctrl ⇧ Alt T",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+Y",display:"Show Text threads",mac_sc:"⌘ ⌥ Y",pc_sc:"Ctrl Alt Y",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+GRAVE",display:"Snap to Grid",mac_sc:"⌘ ⇧ '",pc_sc:"Ctrl ⇧ '",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"F7",display:"Open Layers Panel",mac_sc:"F7",pc_sc:"F7",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+F6",display:"Seperations Preview",mac_sc:"⇧ F6",pc_sc:"⇧ F6",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+OPTION+ARROWDOWN",display:"Nudge Down 10px and Duplicate",mac_sc:"⇧ ⌥ ↓",pc_sc:"⇧ Alt ↓",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+OPTION+V",display:"Resize Vertical",mac_sc:"⇧ ⌥ V",pc_sc:"⇧ Alt V",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+ARROWUP",display:"Pin Top Edge",mac_sc:"⌘ ⌥ ↑",pc_sc:"Ctrl Alt ↑",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+G",display:"Select All Guides",mac_sc:"⌘ ⌥ G",pc_sc:"Ctrl Alt G",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+L",display:"Override All Master Page",mac_sc:"⌘ ⇧ ⌥ L",pc_sc:"Ctrl ⇧ Alt L",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"=",display:"Add Anchor Point",mac_sc:"=",pc_sc:"=",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"SHIFT+T",display:"Type on a Path Tool",mac_sc:"⇧ T",pc_sc:"⇧ T",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:true,ae:false,fi:false},
-  {shortcut:"CMD+OPTION+HOME",display:"Centre the Anchor Point in the layer content",mac_sc:"⌘ ⌥ Home",pc_sc:"Ctrl Alt Home",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+HOME",display:"Centre layer in composition",mac_sc:"⌘ Home",pc_sc:"Ctrl Home",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"F9",display:"Apply Easy Ease to selected keyframes",mac_sc:"F9",pc_sc:"F9",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+T",display:"Enable Time Remapping",mac_sc:"⌘ ⌥ T",pc_sc:"Ctrl Alt T",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+F3",display:"Toogle the Graph Editor",mac_sc:"⇧ F3",pc_sc:"⇧ F3",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+I",display:"Import",mac_sc:"⌘ I",pc_sc:"Ctrl I",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+F",display:"Find in Timeline Panel",mac_sc:"⌘ F",pc_sc:"Ctrl F",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+Y",display:"New Layer",mac_sc:"⌘ Y",pc_sc:"Ctrl Y",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"1",display:"Orbit Camera Tool",mac_sc:"1",pc_sc:"1",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"2",display:"Pan Camera Tool",mac_sc:"2",pc_sc:"2",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"3",display:"Dolly Camera Tool",mac_sc:"3",pc_sc:"3",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"W",display:"Rotate Tool",mac_sc:"W",pc_sc:"W",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"Q",display:"Rectangle Tool",mac_sc:"Q",pc_sc:"Q",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"G",display:"Pen Tool",mac_sc:"G",pc_sc:"G",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+P",display:"Toggle between Puppet Pin Tools",mac_sc:"⌘ P",pc_sc:"Ctrl P",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+CTRL+M",display:"Add to Render Queue",mac_sc:"⌘ ⌃ M",pc_sc:"Ctrl Alt M",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+;",display:"Toggle Guide Lock",mac_sc:"⌘ ⇧ ⌥ ;",pc_sc:"Ctrl ⇧ Alt ;",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+[",display:"Move Layer Down",mac_sc:"⌘ [",pc_sc:"Ctrl [",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+]",display:"Move Layer Up",mac_sc:"⌘ ]",pc_sc:"Ctrl ]",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+[",display:"Move Layer to Bottom",mac_sc:"⌘ ⇧ [",pc_sc:"Ctrl ⇧ [",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+]",display:"Move Layer to Top",mac_sc:"⌘ ⇧ ]",pc_sc:"Ctrl ⇧ ]",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+L",display:"Lock layer",mac_sc:"⌘ L",pc_sc:"Ctrl L",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+L",display:"Unlock all layers",mac_sc:"⌘ ⇧ L",pc_sc:"Ctrl ⇧ L",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+F9",display:"Add Easy Ease-In",mac_sc:"⇧ F9",pc_sc:"⇧ F9",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+F9",display:"Add Easy Ease-Out",mac_sc:"⌘ ⇧ F9",pc_sc:"Ctrl ⇧ F9",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD",display:"Hold this and click a keyframe to remove its Easing",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION",display:"Hold this and click the stopwatch to add an expression",mac_sc:"⌥ Option",pc_sc:"Alt",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+ARROWRIGHT",display:"Move selected keyframe forward one frame",mac_sc:"⌥ →",pc_sc:"Alt →",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"OPTION+ARROWLEFT",display:"Move selected keyframe back one frame",mac_sc:"⌥ ←",pc_sc:"Alt ←",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+OPTION+ARROWRIGHT",display:"Move selected keyframe forward ten frames",mac_sc:"⇧ ⌥ →",pc_sc:"⇧ Alt →",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+OPTION+ARROWLEFT",display:"Move selected keyframe back ten frames",mac_sc:"⇧ ⌥ ←",pc_sc:"⇧ Alt ←",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+/",display:"Replace Footage",mac_sc:"⌘ ⌥ /",pc_sc:"Ctrl Alt /",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+GRAVE",display:"Open the Keyboard Shortcuts editor",mac_sc:"⌘ ⌥ '",pc_sc:"Ctrl Alt '",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+ARROWDOWN",display:"Extend selection to next item",mac_sc:"⇧ ↓",pc_sc:"⇧ ↓",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+ARROWUP",display:"Extend selection to previous item",mac_sc:"⇧ ↑",pc_sc:"⇧ ↑",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+K",display:"Open Project Settings",mac_sc:"⌘ ⇧ ⌥ K",pc_sc:"Ctrl ⇧ Alt K",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+;",display:"Open Preferences",mac_sc:"⌘ ⌥ ;",pc_sc:"Ctrl Alt ;",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+1",display:"Toggle Tools Panel",mac_sc:"⌘ 1",pc_sc:"Ctrl 1",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+2",display:"Toggle Info Panel",mac_sc:"⌘ 2",pc_sc:"Ctrl 2",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+3",display:"Toggle Preview Panel",mac_sc:"⌘ 3",pc_sc:"Ctrl 3",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+4",display:"Toggle Audio Panel",mac_sc:"⌘ 4",pc_sc:"Ctrl 4",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+5",display:"Toggle Effects & Presets Panel",mac_sc:"⌘ 5",pc_sc:"Ctrl 5",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+6",display:"Toggle Character Panel",mac_sc:"⌘ 6",pc_sc:"Ctrl 6",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+7",display:"Toggle Paragraph Panel",mac_sc:"⌘ 7",pc_sc:"Ctrl 7",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+8",display:"Toggle Paint Panel",mac_sc:"⌘ 8",pc_sc:"Ctrl 8",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+9",display:"Toggle Brushes Panel",mac_sc:"⌘ 9",pc_sc:"Ctrl 9",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+0",display:"Toggle Project Panel",mac_sc:"⌘ 0",pc_sc:"Ctrl 0",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+0",display:"Toggle Render Queue Panel",mac_sc:"⌘ ⌥ 0",pc_sc:"Ctrl Alt 0",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"C",display:"Cycle through Camera Tools",mac_sc:"C",pc_sc:"C",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD",display:"Temporarily active Selection Tool while using Pen",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"SHIFT+OPTION+J",display:"Go to specific Time",mac_sc:"⇧ ⌥ J",pc_sc:"⇧ Alt J",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD",display:"Hold this while dragging time indicator to scrub through footage",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"GRAVE",display:"Toggle Safe Zone visibility",mac_sc:"'",pc_sc:"'",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+DEL",display:"Delete footage withoutb warning",mac_sc:"⌘ ⌫",pc_sc:"Ctrl Backspace",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+OPTION+Y",display:"New Adjustment Layer",mac_sc:"⌘ ⌥ Y",pc_sc:"Ctrl Alt Y",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+V",display:"Paste in Place",mac_sc:"⌘ ⇧ V",pc_sc:"Ctrl ⇧ V",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+I",display:"Open Resources (Components/Plugins) search bar",mac_sc:"⇧ I",pc_sc:"⇧ I",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+BACKSLASH",display:"Show/Hide UI",mac_sc:"⌘ \\",pc_sc:"Ctrl \\",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+H",display:"Flip Horizontal",mac_sc:"⇧ H",pc_sc:"⇧ H",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+V",display:"Flip Vertical",mac_sc:"⇧ V",pc_sc:"⇧ V",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+R",display:"Toggle Rulers",mac_sc:"⇧ R",pc_sc:"⇧ R",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"1",display:"Set Opacity to 10%",mac_sc:"1",pc_sc:"1",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"2",display:"Set Opacity to 20%",mac_sc:"2",pc_sc:"2",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"3",display:"Set Opacity to 30%",mac_sc:"3",pc_sc:"3",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"4",display:"Set Opacity to 40%",mac_sc:"4",pc_sc:"4",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"5",display:"Set Opacity to 50%",mac_sc:"5",pc_sc:"5",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"6",display:"Set Opacity to 60%",mac_sc:"6",pc_sc:"6",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"7",display:"Set Opacity to 70%",mac_sc:"7",pc_sc:"7",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"8",display:"Set Opacity to 80%",mac_sc:"8",pc_sc:"8",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"9",display:"Set Opacity to 90%",mac_sc:"9",pc_sc:"9",pc_safe:true,difficulty:1,group:"opacity",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+S",display:"Save version history checkpoint with note",mac_sc:"⌘ ⌥ S",pc_sc:"Ctrl Alt S",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"OPTION+W",display:"Align selected object to Top",mac_sc:"⌥ W",pc_sc:"Alt W",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"OPTION+A",display:"Align selected object to Left",mac_sc:"⌥ A",pc_sc:"Alt A",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"OPTION+S",display:"Align selected object to Bottom",mac_sc:"⌥ S",pc_sc:"Alt S",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"OPTION+D",display:"Align selected object to Right",mac_sc:"⌥ D",pc_sc:"Alt D",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+E",display:"Toggle between Design& Prototype tabs",mac_sc:"⇧ E",pc_sc:"⇧ E",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD",display:"Hold this while resixing to override constraints",mac_sc:"⌘",pc_sc:"Ctrl",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+T",display:"Tidy Up",mac_sc:"⌘ ⌥ T",pc_sc:"Ctrl Alt T",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+1",display:"Zoom to Fit",mac_sc:"⇧ 1",pc_sc:"⇧ 1",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+2",display:"Zoom to Selection",mac_sc:"⇧ 2",pc_sc:"⇧ 2",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+L",display:"Toggle Lock",mac_sc:"⌘ ⌥ L",pc_sc:"Ctrl Alt L",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"OPTION+1",display:"Open the Layers Panel",mac_sc:"⌥ 1",pc_sc:"Alt 1",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"OPTION+2",display:"Open the Assets Panel",mac_sc:"⌥ 2",pc_sc:"Alt 2",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+OPTION+C",display:"Copy as a PNG",mac_sc:"⌘ ⇧ ⌥ C",pc_sc:"Ctrl ⇧ Alt C",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+P",display:"Run last Plugin",mac_sc:"⌘ ⌥ P",pc_sc:"Ctrl Alt P",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+G",display:"Toggle Guide visibility",mac_sc:"⇧ G",pc_sc:"⇧ G",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+BACKSLASH",display:"Toggle Multiplayer Cursor visibility",mac_sc:"⌘ ⌥ \\",pc_sc:"Ctrl Alt \\",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+GRAVE",display:"Toggle Pixel Grid",mac_sc:"⇧ '",pc_sc:"⇧ '",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+C",display:"Toggle Comments visibility",mac_sc:"⇧ C",pc_sc:"⇧ C",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+Y",display:"Toggle Annotations visibility",mac_sc:"⇧ Y",pc_sc:"⇧ Y",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+P",display:"Toggle Pixel preview",mac_sc:"⌘ ⇧ P",pc_sc:"Ctrl ⇧ P",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+BACKSLASH",display:"Minimise UI",mac_sc:"⌘ ⇧ \\",pc_sc:"Ctrl ⇧ \\",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+DEL",display:"Delete and heal the selection",mac_sc:"⌘ ⌫",pc_sc:"Ctrl Backspace",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+F",display:"Flatten",mac_sc:"⌘ ⇧ F",pc_sc:"Ctrl ⇧ F",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+OPTION+H",display:"Dristribute Horizontally",mac_sc:"⇧ ⌥ H",pc_sc:"⇧ Alt H",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"SHIFT+OPTION+V",display:"Dristribute Vertically",mac_sc:"⇧ ⌥ V",pc_sc:"⇧ Alt V",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+J",display:"Join vectors",mac_sc:"⌘ J",pc_sc:"Ctrl J",pc_safe:true,difficulty:3,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+J",display:"Smooth vectors",mac_sc:"⌘ ⇧ J",pc_sc:"Ctrl ⇧ J",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+A",display:"Select All",mac_sc:"⌘ A",pc_sc:"Ctrl A",pc_safe:true,difficulty:1,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+OPTION+A",display:"Select Matching Layers",mac_sc:"⌘ ⌥ A",pc_sc:"Ctrl Alt A",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"fn+E",display:"Open Emoji picker",mac_sc:"fn E",pc_sc:"fn E",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:false,fi:true},
-  {shortcut:"CMD+SHIFT+E",display:"Remove all effects from the selected layer",mac_sc:"⌘ ⇧ E",pc_sc:"Ctrl ⇧ E",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+OPTION+E",display:"Re-apply the last effect with the same settings",mac_sc:"⌘ ⇧ ⌥ E",pc_sc:"Ctrl ⇧ Alt E",pc_safe:true,difficulty:5,group:"",ps:false,ai:false,indd:false,ae:true,fi:false},
-  {shortcut:"CMD+SHIFT+V",display:"Paste in Place on the active art board",mac_sc:"⌘ ⇧ V",pc_sc:"Ctrl ⇧ V",pc_safe:true,difficulty:5,group:"",ps:false,ai:true,indd:false,ae:false,fi:false},
-  {shortcut:"SHIFT++",display:"Cycle through layer blending modes",mac_sc:"⇧ +",pc_sc:"⇧ +",pc_safe:true,difficulty:5,group:"",ps:true,ai:false,indd:false,ae:false,fi:false}
-];
-/* ══════════════════════════════════════
+const UNIVERSAL_SHORTCUTS = [
+  // ─── BETA TEST ENTRY — single question loops for game cycle testing ───
+  {shortcut:"CMD+Z",display:"Undo the last action",mac_sc:"⌘ Z",pc_sc:"Ctrl Z",pc_safe:true,difficulty:1,group:""}
+];/* ══════════════════════════════════════
    KEYBOARD BUILDER
 ══════════════════════════════════════ */
 const keyEls = {};
@@ -2500,37 +2290,23 @@ let toastTimer = null;
 
 var _kwToastTimer = null;
 
+function _kbPanelRect() {
+  var p = document.getElementById('keyboardPanel');
+  return p ? p.getBoundingClientRect() : null;
+}
+
 function showToast(msg, duration) {
-  duration = duration || 2400;
+  var readingDuration = Math.min(6000, 1800 + msg.length * 65);
+  duration = duration || readingDuration;
   var el = document.getElementById('kwToast');
   if (!el) return;
-  // Position: centred above the keyboard panel, or top-of-front-modal if open
-  var modalFront = null;
-  if (kbModalOpen || browserModalOpen) {
-    var kbM  = document.getElementById('kbModal');
-    var brM  = document.getElementById('browserModal');
-    if (kbModalOpen && browserModalOpen) {
-      // whichever has higher z-index is in front
-      var kbZ  = parseInt(kbM.style.zIndex  || 200);
-      var brZ  = parseInt(brM.style.zIndex  || 200);
-      modalFront = kbZ >= brZ ? kbM : brM;
-    } else {
-      modalFront = kbModalOpen ? kbM : brM;
-    }
-  }
-  if (modalFront) {
-    var mr = modalFront.getBoundingClientRect();
-    el.style.left = Math.round(mr.left + mr.width / 2) + 'px';
-    el.style.top  = Math.round(mr.top + 18) + 'px';
+  var r = _kbPanelRect();
+  if (r) {
+    el.style.left = Math.round(r.left + window.scrollX + r.width / 2) + 'px';
+    el.style.top  = Math.round(r.top  + window.scrollY + r.height / 2) + 'px';
   } else {
-    var r = _kbPanelRect();
-    if (r) {
-      el.style.left = Math.round(r.left + window.scrollX + r.width / 2) + 'px';
-      el.style.top  = Math.round(r.top  + window.scrollY + r.height / 2) + 'px';
-    } else {
-      el.style.left = '50%';
-      el.style.top  = '50%';
-    }
+    el.style.left = '50%';
+    el.style.top  = '50%';
   }
   clearTimeout(_kwToastTimer);
   el.textContent = msg;
@@ -2540,7 +2316,7 @@ function showToast(msg, duration) {
   }, duration);
 }
 
-// Legacy alias — keeps any remaining internal calls working
+// Legacy alias — keeps existing internal calls working
 function showModeToast(msg) { showToast(msg); }
 
 function pulseBtn(el) {
@@ -2586,20 +2362,14 @@ function handleKeyTouch(e, el) {
   const code = el.dataset.key;
   if (!code) return;
   playKeyClick();
-  // Set modifier flags so isKeyPartOfShortcut recognises modifier keys correctly
-  const synth = {
-    code: code, key: code, preventDefault: function(){},
-    shiftKey: code === 'ShiftLeft'   || code === 'ShiftRight',
-    altKey:   code === 'AltLeft'     || code === 'AltRight',
-    metaKey:  code === 'MetaLeft'    || code === 'MetaRight',
-    ctrlKey:  code === 'ControlLeft' || code === 'ControlRight',
-    _fromTouch: true,
-  };
+  // Build a minimal synthetic event carrying the code we need
+  // We dispatch through our own handlers directly (real KeyboardEvent
+  // requires trusted origin for some keys, so we call handlers directly).
+  const synth = { code: code, key: code, preventDefault: function(){},
+                  shiftKey: false, altKey: false, metaKey: false, ctrlKey: false };
   handleKeydown(synth);
-  // In sticky mode the key stays lit; in non-sticky mode release after the
-  // current frame — but only during active play. On the idle/start screen
-  // keep keys held so they behave like real physical key presses.
-  if (!stickyKeysOn && gameState === 'playing') {
+  // In sticky mode the key stays; in non-sticky mode we release immediately
+  if (!stickyKeysOn) {
     requestAnimationFrame(() => handleKeyup(synth));
   }
 }
@@ -2659,6 +2429,15 @@ function buildOsLabels() {
     leftLabel.innerHTML  = '<small>PC</small>' + PC_ICON_SVG;
     rightLabel.innerHTML = MAC_ICON_SVG + ' Mac';
   }
+
+  const leftOperatingSystem  = nativeMac ? 'mac' : 'pc';
+  const rightOperatingSystem = nativeMac ? 'pc'  : 'mac';
+
+  leftLabel.style.cursor  = 'pointer';
+  rightLabel.style.cursor = 'pointer';
+
+  leftLabel.addEventListener('click',  function() { applyOsMode(leftOperatingSystem);  if (activeSettings === 'keyboard') updateModalToggles(); });
+  rightLabel.addEventListener('click', function() { applyOsMode(rightOperatingSystem); if (activeSettings === 'keyboard') updateModalToggles(); });
 }
 
 function updateToggleVisual(os) {
@@ -2674,6 +2453,19 @@ function updateToggleVisual(os) {
 
 function applyOsMode(os) {
   currentOs = os;
+  var savedPos = _kbPos;
+  var panel = document.getElementById('keyboardPanel');
+  var stage = document.getElementById('kbFlipStage');
+  var wrap  = document.getElementById('keyboardWrap');
+
+  // Disable CSS transitions before any transform change so nothing animates
+  if (savedPos !== 'face') {
+    panel.style.transition = 'none';
+    stage.style.transition = 'none';
+  }
+
+  if (savedPos !== 'face') _resetFlipState();
+
   var nativeMac = (detectedOs === 'mac' || detectedOs === 'mobile');
   osToggleEl.checked = nativeMac ? (os === 'pc') : (os === 'mac');
   updateToggleVisual(os);
@@ -2684,8 +2476,29 @@ function applyOsMode(os) {
     buildKeyboard(currentKbMode === 'mini');
   }
   _syncKbCountFromVariant();
-  // Mid-game OS toggle: rebuild pool and replace current question if it
-  // is no longer valid (e.g. a mac-only shortcut when switching to PC).
+  if (activeSettings !== null) _spAlignPanel();
+
+  // Restore keyboard position without any animation after DOM rebuild
+  if (savedPos !== 'face') {
+    _kbPos     = savedPos;
+    _kbFlipped = (savedPos === 'edge');
+    panel.classList.toggle('kb-partial', savedPos === 'partial');
+    panel.classList.add('kb-edged');
+    if (savedPos === 'edge') {
+      panel.classList.add('kb-edges-visible');
+      stage.classList.add('kb-show-base');
+    }
+    wrap.classList.add('kb-flipping');
+    panel.style.transform = KB_POS[savedPos].panel;
+    stage.style.transform = KB_POS[savedPos].stage;
+    // Force a reflow so the browser commits the transform at this position,
+    // then re-enable transitions synchronously — no async gap for clicks to fall into.
+    void panel.offsetWidth;
+    panel.style.transition = '';
+    stage.style.transition = '';
+  }
+
+  // Mid-game OS toggle: rebuild pool and replace current question if no longer valid
   if (gameState === 'playing') {
     const newPool = shuffleArray(buildPool());
     const currentStillValid = newPool.some(s =>
@@ -2698,7 +2511,6 @@ function applyOsMode(os) {
       titleEl.className = '';
       titleEl.textContent = questionPool[0].display;
     } else {
-      // Keep playing but refresh pool for future questions
       questionPool = newPool;
       questionIndex = 0;
     }
@@ -2706,14 +2518,24 @@ function applyOsMode(os) {
 }
 
 function updateMismatchPill() {
-  if (detectedOs === 'mobile') return; // mobile message shown once at init
-  if (detectedOs === 'other') return;
+  if (detectedOs === 'mobile') {
+    osMismatchEl.textContent = 'We recommend training with a real mechanical keyboard.';
+    osMismatchEl.classList.add('show');
+    return;
+  }
+  if (detectedOs === 'other') {
+    osMismatchEl.classList.remove('show');
+    return;
+  }
   const mismatch = (detectedOs === 'mac' && currentOs === 'pc') ||
                    (detectedOs === 'pc'  && currentOs === 'mac');
   if (mismatch) {
     const playing = currentOs === 'pc' ? 'PC' : 'Mac';
     const machine = detectedOs === 'mac' ? 'a Mac' : 'a PC';
-    showToast('Playing ' + playing + ' mode on ' + machine);
+    osMismatchEl.textContent = `Playing ${playing} mode on ${machine}`;
+    osMismatchEl.classList.add('show');
+  } else {
+    osMismatchEl.classList.remove('show');
   }
 }
 
@@ -2722,8 +2544,8 @@ function onOsToggle() {
   applyOsMode(osToggleEl.checked
     ? (nativeMac ? 'pc'  : 'mac')
     : (nativeMac ? 'mac' : 'pc'));
-  if (kbModalOpen) updateModalToggles();
-  if (browserModalOpen) _refreshBrowserContent();
+  if (activeSettings === 'keyboard') updateModalToggles();
+  if (activeSettings === 'browser')  _refreshBrowserContent();
 }
 
 // On mobile: auto-enable sticky + touch modes, show updated message
@@ -2731,7 +2553,8 @@ if (detectedOs === 'mobile') {
   setStickyKeys(true);
   setTouchEnabled(true);
   document.getElementById('stickyRow').classList.add('disabled');
-  showToast('We recommend training with a real mechanical keyboard.', 4000);
+  osMismatchEl.textContent = 'We recommend training with a real mechanical keyboard.';
+  osMismatchEl.classList.add('show');
 }
 
 // Set the initial toggle position to match the detected OS
@@ -2760,29 +2583,14 @@ function updateKeyboardMode() {
     buildKeyboard(mode === 'mini');
   }
 }
-function alignKbIcon() {
-  var icon   = document.getElementById('kbIcon');
-  var kpanel = document.getElementById('keyboardPanel');
-  var kwrap  = document.getElementById('keyboardWrap');
-  if (!icon || !kpanel || !kwrap) return;
-  var iconW      = icon.offsetWidth || 44;
-  var kpanelLeft = kpanel.getBoundingClientRect().left - kwrap.getBoundingClientRect().left;
-  icon.style.left = (kpanelLeft - iconW * 2) + 'px';
-}
 
 window.addEventListener('resize', function() {
   updateKeyboardMode();
-  alignKbIcon();
-  if (kbModalOpen) {
-    if (window.innerWidth < 600) {
-      closeKbModal();
-    } else {
-      positionKbModal();
-    }
-  }
+  positionIcons();
+  if (activeSettings !== null) _spAlignPanel();
 });
 updateKeyboardMode();
-setTimeout(alignKbIcon, 50);
+setTimeout(positionIcons, 50);
 // Show mismatch pill after initial keyboard build
 updateMismatchPill();
 // Apply rounded style if starting in PC mode
@@ -2798,7 +2606,6 @@ function shortcutToCodes(s) {
   const OPT  = ['AltLeft','AltRight'];
   const SH   = ['ShiftLeft','ShiftRight'];
 
-  if (u === 'CMD')   return CMD;
   if (u === 'SPACE')  return ['Space'];
   if (u === 'TAB')    return ['Tab'];
   if (u === 'HOME')      return ['Home'];
@@ -2843,6 +2650,12 @@ function shortcutToCodes(s) {
   if (u === 'OPTION+[') return [...OPT, 'BracketLeft'];
   if (u === 'OPTION+]') return [...OPT, 'BracketRight'];
 
+  // SHIFT + OPTION + key (prefix variant)
+  if (u.startsWith('SHIFT+OPTION+')) {
+    const key = charToCode(u.slice(13));
+    return [...SH, ...OPT, key].filter(Boolean);
+  }
+
   // OPTION + SHIFT + key (AE keyframe shortcuts)
   if (u.startsWith('OPTION+SHIFT+')) {
     const key = charToCode(u.slice(13));
@@ -2885,17 +2698,19 @@ function charToCode(ch) {
     ';':'Semicolon','=':'Equal','-':'Minus',
     '[':'BracketLeft',']':'BracketRight',
     '/':'Slash','.':'Period',',':'Comma',
-    '<':'Comma','>':'Period',          // Shift+, and Shift+. produce < and >
+    '<':'Comma','>':'Period',
     '0':'Digit0','1':'Digit1','2':'Digit2','3':'Digit3',
     '4':'Digit4','5':'Digit5','6':'Digit6','7':'Digit7',
     '8':'Digit8','9':'Digit9',
     'ARROWLEFT':'ArrowLeft','ARROWRIGHT':'ArrowRight',
     'ARROWUP':'ArrowUp','ARROWDOWN':'ArrowDown',
     'HOME':'Home','END':'End',
+    'PAGEUP':'PageUp','PAGEDOWN':'PageDown',
     'GRAVE':'Backquote','BACKSLASH':'Backslash',
-    "'":'Quote','QUOTE':'Quote',
-    ';':'Semicolon','SEMICOLON':'Semicolon',
-    '-':'Minus','=':'Equal','[':'BracketLeft',']':'BracketRight','COMMA':'Comma','PERIOD':'Period',
+    'TAB':'Tab','SPACE':'Space','DEL':'Backspace','DELETE':'Delete',
+    'F1':'F1','F2':'F2','F3':'F3','F4':'F4',
+    'F5':'F5','F6':'F6','F7':'F7','F8':'F8',
+    'F9':'F9','F10':'F10','F11':'F11','F12':'F12',
   };
   if (map[ch]) return map[ch];
   if (ch.length === 1 && ch >= 'A' && ch <= 'Z') return 'Key' + ch;
@@ -2926,6 +2741,44 @@ function neededSatisfied(needed) {
     const pair = LR_PAIRS.find(p => p.includes(c));
     return pair ? pair.some(p => greenHeld.has(p)) : false;
   });
+}
+
+function isPartialCorrectState() {
+  // Returns true if at least one required key is held/toggled green,
+  // no orange keys are present, and at least one required key is still missing.
+  if (gameState !== 'playing' || transitioning || helpActive) return false;
+  const requiredKeyCodes = shortcutToCodes(currentAnswer);
+  if (requiredKeyCodes.length === 0) return false;
+  const atLeastOneGreenKeyHeld = requiredKeyCodes.some(code => greenHeld.has(code) || stickyLit.get(code) === 'green');
+  const anyOrangeKeyPresent = [...stickyLit.values()].includes('orange') ||
+    Object.keys(keyEls).some(code => keyEls[code].classList.contains('lit-orange-down') || keyEls[code].classList.contains('lit-orange-up'));
+  const allRequiredKeysSatisfied = neededSatisfied(requiredKeyCodes);
+  return atLeastOneGreenKeyHeld && !anyOrangeKeyPresent && !allRequiredKeysSatisfied;
+}
+
+function resetPartialShortcutNudgeTimers() {
+  clearTimeout(partialShortcutNudgeTimer);
+  clearTimeout(partialShortcutFollowUpTimer);
+  partialShortcutNudgeTimer    = null;
+  partialShortcutFollowUpTimer = null;
+  partialShortcutNudgeArmed    = false;
+}
+
+function checkAndArmPartialShortcutNudge() {
+  if (partialShortcutNudgeArmed) return;
+  if (!isPartialCorrectState()) return;
+  partialShortcutNudgeArmed = true;
+  partialShortcutNudgeTimer = setTimeout(function() {
+    if (!isPartialCorrectState()) { resetPartialShortcutNudgeTimers(); return; }
+    var firstNudgeMessage = "The shortcut isn't complete yet";
+    var firstNudgeReadingDuration = Math.min(6000, 1800 + firstNudgeMessage.length * 65);
+    showToast(firstNudgeMessage);
+    partialShortcutFollowUpTimer = setTimeout(function() {
+      if (!isPartialCorrectState()) { resetPartialShortcutNudgeTimers(); return; }
+      showToast("What other key(s) would you press?");
+      resetPartialShortcutNudgeTimers();
+    }, firstNudgeReadingDuration + 1000);
+  }, 2000);
 }
 
 // Per-key linger timers — so each key fades independently
@@ -3092,6 +2945,7 @@ const NUMPAD_MAP = {
 };
 
 function updateKeyboardLighting(e, isDown) {
+  if (isDown && e.repeat) return; // key already lit from initial keydown; repeats do nothing
   const code = NUMPAD_MAP[e.code] || e.code;
   const isExtKey   = code in EXT_KEY_LABELS;
   const isModifier = code === 'MetaLeft'    || code === 'MetaRight'   ||
@@ -3114,8 +2968,7 @@ function updateKeyboardLighting(e, isDown) {
     }
     // Otherwise light it
     heldKeys.add(code);
-    // Outside a round, always green — currentAnswer is empty so correctness is meaningless
-    const isCorrect = gameState !== 'playing' || isKeyPartOfShortcut(e, currentAnswer);
+    const isCorrect = isKeyPartOfShortcut(e, currentAnswer);
     const colour = isCorrect ? 'green' : 'orange';
     stickyLit.set(code, colour);
     if (isCorrect) {
@@ -3123,10 +2976,12 @@ function updateKeyboardLighting(e, isDown) {
       if (isExtKey) showExtKeyPill(code, 'green');
       else          setKeyLit(code, 'green-down');
       if ((!isModifier || isBareModifierQuestion) && !isSilent) { greenHits++; totalHits++; updateAccuracyDisplay(); }
+      checkAndArmPartialShortcutNudge();
     } else {
       if (isExtKey) showExtKeyPill(code, 'orange');
       else          setKeyLit(code, 'orange-down');
       if ((!isModifier || isBareModifierQuestion) && !isSilent) { totalHits++; updateAccuracyDisplay(); }
+      resetPartialShortcutNudgeTimers();
     }
     return;
   }
@@ -3146,15 +3001,18 @@ function updateKeyboardLighting(e, isDown) {
         if (isExtKey) showExtKeyPill(code, 'green');
         else          setKeyLit(code, 'green-down');
         if (!alreadyHeld && (!isModifier || isBareModifierQuestion) && !isSilent) { greenHits++; totalHits++; updateAccuracyDisplay(); }
+        checkAndArmPartialShortcutNudge();
       } else {
         if (isExtKey) showExtKeyPill(code, 'orange');
         else          setKeyLit(code, 'orange-down');
         if (!alreadyHeld && (!isModifier || isBareModifierQuestion) && !isSilent) { totalHits++; updateAccuracyDisplay(); }
+        resetPartialShortcutNudgeTimers();
       }
     }
   } else {
     heldKeys.delete(code);
     greenHeld.delete(code);
+    resetPartialShortcutNudgeTimers();
     if (isExtKey) {
       hideExtKeyPill();
     } else {
@@ -3187,6 +3045,10 @@ let answersLeft     = 10;  // counts down only on correct answer
 let currentAnswer = '';
 let helpActive    = false;
 let transitioning = false;
+let partialShortcutNudgeTimer    = null;
+let partialShortcutFollowUpTimer = null;
+let partialShortcutNudgeArmed    = false;
+let endScreenInactivityTimer     = null;
 let bestRecord    = { time: null, accuracy: null };  // independent bests
 let greenHits       = 0;
 let totalHits       = 0;
@@ -3370,9 +3232,8 @@ function mainButtonClick() {
   if (gameState === 'counting')      { cancelCountdown(); return; }
   if (gameState === 'playing')       { skipShortcut(); return; }
   if (gameState === 'paused') {
-    var needsCountdown = _modalWasOpenOnPause || kbModalOpen || browserModalOpen;
     _closeAllModals();
-    if (needsCountdown) { beginResumeCountdown(); } else { unpause(); }
+    beginResumeCountdown();
     return;
   }
   if (gameState === 'confirm-reset') { confirmResetYes(); return; }
@@ -3408,6 +3269,7 @@ const IMPROVEMENT_TIPS = [
 
 function helpButtonClick() {
   helpBtn.blur();
+  resetEndScreenInactivityTimer();
   if (gameState === 'idle')           { titleEl.textContent = bestRecord.time !== null ? 'To reset your score, press the lock key on the keyboard.' : 'Press start to begin.'; return; }
   if (gameState === 'playing')        { toggleHelp(); return; }
   if (gameState === 'paused')         { enterConfirmReset(); return; }
@@ -3419,10 +3281,8 @@ function helpButtonClick() {
 function timerBoxClick() {
   if (gameState === 'playing') { enterPause(); return; }
   if (gameState === 'paused') {
-    // Treat exactly like the Unpause button: close modals, countdown if needed
-    var needsCountdown = _modalWasOpenOnPause || kbModalOpen || browserModalOpen;
     _closeAllModals();
-    if (needsCountdown) { beginResumeCountdown(); } else { unpause(); }
+    beginResumeCountdown();
     return;
   }
   if (gameState === 'confirm-reset' && _wasPlaying) {
@@ -3479,6 +3339,7 @@ function buildHintHTML(shortcut, bg) {
 
 function toggleHelp() {
   clearTimeout(helpFadeTimer);
+  resetPartialShortcutNudgeTimers();
   if (!helpActive) {
     helpActive = true;
     // Show hint in the toast pill — green to distinguish from accuracy penalty
@@ -3511,6 +3372,7 @@ function clearHelp() {
   clearTimeout(helpFadeTimer);
   helpActive = false;
   kbToastEl.classList.remove('show');
+  resetPartialShortcutNudgeTimers();
 }
 
 /* ══════════════════════════════════════
@@ -3536,6 +3398,13 @@ function enterPause(instantBlur) {
   clearTimeout(penaltyTimeout);
   transitioning = false; // clear skip-in-progress if pause interrupts it
   clearHelp();
+  resetPartialShortcutNudgeTimers();
+  // Settings panel sets its own position before calling enterPause; only move
+  // to edge if no settings screen is already driving a different position.
+  if (activeSettings === null) {
+    setKbPosition('edge');
+    openSettings('pause');
+  }
 
   if (instantBlur) {
     titleEl.classList.add('blur-instant');
@@ -3556,11 +3425,13 @@ function enterPause(instantBlur) {
   helpBtn.style.background = '#6b7280';
   helpBtn.style.color = 'white';
   if (lockKeyEl) lockKeyEl.classList.add('active');
-  _modalWasOpenOnPause = (kbModalOpen || browserModalOpen);
+  _modalWasOpenOnPause = (activeSettings !== null);
 }
 
 function unpause() {
   gameState = 'playing';
+  clearAllLit();
+  heldKeys.clear();
   // Restore question title — may have been blanked by the resume countdown
   if (questionPool.length > 0 && (!titleEl.textContent || titleEl.textContent === '')) {
     titleEl.className = '';
@@ -3578,13 +3449,6 @@ function unpause() {
   timerInterval = setInterval(updateTimer, 100);
 }
 
-function _closeAllModalsInstant() {
-  // Dismiss modals without animation — used when confirm-reset overlay needs clear focus
-  var km = document.getElementById('kbModal');
-  var bm = document.getElementById('browserModal');
-  if (kbModalOpen && km)      { km.classList.remove('visible'); km.style.animation = ''; km.style.pointerEvents = ''; kbModalOpen = false; }
-  if (browserModalOpen && bm) { bm.classList.remove('visible'); bm.style.animation = ''; bm.style.pointerEvents = ''; browserModalOpen = false; }
-}
 
 function enterConfirmReset() {
   _confirmFromFinished = (gameState === 'finished');
@@ -3660,8 +3524,11 @@ function resetToIdle() {
   gameState = 'idle';
   _wasPlaying = false;
   setAppSelectorGameActive(false);
+  setKbPosition('face');
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
+  clearTimeout(endScreenInactivityTimer);
+  endScreenInactivityTimer = null;
   clearHelp();
   clearAllLit();
   heldKeys.clear();
@@ -3730,7 +3597,7 @@ function matchesShortcut(event, str) {
 
   // Helper: does the event key match the expected bare char/token?
   function keyIs(exp) {
-    if (exp === '='   ) return k === '=' || k === '+' || codeChar === '=';
+    if (exp === '='   ) return k === '=' || k === '+';
     if (exp === 'RETURN') return k === 'Enter';
     if (exp === 'ENTER')  return k === 'Enter';
     if (exp === 'ARROWLEFT')  return k === 'ArrowLeft';
@@ -3741,11 +3608,11 @@ function matchesShortcut(event, str) {
     if (exp === 'END')  return k === 'End';
     if (exp === '[')    return k === '[' || (k === '{' && sh) || codeChar === '[';
     if (exp === ']')    return k === ']' || (k === '}' && sh) || codeChar === ']';
-    if (exp === '/')    return k === '/' || codeChar === '/';
-    if (exp === '.')    return k === '.' || codeChar === '.';
-    if (exp === ',')    return k === ',' || codeChar === ',';
-    if (exp === ';')    return k === ';' || k === '…' || codeChar === ';';
-    if (exp === '-')    return k === '-' || codeChar === '-';
+    if (exp === '/')    return k === '/';
+    if (exp === '.')    return k === '.';
+    if (exp === ',')    return k === ',';
+    if (exp === ';')    return k === ';' || k === '…';
+    if (exp === '-')    return k === '-';
     if (exp === '<')    return k === '<' || (k === ',' && sh);
     if (exp === '>')    return k === '>' || (k === '.' && sh);
     if (exp === '2')    return k === '2' || k === '™';
@@ -3761,9 +3628,8 @@ function matchesShortcut(event, str) {
   }
 
   // ── Bare modifiers ─────────────────────────────────────────────────────────
-  if (s === 'SHIFT')  return k === 'Shift'   && nocmd && !opt;
-  if (s === 'OPTION') return k === 'Alt'     && nocmd && !sh;
-  if (s === 'CMD')    return (currentOs === 'pc' ? event.ctrlKey : event.metaKey) && !event.altKey && !event.shiftKey && (k === 'Control' || k === 'Meta');
+  if (s === 'SHIFT')  return k === 'Shift' && nocmd && !opt;
+  if (s === 'OPTION') return k === 'Alt'   && nocmd && !sh;
 
   // ── Bare non-modifier keys ─────────────────────────────────────────────────
   if (s === 'SPACE')  return k === ' '          && nocmd && !opt && !sh;
@@ -4189,143 +4055,182 @@ function onModalFnToggle() {
   updateModalToggles();
 }
 
-// ── Keyboard icon modal ──────────────────────────────────────────────────────
+// ── Settings panel ──────────────────────────────────────────────
+// activeSettings: null | 'keyboard' | 'browser' | 'difficulty'
+var activeSettings = null;
+
+// Kept as aliases so existing code that checks kbModalOpen/browserModalOpen
+// continues to work during the transition. Both are now always false.
 var kbModalOpen = false;
 var browserModalOpen = false;
 
+var SP_PAGE_ORDER = ['keyboard', 'browser', 'difficulty', 'pause'];
 
-function positionIcons() {
+function _spPageEl(page) {
+  var ids = { keyboard: 'spKeyboard', browser: 'spBrowser', difficulty: 'spDifficulty', pause: 'spPause' };
+  return document.getElementById(ids[page]);
+}
+
+function _spAlignPanel() {
+  // keyboardPanel's offsetParent is kbFlipStage (position:relative).
+  // settingsPanelInner's offsetParent is settingsPanel → keyboardWrap.
+  // We need panel's left offset relative to keyboardWrap, so add stage.offsetLeft too.
   var panel = document.getElementById('keyboardPanel');
+  var stage = document.getElementById('kbFlipStage');
+  var inner = document.getElementById('settingsPanelInner');
   var wrap  = document.getElementById('keyboardWrap');
-  var kb    = document.getElementById('kbIcon');
-  var br    = document.getElementById('browserIcon');
-  if (!panel || !wrap) return;
-  var pRect = panel.getBoundingClientRect();
-  var wRect = wrap.getBoundingClientRect();
-  var KB_GAP = 18;  // left: keyboard icon
-  var BR_GAP = 36;  // right: browser icon (wider SVG needs more air)
-  if (kb) kb.style.left = Math.round(pRect.left - wRect.left - kb.offsetWidth - KB_GAP) + 'px';
-  if (br) br.style.left = Math.round(pRect.right - wRect.left + BR_GAP) + 'px';
-}
-var MODAL_W = 340;
-var MODAL_H = 460;
-var BROWSER_MODAL_W = 340;
-var BROWSER_MODAL_H = 450;
-var BROWSER_ROW_PX  = 26;   // extra px per conflict row beyond the base
-var BROWSER_BASE_ROWS = 3;  // rows that fit comfortably at BROWSER_MODAL_H
-
-function getBrowserModalHeight() {
-  var n = getBrowserConflicts().keys.length;
-  return BROWSER_MODAL_H + Math.max(0, n - BROWSER_BASE_ROWS) * BROWSER_ROW_PX;
+  if (!panel || !stage || !inner || !wrap) return;
+  var left  = stage.offsetLeft + panel.offsetLeft;
+  var width = panel.offsetWidth;
+  inner.style.left  = left + 'px';
+  inner.style.width = width + 'px';
+  // Adapt wrap height to fit content — rAF so browser lays out content first
+  requestAnimationFrame(function() {
+    var contentH = inner.scrollHeight;
+    var needed = contentH + 50;
+    wrap.style.minHeight = Math.max(needed, 282) + 'px';
+  });
 }
 
-function _kbPanelRect() {
-  var p = document.getElementById('keyboardPanel');
-  return p ? p.getBoundingClientRect() : null;
+var _iconWrapIds = { keyboard: 'kbIconWrap', browser: 'brIconWrap', difficulty: 'diffIconWrap' };
+
+function _pinTooltip(page) {
+  // Remove active class from all icon wraps, then add to the active one
+  Object.values(_iconWrapIds).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('sp-icon-active');
+  });
+  var wrapId = _iconWrapIds[page];
+  if (wrapId) {
+    var wrap = document.getElementById(wrapId);
+    if (wrap) wrap.classList.add('sp-icon-active');
+  }
 }
 
-var MODAL_OFFSET = 30;
-
-function _modalBasePos() {
-  var r = _kbPanelRect();
-  if (!r) return {top: 100, left: 100};
-  // Anchor: bottom-left corner of modal at centre of C key
-  // C key centre ≈ panel.left + 32.5% width, panel.top + 72.6% height
-  var cKeyX = r.left + window.scrollX + r.width  * 0.325;
-  var cKeyY = r.top  + window.scrollY + r.height * 0.726;
-  var top  = Math.round(cKeyY - MODAL_H);
-  var left = Math.round(cKeyX);
-  // Clamp to viewport
-  top  = Math.max(top,  window.scrollY + 8);
-  left = Math.max(left, 8);
-  left = Math.min(left, window.innerWidth - MODAL_W - 8);
-  return {top: top, left: left};
+function _unpinTooltip() {
+  if (activeSettings === null) {
+    Object.values(_iconWrapIds).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.remove('sp-icon-active');
+    });
+  }
 }
 
-// KB modal: always top-left (base pos). Browser modal: always bottom-right (base + offset).
-// Only z-index changes when bring-to-front; positions never swap.
-function _applyKbPos(modal) {
-  var p = _modalBasePos();
-  modal.style.top   = p.top  + 'px';
-  modal.style.left  = p.left + 'px';
-  modal.style.width = MODAL_W + 'px';
-  if (!modal.style.height) modal.style.height = MODAL_H + 'px';
-}
-function _applyBrowserPos(modal) {
-  var p = _modalBasePos();
-  modal.style.top   = (p.top  + MODAL_OFFSET) + 'px';
-  modal.style.left  = (p.left + MODAL_OFFSET) + 'px';
-  modal.style.width = MODAL_W + 'px';
-  if (!modal.style.height) modal.style.height = MODAL_H + 'px';
-}
+function openSettings(page) {
+  var wasOpen  = activeSettings !== null;
+  var prevPage = activeSettings;
+  activeSettings = page;
 
-function positionKbModal() {
-  var modal = document.getElementById('kbModal');
-  if (!modal) return;
-  _applyKbPos(modal);
-}
+  // Update kbPos — pause page uses edge same as browser/difficulty
+  var pos = (page === 'keyboard') ? 'partial' : 'edge';
+  setKbPosition(pos);
 
-function openKbModal() {
-  var km = document.getElementById('kbModal');
-  var bm = document.getElementById('browserModal');
-  // If browser modal is already showing, demote it to rear instantly (no animation restart)
-  if (bm && browserModalOpen) bm.style.zIndex = '201';
-  km.style.zIndex = '202';
-  km.style.height = MODAL_H + 'px';
-  _applyKbPos(km);
-  // Reset animation state so paperUnfurl plays fresh
-  km.classList.remove('visible');
-  km.style.animation = '';
-  void km.offsetWidth;
-  km.classList.add('visible');
-  kbModalOpen = true;
-  if (gameState === 'playing') { enterPause(true); }
-  else if (gameState === 'counting') { cancelCountdown(); _modalWasOpenOnPause = true; }
-  else if (gameState === 'paused') { _modalWasOpenOnPause = true; }
-}
+  // Pause game if needed (not for the pause page itself — enterPause calls us)
+  if (!wasOpen && page !== 'pause') {
+    if (gameState === 'playing')  { enterPause(true); }
+    else if (gameState === 'counting') { cancelCountdown(); _modalWasOpenOnPause = true; }
+    else if (gameState === 'paused')   { _modalWasOpenOnPause = true; }
+  }
 
-// Wrap to also update modal toggles on open
-var _origOpenKbModal = openKbModal;
-openKbModal = function() {
-  _origOpenKbModal();
-  updateModalToggles();
-  updateKbSizeToggle();
-};
+  // Populate content
+  if (page === 'browser')    _refreshBrowserContent();
+  if (page === 'keyboard')   { updateModalToggles(); updateKbSizeToggle(); }
 
-function closeKbModal() {
-  kbModalOpen = false;
-  var modal = document.getElementById('kbModal');
-  // Snapshot front/rear NOW before any z-index changes
-  var isFront = !browserModalOpen || modal.style.zIndex === '202';
-  var dur = isFront ? 450 : 550;
-  var anim = isFront
-    ? 'paperFurlFront 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards'
-    : 'paperFurl 0.55s cubic-bezier(0.64, 0, 0.78, 0) forwards';
-  modal.style.animation = anim;
-  modal.style.pointerEvents = 'none';
-  // If kb was rear, promote browser to front ONLY after kb has fully disappeared
-  // If kb was front, browser is already at z=201 and needs no change during animation
-  setTimeout(function() {
-    modal.classList.remove('visible');
-    modal.style.animation = '';
-    modal.style.pointerEvents = '';
-    // Promote surviving modal only after animation is complete
-    if (browserModalOpen) {
-      var bm = document.getElementById('browserModal');
-      if (bm) { bm.style.zIndex = '202'; }
+  // Align panel width to keyboard
+  _spAlignPanel();
+
+  // Show/activate the right page
+  var allPages = ['keyboard', 'browser', 'difficulty', 'pause'];
+  allPages.forEach(function(p) {
+    var el = _spPageEl(p);
+    if (!el) return;
+    el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left');
+  });
+
+  var pageEl = _spPageEl(page);
+  if (pageEl) {
+    pageEl.classList.add('sp-active');
+    if (wasOpen && prevPage !== page) {
+      // Wipe direction: based on page order
+      var prevIdx = SP_PAGE_ORDER.indexOf(prevPage);
+      var nextIdx = SP_PAGE_ORDER.indexOf(page);
+      pageEl.classList.add(nextIdx > prevIdx ? 'sp-wipe-in' : 'sp-wipe-in-left');
     }
-  }, dur);
+  }
+
+  // Open panel
+  var sp = document.getElementById('settingsPanel');
+  if (sp) sp.classList.add('sp-open');
+
+  // Disable pointer-events on the keyboard stage so the tilted panel
+  // doesn't intercept clicks on diffIcon and other elements below it
+  var stage = document.getElementById('kbFlipStage');
+  if (stage) stage.style.pointerEvents = 'none';
+
+  // Pin tooltip for active settings icon (not for pause page)
+  if (page !== 'pause') _pinTooltip(page);
 }
 
-function toggleKbModal() {
-  kbModalOpen ? closeKbModal() : openKbModal();
+function closeSettings() {
+  if (activeSettings === null) return;
+  activeSettings = null;
+  kbModalOpen    = false;
+  browserModalOpen = false;
+
+  var sp = document.getElementById('settingsPanel');
+  if (sp) sp.classList.remove('sp-open');
+
+  // Hide all pages
+  ['keyboard', 'browser', 'difficulty', 'pause'].forEach(function(p) {
+    var el = _spPageEl(p);
+    if (el) el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left');
+  });
+
+  _unpinTooltip();
+  // Restore keyboard pointer-events
+  var stage = document.getElementById('kbFlipStage');
+  if (stage) stage.style.pointerEvents = '';
+  // Reset wrap height
+  var wrap = document.getElementById('keyboardWrap');
+  if (wrap) wrap.style.minHeight = '';
+  // Only snap keyboard to face if not paused — when paused, runCountdown will
+  // animate it up at the right time as the player resumes.
+  if (gameState !== 'paused' && gameState !== 'counting') {
+    setKbPosition('face');
+  }
 }
 
-function positionBrowserModal() {
-  var modal = document.getElementById('browserModal');
-  if (!modal) return;
-  _applyBrowserPos(modal);
+function _closeAllModals() {
+  if (activeSettings !== null) closeSettings();
 }
+
+function _closeAllModalsInstant() {
+  if (activeSettings === null) return;
+  activeSettings = null;
+  kbModalOpen    = false;
+  browserModalOpen = false;
+  var sp = document.getElementById('settingsPanel');
+  if (sp) sp.classList.remove('sp-open');
+  ['keyboard', 'browser', 'difficulty', 'pause'].forEach(function(p) {
+    var el = _spPageEl(p);
+    if (el) el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left');
+  });
+  _unpinTooltip();
+  var stage2 = document.getElementById('kbFlipStage');
+  if (stage2) stage2.style.pointerEvents = '';
+  var wrap2 = document.getElementById('keyboardWrap');
+  if (wrap2) wrap2.style.minHeight = '';
+}
+
+// Legacy aliases — kept so remaining call sites compile
+function openKbModal()       { openSettings('keyboard'); }
+function closeKbModal()      { closeSettings(); }
+function toggleKbModal()     { activeSettings === 'keyboard' ? closeSettings() : openSettings('keyboard'); }
+function openBrowserModal()  { openSettings('browser'); }
+function closeBrowserModal() { closeSettings(); }
+function toggleBrowserModal(){ activeSettings === 'browser'  ? closeSettings() : openSettings('browser');  }
+function positionKbModal()   { _spAlignPanel(); }
+function positionBrowserModal() { _spAlignPanel(); }
 
 function _renderKeyChips(label) {
   var em      = '\u2014';
@@ -4379,9 +4284,6 @@ function _makeConflictRadio(canonicalKey) {
     + '<circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>'
     + '</svg>';
   wrap.addEventListener('click', function(e) {
-    // Ignore taps near the right edge of the modal
-    var bm = document.getElementById('browserModal');
-    if (bm && e.clientX >= bm.getBoundingClientRect().right - 35) return;
     var li = wrap.closest('li');
     if (dismissedConflicts.has(canonicalKey)) {
       // Restore
@@ -4403,9 +4305,9 @@ function _makeConflictRadio(canonicalKey) {
 }
 
 function _refreshBrowserContent() {
-  // Rebuild browser modal text/list to reflect current OS — no animation or z-index changes.
   var d     = getBrowserConflicts();
-  var bname = d.name;
+  var bname = d.name;    // e.g. 'Chrome' or 'your browser' if unknown
+  var knownBrowser = (bname !== 'your browser');
 
   var h = document.getElementById('browserCompatHeading');
   if (h) {
@@ -4413,20 +4315,29 @@ function _refreshBrowserContent() {
     var t1 = document.createElement('strong');
     t1.style.color = '#1e3a5f';
     t1.textContent = 'Keyboard Warriors';
-    var t2 = document.createTextNode(bname === 'Chromium' ? ', the shortcuts coach, is compatible with your Chromium-based browser, ' : ', the shortcuts coach, is compatible with your browser, ');
-    var t3 = document.createElement('strong');
-    t3.textContent = (bname === 'Chromium' ? 'Chrome, Edge, or Brave.' : bname + '.');
-    h.appendChild(t1); h.appendChild(t2); h.appendChild(t3);
+    h.appendChild(t1);
+    if (knownBrowser) {
+      h.appendChild(document.createTextNode(', the shortcuts coach, is compatible with your browser, '));
+      var t3 = document.createElement('strong');
+      t3.textContent = bname + '.';
+      h.appendChild(t3);
+    } else {
+      h.appendChild(document.createTextNode(', the shortcuts coach, is compatible with your browser.'));
+    }
   }
 
   var intro = document.getElementById('browserCompatIntro');
   if (intro) {
     if (d.labels.length > 0) {
-      intro.textContent = 'But, you may find that your ' + (bname === 'Chromium' ? 'Chromium-based browser' : bname) + ' can take over if it hears one of its favourite shortcuts called:';
+      intro.textContent = 'But, you may find it can take over if it hears one of its favourite shortcuts. We will try not to ask you any questions that use these specific key combinations, but if we do get interrupted during play, just click back into our window to continue training.';
     } else {
       intro.textContent = 'We haven\u2019t spotted any shortcut conflicts for your current setup \u2014 you\u2019re good to go.';
     }
   }
+
+  // Hide the footer paragraph when intro already contains the full explanation
+  var ft = document.getElementById('browserCompatFooter');
+  if (ft) ft.textContent = '';
 
   var ul = document.getElementById('browserCompatList');
   if (ul) {
@@ -4442,124 +4353,31 @@ function _refreshBrowserContent() {
       label.className = 'conflict-label';
       label.appendChild(_renderKeyChips(s));
       li.appendChild(label);
-      // Clicking anywhere on the row also toggles
       li.addEventListener('click', function(e) {
-        // Ignore taps near the right edge (used to bring modal to front, not interact)
-        var bm = document.getElementById('browserModal');
-        if (bm) {
-          var bmRight = bm.getBoundingClientRect().right;
-          if (e.clientX >= bmRight - 35) return;
-        }
-        if (e.target.closest('.modal-radio')) return; // radio handles its own click
+        if (e.target.closest('.modal-radio')) return;
         li.querySelector('.modal-radio').click();
       });
       ul.appendChild(li);
     });
   }
-
-  var ft = document.getElementById('browserCompatFooter');
-  if (ft) ft.textContent = 'We will try not to ask you any questions that use these specific key combinations, but if we do get interrupted during play, just click back into our window to continue training.';
-  // Update modal height live (e.g. OS toggle changes conflict count)
-  if (browserModalOpen) {
-    var bm2 = document.getElementById('browserModal');
-    if (bm2) bm2.style.height = getBrowserModalHeight() + 'px';
-  }
-}
-
-function openBrowserModal() {
-  _refreshBrowserContent();
-
-  var bm = document.getElementById('browserModal');
-  var km = document.getElementById('kbModal');
-  // If kb modal is already showing, demote it to rear instantly (no animation restart)
-  if (km && kbModalOpen) km.style.zIndex = '201';
-  bm.style.zIndex = '202';
-  bm.style.height = getBrowserModalHeight() + 'px';
-  _applyBrowserPos(bm);
-  // Reset animation state so paperUnfurl plays fresh
-  bm.classList.remove('visible');
-  bm.style.animation = '';
-  void bm.offsetWidth;
-  bm.classList.add('visible');
-  browserModalOpen = true;
-  if (gameState === 'playing') { enterPause(true); }
-  else if (gameState === 'counting') { cancelCountdown(); _modalWasOpenOnPause = true; }
-  else if (gameState === 'paused') { _modalWasOpenOnPause = true; }
-}
-
-function closeBrowserModal() {
-  browserModalOpen = false;
-  var modal = document.getElementById('browserModal');
-  // Snapshot front/rear NOW before any z-index changes
-  var isFront = !kbModalOpen || modal.style.zIndex === '202';
-  var dur = isFront ? 450 : 550;
-  var anim = isFront
-    ? 'paperFurlFront 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards'
-    : 'paperFurl 0.55s cubic-bezier(0.64, 0, 0.78, 0) forwards';
-  modal.style.animation = anim;
-  modal.style.pointerEvents = 'none';
-  setTimeout(function() {
-    modal.classList.remove('visible');
-    modal.style.animation = '';
-    modal.style.pointerEvents = '';
-    // Promote surviving modal only after animation is complete
-    if (kbModalOpen) {
-      var km = document.getElementById('kbModal');
-      if (km) { km.style.zIndex = '202'; }
-    }
-  }, dur);
-}
-
-function toggleBrowserModal() {
-  browserModalOpen ? closeBrowserModal() : openBrowserModal();
 }
 
 // ── Unified icon click handlers ──────────────────────────────────────────────
 document.getElementById('kbIcon').addEventListener('click', function(e) {
   e.stopPropagation();
+  resetEndScreenInactivityTimer();
   toggleKbModal();
 });
 
 document.getElementById('browserIcon').addEventListener('click', function(e) {
   e.stopPropagation();
+  resetEndScreenInactivityTimer();
   toggleBrowserModal();
 });
 
-// ── Clicking the back modal brings it to front (deferred: modals are after script tag) ──
-window.addEventListener('load', function() {
-  document.getElementById('kbModal').addEventListener('mousedown', function(e) {
-    var km = document.getElementById('kbModal');
-    var bm = document.getElementById('browserModal');
-    if (!browserModalOpen || km.style.zIndex === '202') return;
-    // X button must never trigger bring-to-front
-    if (e.target.closest('.modal-dismiss-btn')) return;
-    // Only bring to front if the click point is NOT inside the front modal
-    var frontRect = bm.getBoundingClientRect();
-    if (e.clientX >= frontRect.left && e.clientX <= frontRect.right &&
-        e.clientY >= frontRect.top  && e.clientY <= frontRect.bottom) return;
-    km.style.zIndex = '202';
-    bm.style.zIndex = '201';
-  });
-  document.getElementById('browserModal').addEventListener('mousedown', function(e) {
-    var bm = document.getElementById('browserModal');
-    var km = document.getElementById('kbModal');
-    if (!kbModalOpen || bm.style.zIndex === '202') return;
-    // X button must never trigger bring-to-front
-    if (e.target.closest('.modal-dismiss-btn')) return;
-    // Only bring to front if the click point is NOT inside the front modal
-    var frontRect = km.getBoundingClientRect();
-    if (e.clientX >= frontRect.left && e.clientX <= frontRect.right &&
-        e.clientY >= frontRect.top  && e.clientY <= frontRect.bottom) return;
-    bm.style.zIndex = '202';
-    km.style.zIndex = '201';
-  });
-});
-
-// ── Outside-click: modals are no longer dismissed by clicking empty space.
-//    Only X buttons or resuming play closes them.
-//    App pill is still blocked during play.
+// ── Outside-click: app pill blocked during play, settings unaffected ─────────
 document.addEventListener('click', function(e) {
-  if (!kbModalOpen && !browserModalOpen) return;
+  if (activeSettings === null) return;
   var midGame = (gameState === 'playing' || gameState === 'paused');
   if (!midGame) return;
   var appP = document.getElementById('appPill');
@@ -4569,10 +4387,29 @@ document.addEventListener('click', function(e) {
   }
 });
 
+function positionIcons() {
+  var panel = document.getElementById('keyboardPanel');
+  var wrap  = document.getElementById('keyboardWrap');
+  var kbWrap = document.getElementById('kbIconWrap');
+  var brWrap = document.getElementById('brIconWrap');
+  var kb = document.getElementById('kbIcon');
+  var br = document.getElementById('browserIcon');
+  if (!panel || !wrap) return;
+  var pRect = panel.getBoundingClientRect();
+  var wRect = wrap.getBoundingClientRect();
+  var KB_GAP = 36;
+  var BR_GAP = 36;
+  var kbLeft = Math.round(pRect.left - wRect.left - (kbWrap ? kbWrap.offsetWidth : 44) - KB_GAP);
+  var brLeft = Math.round(pRect.right - wRect.left + BR_GAP);
+  if (kbWrap) { kbWrap.style.left = kbLeft + 'px'; kbWrap.style.right = 'auto'; }
+  else if (kb) kb.style.left = kbLeft + 'px';
+  if (brWrap) { brWrap.style.left = brLeft + 'px'; brWrap.style.right = 'auto'; }
+  else if (br) br.style.left = brLeft + 'px';
+}
+
 window.addEventListener('resize', function() {
   positionIcons();
-  if (kbModalOpen)      positionKbModal();
-  if (browserModalOpen) positionBrowserModal();
+  if (activeSettings !== null) _spAlignPanel();
 });
 
 // ── Game-area click pulses the contextually useful button ────────────────────
@@ -4580,7 +4417,7 @@ document.getElementById('gameContainer').addEventListener('click', function(e) {
   // Don't intercept clicks on actual buttons/interactive elements
   var tag = e.target.tagName;
   if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'LABEL' || tag === 'A') return;
-  if (e.target.closest('button, input, label, a, #timerBox, #kbIcon, #browserIcon, #appPill, #appDropdown, #debugOverlay')) return;
+  if (e.target.closest('button, input, label, a, #timerBox, #kbIcon, #browserIcon, #appPill, #appDropdown, #debugOverlay, #settingsPanel')) return;
 
   if (gameState === 'paused') {
     pulseBtn(document.getElementById('mainBtn'));
@@ -4699,7 +4536,7 @@ function dbgReport() {
     btn.textContent = 'Preparing…';
     setTimeout(function() { btn.textContent = 'Report'; }, 2500);
   }
-  var body    = 'Bug report from Keyboard Warriors:\n\n' + dbgBuildReport() + '\n\nPlease describe the issue here:';
+  var body    = '\nBug report from Keyboard Warriors:\n\n' + dbgBuildReport() + '\n\nPlease describe the issue here:\n';
   var subject = 'Keyboard Warriors error report';
   window.location.href = 'mailto:Wednesday%20Dessauer%20%3Cddessauer%40swin.edu.au%3E?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
 }
@@ -4716,18 +4553,8 @@ function dbgRefreshCtx() {
   const pool     = questionPool.length;
   const qi       = pool > 0 ? (questionIndex % pool) + 1 : '—';
   const qStr     = state === 'idle' ? '—/0' : qi + '/' + pool;
-  var browserName = (function() {
-    var ua = navigator.userAgent || '';
-    if (/Edg\//.test(ua))    return 'Edge';
-    if (/Firefox\//.test(ua)) return 'Firefox';
-    if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) return 'Safari';
-    if (/OPR\//.test(ua))    return 'Opera';
-    if (/Brave\//.test(ua) || navigator.brave !== undefined) return 'Brave';
-    if (/Chrome\//.test(ua)) return 'Chrome';
-    return 'unknown';
-  })();
   top.textContent = 'app:' + appName + '  state:' + state + '  Q:' + qStr;
-  if (sub) sub.textContent = 'device:' + device + '  os:' + osName + '  browser:' + browserName + '  build:2026.03';
+  if (sub) sub.textContent = 'build:' + device + '  os:' + osName;
 }
 
 // ── Debug accuracy display ────────────────────────────────────────────────────
@@ -4781,13 +4608,12 @@ function getBrowserConflicts() {
 
   // Detect browser
   var browser;
-  if      (/Edg\//.test(ua))                                         browser = 'Edge';
-  else if (/Firefox\//.test(ua))                                     browser = 'Firefox';
-  else if (/Safari\//.test(ua) && !/Chrome\//.test(ua))             browser = 'Safari';
-  else if (/OPR\//.test(ua))                                         browser = 'Opera';
-  else if (/Brave\//.test(ua) || navigator.brave !== undefined)      browser = 'Chromium';
-  else if (/Chrome\//.test(ua))                                      browser = 'Chromium';
-  else                                                                browser = null;
+  if      (/Edg\//.test(ua))                              browser = 'Edge';
+  else if (/Firefox\//.test(ua))                          browser = 'Firefox';
+  else if (/Safari\//.test(ua) && !/Chrome\//.test(ua))  browser = 'Safari';
+  else if (/OPR\//.test(ua))                              browser = 'Opera';
+  else if (/Chrome\//.test(ua))                           browser = 'Chrome';
+  else                                                     browser = null;
 
   // Conflict tables — Mac shortcuts use Cmd, PC use Ctrl (same token in our shortcut strings)
   // Values are the canonical shortcut strings used in SHORTCUTS[].shortcut
@@ -4796,15 +4622,13 @@ function getBrowserConflicts() {
     Firefox: ['CMD+T','CMD+OPTION+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
     Safari:  ['CMD+T','CMD+OPTION+U','CMD+OPTION+I','CMD+OPTION+C','CMD+SHIFT+H','CMD+SHIFT+I','CMD+SHIFT+L'],
     Opera:   ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Chrome:    ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
-    Chromium:  ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
+    Chrome:  ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
   };
   var pc = {
     Edge:    ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
     Firefox: ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
     Opera:   ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Chrome:    ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+C','CMD+SHIFT+N'],
-    Chromium:  ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+C','CMD+SHIFT+N'],
+    Chrome:  ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+C','CMD+SHIFT+N'],
   };
 
   // Human-readable labels — Mac vs PC, browser-specific
@@ -4850,13 +4674,6 @@ function getBrowserConflicts() {
       'Cmd+Shift+C \u2014 opens DevTools inspector',
       'Cmd+Shift+N \u2014 opens Incognito window',
     ],
-    Chromium: [
-      'Cmd+T \u2014 opens new tab',
-      'Cmd+Opt+I \u2014 opens DevTools',
-      'Cmd+Opt+J \u2014 opens DevTools console',
-      'Cmd+Shift+C \u2014 opens DevTools inspector',
-      'Cmd+Shift+N \u2014 opens Incognito window',
-    ],
   };
   var pcLabels = {
     Edge: [
@@ -4886,12 +4703,6 @@ function getBrowserConflicts() {
     ],
     Chrome: [
       'Ctrl+T \u2014 opens new tab',
-      'Ctrl+Shift+I \u2014 opens DevTools',
-      'Ctrl+Shift+J \u2014 opens DevTools console',
-      'Ctrl+Shift+C \u2014 opens DevTools inspector',
-      'Ctrl+Shift+N \u2014 opens Incognito window',
-    ],
-    Chromium: [
       'Ctrl+T \u2014 opens new tab',
       'Ctrl+Shift+I \u2014 opens DevTools',
       'Ctrl+Shift+J \u2014 opens DevTools console',
@@ -4942,10 +4753,26 @@ positionIcons();
 
 /* ══════════════════════════════════════
    POOL BUILDER
-   Filters master SHORTCUTS list by the
-   selected app and current OS mode.
+   Builds the question pool from UNIVERSAL_SHORTCUTS
+   plus the loaded app-specific shortcuts JSON.
+   Filters by current OS, difficulty, keyboard, and browser.
 ══════════════════════════════════════ */
-const APP_FIELD = {Ps:'ps', Ai:'ai', In:'indd', Ae:'ae', Fi:'fi'};
+
+// Maps each app key to its JSON filename (no extension)
+const APP_JSON_FILE_PATH = {
+  Ps: '/keyboard_warriors/data/shortcuts_photoshop.json',
+  Ai: '/keyboard_warriors/data/shortcuts_illustrator.json',
+  In: '/keyboard_warriors/data/shortcuts_inDesign.json',
+  Ae: '/keyboard_warriors/data/shortcuts_afterEffects.json',
+  Fi: '/keyboard_warriors/data/shortcuts_figma.json'
+};
+
+// The app key whose shortcuts are currently held in memory (null = nothing loaded yet)
+let loadedAppName      = null;
+// The shortcuts loaded from the current app's JSON file
+let loadedAppShortcuts = [];
+// Increments each time a load is requested, used to ignore stale fetch responses
+let loadSequenceNumber = 0;
 
 // Codes that only exist on the extended keyboard (not on the graphical layout)
 const EXT_CODES = new Set(Object.keys(EXT_KEY_LABELS));
@@ -4956,16 +4783,57 @@ function requiresExtKey(shortcut) {
 }
 
 function buildPool() {
-  const field        = APP_FIELD[currentApp] || 'ps';
-  const browserSkip  = getBrowserConflictSet();
-  return SHORTCUTS.filter(s => {
-    if (!s[field]) return false;
+  const browserSkip   = getBrowserConflictSet();
+  const allShortcuts  = UNIVERSAL_SHORTCUTS.concat(loadedAppShortcuts);
+  return allShortcuts.filter(s => {
     if (!s.pc_safe && currentOs === 'pc') return false;
     if (s.difficulty > 3) return false;
     if ((touchEnabled || !hasFullKeyboard) && requiresExtKey(s.shortcut)) return false;
     if (browserSkip.has(s.shortcut)) return false;
     return true;
   });
+}
+
+// Loads the JSON for the given app key into memory, then calls onReady.
+// If the correct app is already loaded, calls onReady immediately.
+// The Cancel button must be disabled before calling this function.
+function loadAppShortcutsIfNeeded(appKey, onReady) {
+  if (loadedAppName === appKey) {
+    onReady();
+    return;
+  }
+
+  showModeToast('Preparing shortcuts…');
+
+  const thisLoadSequence = ++loadSequenceNumber;
+
+  const filePath = APP_JSON_FILE_PATH[appKey];
+  console.log('[Shortcuts] Fetching:', filePath);
+
+  fetch(filePath)
+    .then(function(response) {
+      console.log('[Shortcuts] Response status:', response.status, 'for', filePath);
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      return response.json();
+    })
+    .then(function(shortcuts) {
+      console.log('[Shortcuts] Loaded', shortcuts.length, 'shortcuts for', appKey);
+      if (thisLoadSequence === loadSequenceNumber) {
+        loadedAppShortcuts = shortcuts;
+        loadedAppName      = appKey;
+        onReady();
+      } else {
+        console.log('[Shortcuts] Stale response ignored (sequence mismatch)');
+      }
+    })
+    .catch(function(error) {
+      console.error('[Shortcuts] Failed to load for ' + appKey + ':', error, '| Path was:', filePath);
+      if (thisLoadSequence === loadSequenceNumber) {
+        loadedAppShortcuts = [];
+        loadedAppName      = appKey;
+        onReady();
+      }
+    });
 }
 function cancelCountdown() {
   if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
@@ -4985,15 +4853,19 @@ function cancelCountdown() {
 function beginCountdown() {
   // Prevent double-triggers during countdown
   if (_countdownTimer) return;
-  _countdownMode = 'start';
-  gameState = 'counting';
+  _countdownMode    = 'start';
+  gameState         = 'counting';
   mainBtn.textContent = 'Cancel';
-  mainBtn.disabled = false;
-  helpBtn.disabled = true;
-  runCountdown(function() {
+  mainBtn.disabled  = true;
+  helpBtn.disabled  = true;
+
+  loadAppShortcutsIfNeeded(currentApp, function() {
     mainBtn.disabled = false;
-    helpBtn.disabled = false;
-    startGame();
+    runCountdown(function() {
+      mainBtn.disabled = false;
+      helpBtn.disabled = false;
+      startGame();
+    });
   });
 }
 
@@ -5016,11 +4888,13 @@ function beginResumeCountdown() {
 function startGame() {
   gameState = 'playing';
   setAppSelectorGameActive(true);
+  clearTimeout(endScreenInactivityTimer);
+  endScreenInactivityTimer = null;
   totalTime = 0;
   transitioning = false;
   questionPool = shuffleArray(buildPool());
   if (currentApp === 'Ae' && !hasFullKeyboard) {
-    showModeToast('After Effects uses many extended keyboard shortcuts. Switch to Full Keyboard for the best experience.');
+    showToast('After Effects uses many extended keyboard shortcuts. Switch to Full Keyboard for the best experience.');
   }
   questionIndex = 0;
   answersLeft = 10;
@@ -5076,6 +4950,7 @@ function skipShortcut() {
 }
 
 function advanceQuestion() {
+  resetPartialShortcutNudgeTimers();
   // Move to the next question in the pool, reshuffling if we reach the end
   const lastDisplay = questionPool[questionIndex]?.display;
   questionIndex++;
@@ -5135,6 +5010,21 @@ function endGameMessage(time, accuracy, record, wasFirst) {
   return 'Keep practising. Every rep counts.';
 }
 
+function startEndScreenInactivityTimer() {
+  clearTimeout(endScreenInactivityTimer);
+  endScreenInactivityTimer = setTimeout(function pulseAndReschedule() {
+    if (gameState !== 'finished') { endScreenInactivityTimer = null; return; }
+    pulseBtn(document.getElementById('mainBtn'));
+    endScreenInactivityTimer = setTimeout(pulseAndReschedule, 5000);
+  }, 5000);
+}
+
+function resetEndScreenInactivityTimer() {
+  if (gameState !== 'finished') return;
+  clearTimeout(endScreenInactivityTimer);
+  startEndScreenInactivityTimer();
+}
+
 function endGame() {
   gameState = 'finished';
   setAppSelectorGameActive(false);
@@ -5177,6 +5067,7 @@ function endGame() {
   mainBtn.textContent = 'Try again?';
   titleEl.className = '';
   titleEl.textContent = endGameMessage(totalTime, finalAccuracy, bestRecord, wasFirstRecord);
+  startEndScreenInactivityTimer();
   fillProgressDot(9);
   setTimeout(hideProgressDots, 0);
   timerBox.className = 'timerBox medal-' + medal;
@@ -5300,6 +5191,13 @@ function runCountdown(onComplete) {
   // Clear any running countdown
   if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
 
+  // Start moving keyboard to face position immediately — it has the full
+  // countdown duration (~2.7s) to complete the 850ms transition.
+  setKbPosition('face');
+
+  // Close any open settings panel (including pause screen)
+  _closeAllModalsInstant();
+
   var overlay = document.getElementById('countdownOverlay');
   var numEl   = document.getElementById('countdownNum');
   if (!overlay || !numEl) { onComplete(); return; }
@@ -5338,7 +5236,6 @@ function showTip(index) {
 }
 
 function handleKeydown(e) {
-  if (e.repeat) { updateKeyboardLighting(e, true); return; }
   updateKeyboardLighting(e, true);
   // DEBUG
   const dbg = document.getElementById('debugOverlay');
@@ -5451,6 +5348,84 @@ function handleKeyup(e) {
   }
 }
 
+/* ── Keyboard flip ────────────────────────────────── */
+var _kbPos     = 'face'; // 'face' | 'partial' | 'edge'
+var _flipBusy  = false;  // kept for applyOsMode compatibility — unused by setKbPosition
+var _kbFlipped = false;  // kept for applyOsMode compatibility — true when pos is 'edge'
+var _flipSeq   = 0;      // still used by the show/hide icon timing
+
+// KB position targets
+var KB_POS = {
+  face:    { stage: 'translateY(0px)',   panel: 'rotateX(0deg)'  },
+  partial: { stage: 'translateY(89px)',  panel: 'rotateX(62deg)' },
+  edge:    { stage: 'translateY(118px)', panel: 'rotateX(82deg)' },
+};
+
+function setKbPosition(pos) {
+  if (pos === _kbPos) return;
+  var prev = _kbPos;
+  _kbPos     = pos;
+  _kbFlipped = (pos === 'edge');
+  _flipBusy  = false;
+  var seq = ++_flipSeq;
+
+  var panel = document.getElementById('keyboardPanel');
+  var stage = document.getElementById('kbFlipStage');
+  var wrap  = document.getElementById('keyboardWrap');
+
+  // Going away from face — hide icons, show 3D edges
+  if (prev === 'face') {
+    wrap.classList.add('kb-flipping');
+    setTimeout(function() {
+      if (_flipSeq !== seq) return;
+      panel.classList.add('kb-edged');
+    }, 200);
+  }
+
+  // Going to face — remove 3D edges, reveal icons after transition
+  if (pos === 'face') {
+    stage.classList.remove('kb-show-base');
+    panel.classList.remove('kb-edges-visible', 'kb-edged');
+    setTimeout(function() {
+      if (_flipSeq !== seq) return;
+      wrap.classList.remove('kb-flipping');
+    }, 900);
+  }
+
+  // Arriving at edge — show edge details
+  if (pos === 'edge') {
+    setTimeout(function() {
+      if (_flipSeq !== seq) return;
+      panel.classList.add('kb-edges-visible');
+    }, 400);
+    setTimeout(function() {
+      if (_flipSeq !== seq) return;
+      stage.classList.add('kb-show-base');
+    }, 650);
+  } else {
+    panel.classList.remove('kb-edges-visible');
+    stage.classList.remove('kb-show-base');
+  }
+
+  // Apply the CSS transform — transition handles smooth interpolation from any position
+  stage.style.transform = KB_POS[pos].stage;
+  panel.style.transform = KB_POS[pos].panel;
+  panel.classList.toggle('kb-partial', pos === 'partial');
+}
+
+function _resetFlipState() {
+  // Instantly snaps to face — used by applyOsMode when rebuilding the keyboard
+  _flipSeq++;
+  _kbPos     = 'face';
+  _kbFlipped = false;
+  _flipBusy  = false;
+  var panel = document.getElementById('keyboardPanel');
+  var stage = document.getElementById('kbFlipStage');
+  var wrap  = document.getElementById('keyboardWrap');
+  if (panel) { panel.classList.remove('kb-edged', 'kb-edges-visible', 'kb-partial'); panel.style.transform = ''; }
+  if (stage) { stage.classList.remove('kb-show-base'); stage.style.transform = ''; }
+  if (wrap)  { wrap.classList.remove('kb-flipping'); }
+}
 
 /* ── Difficulty toast helper ───────────────────────── */
 var _diffToastTimer = null;
@@ -5460,22 +5435,21 @@ function showDiffToast(msg) {
   clearTimeout(_diffToastTimer);
   el.textContent = msg;
   el.classList.add('visible');
+  var readingDuration = Math.min(6000, 1800 + msg.length * 65);
   _diffToastTimer = setTimeout(function() {
     el.classList.remove('visible');
-  }, 2200);
+  }, readingDuration);
 }
 
-/* ── Difficulty icon — needle states ──────────────── */
-var _diffState = 0;   // -1 = left/basics, 0 = centre/normal, 1 = right/hardcore
-var _diffFirst = false; // no suppression needed — nothing calls setDiffState at init
-
+/* ── Difficulty needle states (ready, not yet wired to click) ── */
+var _diffState = 0;   // -1 = basics, 0 = normal, 1 = hardcore
+var _diffFirst = false;
 var DIFF_ANGLES = { '-1': -60, '0': 0, '1': 60 };
 var DIFF_TOASTS = {
   '-1': 'Basics mode coming soon.',
    '0': 'You are in normal mode.',
    '1': 'Hardcore mode coming soon.'
 };
-
 function setDiffState(newState) {
   var changed = (newState !== _diffState);
   _diffState = newState;
@@ -5485,185 +5459,31 @@ function setDiffState(newState) {
   _diffFirst = false;
 }
 
-(function() {
-  var diffWrap = document.getElementById('diffIconWrap');
-  if (!diffWrap) return;
-  diffWrap.addEventListener('click', function() {
-    var next = _diffState + 1;
-    if (next > 1) next = -1;
-    setDiffState(next);
-  });
-})();
-
-/* ── Icon tooltips ─────────────────────────────────── */
-(function() {
-  var tooltipEl   = document.getElementById('iconTooltip');
-  var tooltipTimer  = null;
-  var tooltipHideTimer = null;
-
-  var TOOLTIPS = [
-    { id: 'kbIcon',      text: 'keyboard\nsettings' },
-    { id: 'browserIcon', text: 'browser\nsettings' },
-    { id: 'diffIcon',    text: 'difficulty\nsettings' }
-  ];
-
-  function showTip(el, text) {
-    clearTimeout(tooltipTimer);
-    clearTimeout(tooltipHideTimer);
-    tooltipTimer = setTimeout(function() {
-      var r = el.getBoundingClientRect();
-      tooltipEl.textContent = text;
-      tooltipEl.style.left = (r.left + r.width / 2) + 'px';
-      tooltipEl.style.top  = (r.bottom + 10) + 'px';
-      tooltipEl.style.transform = 'translateX(-50%)';
-      tooltipEl.classList.remove('visible');
-      requestAnimationFrame(function() {
-        requestAnimationFrame(function() {
-          tooltipEl.classList.add('visible');
-        });
-      });
-    }, 600);
+/* ── Active click handler — flip animation ───────────── */
+function diffIconClick() {
+  resetEndScreenInactivityTimer();
+  if (activeSettings === 'difficulty') {
+    closeSettings();
+  } else {
+    openSettings('difficulty');
   }
+}
 
-  function hideTip() {
-    clearTimeout(tooltipTimer);
-    tooltipHideTimer = setTimeout(function() {
-      tooltipEl.classList.remove('visible');
-    }, 80);
-  }
+/* ── Shared icon tooltip ──────────────────────────── */
+// Tooltips are now pure CSS (.icon-tip inside each wrap).
+// _pinTooltip / _unpinTooltip toggle .sp-icon-active class on the wrap.
 
-  TOOLTIPS.forEach(function(t) {
-    var el = document.getElementById(t.id);
-    if (!el) return;
-    el.addEventListener('mouseenter', function() { showTip(el, t.text); });
-    el.addEventListener('mouseleave', hideTip);
-  });
-})();
-
+document.addEventListener('DOMContentLoaded', function() {
+  var di = document.getElementById('diffIcon');
+  if (di) di.addEventListener('click', diffIconClick);
+});
 </script>
-<div id="kbModal" role="dialog" aria-modal="true">
-  <button class="modal-dismiss-btn" onclick="closeKbModal()">&times;</button>
-  <div id="kbModalInner">
-
-    <p class="modal-section-title">Keyboard Behaviour:</p>
-    <div class="modal-section-gap"></div>
-
-    <div class="modal-toggle-row" id="stickyRow">
-      <label onclick="onStickyKeysToggle()">
-        <span class="modal-radio" id="stickyRadio">
-          <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
-            <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
-          </svg>
-        </span>
-        <span class="modal-toggle-label">Sticky Keys</span>
-      </label>
-    </div>
-
-    <div class="modal-toggle-row" id="touchRow">
-      <label onclick="onTouchToggle()">
-        <span class="modal-radio" id="touchRadio">
-          <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
-            <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
-          </svg>
-        </span>
-        <span class="modal-toggle-label">Touch Enabled (soft keys)</span>
-      </label>
-    </div>
-
-    <div class="modal-toggle-row disabled" id="audibleRow">
-      <label onclick="onAudibleToggle()">
-        <span class="modal-radio" id="audibleRadio">
-          <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
-            <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
-          </svg>
-        </span>
-        <span class="modal-toggle-label">Audible</span>
-      </label>
-    </div>
-
-    <div class="modal-section-gap"></div>
-    <div class="modal-section-gap"></div>
-
-    <p class="modal-section-title">Keyboard Layout:</p>
-    <div class="modal-section-gap"></div>
-
-    <div class="modal-layout-rows">
-
-      <!-- Row 1: 3 / 4 keys -->
-      <div class="modal-inline-row">
-        <div class="modal-left-label"><span>3</span></div>
-        <div class="modal-switch-wrap">
-          <label class="os-switch" title="Keys left of space" style="cursor:pointer;">
-            <input type="checkbox" id="modalOsToggle" onchange="onModalOsToggle()">
-            <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect id="modalOsTrackRect" x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
-              <circle id="modalOsKnobEl" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
-                      style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
-            </svg>
-          </label>
-        </div>
-        <div class="modal-right-label"><span class="modal-inline-val">4</span>&ensp;<span class="modal-inline-label">keys to the left of spacebar</span></div>
-      </div>
-
-      <!-- Row 2: ctrl / fn -->
-      <div class="modal-inline-row" id="modalFnRow">
-        <div class="modal-left-label"><span id="modalFnLabelLeft"></span></div>
-        <div class="modal-switch-wrap">
-          <label class="os-switch" title="Leftmost key" style="cursor:pointer;">
-            <input type="checkbox" id="modalFnToggle" onchange="onModalFnToggle()">
-            <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
-              <circle id="modalFnKnobEl" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
-                      style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
-            </svg>
-          </label>
-        </div>
-        <div class="modal-right-label"><span id="modalFnLabelRight" class="modal-inline-val"></span>&ensp;<span class="modal-inline-label">is the leftmost key</span></div>
-      </div>
-
-    </div><!-- /.modal-layout-rows -->
-
-    <div class="modal-section-gap"></div>
-    <div id="modalKbSizeSection">
-      <p>The on-screen display shows a compact keyboard, but the game also accepts input from full-sized keyboards with their extended keys.</p>
-      <p>Don&#8217;t have a full-sized keyboard? Let us know so we won&#8217;t ask you any impossible questions:</p>
-      <div class="modal-kbsize-row" id="modalKbSizeRow">
-        <div class="modal-left-label"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 167 101.8" style="width:66px;height:auto;fill:#9ca3af;flex-shrink:0;"><path d="M142.1,32.4H24.9c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h117.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM143.4,65.9c0,.7-.6,1.3-1.3,1.3H24.9c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h117.2c.7,0,1.3.6,1.3,1.3v29.6ZM28.7,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM28.7,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM109.4,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM28.7,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM79.3,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM109.4,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM38.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM46.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM54.6,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM62.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.9,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM79,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM87.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.3,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM54.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM58.3,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM71.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM88.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM96.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM49.8,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM57.8,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM66.6,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM70.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM84.2,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM93,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM118.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM109.4,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM118.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM118.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM118.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM48.9,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM41.8,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM34.7,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM87,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM94.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM102,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM109.4,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/></svg></div>
-        <div class="modal-switch-wrap">
-          <label class="os-switch" title="Keyboard size" style="cursor:pointer;">
-            <input type="checkbox" id="modalKbSizeToggle" onchange="onKbSizeToggle()">
-            <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
-              <circle id="modalKbSizeKnob" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
-                      style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
-            </svg>
-          </label>
-        </div>
-        <div class="modal-right-label"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;fill:#9ca3af;"> <path d="M98.6,32.4H11.4c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h87.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM99.9,65.9c0,.7-.6,1.3-1.3,1.3H11.4c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h87.2c.7,0,1.3.6,1.3,1.3v29.6ZM15.2,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM15.2,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM95.9,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM15.2,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM65.8,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM95.9,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM24.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM33,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.1,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM49.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM57.4,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM65.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM73.7,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM27.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM40.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM44.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM57.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM66.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM74.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM83.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM36.3,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM44.3,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM53.1,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM56.7,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.7,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.5,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM81.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.9,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM35.4,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM28.3,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM21.2,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM73.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM81,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM88.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM95.9,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/> </svg></div>
-      </div>
-    </div><!-- /#modalKbSizeSection -->
-
-</div><!-- /#kbModalInner -->
-</div><!-- /#kbModal -->
-
-<div id="browserModal" role="dialog" aria-modal="true">
-  <button class="modal-dismiss-btn" onclick="closeBrowserModal()">&times;</button>
-  <div id="browserModalInner">
-    <p class="modal-section-title" style="padding-right:24px;">Browser Compatibility Report:</p>
-    <div class="modal-section-gap"></div>
-    <p class="compat-heading" id="browserCompatHeading"></p>
-    <p class="compat-intro"   id="browserCompatIntro"></p>
-    <ul id="browserCompatList"></ul>
-    <p class="compat-footer"  id="browserCompatFooter"></p>
-    <div class="modal-section-gap"></div>
-    <p class="compat-debug-hint">If you encounter an error, please hold down
-      <span style="display:inline-block;font-size:10px;font-weight:600;color:#1e3a5f;border:1px solid #d1d5db;border-radius:3px;padding:1px 4px 0;line-height:1.6;white-space:nowrap;">Esc</span>
-      to wake my debug window where you can send me a report.</p>
-  </div>
-</div>
+<!-- ══════════════════════════════════════
+     SETTINGS PANEL
+     Sits in page flow between statsRow and keyboardWrap.
+     Width is aligned to keyboardPanel via JS on open.
+     Content fades/wipes in as keyboard descends.
+══════════════════════════════════════ -->
 
 <style>
 #modalKbSizeSection {
@@ -5684,6 +5504,272 @@ function setDiffState(newState) {
   opacity: 0.38;
   pointer-events: none;
 }
+
+/* ── Difficulty icon ──────────────────────────────── */
+/* ── Keyboard flip animation ──────────────────────── */
+
+/* ─── 3D STAGE ──────────────────────────────────────*/
+#kbFlipStage {
+  perspective:        900px;
+  perspective-origin: 50% 50%;
+  transform-style:    preserve-3d;
+  transition:         transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow:           visible;
+  position:           relative;
+  z-index:            2; /* above settingsPanel (z:1) */
+}
+
+/* ─── PANEL ──────────────────────────────────────────*/
+#keyboardPanel {
+  transform-style:  preserve-3d;
+  transform-origin: center center;
+  transform:        rotateX(0deg);
+  transition:
+    transform    0.85s cubic-bezier(0.4, 0, 0.2, 1),
+    background   0.5s  ease 0.2s,
+    box-shadow   0.5s  ease 0.2s;
+  will-change: transform;
+}
+#keyboardPanel.kb-edged {
+  background: #868e99;
+  box-shadow: none;
+}
+#keyboardPanel.pc-keys.kb-edged {
+  background: #7a9fa8;
+}
+
+/* ─── KEYS ───────────────────────────────────────────
+   preserve-3d so ::before front face participates
+   in the same 3D space. overflow visible so the
+   front face isn't clipped.                          */
+#keyboardPanel .key {
+  transform:       translateZ(8px);
+  transition:
+    background 0.45s ease 0.15s,
+    box-shadow 0.45s ease 0.15s,
+    color      0.35s ease 0.2s,
+    transform  0.5s  ease 0.15s;
+}
+#keyboardPanel.kb-edged .key {
+  background: #e4e7ea;
+  color:      transparent;
+  box-shadow: none;
+  transform:  translateZ(8px);
+  transition:
+    background 0.45s ease 0.15s,
+    box-shadow 0.45s ease 0.15s,
+    color      0.35s ease 0.2s,
+    transform  0.5s  ease 0.15s;
+}
+
+
+/* ─── SLAB WALLS ─────────────────────────────────────
+   Full edge-to-edge — no inset offsets.
+   Left/right walls use z-index to sit atop top/bottom
+   at corners, filling the gap cleanly.
+   border-radius on the correct corners follows the
+   panel's 14px curve.                                 */
+
+#kb-wall-top, #kb-wall-bottom {
+  position:       absolute;
+  pointer-events: none;
+  opacity:        0;
+  transition:     opacity 0.3s ease 0.1s;
+}
+#keyboardPanel.kb-edged #kb-wall-top,
+#keyboardPanel.kb-edged #kb-wall-bottom {
+  opacity: 1;
+}
+
+/* Bottom wall corner radius: capped at half wall height (3px) at partial so the
+   arc never exceeds the foreshortened strip height at any viewing angle. At full
+   edge (82deg) the strip is nearly perpendicular so 14px/22px reads correctly. */
+#keyboardPanel.kb-partial #kb-wall-bottom          { border-radius: 3px 3px 0 0; }
+#keyboardPanel.pc-keys.kb-partial #kb-wall-bottom  { border-radius: 3px 3px 0 0; }
+
+/* PC panel has 22px radius — bottom wall corners match */
+#keyboardPanel.pc-keys #kb-wall-bottom {
+  border-radius: 22px 22px 0 0;
+}
+#keyboardPanel.pc-keys #kb-wall-top {
+  border-radius: 0 0 6px 6px;
+}
+
+/* Top wall — full width, hinges backward from top edge */
+#kb-wall-top {
+  top:              0;
+  left:             0;
+  right:            0;
+  height:           7px;
+  z-index:          1;
+  transform-origin: center top;
+  transform:        rotateX(-90deg);
+  background:       linear-gradient(to bottom, #a8aeb8, #989eb0);
+  border-radius:    0 0 4px 4px;
+  display:          none;
+}
+
+/* Bottom wall — full width, hinges backward from bottom edge.
+   Most visible face when tilting top-away.             */
+#kb-wall-bottom {
+  bottom:           0;
+  left:             0;
+  right:            0;
+  height:           7px;
+  z-index:          1;
+  transform-origin: center bottom;
+  transform:        rotateX(90deg);
+  /* Horizontal metallic ramp: dark edges → light centre → dark edges
+     Gives the illusion of a curved/rounded front face.
+     The top-to-bottom gradient layered on top adds the bevel sheen. */
+  background:
+    linear-gradient(to bottom,
+      rgba(0,0,0,0.30)       0px,
+      rgba(0,0,0,0.30)       1.5px,
+      rgba(0,0,0,0.0)        1.5px,
+      rgba(0,0,0,0.0)        5.5px,
+      rgba(255,255,255,0.70) 5.5px,
+      rgba(255,255,255,0.70) 7px),
+    linear-gradient(to right,
+      #6e7480 0%,
+      #9aa0aa 10%,
+      #bfc4cb 22%,
+      #c8cdd4 35%,
+      #c8cdd4 65%,
+      #bfc4cb 78%,
+      #9aa0aa 90%,
+      #6e7480 100%);
+  border-radius:    14px 14px 0 0;
+}
+
+
+/* ─── SLAB BACK — closes the box, invisible ─────────*/
+#kb-slab-back {
+  position:       absolute;
+  inset:          0;
+  border-radius:  14px;
+  pointer-events: none;
+  transform:      translateZ(-7px);
+  background:     transparent;
+  z-index:        0;
+}
+
+/* ─── DROP SHADOW ─────────────────────────────────────
+   Blurred translucent blob at negative Z — floats the
+   keyboard just above the surface, shadow falls on
+   whatever is below (credit line etc).               */
+#kb-shadow {
+  position:       absolute;
+  inset:          12px 24px;
+  border-radius:  20px;
+  pointer-events: none;
+  transform:      translateZ(-10px) translateY(4px);
+  background:     rgba(0,0,0,0.0);
+  filter:         blur(22px);
+  transition:
+    background 0.6s ease 0.1s,
+    transform  0.85s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index:        0;
+}
+#keyboardPanel.kb-edged #kb-shadow {
+  background: rgba(0,0,0,0.6);
+  transform:  translateZ(-10px) translateY(42px);
+}
+
+/* ─── BASE EDGE HIGHLIGHT ─────────────────────────────*/
+#kb-base-edge {
+  position:       absolute;
+  bottom:         0;
+  left:           14px;
+  right:          14px;
+  height:         0;
+  border-radius:  0 0 3px 3px;
+  pointer-events: none;
+  z-index:        5;
+  opacity:        0;
+  transition:     height 0.3s ease, opacity 0.3s ease;
+  background:     rgba(255,255,255,0.55);
+}
+#kbFlipStage.kb-show-base #kb-base-edge {
+  height:  3px;
+  opacity: 1;
+}
+
+/* ─── ROW STRIPS — suppressed ────────────────────────*/
+.kb-row::after { display: none; }
+
+/* ─── ICONS ──────────────────────────────────────────*/
+#kbIconWrap, #brIconWrap {
+  transition: opacity 0.3s ease;
+  overflow: visible;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#kbIconWrap { left: 0; }
+#brIconWrap { right: 0; }
+
+/* ─── DIFF GAUGE ─────────────────────────────────────*/
+#diffIconWrap { display: flex; justify-content: center; margin-top: 4px; }
+#diffIcon {
+  display: block; fill: #9ca3af; pointer-events: auto;
+  cursor: pointer; width: 44px; transition: transform 0.18s ease;
+}
+#diffIcon:hover { transform: scale(1.12); }
+#diffIcon #Needle {
+  fill: #9ca3af; transform-origin: 45px 50.9px; transform: rotate(-60deg);
+}
+
+/* ─── TOOLTIP ────────────────────────────────────────*/
+/* ─── ICON TOOLTIPS — pure CSS, anchored to each icon wrap ──────*/
+#diffIconWrap { position: relative; }
+
+.icon-tip {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 10px;
+  color: #9ca3af;
+  line-height: 1.25;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  z-index: 9990;
+}
+
+/* For kb/browser wraps: wrap is sized to the icon, tip sits directly below */
+#kbIconWrap  .icon-tip { top: calc(100% + 6px); }
+#brIconWrap  .icon-tip { top: calc(100% + 6px); }
+/* diffIconWrap is normal flow — tip sits below the svg */
+#diffIconWrap .icon-tip { top: calc(100% + 4px); }
+
+/* Show on hover */
+#kbIconWrap:hover  .icon-tip,
+#brIconWrap:hover  .icon-tip,
+#diffIconWrap:hover .icon-tip { opacity: 1; }
+
+/* Keep visible and darken when that settings page is active */
+#kbIconWrap.sp-icon-active  .icon-tip,
+#brIconWrap.sp-icon-active  .icon-tip,
+#diffIconWrap.sp-icon-active .icon-tip {
+  opacity: 1;
+  color: #374151;
+}
+
+/* Darken the icon SVG fill when active */
+#kbIconWrap.sp-icon-active  #kbIcon      { fill: #374151; }
+#brIconWrap.sp-icon-active  #browserIcon { fill: #374151; }
+#diffIconWrap.sp-icon-active #diffIcon   { fill: #374151; }
+#diffIconWrap.sp-icon-active #diffIcon .gauge-stroke { stroke: #374151; }
+#diffIconWrap.sp-icon-active #diffIcon #Needle        { fill:  #374151; }
 </style>
 
 </body>
