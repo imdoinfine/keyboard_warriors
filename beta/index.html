@@ -735,6 +735,54 @@ body.pc-mode #extKeyPill {
 #kbToast.show { opacity: 1; }
 #kbToast.warning { background: #f59e0b; }
 
+/* ── Difficulty toast — appears over the keyboard ── */
+#diffToast {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(30, 30, 35, 0.88);
+  color: #f3f4f6;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 16px;
+  border-radius: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 20;
+}
+#diffToast.visible { opacity: 1; }
+
+/* ── Unified notification toast ─────────────────────────────────────────────
+   position:fixed so it floats above everything including modals.
+   JS positions it: centred above keyboard normally, or top-of-modal when
+   a modal is open. Drop shadow with top-left light source.              ── */
+#kwToast {
+  position: fixed;
+  background: rgba(28, 28, 32, 0.92);
+  color: #f3f4f6;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 18px;
+  border-radius: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 0);
+  transition: opacity 0.22s ease;
+  box-shadow: 2px 3px 12px rgba(0,0,0,0.48), 1px 1px 3px rgba(0,0,0,0.28);
+  z-index: 210;
+  max-width: 340px;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.4;
+}
+#kwToast.visible { opacity: 1; }
+
 /* ══════════════════════════════════════
    KEYBOARD WRAPPER
 ══════════════════════════════════════ */
@@ -1724,6 +1772,9 @@ li.conflict-dismissed .conflict-desc {
   </svg>
 </div>
 
+<div id="diffToast"></div>
+<div id="kwToast"></div>
+
 <div id="iconTooltip"></div>
 
 <script>
@@ -2044,28 +2095,50 @@ function buildKeyboard(isMini) {
 const kbToastEl = document.getElementById('kbToast');
 let toastTimer = null;
 
-var modeToastTimer   = null;
-var modeToastOrigText    = null;
-var modeToastOrigVisible = false;
+var _kwToastTimer = null;
 
-function showModeToast(msg) {
-  // Capture the original state only before the first toast in a sequence
-  if (!modeToastTimer) {
-    modeToastOrigText    = osMismatchEl.textContent;
-    modeToastOrigVisible = osMismatchEl.classList.contains('show');
+function showToast(msg, duration) {
+  var readingDuration = Math.min(6000, 1800 + msg.length * 65);
+  duration = duration || readingDuration;
+  var el = document.getElementById('kwToast');
+  if (!el) return;
+  // Position: centred above the keyboard panel, or top-of-modal when a modal is open
+  var modalFront = null;
+  if (kbModalOpen || browserModalOpen) {
+    var kbM  = document.getElementById('kbModal');
+    var brM  = document.getElementById('browserModal');
+    if (kbModalOpen && browserModalOpen) {
+      var kbZ  = parseInt(kbM.style.zIndex  || 200);
+      var brZ  = parseInt(brM.style.zIndex  || 200);
+      modalFront = kbZ >= brZ ? kbM : brM;
+    } else {
+      modalFront = kbModalOpen ? kbM : brM;
+    }
   }
-  clearTimeout(modeToastTimer);
-  osMismatchEl.textContent = msg;
-  osMismatchEl.classList.add('show');
-  modeToastTimer = setTimeout(function() {
-    modeToastTimer = null;
-    osMismatchEl.classList.remove('show');
-    setTimeout(function() {
-      osMismatchEl.textContent = modeToastOrigText;
-      if (modeToastOrigVisible) osMismatchEl.classList.add('show');
-    }, 300);
-  }, 2000);
+  if (modalFront) {
+    var mr = modalFront.getBoundingClientRect();
+    el.style.left = Math.round(mr.left + mr.width / 2) + 'px';
+    el.style.top  = Math.round(mr.top + 18) + 'px';
+  } else {
+    var r = _kbPanelRect();
+    if (r) {
+      el.style.left = Math.round(r.left + window.scrollX + r.width / 2) + 'px';
+      el.style.top  = Math.round(r.top  + window.scrollY + r.height / 2) + 'px';
+    } else {
+      el.style.left = '50%';
+      el.style.top  = '50%';
+    }
+  }
+  clearTimeout(_kwToastTimer);
+  el.textContent = msg;
+  el.classList.add('visible');
+  _kwToastTimer = setTimeout(function() {
+    el.classList.remove('visible');
+  }, duration);
 }
+
+// Legacy alias — keeps existing internal calls working
+function showModeToast(msg) { showToast(msg); }
 
 function pulseBtn(el) {
   if (!el) return;
@@ -2177,6 +2250,15 @@ function buildOsLabels() {
     leftLabel.innerHTML  = '<small>PC</small>' + PC_ICON_SVG;
     rightLabel.innerHTML = MAC_ICON_SVG + ' Mac';
   }
+
+  const leftOperatingSystem  = nativeMac ? 'mac' : 'pc';
+  const rightOperatingSystem = nativeMac ? 'pc'  : 'mac';
+
+  leftLabel.style.cursor  = 'pointer';
+  rightLabel.style.cursor = 'pointer';
+
+  leftLabel.addEventListener('click',  function() { applyOsMode(leftOperatingSystem);  if (kbModalOpen) updateModalToggles(); });
+  rightLabel.addEventListener('click', function() { applyOsMode(rightOperatingSystem); if (kbModalOpen) updateModalToggles(); });
 }
 
 function updateToggleVisual(os) {
@@ -2373,6 +2455,12 @@ function shortcutToCodes(s) {
   if (u === 'OPTION+[') return [...OPT, 'BracketLeft'];
   if (u === 'OPTION+]') return [...OPT, 'BracketRight'];
 
+  // SHIFT + OPTION + key (prefix variant)
+  if (u.startsWith('SHIFT+OPTION+')) {
+    const key = charToCode(u.slice(13));
+    return [...SH, ...OPT, key].filter(Boolean);
+  }
+
   // OPTION + SHIFT + key (AE keyframe shortcuts)
   if (u.startsWith('OPTION+SHIFT+')) {
     const key = charToCode(u.slice(13));
@@ -2415,13 +2503,19 @@ function charToCode(ch) {
     ';':'Semicolon','=':'Equal','-':'Minus',
     '[':'BracketLeft',']':'BracketRight',
     '/':'Slash','.':'Period',',':'Comma',
-    '<':'Comma','>':'Period',          // Shift+, and Shift+. produce < and >
+    '<':'Comma','>':'Period',
     '0':'Digit0','1':'Digit1','2':'Digit2','3':'Digit3',
     '4':'Digit4','5':'Digit5','6':'Digit6','7':'Digit7',
     '8':'Digit8','9':'Digit9',
     'ARROWLEFT':'ArrowLeft','ARROWRIGHT':'ArrowRight',
     'ARROWUP':'ArrowUp','ARROWDOWN':'ArrowDown',
     'HOME':'Home','END':'End',
+    'PAGEUP':'PageUp','PAGEDOWN':'PageDown',
+    'GRAVE':'Backquote','BACKSLASH':'Backslash',
+    'TAB':'Tab','SPACE':'Space','DEL':'Backspace','DELETE':'Delete',
+    'F1':'F1','F2':'F2','F3':'F3','F4':'F4',
+    'F5':'F5','F6':'F6','F7':'F7','F8':'F8',
+    'F9':'F9','F10':'F10','F11':'F11','F12':'F12',
   };
   if (map[ch]) return map[ch];
   if (ch.length === 1 && ch >= 'A' && ch <= 'Z') return 'Key' + ch;
@@ -2452,6 +2546,44 @@ function neededSatisfied(needed) {
     const pair = LR_PAIRS.find(p => p.includes(c));
     return pair ? pair.some(p => greenHeld.has(p)) : false;
   });
+}
+
+function isPartialCorrectState() {
+  // Returns true if at least one required key is held/toggled green,
+  // no orange keys are present, and at least one required key is still missing.
+  if (gameState !== 'playing' || transitioning || helpActive) return false;
+  const requiredKeyCodes = shortcutToCodes(currentAnswer);
+  if (requiredKeyCodes.length === 0) return false;
+  const atLeastOneGreenKeyHeld = requiredKeyCodes.some(code => greenHeld.has(code) || stickyLit.get(code) === 'green');
+  const anyOrangeKeyPresent = [...stickyLit.values()].includes('orange') ||
+    Object.keys(keyEls).some(code => keyEls[code].classList.contains('lit-orange-down') || keyEls[code].classList.contains('lit-orange-up'));
+  const allRequiredKeysSatisfied = neededSatisfied(requiredKeyCodes);
+  return atLeastOneGreenKeyHeld && !anyOrangeKeyPresent && !allRequiredKeysSatisfied;
+}
+
+function resetPartialShortcutNudgeTimers() {
+  clearTimeout(partialShortcutNudgeTimer);
+  clearTimeout(partialShortcutFollowUpTimer);
+  partialShortcutNudgeTimer    = null;
+  partialShortcutFollowUpTimer = null;
+  partialShortcutNudgeArmed    = false;
+}
+
+function checkAndArmPartialShortcutNudge() {
+  if (partialShortcutNudgeArmed) return;
+  if (!isPartialCorrectState()) return;
+  partialShortcutNudgeArmed = true;
+  partialShortcutNudgeTimer = setTimeout(function() {
+    if (!isPartialCorrectState()) { resetPartialShortcutNudgeTimers(); return; }
+    var firstNudgeMessage = "The shortcut isn't complete yet";
+    var firstNudgeReadingDuration = Math.min(6000, 1800 + firstNudgeMessage.length * 65);
+    showToast(firstNudgeMessage);
+    partialShortcutFollowUpTimer = setTimeout(function() {
+      if (!isPartialCorrectState()) { resetPartialShortcutNudgeTimers(); return; }
+      showToast("What other key(s) would you press?");
+      resetPartialShortcutNudgeTimers();
+    }, firstNudgeReadingDuration + 1000);
+  }, 2000);
 }
 
 // Per-key linger timers — so each key fades independently
@@ -2648,10 +2780,12 @@ function updateKeyboardLighting(e, isDown) {
       if (isExtKey) showExtKeyPill(code, 'green');
       else          setKeyLit(code, 'green-down');
       if ((!isModifier || isBareModifierQuestion) && !isSilent) { greenHits++; totalHits++; updateAccuracyDisplay(); }
+      checkAndArmPartialShortcutNudge();
     } else {
       if (isExtKey) showExtKeyPill(code, 'orange');
       else          setKeyLit(code, 'orange-down');
       if ((!isModifier || isBareModifierQuestion) && !isSilent) { totalHits++; updateAccuracyDisplay(); }
+      resetPartialShortcutNudgeTimers();
     }
     return;
   }
@@ -2671,15 +2805,18 @@ function updateKeyboardLighting(e, isDown) {
         if (isExtKey) showExtKeyPill(code, 'green');
         else          setKeyLit(code, 'green-down');
         if (!alreadyHeld && (!isModifier || isBareModifierQuestion) && !isSilent) { greenHits++; totalHits++; updateAccuracyDisplay(); }
+        checkAndArmPartialShortcutNudge();
       } else {
         if (isExtKey) showExtKeyPill(code, 'orange');
         else          setKeyLit(code, 'orange-down');
         if (!alreadyHeld && (!isModifier || isBareModifierQuestion) && !isSilent) { totalHits++; updateAccuracyDisplay(); }
+        resetPartialShortcutNudgeTimers();
       }
     }
   } else {
     heldKeys.delete(code);
     greenHeld.delete(code);
+    resetPartialShortcutNudgeTimers();
     if (isExtKey) {
       hideExtKeyPill();
     } else {
@@ -2712,6 +2849,10 @@ let answersLeft     = 10;  // counts down only on correct answer
 let currentAnswer = '';
 let helpActive    = false;
 let transitioning = false;
+let partialShortcutNudgeTimer    = null;
+let partialShortcutFollowUpTimer = null;
+let partialShortcutNudgeArmed    = false;
+let endScreenInactivityTimer     = null;
 let bestRecord    = { time: null, accuracy: null };  // independent bests
 let greenHits       = 0;
 let totalHits       = 0;
@@ -2933,6 +3074,7 @@ const IMPROVEMENT_TIPS = [
 
 function helpButtonClick() {
   helpBtn.blur();
+  resetEndScreenInactivityTimer();
   if (gameState === 'idle')           { titleEl.textContent = bestRecord.time !== null ? 'To reset your score, press the lock key on the keyboard.' : 'Press start to begin.'; return; }
   if (gameState === 'playing')        { toggleHelp(); return; }
   if (gameState === 'paused')         { enterConfirmReset(); return; }
@@ -3004,6 +3146,7 @@ function buildHintHTML(shortcut, bg) {
 
 function toggleHelp() {
   clearTimeout(helpFadeTimer);
+  resetPartialShortcutNudgeTimers();
   if (!helpActive) {
     helpActive = true;
     // Show hint in the toast pill — green to distinguish from accuracy penalty
@@ -3036,6 +3179,7 @@ function clearHelp() {
   clearTimeout(helpFadeTimer);
   helpActive = false;
   kbToastEl.classList.remove('show');
+  resetPartialShortcutNudgeTimers();
 }
 
 /* ══════════════════════════════════════
@@ -3061,6 +3205,7 @@ function enterPause(instantBlur) {
   clearTimeout(penaltyTimeout);
   transitioning = false; // clear skip-in-progress if pause interrupts it
   clearHelp();
+  resetPartialShortcutNudgeTimers();
 
   if (instantBlur) {
     titleEl.classList.add('blur-instant');
@@ -3086,6 +3231,8 @@ function enterPause(instantBlur) {
 
 function unpause() {
   gameState = 'playing';
+  clearAllLit();
+  heldKeys.clear();
   // Restore question title — may have been blanked by the resume countdown
   if (questionPool.length > 0 && (!titleEl.textContent || titleEl.textContent === '')) {
     titleEl.className = '';
@@ -3187,6 +3334,8 @@ function resetToIdle() {
   setAppSelectorGameActive(false);
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
+  clearTimeout(endScreenInactivityTimer);
+  endScreenInactivityTimer = null;
   clearHelp();
   clearAllLit();
   heldKeys.clear();
@@ -4047,11 +4196,13 @@ function toggleBrowserModal() {
 // ── Unified icon click handlers ──────────────────────────────────────────────
 document.getElementById('kbIcon').addEventListener('click', function(e) {
   e.stopPropagation();
+  resetEndScreenInactivityTimer();
   toggleKbModal();
 });
 
 document.getElementById('browserIcon').addEventListener('click', function(e) {
   e.stopPropagation();
+  resetEndScreenInactivityTimer();
   toggleBrowserModal();
 });
 
@@ -4581,6 +4732,8 @@ function beginResumeCountdown() {
 function startGame() {
   gameState = 'playing';
   setAppSelectorGameActive(true);
+  clearTimeout(endScreenInactivityTimer);
+  endScreenInactivityTimer = null;
   totalTime = 0;
   transitioning = false;
   questionPool = shuffleArray(buildPool());
@@ -4641,6 +4794,7 @@ function skipShortcut() {
 }
 
 function advanceQuestion() {
+  resetPartialShortcutNudgeTimers();
   // Move to the next question in the pool, reshuffling if we reach the end
   const lastDisplay = questionPool[questionIndex]?.display;
   questionIndex++;
@@ -4700,6 +4854,21 @@ function endGameMessage(time, accuracy, record, wasFirst) {
   return 'Keep practising. Every rep counts.';
 }
 
+function startEndScreenInactivityTimer() {
+  clearTimeout(endScreenInactivityTimer);
+  endScreenInactivityTimer = setTimeout(function pulseAndReschedule() {
+    if (gameState !== 'finished') { endScreenInactivityTimer = null; return; }
+    pulseBtn(document.getElementById('mainBtn'));
+    endScreenInactivityTimer = setTimeout(pulseAndReschedule, 5000);
+  }, 5000);
+}
+
+function resetEndScreenInactivityTimer() {
+  if (gameState !== 'finished') return;
+  clearTimeout(endScreenInactivityTimer);
+  startEndScreenInactivityTimer();
+}
+
 function endGame() {
   gameState = 'finished';
   setAppSelectorGameActive(false);
@@ -4742,6 +4911,7 @@ function endGame() {
   mainBtn.textContent = 'Try again?';
   titleEl.className = '';
   titleEl.textContent = endGameMessage(totalTime, finalAccuracy, bestRecord, wasFirstRecord);
+  startEndScreenInactivityTimer();
   fillProgressDot(9);
   setTimeout(hideProgressDots, 0);
   timerBox.className = 'timerBox medal-' + medal;
@@ -4938,9 +5108,11 @@ function handleKeydown(e) {
     clearHelp();
     clearInterval(timerInterval);
     setTimerState('green', 'right');
-    titleEl.classList.add('hidden');
+    titleEl.style.color = '#10b981'; // instant green — directs attention before hiding
+    requestAnimationFrame(() => titleEl.classList.add('hidden'));
     fillProgressDot(10 - answersLeft);
     setTimeout(() => {
+      titleEl.style.color = '';
       clearAllLit();
       heldKeys.clear();
       stickyLit.clear();
@@ -5100,7 +5272,41 @@ function flipToFace() {
   }, FLIP_DUR + 60);
 }
 
+/* ── Difficulty toast helper ───────────────────────── */
+var _diffToastTimer = null;
+function showDiffToast(msg) {
+  var el = document.getElementById('diffToast');
+  if (!el) { showModeToast(msg); return; }
+  clearTimeout(_diffToastTimer);
+  el.textContent = msg;
+  el.classList.add('visible');
+  var readingDuration = Math.min(6000, 1800 + msg.length * 65);
+  _diffToastTimer = setTimeout(function() {
+    el.classList.remove('visible');
+  }, readingDuration);
+}
+
+/* ── Difficulty needle states (ready, not yet wired to click) ── */
+var _diffState = 0;   // -1 = basics, 0 = normal, 1 = hardcore
+var _diffFirst = false;
+var DIFF_ANGLES = { '-1': -60, '0': 0, '1': 60 };
+var DIFF_TOASTS = {
+  '-1': 'Basics mode coming soon.',
+   '0': 'You are in normal mode.',
+   '1': 'Hardcore mode coming soon.'
+};
+function setDiffState(newState) {
+  var changed = (newState !== _diffState);
+  _diffState = newState;
+  var needle = document.querySelector('#diffIcon #Needle');
+  if (needle) needle.style.transform = 'rotate(' + DIFF_ANGLES[String(newState)] + 'deg)';
+  if (changed && !_diffFirst) showDiffToast(DIFF_TOASTS[String(newState)]);
+  _diffFirst = false;
+}
+
+/* ── Active click handler — flip animation ───────────── */
 function diffIconClick() {
+  resetEndScreenInactivityTimer();
   if (_kbFlipped) flipToFace(); else flipToEdge();
 }
 
