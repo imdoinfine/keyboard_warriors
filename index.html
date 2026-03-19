@@ -4,7 +4,7 @@
      and production logic lives in computer.html.
      Do not deploy. Merge approved changes back manually.
      ═══════════════════════════════════════════════════ -->
-<script>const DBG_DEVICE = 'comp1.012';</script>
+<script>const DBG_DEVICE = 'comp1.013';</script>
 <!DOCTYPE html>
 <html>
 <head>
@@ -3975,24 +3975,15 @@ function matchesShortcut(event, str) {
    reveals more of itself when opened.
    Non-selected rows fade out when closed.
 ══════════════════════════════════════ */
-const APPS = [
-  { key: 'Ps', label: 'Photoshop (Ps)',    short: 'Photoshop'    },
-  { key: 'Ai', label: 'Illustrator (Ai)',  short: 'Illustrator'  },
-  { key: 'In', label: 'InDesign (In)',     short: 'InDesign'     },
-  { key: 'Ae', label: 'After Effects (Ae)',short: 'After Effects'},
-  { key: 'Fi', label: 'Figma',             short: 'Figma'        },
-];
+// APPS and APP_JSON_FILE_PATH are populated at runtime from KeyboardWarrior_Apps.json.
+// Until the fetch resolves these remain empty; init is deferred to _onAppsLoaded().
+var APPS = [];
+var APP_JSON_FILE_PATH = {};
 
 // Each row is 22px. Closed: scroll to show selected row.
 const ROW_H = 24; // px — must match CSS height: 24px on .app-option
 
-let currentApp = (() => {
-  try {
-    const saved = localStorage.getItem('kw_app');
-    if (saved && APPS.find(a => a.key === saved)) return saved;
-  } catch(e) {}
-  return 'Ps';
-})();
+var currentApp = 'Ps'; // placeholder; overwritten by _onAppsLoaded once APPS is known
 
 const appPillEl = document.getElementById('appPill');
 
@@ -4767,8 +4758,8 @@ function dbgRefreshCtx() {
   const top = document.getElementById('dbgCtxTop');
   const sub = document.getElementById('dbgCtxSub');
   if (!top) return;
-  const appLabels = {Ps:'Photoshop', Ai:'Illustrator', In:'InDesign', Ae:'After Effects', Fi:'Figma'};
-  const appName  = appLabels[currentApp] || currentApp;
+  const appEntry = APPS.find(function(a) { return a.key === currentApp; });
+  const appName  = appEntry ? appEntry.label : currentApp;
   const osName   = currentOs === 'pc' ? 'PC/Windows' : 'Mac';
   const device   = typeof DBG_DEVICE !== 'undefined' ? DBG_DEVICE : 'computer';
   const state    = gameState;
@@ -4968,10 +4959,6 @@ function getBrowserConflictSet() {
   return new Set(all.filter(function(k) { return !dismissedConflicts.has(k); }));
 }
 
-// Initialise
-buildAppPill();
-positionIcons();
-
 /* ══════════════════════════════════════
    WELCOME SCREEN
    Shown on first load if no saved difficulty preference exists.
@@ -5128,14 +5115,7 @@ function _dismissWelcome() {
    Filters by current OS, difficulty, keyboard, and browser.
 ══════════════════════════════════════ */
 
-// Maps each app key to its JSON filename (no extension)
-const APP_JSON_FILE_PATH = {
-  Ps: '/keyboard_warriors/data/shortcuts_photoshop.json',
-  Ai: '/keyboard_warriors/data/shortcuts_illustrator.json',
-  In: '/keyboard_warriors/data/shortcuts_inDesign.json',
-  Ae: '/keyboard_warriors/data/shortcuts_afterEffects.json',
-  Fi: '/keyboard_warriors/data/shortcuts_figma.json'
-};
+// APP_JSON_FILE_PATH is built from KeyboardWarrior_Apps.json at startup (see below).
 
 // The app key whose shortcuts are currently held in memory (null = nothing loaded yet)
 let loadedAppName      = null;
@@ -5143,6 +5123,53 @@ let loadedAppName      = null;
 let loadedAppShortcuts = [];
 // Increments each time a load is requested, used to ignore stale fetch responses
 let loadSequenceNumber = 0;
+
+// Called once KeyboardWarrior_Apps.json has been fetched and parsed.
+function _onAppsLoaded(appsData) {
+  // Populate the two structures the rest of the code uses
+  APPS = appsData.map(function(a) {
+    return { key: a.key, label: a.label };
+  });
+  appsData.forEach(function(a) {
+    APP_JSON_FILE_PATH[a.key] = a.path;
+  });
+
+  // Restore saved app choice, falling back to the first entry
+  var defaultKey = APPS.length ? APPS[0].key : 'Ps';
+  try {
+    var saved = localStorage.getItem('kw_app');
+    currentApp = (saved && APPS.find(function(a) { return a.key === saved; })) ? saved : defaultKey;
+  } catch(e) {
+    currentApp = defaultKey;
+  }
+
+  // Now it's safe to build the UI
+  buildAppPill();
+  positionIcons();
+}
+
+// Fetch the apps manifest on startup. Falls back to a minimal built-in list if the
+// file cannot be reached (e.g. running the HTML file locally without a server).
+(function() {
+  fetch('/keyboard_warriors/data/KeyboardWarrior_Apps.json')
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      _onAppsLoaded(data);
+    })
+    .catch(function(err) {
+      console.warn('[Apps] Could not load KeyboardWarrior_Apps.json:', err, '— using built-in fallback.');
+      _onAppsLoaded([
+        { key: 'Ps', label: 'Photoshop',    path: '/keyboard_warriors/data/shortcuts_photoshop.json'    },
+        { key: 'Ai', label: 'Illustrator',  path: '/keyboard_warriors/data/shortcuts_illustrator.json'  },
+        { key: 'Id', label: 'InDesign',      path: '/keyboard_warriors/data/shortcuts_inDesign.json'     },
+        { key: 'Ae', label: 'After Effects', path: '/keyboard_warriors/data/shortcuts_afterEffects.json' },
+        { key: 'Fi', label: 'Figma',         path: '/keyboard_warriors/data/shortcuts_figma.json'        }
+      ]);
+    });
+})();
 
 // Codes that only exist on the extended keyboard (not on the graphical layout)
 const EXT_CODES = new Set(Object.keys(EXT_KEY_LABELS));
