@@ -4,7 +4,7 @@
      and production logic lives in computer.html.
      Do not deploy. Merge approved changes back manually.
      ═══════════════════════════════════════════════════ -->
-<script>const DBG_DEVICE = 'comp1.013';</script>
+<script>const DBG_DEVICE = 'comp1.014';</script>
 <!DOCTYPE html>
 <html>
 <head>
@@ -711,14 +711,16 @@ body.pc-mode #extKeyPill {
   grid-template-columns: 1fr 1fr;
 }
 
-/* Difficulty page: full-width single column, centred buttons */
-#spDifficulty.sp-active {
+/* Returning-user and Difficulty pages: full-width single column, centred */
+#spDifficulty.sp-active,
+#spReturning.sp-active {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-#spDifficulty.sp-active::after { display: none; }
+#spDifficulty.sp-active::after,
+#spReturning.sp-active::after  { display: none; }
 
 /* Gutter: a 1px line at the midpoint — centred above diffIcon */
 .sp-page.sp-active::after {
@@ -1762,7 +1764,7 @@ li.conflict-dismissed .conflict-desc {
   <svg id="kbIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;">
     <path d="M98.6,32.4H11.4c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h87.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM99.9,65.9c0,.7-.6,1.3-1.3,1.3H11.4c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h87.2c.7,0,1.3.6,1.3,1.3v29.6ZM15.2,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM15.2,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM95.9,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM15.2,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM65.8,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM95.9,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM24.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM33,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.1,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM49.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM57.4,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM65.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM73.7,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM27.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM40.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM44.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM57.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM66.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM74.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM83.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM36.3,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM44.3,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM53.1,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM56.7,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.7,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.5,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM81.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.9,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM35.4,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM28.3,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM21.2,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM73.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM81,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM88.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM95.9,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/>
   </svg>
-  <span class="icon-tip">keyboard<br>settings</span>
+  <span class="icon-tip" onclick="event.stopPropagation();toggleKbModal()">keyboard<br>settings</span>
   </div>
   <div id="settingsPanel" aria-hidden="true">
     <div id="settingsPanelInner">
@@ -1807,6 +1809,15 @@ li.conflict-dismissed .conflict-desc {
         <p class="sp-body"><strong>Privacy statement:</strong></p>
         <p class="sp-body"><em>Digital produce that thinks local.</em></p>
         <p class="sp-body">Made for you, and stored with you, 'Keyboard Warriors' runs entirely on your device using local memory. No clouds, no crumbs.</p>
+      </div>
+    </div>
+
+    <!-- ── Returning User Landing ───────────────────────── -->
+    <div id="spReturning" class="sp-page">
+      <p class="sp-title" style="margin-bottom:10px;text-align:center;">Would you like to:</p>
+      <div style="display:flex;gap:10px;justify-content:center;width:100%;">
+        <button class="diff-btn" style="max-width:220px;white-space:nowrap;" onclick="_returningContinue()">Continue last session</button>
+        <button class="diff-btn" style="max-width:220px;white-space:nowrap;" onclick="_returningStartOver()">Forget and start over</button>
       </div>
     </div>
 
@@ -1947,7 +1958,7 @@ li.conflict-dismissed .conflict-desc {
   </g>
   <path d="M42.5,23.4c-6,0-11.4,2.1-14.9,5.4h0c0,0-.1.1-.2.2-2.4,2.3-3.8,5.2-3.8,8.4s1.4,6,3.8,8.4c0,0,0,.1.2.2,3.4,3.3,8.8,5.4,14.9,5.4s11.4-2.1,14.9-5.4h0c0,0,.1-.1.2-.2,0,0,0,0,0,0,2.4-2.3,3.8-5.2,3.8-8.4s-1.4-6-3.8-8.4c0,0-.1-.1-.2-.2-3.4-3.3-8.8-5.4-14.9-5.4h0ZM41.3,25.3v5.4c-1.9,0-3.7-.2-5.4-.4.3-.6.7-1.2,1-1.7,1.3-1.7,2.8-2.8,4.4-3.2h0ZM43.7,25.3c1.6.4,3.1,1.5,4.4,3.2.4.5.7,1.1,1.1,1.7-1.7.2-3.5.4-5.4.4v-5.3ZM49,26.2c2.1.7,4,1.7,5.5,2.9-.9.3-1.9.5-2.9.8-.4-.8-.8-1.5-1.3-2.2-.4-.5-.8-1-1.3-1.5h0ZM36,26.2c-.5.4-.9.9-1.2,1.5-.5.7-.9,1.4-1.3,2.2-1.1-.2-2.1-.5-2.9-.8,1.5-1.2,3.4-2.2,5.5-2.9h0ZM28.9,30.6c1.1.4,2.4.8,3.8,1-.5,1.5-.8,3.1-.9,4.8h-5.6c.2-2.1,1.2-4.1,2.7-5.8h0ZM56.1,30.6c1.5,1.7,2.5,3.7,2.7,5.8h-5.6c0-1.7-.4-3.3-.9-4.8,1.4-.3,2.7-.6,3.8-1h0ZM35.1,32c1.9.3,4,.4,6.1.5v3.9h-7c0-1.5.4-3,.8-4.3h0ZM49.9,32c.4,1.3.7,2.8.8,4.3h-7v-3.9c2.2,0,4.2-.2,6.1-.5h0ZM26.2,38.2h5.6c0,1.7.4,3.3.9,4.8-1.4.3-2.7.6-3.8,1-1.5-1.7-2.5-3.7-2.7-5.8h0ZM34.3,38.2h7v3.9c-2.2,0-4.2.2-6.1.5-.4-1.3-.7-2.8-.8-4.3h0ZM43.7,38.2h7c0,1.5-.4,3-.8,4.3-1.9-.3-4-.4-6.1-.5v-3.9ZM53.2,38.2h5.6c-.2,2.1-1.2,4.1-2.7,5.8-1.1-.4-2.4-.8-3.8-1,.5-1.5.8-3.1.9-4.8h0ZM41.3,43.9v5.4c-1.6-.4-3.1-1.4-4.4-3.2-.4-.5-.7-1.1-1.1-1.7,1.7-.2,3.5-.4,5.4-.4h0ZM43.7,43.9c1.9,0,3.7.2,5.4.4-.3.6-.7,1.2-1.1,1.7-1.3,1.7-2.8,2.8-4.4,3.2v-5.3ZM33.4,44.7c.4.8.8,1.5,1.3,2.2.4.5.8,1,1.2,1.5-2.1-.7-4-1.7-5.5-2.9.9-.3,1.9-.5,2.9-.8h0ZM51.6,44.7c1.1.2,2.1.5,2.9.8-1.5,1.2-3.4,2.2-5.5,2.9.5-.4.9-.9,1.3-1.5.5-.7.9-1.4,1.3-2.2h0Z"/>
   </svg>
-  <span class="icon-tip">browser<br>settings</span>
+  <span class="icon-tip" onclick="event.stopPropagation();toggleBrowserModal()">browser<br>settings</span>
   </div>
 </div>
 
@@ -2039,7 +2050,7 @@ li.conflict-dismissed .conflict-desc {
       <circle cx="45" cy="50.9" r="2.7"/>
     </g>
   </svg>
-  <span class="icon-tip">difficulty<br>settings</span>
+  <span class="icon-tip" onclick="event.stopPropagation();diffIconClick()">difficulty<br>settings</span>
 </div>
 
 <div id="diffToast"></div>
@@ -2694,6 +2705,7 @@ function shortcutToCodes(s) {
   if (u === 'PAGEDOWN') return ['PageDown'];
   if (u === 'GRAVE')  return ['Backquote'];
   if (u === 'END')    return ['End'];
+  if (u === 'CMD')    return CMD;
   if (u === 'SHIFT')  return SH;
   if (u === 'OPTION') return OPT;
 
@@ -3103,12 +3115,13 @@ function updateKeyboardLighting(e, isDown) {
 
 /* ══════════════════════════════════════
    GAME STATE
-   States: idle | playing | paused | confirm-reset | finished
+   States: idle | playing | paused | confirm-quit | confirm-reset | finished
 ══════════════════════════════════════ */
 let gameState = 'idle';
 let currentMedal = null;
 let _confirmFromFinished  = false; // true when confirm-reset entered from finished state
 let _confirmFromPause     = false; // true when confirm-reset entered from active paused game
+let _welcomeIsReturning   = false; // true when the returning-visitor landing screen is showing
 let _pendingDifficulty   = null;  // difficulty mode awaiting confirmation
 let _prevDifficulty      = null;  // difficulty to restore on cancel
 let _clearTarget         = null;  // 'time' | 'accuracy' | 'both' — which record the pending reset affects
@@ -3130,6 +3143,7 @@ let partialShortcutFollowUpTimer = null;
 let partialShortcutNudgeArmed    = false;
 let endScreenInactivityTimer     = null;
 let bestRecord    = { time: null, accuracy: null };  // independent bests
+let hasEverAchievedPerfectAccuracy = false;           // never cleared, gates Hardcore and trophy
 let greenHits       = 0;
 let totalHits       = 0;
 let hintPenaltyPct  = 0;  // decaying hint penalty in percentage points
@@ -3148,6 +3162,10 @@ try {
       localStorage.removeItem('kw_best');
     }
   }
+} catch(e) {}
+
+try {
+  if (localStorage.getItem('kw_perfect') === '1') hasEverAchievedPerfectAccuracy = true;
 } catch(e) {}
 
 const mainBtn         = document.getElementById('mainBtn');
@@ -3245,8 +3263,10 @@ function updateBestDisplay(pulseTime, pulseAcc) {
     statLeftEl.innerHTML = '';
   }
   if (bestRecord.accuracy !== null) {
-    const trophy = bestRecord.accuracy >= 100 ? ' 🏆' : '';
+    const trophy = hasEverAchievedPerfectAccuracy ? ' 🏆' : '';
     statRightEl.innerHTML = 'best ' + BULLSEYE_SVG_STR + '= ' + bestRecord.accuracy + '%' + trophy;
+  } else if (hasEverAchievedPerfectAccuracy) {
+    statRightEl.innerHTML = '🏆';
   } else {
     statRightEl.textContent = '';
   }
@@ -3308,7 +3328,7 @@ function _closeAllModals() {
 
 function mainButtonClick() {
   mainBtn.blur();
-  if (gameState === 'welcome') { _dismissWelcome(); return; }
+  if (gameState === 'welcome') { _startFromWelcome(); return; }
   if (gameState === 'idle' || gameState === 'finished') { _closeAllModals(); beginCountdown(); return; }
   if (gameState === 'counting')      { cancelCountdown(); return; }
   if (gameState === 'playing')       { skipShortcut(); return; }
@@ -3318,6 +3338,7 @@ function mainButtonClick() {
     return;
   }
   if (gameState === 'confirm-reset') { confirmResetYes(); return; }
+  if (gameState === 'confirm-quit')  { confirmQuitYes();  return; }
   if (gameState === 'confirm-diff-change') { confirmDiffChangeYes(); return; }
 }
 
@@ -3354,8 +3375,9 @@ function helpButtonClick() {
   resetEndScreenInactivityTimer();
   if (gameState === 'idle')           { titleEl.textContent = bestRecord.time !== null ? 'To reset your score, press the lock key on the keyboard.' : 'Press start to begin.'; return; }
   if (gameState === 'playing')        { toggleHelp(); return; }
-  if (gameState === 'paused')         { if (lockKeyEl) lockKeyEl.classList.remove('active'); resetToIdle(); return; }
+  if (gameState === 'paused')         { enterConfirmQuit(); return; }
   if (gameState === 'confirm-reset')       { confirmResetNo(); return; }
+  if (gameState === 'confirm-quit')        { confirmQuitNo();  return; }
   if (gameState === 'confirm-diff-change') { confirmDiffChangeNo(); return; }
   if (gameState === 'finished')       { showTip(tipIndex + 1); tipIndex++; return; }
 }
@@ -3369,8 +3391,11 @@ function timerBoxClick() {
     return;
   }
   if (gameState === 'confirm-reset' && _wasPlaying) {
-    // Pause icon is still visible — tapping it means "cancel, go back"
     confirmResetNo();
+    return;
+  }
+  if (gameState === 'confirm-quit') {
+    confirmQuitNo();
     return;
   }
   if (gameState === 'confirm-diff-change') {
@@ -3515,6 +3540,29 @@ function enterPause(instantBlur) {
   _modalWasOpenOnPause = (activeSettings !== null);
 }
 
+function enterConfirmQuit() {
+  _closeAllModalsInstant();
+  gameState = 'confirm-quit';
+  titleEl.className = '';
+  titleEl.classList.remove('blurred');
+  titleEl.textContent = 'Are you sure you want to abandon this game?';
+  mainBtn.textContent = 'Yes';
+  mainBtn.style.background = '#10b981';
+  helpBtn.textContent = 'No';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+}
+
+function confirmQuitYes() {
+  mainBtn.style.background = '';
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  resetToIdle();
+}
+
+function confirmQuitNo() {
+  _returnToPauseScreen(null);
+}
+
 function unpause() {
   gameState = 'playing';
   clearAllLit();
@@ -3570,6 +3618,27 @@ function enterConfirmReset(target) {
   if (lockKeyEl) lockKeyEl.classList.add('active');
 }
 
+function _returnToPauseScreen(titleMessage) {
+  gameState = 'paused';
+  titleEl.className = '';
+  if (titleMessage) {
+    titleEl.textContent = titleMessage;
+    titleEl.classList.remove('blurred');
+  } else {
+    titleEl.classList.add('blurred');
+    titleEl.textContent = questionPool[questionIndex]?.display || '';
+  }
+  questionCountEl.classList.remove('blurred');
+  mainBtn.textContent = 'Unpause';
+  mainBtn.style.background = '';
+  helpBtn.textContent = 'Quit';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  _refreshPausePanel();
+  openSettings('pause');
+}
+
 function confirmResetYes() {
   var fromFinished  = _confirmFromFinished;
   var fromPause     = _confirmFromPause;
@@ -3580,7 +3649,6 @@ function confirmResetYes() {
   _confirmAfterUpgrade = null;
   _clearTarget = null;
 
-  // Apply the partial or full clear
   if (target === 'time') {
     bestRecord.time = null;
   } else if (target === 'accuracy') {
@@ -3588,14 +3656,12 @@ function confirmResetYes() {
   } else {
     bestRecord = { time: null, accuracy: null };
   }
-  // Persist: if both are now null remove the key, otherwise update it
   if (bestRecord.time === null && bestRecord.accuracy === null) {
     try { localStorage.removeItem('kw_best'); } catch(e) {}
   } else {
     try { localStorage.setItem('kw_best', JSON.stringify(bestRecord)); } catch(e) {}
   }
   updateBestDisplay();
-  if (lockKeyEl) lockKeyEl.classList.remove('active');
 
   if (afterUpgrade) {
     resetToIdle();
@@ -3603,16 +3669,17 @@ function confirmResetYes() {
     return;
   }
 
-  // Came from a paused game — clear the record then return to pause screen
   if (fromPause) {
-    _refreshPausePanel();
-    openSettings('pause');
+    var clearedMsg = target === 'time'     ? 'Time record cleared.'
+                   : target === 'accuracy' ? 'Accuracy record cleared.'
+                   : 'Both records have been cleared.';
+    _returnToPauseScreen(clearedMsg);
     return;
   }
 
   resetToIdle();
   if (fromFinished) {
-    var cleared = target === 'time' ? 'Time record cleared.'
+    var cleared = target === 'time'     ? 'Time record cleared.'
                 : target === 'accuracy' ? 'Accuracy record cleared.'
                 : 'Both records have been cleared.';
     titleEl.textContent = cleared;
@@ -3623,18 +3690,16 @@ function confirmResetNo() {
   var afterUpgrade = _confirmAfterUpgrade;
   _confirmAfterUpgrade = null;
   _clearTarget = null;
-  if (lockKeyEl) lockKeyEl.classList.remove('active');
 
-  // Post-upgrade "No" — just go to idle with mode-ready message, no score change
   if (afterUpgrade) {
     _confirmFromFinished = false;
+    _confirmFromPause    = false;
     resetToIdle();
     titleEl.textContent = afterUpgrade + ' mode ready.';
     return;
   }
 
   if (_confirmFromFinished) {
-    // Return to medal screen — keep everything intact, show a tip
     _confirmFromFinished = false;
     gameState = 'finished';
     if (currentMedal) {
@@ -3651,16 +3716,10 @@ function confirmResetNo() {
     showTip(tipIndex);
     return;
   }
-  // If a game was in progress, count straight back in
+
   if (_wasPlaying && questionPool.length > 0 && answersLeft > 0) {
-    gameState = 'paused';
-    titleEl.classList.add('blurred');
-    titleEl.textContent = questionPool[questionIndex]?.display || '';
-    mainBtn.textContent = 'Unpause';
-    helpBtn.textContent = 'Quit';
-    helpBtn.style.background = '#6b7280';
-    helpBtn.style.color = 'white';
-    beginResumeCountdown();
+    _confirmFromPause = false;
+    _returnToPauseScreen(null);
   } else {
     resetToIdle();
   }
@@ -3718,14 +3777,7 @@ function confirmDiffChangeNo() {
   _pendingDifficulty = null;
   _prevDifficulty    = null;
   // Resume the paused game directly
-  gameState = 'paused';
-  titleEl.classList.add('blurred');
-  titleEl.textContent = questionPool[questionIndex]?.display || '';
-  mainBtn.textContent = 'Unpause';
-  helpBtn.textContent = 'Quit';
-  helpBtn.style.background = '#6b7280';
-  helpBtn.style.color = 'white';
-  beginResumeCountdown();
+  _returnToPauseScreen(null);
 }
 
 function resetToIdle() {
@@ -3997,7 +4049,7 @@ function buildAppPill() {
     row.innerHTML = `<span class="app-caret">${app.key === currentApp ? '▶' : '  '}</span><span class="app-label">${app.label}</span>`;
     row.addEventListener('click', e => {
       e.stopPropagation();     // stop bubbling to pill's own onclick
-      if (gameState === 'playing' || gameState === 'paused' || gameState === 'confirm-reset') return;
+      if (gameState === 'playing' || gameState === 'paused' || gameState === 'confirm-reset' || gameState === 'confirm-quit') return;
       currentApp = app.key;
       try { localStorage.setItem('kw_app', currentApp); } catch(e) {}
       buildAppPill();
@@ -4016,7 +4068,7 @@ function scrollPillToSelected() {
 }
 
 function toggleAppDropdown() {
-  if (gameState === 'playing' || gameState === 'paused' || gameState === 'confirm-reset') return;
+  if (gameState === 'playing' || gameState === 'paused' || gameState === 'confirm-reset' || gameState === 'confirm-quit') return;
   appPillEl.classList.contains('open') ? closeAppPill() : openAppPill();
 }
 
@@ -4266,10 +4318,10 @@ var activeSettings = null;
 var kbModalOpen = false;
 var browserModalOpen = false;
 
-var SP_PAGE_ORDER = ['keyboard', 'browser', 'difficulty', 'pause'];
+var SP_PAGE_ORDER = ['keyboard', 'browser', 'difficulty', 'pause', 'returning'];
 
 function _spPageEl(page) {
-  var ids = { keyboard: 'spKeyboard', browser: 'spBrowser', difficulty: 'spDifficulty', pause: 'spPause' };
+  var ids = { keyboard: 'spKeyboard', browser: 'spBrowser', difficulty: 'spDifficulty', pause: 'spPause', returning: 'spReturning' };
   return document.getElementById(ids[page]);
 }
 
@@ -4324,7 +4376,7 @@ function openSettings(page) {
   activeSettings = page;
 
   // Update kbPos — difficulty and keyboard use partial; browser, pause use edge
-  var pos = (page === 'keyboard' || page === 'difficulty') ? 'partial' : 'edge';
+  var pos = (page === 'keyboard' || page === 'difficulty' || page === 'returning') ? 'partial' : 'edge';
   setKbPosition(pos);
 
   // Pause game if needed (not for pause page or when on welcome screen)
@@ -4344,7 +4396,7 @@ function openSettings(page) {
   _spAlignPanel();
 
   // Show/activate the right page
-  var allPages = ['keyboard', 'browser', 'difficulty', 'pause'];
+  var allPages = ['keyboard', 'browser', 'difficulty', 'pause', 'returning'];
   allPages.forEach(function(p) {
     var el = _spPageEl(p);
     if (!el) return;
@@ -4389,7 +4441,7 @@ function closeSettings() {
   if (sp) sp.classList.remove('sp-open');
 
   // Hide all pages
-  ['keyboard', 'browser', 'difficulty', 'pause'].forEach(function(p) {
+  ['keyboard', 'browser', 'difficulty', 'pause', 'returning'].forEach(function(p) {
     var el = _spPageEl(p);
     if (el) el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left', 'sp-wipe-in-up');
   });
@@ -4401,8 +4453,13 @@ function closeSettings() {
   // Reset wrap height
   var wrap = document.getElementById('keyboardWrap');
   if (wrap) wrap.style.minHeight = '';
-  // Only snap keyboard to face if not paused or on welcome — runCountdown / resetToIdle handles it
-  if (gameState !== 'paused' && gameState !== 'counting' && gameState !== 'welcome') {
+  // If paused, show the pause panel rather than leaving the keyboard in limbo
+  if (gameState === 'paused') {
+    openSettings('pause');
+    return;
+  }
+  // Only snap keyboard to face if not mid-countdown or on welcome — those flows handle it themselves
+  if (gameState !== 'counting' && gameState !== 'welcome') {
     setKbPosition('face');
   }
 }
@@ -4418,7 +4475,7 @@ function _closeAllModalsInstant() {
   browserModalOpen = false;
   var sp = document.getElementById('settingsPanel');
   if (sp) sp.classList.remove('sp-open');
-  ['keyboard', 'browser', 'difficulty', 'pause'].forEach(function(p) {
+  ['keyboard', 'browser', 'difficulty', 'pause', 'returning'].forEach(function(p) {
     var el = _spPageEl(p);
     if (el) el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left', 'sp-wipe-in-up');
   });
@@ -4831,11 +4888,11 @@ function getBrowserConflicts() {
   // Conflict tables — Mac shortcuts use Cmd, PC use Ctrl (same token in our shortcut strings)
   // Values are the canonical shortcut strings used in SHORTCUTS[].shortcut
   var mac = {
-    Edge:    ['CMD+T','CMD+OPTION+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Firefox: ['CMD+T','CMD+OPTION+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Safari:  ['CMD+T','CMD+OPTION+U','CMD+OPTION+I','CMD+OPTION+C','CMD+SHIFT+H','CMD+SHIFT+I','CMD+SHIFT+L'],
-    Opera:   ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Chrome:  ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
+    Edge:    ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Firefox: ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Safari:  ['CMD+T','CMD+GRAVE','CMD+OPTION+U','CMD+OPTION+I','CMD+OPTION+C','CMD+SHIFT+H','CMD+SHIFT+I','CMD+SHIFT+L'],
+    Opera:   ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Chrome:  ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
   };
   var pc = {
     Edge:    ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
@@ -4848,6 +4905,7 @@ function getBrowserConflicts() {
   var macLabels = {
     Edge: [
       'Cmd+T \u2014 opens new tab',
+      'Cmd+` \u2014 cycles app windows (macOS)',
       'Cmd+Opt+I \u2014 opens DevTools',
       'Cmd+Shift+C \u2014 opens DevTools inspector',
       'Cmd+Shift+J \u2014 opens DevTools console',
@@ -4857,6 +4915,7 @@ function getBrowserConflicts() {
     ],
     Firefox: [
       'Cmd+T \u2014 opens new tab',
+      'Cmd+` \u2014 cycles app windows (macOS)',
       'Cmd+Opt+I \u2014 opens DevTools',
       'Cmd+Shift+A \u2014 opens Add-ons',
       'Cmd+Shift+H \u2014 opens History',
@@ -4866,6 +4925,7 @@ function getBrowserConflicts() {
     ],
     Safari: [
       'Cmd+T \u2014 opens new tab',
+      'Cmd+` \u2014 cycles app windows (macOS)',
       'Cmd+Opt+U \u2014 opens Page Source',
       'Cmd+Opt+I \u2014 opens Web Inspector',
       'Cmd+Opt+C \u2014 opens Inspector Console',
@@ -4875,6 +4935,7 @@ function getBrowserConflicts() {
     ],
     Opera: [
       'Cmd+T \u2014 opens new tab',
+      'Cmd+` \u2014 cycles app windows (macOS)',
       'Cmd+Opt+I \u2014 opens DevTools',
       'Cmd+Opt+J \u2014 opens DevTools console',
       'Cmd+Shift+D \u2014 saves bookmark',
@@ -4882,6 +4943,7 @@ function getBrowserConflicts() {
     ],
     Chrome: [
       'Cmd+T \u2014 opens new tab',
+      'Cmd+` \u2014 cycles app windows (macOS)',
       'Cmd+Opt+I \u2014 opens DevTools',
       'Cmd+Opt+J \u2014 opens DevTools console',
       'Cmd+Shift+C \u2014 opens DevTools inspector',
@@ -4935,10 +4997,10 @@ function getBrowserConflicts() {
   } else {
     // Generic fallback — show both platforms' most universal conflicts
     conflictKeys = isMacOs
-      ? ['CMD+T','CMD+OPTION+I','CMD+SHIFT+H','CMD+SHIFT+N']
+      ? ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+SHIFT+H','CMD+SHIFT+N']
       : ['CMD+T','CMD+SHIFT+I', 'CMD+SHIFT+H','CMD+SHIFT+N'];
     labels = isMacOs
-      ? ['Cmd+T \u2014 opens new tab','Cmd+Opt+I \u2014 opens DevTools','Cmd+Shift+H \u2014 opens History','Cmd+Shift+N \u2014 opens Private window']
+      ? ['Cmd+T \u2014 opens new tab','Cmd+` \u2014 cycles app windows (macOS)','Cmd+Opt+I \u2014 opens DevTools','Cmd+Shift+H \u2014 opens History','Cmd+Shift+N \u2014 opens Private window']
       : ['Ctrl+T \u2014 opens new tab','Ctrl+Shift+I \u2014 opens DevTools','Ctrl+Shift+H \u2014 opens History','Ctrl+Shift+N \u2014 opens Private window'];
   }
 
@@ -4966,20 +5028,20 @@ function getBrowserConflictSet() {
 ══════════════════════════════════════ */
 
 function _showWelcomeScreen() {
+  _welcomeIsReturning = false;
   gameState = 'welcome';
   titleEl.textContent = 'Welcome to Keyboard Warriors';
   var tagline = document.getElementById('welcomeTagline');
   if (tagline) tagline.style.display = 'block';
-  // Needle starts left (Fundamentals position) on the landing screen
+  // Needle starts left (Fundamentals position) on the first-time landing screen
   _diffFirst = true;
   setDiffState(-1);
-  // Open the difficulty settings panel — keyboard tilts to partial, buttons appear
   openSettings('difficulty');
 }
 
 // Shared handler for both the welcome panel and the difficulty settings panel
 function diffBtnClick(mode) {
-  var hardcoreUnlocked = bestRecord.accuracy !== null && bestRecord.accuracy >= 100;
+  var hardcoreUnlocked = hasEverAchievedPerfectAccuracy;
   if (mode === 'hardcore' && !hardcoreUnlocked) {
     showToast('To unlock Hardcore you must achieve 100% accuracy.');
     return;
@@ -5018,7 +5080,7 @@ function diffBtnClick(mode) {
 // using the supplied mode rather than reading currentDifficulty (which may
 // lag during the confirm-diff-change pending state).
 function _updateDiffBtnStyles(activeMode) {
-  var hardcoreUnlocked = bestRecord.accuracy !== null && bestRecord.accuracy >= 100;
+  var hardcoreUnlocked = hasEverAchievedPerfectAccuracy;
   var btns = document.querySelectorAll('#spDifficulty .diff-btn');
   btns.forEach(function(btn) {
     var m = btn.getAttribute('data-mode');
@@ -5078,7 +5140,27 @@ function _pauseClearClick(target) {
 }
 
 function _reportImpossibleQuestion() {
-  var body    = '\nImpossible question report from Keyboard Warriors:\n\n' + dbgBuildReport() + '\n\nPlease describe the question and the problem:\n';
+  // Build the same report dbgBuildReport() produces, but directly from live
+  // state so it is always current regardless of debug overlay visibility.
+  var appEntry = APPS.find(function(a) { return a.key === currentApp; });
+  var appName  = appEntry ? appEntry.label : currentApp;
+  var osName   = currentOs === 'pc' ? 'PC/Windows' : 'Mac';
+  var device   = typeof DBG_DEVICE !== 'undefined' ? DBG_DEVICE : 'unknown';
+  var pool     = questionPool.length;
+  var qi       = pool > 0 ? (questionIndex % pool) + 1 : '—';
+  var qStr     = (gameState === 'idle' || gameState === 'welcome') ? '—/0' : qi + '/' + pool;
+  var question = questionPool[questionIndex] || null;
+
+  var lines = [
+    'build:' + device + '  os:' + osName,
+    'app:' + appName + '  state:' + gameState + '  Q:' + qStr,
+    question ? 'answer: ' + question.shortcut : '',
+    question ? 'display: ' + question.display : '',
+    question ? 'difficulty: ' + question.difficulty : '',
+  ];
+  var report = lines.filter(function(l) { return l.trim(); }).join('\n');
+
+  var body    = '\nImpossible question report from Keyboard Warriors:\n\n' + report + '\n\nPlease describe the question and the problem:\n';
   var subject = 'Keyboard Warriors — impossible question report';
   var a = document.createElement('a');
   a.href = 'mailto:Wednesday%20Dessauer%20%3Cddessauer%40swin.edu.au%3E?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
@@ -5089,21 +5171,85 @@ function _reportImpossibleQuestion() {
   document.body.removeChild(a);
 }
 
+function _showReturningScreen() {
+  _welcomeIsReturning = true;
+  gameState = 'welcome';
+  titleEl.textContent = 'Thanks for coming back.';
+  var tagline = document.getElementById('welcomeTagline');
+  if (tagline) tagline.style.display = 'none';
+  var modeMap = { fundamentals: -1, normal: 0, hardcore: 1 };
+  _diffFirst = true;
+  setDiffState(modeMap[currentDifficulty] !== undefined ? modeMap[currentDifficulty] : 0);
+  _updateDiffBtnStyles(currentDifficulty);
+  _updateDiffSubtitle(currentDifficulty);
+  openSettings('returning');
+}
+
+function _returningContinue() {
+  _welcomeIsReturning = false;
+  var tagline = document.getElementById('welcomeTagline');
+  if (tagline) tagline.style.display = 'none';
+  var modeMap = { fundamentals: -1, normal: 0, hardcore: 1 };
+  _diffFirst = true;
+  setDiffState(modeMap[currentDifficulty] !== undefined ? modeMap[currentDifficulty] : 0);
+  closeSettings();
+  resetToIdle();
+  beginCountdown();
+}
+
+function _returningStartOver() {
+  try { localStorage.removeItem('kw_best'); } catch(e) {}
+  try { localStorage.removeItem('kw_app'); } catch(e) {}
+  try { localStorage.removeItem('kw_difficulty'); } catch(e) {}
+  try { localStorage.removeItem('kw_perfect'); } catch(e) {}
+  try { sessionStorage.removeItem('kw_welcomed'); } catch(e) {}
+  bestRecord = { time: null, accuracy: null };
+  hasEverAchievedPerfectAccuracy = false;
+  currentDifficulty = 'normal';
+  _diffFirst = true;
+  setDiffState(0);
+  updateBestDisplay();
+  closeSettings();
+  _showWelcomeScreen();
+}
+
 function _dismissWelcome() {
   var tagline = document.getElementById('welcomeTagline');
   if (tagline) tagline.style.display = 'none';
+  _welcomeIsReturning = false;
   closeSettings();
   resetToIdle();
 }
 
-// On load: show welcome screen every fresh session (sessionStorage resets on tab close)
+function _startFromWelcome() {
+  // Start pressed on a landing screen without choosing an option.
+  // First-time: default to Normal. Returning: keep existing settings.
+  if (!_welcomeIsReturning) {
+    currentDifficulty = 'normal';
+    try { localStorage.setItem('kw_difficulty', currentDifficulty); } catch(e) {}
+  }
+  var tagline = document.getElementById('welcomeTagline');
+  if (tagline) tagline.style.display = 'none';
+  _welcomeIsReturning = false;
+  closeSettings();
+  resetToIdle();
+  beginCountdown();
+}
+
+// On load: show appropriate landing screen every fresh session (sessionStorage resets on tab close)
 (function() {
   var seenThisSession = false;
   try { seenThisSession = sessionStorage.getItem('kw_welcomed') !== null; } catch(e) {}
   if (!seenThisSession) {
     try { sessionStorage.setItem('kw_welcomed', '1'); } catch(e) {}
-    // Defer slightly so keyboard is built and positioned first
-    setTimeout(_showWelcomeScreen, 80);
+    var hasPriorSession = false;
+    try {
+      hasPriorSession = localStorage.getItem('kw_best')       !== null
+                     || localStorage.getItem('kw_app')        !== null
+                     || localStorage.getItem('kw_difficulty') !== null
+                     || localStorage.getItem('kw_perfect')    !== null;
+    } catch(e) {}
+    setTimeout(hasPriorSession ? _showReturningScreen : _showWelcomeScreen, 80);
   }
 })();
 
@@ -5162,11 +5308,11 @@ function _onAppsLoaded(appsData) {
     .catch(function(err) {
       console.warn('[Apps] Could not load KeyboardWarrior_Apps.json:', err, '— using built-in fallback.');
       _onAppsLoaded([
-        { key: 'Ps', label: 'Photoshop',    path: '/keyboard_warriors/data/shortcuts_photoshop.json'    },
-        { key: 'Ai', label: 'Illustrator',  path: '/keyboard_warriors/data/shortcuts_illustrator.json'  },
-        { key: 'Id', label: 'InDesign',      path: '/keyboard_warriors/data/shortcuts_inDesign.json'     },
-        { key: 'Ae', label: 'After Effects', path: '/keyboard_warriors/data/shortcuts_afterEffects.json' },
-        { key: 'Fi', label: 'Figma',         path: '/keyboard_warriors/data/shortcuts_figma.json'        }
+        { key: 'Ps', label: 'Photoshop (Ps)',    path: '/keyboard_warriors/data/shortcuts_photoshop.json'    },
+        { key: 'Ai', label: 'Illustrator (Ai)',  path: '/keyboard_warriors/data/shortcuts_illustrator.json'  },
+        { key: 'Id', label: 'InDesign (Id)',      path: '/keyboard_warriors/data/shortcuts_inDesign.json'     },
+        { key: 'Ae', label: 'After Effects (Ae)', path: '/keyboard_warriors/data/shortcuts_afterEffects.json' },
+        { key: 'Fi', label: 'Figma (Fi)',         path: '/keyboard_warriors/data/shortcuts_figma.json'        }
       ]);
     });
 })();
@@ -5384,7 +5530,11 @@ function advanceQuestion() {
   titleEl.className = '';
   void titleEl.offsetWidth; // flush so animation restarts
   titleEl.textContent = questionPool[questionIndex].display;
-  titleEl.classList.add('question-pop');
+  if (gameState === 'paused') {
+    titleEl.classList.add('blurred');
+  } else {
+    titleEl.classList.add('question-pop');
+  }
   mainBtn.textContent = 'Skip';
   clearHelp();
   transitioning = false;
@@ -5463,6 +5613,10 @@ function endGame() {
   }
   if (bestRecord.accuracy === null || finalAccuracy > bestRecord.accuracy) {
     bestRecord.accuracy = finalAccuracy; newBestAcc = true;
+  }
+  if (finalAccuracy >= 100 && !hasEverAchievedPerfectAccuracy) {
+    hasEverAchievedPerfectAccuracy = true;
+    try { localStorage.setItem('kw_perfect', '1'); } catch(e) {}
   }
   if (newBestTime || newBestAcc) {
     try { localStorage.setItem('kw_best', JSON.stringify(bestRecord)); } catch(e) {}
@@ -5549,7 +5703,7 @@ function medalPressUp() {
 
 document.addEventListener('mousemove', e => {
   if (!currentMedal) return;
-  if (gameState !== 'finished' && gameState !== 'confirm-reset') return;
+  if (gameState !== 'finished' && gameState !== 'confirm-reset' && gameState !== 'confirm-quit') return;
   const d = (e.clientX / window.innerWidth) - 0.5; // -0.5..+0.5
   rimTarget = d * 30; // ±15°
   if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
@@ -5678,7 +5832,7 @@ function handleKeydown(e) {
     if (e.key === 'ArrowRight') { showTip(tipIndex + 1); e.preventDefault(); return; }
     if (e.key === 'ArrowLeft')  { showTip(tipIndex - 1); e.preventDefault(); return; }
   }
-  if (gameState === 'paused' || gameState === 'confirm-reset') { e.preventDefault(); return; }
+  if (gameState === 'paused' || gameState === 'confirm-reset' || gameState === 'confirm-quit') { e.preventDefault(); return; }
   if (gameState !== 'playing' || transitioning) { e.preventDefault(); return; }
 
   // Check correctness: sticky mode uses accumulated toggled keys; normal uses simultaneity
@@ -5879,7 +6033,7 @@ function setDiffState(newState) {
 /* ── Active click handler — flip animation ───────────── */
 function diffIconClick() {
   resetEndScreenInactivityTimer();
-  if (activeSettings === 'difficulty') {
+  if (activeSettings === 'difficulty' || activeSettings === 'returning') {
     closeSettings();
   } else {
     openSettings('difficulty');
@@ -6246,6 +6400,8 @@ document.addEventListener('DOMContentLoaded', function() {
 #diffIconWrap.sp-icon-active .icon-tip {
   opacity: 1;
   color: #374151;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 /* Darken the icon SVG fill when active */
