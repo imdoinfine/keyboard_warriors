@@ -479,7 +479,7 @@
   {
     "shortcut": "ENTER",
     "display": "Dive into group (select Child)",
-    "mac_sc": "⏎  Enter",
+    "mac_sc": "⏎  Return",
     "pc_sc": "Enter",
     "pc_safe": true,
     "difficulty": 1,
@@ -895,15 +895,6 @@
     "display": "Select Matching Layers",
     "mac_sc": "⌘  ⌥  A",
     "pc_sc": "Ctrl Alt A",
-    "pc_safe": true,
-    "difficulty": 5,
-    "group": ""
-  },
-  {
-    "shortcut": "fn+E",
-    "display": "Open Emoji picker",
-    "mac_sc": "fn E",
-    "pc_sc": "fn E",
     "pc_safe": true,
     "difficulty": 5,
     "group": ""
