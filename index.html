@@ -4,7 +4,7 @@
      and production logic lives in computer.html.
      Do not deploy. Merge approved changes back manually.
      ═══════════════════════════════════════════════════ -->
-<script>const DBG_DEVICE = 'comp1.001';</script>
+<script>const DBG_DEVICE = 'comp1.012';</script>
 <!DOCTYPE html>
 <html>
 <head>
@@ -711,6 +711,15 @@ body.pc-mode #extKeyPill {
   grid-template-columns: 1fr 1fr;
 }
 
+/* Difficulty page: full-width single column, centred buttons */
+#spDifficulty.sp-active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+#spDifficulty.sp-active::after { display: none; }
+
 /* Gutter: a 1px line at the midpoint — centred above diffIcon */
 .sp-page.sp-active::after {
   content: '';
@@ -746,6 +755,48 @@ body.pc-mode #extKeyPill {
   font-size: 11px;
   color: #6b7280;
   margin-top: 8px;
+}
+
+/* ── Welcome screen — middlePanel tagline ─────────── */
+#welcomeTagline {
+  display: none;
+  font-size: 14px;
+  font-style: italic;
+  color: #6b7280;
+  margin: 4px 0 0;
+  text-align: center;
+  line-height: 1.5;
+}
+.diff-btn {
+  flex: 1;
+  max-width: 140px;
+  padding: 9px 10px;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  background: white;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  line-height: 1.2;
+}
+.diff-btn:hover:not(.diff-btn-inactive) {
+  background: #f0fdf4;
+  border-color: #10b981;
+  color: #065f46;
+}
+.diff-btn-inactive {
+  color: #9ca3af;
+  border-color: #e5e7eb;
+  cursor: default;
+  background: #fafafa;
+}
+.diff-btn-active {
+  color: #374151;
+  border-color: #374151;
+  background: white;
 }
 .sp-key-chip {
   display: inline-block;
@@ -787,8 +838,13 @@ body.pc-mode #extKeyPill {
   from { opacity: 0; transform: translateX(-18px); }
   to   { opacity: 1; transform: translateX(0);     }
 }
+@keyframes spWipeInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
 .sp-page.sp-wipe-in       { animation: spWipeIn     0.22s ease forwards; }
 .sp-page.sp-wipe-in-left  { animation: spWipeInLeft 0.22s ease forwards; }
+.sp-page.sp-wipe-in-up    { animation: spWipeInUp   0.22s ease forwards; }
 
 @keyframes btnPulse {
   0%   { transform: scale(1); }
@@ -1651,8 +1707,9 @@ li.conflict-dismissed .conflict-desc {
       <button id="helpBtn" onclick="helpButtonClick()">Help</button>
     </div>
     <div class="middlePanel">
-      <div style="position:relative;display:flex;align-items:center;justify-content:center;width:100%;">
+      <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;">
           <h2 id="title">Play Keyboard Warriors</h2>
+          <p id="welcomeTagline"><em>The keyboard shortcuts coach for graphic designers.</em></p>
           <div id="countdownOverlay"><span id="countdownNum"></span></div>
         </div>
     </div>
@@ -1728,7 +1785,23 @@ li.conflict-dismissed .conflict-desc {
     <!-- ── Pause Screen ──────────────────────────────── -->
     <div id="spPause" class="sp-page">
       <div class="sp-col sp-col-left">
-        <p class="sp-body"><strong>Your game is paused.</strong></p>
+        <p class="sp-body sp-paused-heading"><strong>Your game is paused.</strong></p>
+        <p class="sp-body sp-clear-label" id="spClearLabel"><strong>Clear High Score Record?</strong></p>
+        <div class="score-clear-pill">
+          <button id="clearTimeBtn" class="score-pill-seg score-pill-quarter" onclick="_pauseClearClick('time')" title="Clear best time">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6"/><path d="M12 3v2"/></svg>
+          </button>
+          <button id="clearBothBtn" class="score-pill-seg score-pill-half" onclick="_pauseClearClick('both')">both</button>
+          <button id="clearAccBtn" class="score-pill-seg score-pill-quarter" onclick="_pauseClearClick('accuracy')" title="Clear best accuracy">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/></svg>
+          </button>
+        </div>
+        <p class="sp-body sp-clear-label" style="margin-top:8px;"><strong>Report impossible question:</strong></p>
+        <div class="score-clear-pill">
+          <button class="score-pill-seg score-pill-full" onclick="_reportImpossibleQuestion()" title="Report an impossible question">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+          </button>
+        </div>
       </div>
       <div class="sp-col sp-col-right">
         <p class="sp-body"><strong>Privacy statement:</strong></p>
@@ -1739,11 +1812,13 @@ li.conflict-dismissed .conflict-desc {
 
     <!-- ── Difficulty Settings ──────────────────────────── -->
     <div id="spDifficulty" class="sp-page">
-      <div class="sp-col sp-col-left">
-        <p class="sp-title">Difficulty</p>
-        <p class="sp-body">Coming soon: Fundamentals &amp; Hardcore modes.</p>
+      <p class="sp-title" style="margin-bottom:10px;">Difficulty</p>
+      <div style="display:flex;gap:10px;justify-content:center;width:100%;">
+        <button class="diff-btn" data-mode="fundamentals" onclick="diffBtnClick('fundamentals')">Fundamentals</button>
+        <button class="diff-btn" data-mode="normal" onclick="diffBtnClick('normal')">Normal</button>
+        <button class="diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')">Hardcore</button>
       </div>
-      <div class="sp-col sp-col-right"></div>
+      <p id="diffSubtitle" class="diff-subtitle">&nbsp;</p>
     </div>
 
     <!-- ── Keyboard Settings ────────────────────────────── -->
@@ -3033,6 +3108,11 @@ function updateKeyboardLighting(e, isDown) {
 let gameState = 'idle';
 let currentMedal = null;
 let _confirmFromFinished  = false; // true when confirm-reset entered from finished state
+let _confirmFromPause     = false; // true when confirm-reset entered from active paused game
+let _pendingDifficulty   = null;  // difficulty mode awaiting confirmation
+let _prevDifficulty      = null;  // difficulty to restore on cancel
+let _clearTarget         = null;  // 'time' | 'accuracy' | 'both' — which record the pending reset affects
+let _confirmAfterUpgrade = null;  // mode label string when ramp-up reset prompt is pending
 let _countdownMode        = 'start'; // 'start' | 'resume'
 let _modalWasOpenOnPause  = false;   // true when a modal was open entering/during pause
 let _wasPlaying           = false;   // true once any question has been answered (answersLeft decremented)
@@ -3228,6 +3308,7 @@ function _closeAllModals() {
 
 function mainButtonClick() {
   mainBtn.blur();
+  if (gameState === 'welcome') { _dismissWelcome(); return; }
   if (gameState === 'idle' || gameState === 'finished') { _closeAllModals(); beginCountdown(); return; }
   if (gameState === 'counting')      { cancelCountdown(); return; }
   if (gameState === 'playing')       { skipShortcut(); return; }
@@ -3237,6 +3318,7 @@ function mainButtonClick() {
     return;
   }
   if (gameState === 'confirm-reset') { confirmResetYes(); return; }
+  if (gameState === 'confirm-diff-change') { confirmDiffChangeYes(); return; }
 }
 
 const IMPROVEMENT_TIPS = [
@@ -3272,8 +3354,9 @@ function helpButtonClick() {
   resetEndScreenInactivityTimer();
   if (gameState === 'idle')           { titleEl.textContent = bestRecord.time !== null ? 'To reset your score, press the lock key on the keyboard.' : 'Press start to begin.'; return; }
   if (gameState === 'playing')        { toggleHelp(); return; }
-  if (gameState === 'paused')         { enterConfirmReset(); return; }
-  if (gameState === 'confirm-reset')  { confirmResetNo(); return; }
+  if (gameState === 'paused')         { if (lockKeyEl) lockKeyEl.classList.remove('active'); resetToIdle(); return; }
+  if (gameState === 'confirm-reset')       { confirmResetNo(); return; }
+  if (gameState === 'confirm-diff-change') { confirmDiffChangeNo(); return; }
   if (gameState === 'finished')       { showTip(tipIndex + 1); tipIndex++; return; }
 }
 
@@ -3286,8 +3369,12 @@ function timerBoxClick() {
     return;
   }
   if (gameState === 'confirm-reset' && _wasPlaying) {
-    // Pause icon is still visible — tapping it means "cancel reset, go back"
+    // Pause icon is still visible — tapping it means "cancel, go back"
     confirmResetNo();
+    return;
+  }
+  if (gameState === 'confirm-diff-change') {
+    confirmDiffChangeNo();
     return;
   }
 }
@@ -3421,7 +3508,7 @@ function enterPause(instantBlur) {
   timerDiv.innerHTML = '<svg width="26" height="26" viewBox="0 0 26 26" style="display:block;vertical-align:top;" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="2" width="4" height="22" rx="1.5" fill="white"/><rect x="16" y="2" width="4" height="22" rx="1.5" fill="white"/></svg>';
   setTimerState('paused');
   mainBtn.textContent = 'Unpause';
-  helpBtn.textContent = 'Reset';
+  helpBtn.textContent = 'Quit';
   helpBtn.style.background = '#6b7280';
   helpBtn.style.color = 'white';
   if (lockKeyEl) lockKeyEl.classList.add('active');
@@ -3450,17 +3537,30 @@ function unpause() {
 }
 
 
-function enterConfirmReset() {
+function enterConfirmReset(target) {
+  // target: 'time' | 'accuracy' | 'both' (default 'both' for legacy lock-key call)
+  _clearTarget = target || 'both';
   _confirmFromFinished = (gameState === 'finished');
+  _confirmFromPause    = _wasPlaying && answersLeft > 0 && gameState !== 'finished';
   _closeAllModalsInstant();
   gameState = 'confirm-reset';
   if (currentMedal && !_confirmFromFinished) resetTimerBox();
   titleEl.classList.remove('blurred');
   questionCountEl.classList.remove('blurred');
   titleEl.className = '';
-  titleEl.textContent = _confirmFromFinished
-    ? 'Do you want to reset your high scores?'
-    : 'Reset your best score and start again?';
+  var msg;
+  if (_confirmAfterUpgrade) {
+    msg = 'You ramped up difficulty. Shall I reset your high scores then?';
+  } else if (_clearTarget === 'time') {
+    msg = 'Do you really want to wipe your best time record?';
+  } else if (_clearTarget === 'accuracy') {
+    msg = 'Do you really want to wipe your highest accuracy record?';
+  } else {
+    msg = _confirmFromFinished
+      ? 'Are you sure you want to clear your high scores?'
+      : 'Are you sure you want to clear your high scores?';
+  }
+  titleEl.textContent = msg;
   if (_confirmFromFinished) setAppSelectorGameActive(false);
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
@@ -3471,25 +3571,72 @@ function enterConfirmReset() {
 }
 
 function confirmResetYes() {
-  var fromFinished = _confirmFromFinished;
+  var fromFinished  = _confirmFromFinished;
+  var fromPause     = _confirmFromPause;
+  var afterUpgrade  = _confirmAfterUpgrade;
+  var target        = _clearTarget;
   _confirmFromFinished = false;
-  bestRecord = { time: null, accuracy: null };
-  try { localStorage.removeItem('kw_best'); } catch(e) {}
+  _confirmFromPause    = false;
+  _confirmAfterUpgrade = null;
+  _clearTarget = null;
+
+  // Apply the partial or full clear
+  if (target === 'time') {
+    bestRecord.time = null;
+  } else if (target === 'accuracy') {
+    bestRecord.accuracy = null;
+  } else {
+    bestRecord = { time: null, accuracy: null };
+  }
+  // Persist: if both are now null remove the key, otherwise update it
+  if (bestRecord.time === null && bestRecord.accuracy === null) {
+    try { localStorage.removeItem('kw_best'); } catch(e) {}
+  } else {
+    try { localStorage.setItem('kw_best', JSON.stringify(bestRecord)); } catch(e) {}
+  }
   updateBestDisplay();
   if (lockKeyEl) lockKeyEl.classList.remove('active');
+
+  if (afterUpgrade) {
+    resetToIdle();
+    titleEl.textContent = afterUpgrade + ' mode ready.';
+    return;
+  }
+
+  // Came from a paused game — clear the record then return to pause screen
+  if (fromPause) {
+    _refreshPausePanel();
+    openSettings('pause');
+    return;
+  }
+
   resetToIdle();
   if (fromFinished) {
-    titleEl.textContent = 'Both records have been cleared.';
+    var cleared = target === 'time' ? 'Time record cleared.'
+                : target === 'accuracy' ? 'Accuracy record cleared.'
+                : 'Both records have been cleared.';
+    titleEl.textContent = cleared;
   }
 }
 
 function confirmResetNo() {
+  var afterUpgrade = _confirmAfterUpgrade;
+  _confirmAfterUpgrade = null;
+  _clearTarget = null;
   if (lockKeyEl) lockKeyEl.classList.remove('active');
+
+  // Post-upgrade "No" — just go to idle with mode-ready message, no score change
+  if (afterUpgrade) {
+    _confirmFromFinished = false;
+    resetToIdle();
+    titleEl.textContent = afterUpgrade + ' mode ready.';
+    return;
+  }
+
   if (_confirmFromFinished) {
     // Return to medal screen — keep everything intact, show a tip
     _confirmFromFinished = false;
     gameState = 'finished';
-    // Restore medal on timerBox in case anything disturbed it
     if (currentMedal) {
       timerBox.className = 'timerBox medal-' + currentMedal;
       timerBox.style.background = MEDAL_RIM[currentMedal](rimCurrent);
@@ -3500,18 +3647,17 @@ function confirmResetNo() {
     helpBtn.style.background = '';
     helpBtn.style.color = '';
     titleEl.className = '';
-    setAppSelectorGameActive(false); // app selector stays active (between games)
+    setAppSelectorGameActive(false);
     showTip(tipIndex);
     return;
   }
-  // If a game was in progress, count straight back in — no stop at paused
+  // If a game was in progress, count straight back in
   if (_wasPlaying && questionPool.length > 0 && answersLeft > 0) {
-    // Set up paused UI so enterPause state is correct, then immediately resume
     gameState = 'paused';
     titleEl.classList.add('blurred');
     titleEl.textContent = questionPool[questionIndex]?.display || '';
     mainBtn.textContent = 'Unpause';
-    helpBtn.textContent = 'Reset';
+    helpBtn.textContent = 'Quit';
     helpBtn.style.background = '#6b7280';
     helpBtn.style.color = 'white';
     beginResumeCountdown();
@@ -3520,9 +3666,74 @@ function confirmResetNo() {
   }
 }
 
+function enterConfirmDiffChange() {
+  _closeAllModalsInstant();
+  gameState = 'confirm-diff-change';
+  titleEl.classList.remove('blurred');
+  questionCountEl.classList.remove('blurred');
+  titleEl.className = '';
+  titleEl.textContent = 'Changing difficulty will cancel your paused game. Proceed?';
+  mainBtn.textContent = 'Yes';
+  mainBtn.style.background = '#10b981';
+  helpBtn.textContent = 'No';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+  if (lockKeyEl) lockKeyEl.classList.add('active');
+}
+
+function confirmDiffChangeYes() {
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  var prevDiff = _prevDifficulty;
+  currentDifficulty = _pendingDifficulty;
+  _pendingDifficulty = null;
+  _prevDifficulty    = null;
+  try { localStorage.setItem('kw_difficulty', currentDifficulty); } catch(e) {}
+
+  var diffRank = { fundamentals: 0, normal: 1, hardcore: 2 };
+  var isUpgrade = (diffRank[currentDifficulty] || 0) > (diffRank[prevDiff] || 0);
+  var hasRecord = bestRecord.time !== null || bestRecord.accuracy !== null;
+  var label = currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1);
+
+  if (isUpgrade && hasRecord) {
+    // Chain into ramp-up reset prompt before going to idle
+    _confirmAfterUpgrade = label;
+    _clearTarget = 'both';
+    enterConfirmReset('both');
+    return;
+  }
+
+  resetToIdle();
+  titleEl.textContent = label + ' mode ready.';
+}
+
+function confirmDiffChangeNo() {
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  // Restore difficulty and needle to the game that is still active
+  var modeMap = { fundamentals: -1, normal: 0, hardcore: 1 };
+  currentDifficulty  = _prevDifficulty;
+  _diffFirst = true;
+  setDiffState(modeMap[_prevDifficulty] !== undefined ? modeMap[_prevDifficulty] : 0);
+  _updateDiffBtnStyles(currentDifficulty);
+  _updateDiffSubtitle(currentDifficulty);
+  _pendingDifficulty = null;
+  _prevDifficulty    = null;
+  // Resume the paused game directly
+  gameState = 'paused';
+  titleEl.classList.add('blurred');
+  titleEl.textContent = questionPool[questionIndex]?.display || '';
+  mainBtn.textContent = 'Unpause';
+  helpBtn.textContent = 'Quit';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+  beginResumeCountdown();
+}
+
 function resetToIdle() {
   gameState = 'idle';
   _wasPlaying = false;
+  // Hide welcome-screen elements if visible
+  var _wTag = document.getElementById('welcomeTagline');
+  if (_wTag) _wTag.style.display = 'none';
   setAppSelectorGameActive(false);
   setKbPosition('face');
   clearInterval(timerInterval);
@@ -4121,12 +4332,12 @@ function openSettings(page) {
   var prevPage = activeSettings;
   activeSettings = page;
 
-  // Update kbPos — pause page uses edge same as browser/difficulty
-  var pos = (page === 'keyboard') ? 'partial' : 'edge';
+  // Update kbPos — difficulty and keyboard use partial; browser, pause use edge
+  var pos = (page === 'keyboard' || page === 'difficulty') ? 'partial' : 'edge';
   setKbPosition(pos);
 
-  // Pause game if needed (not for the pause page itself — enterPause calls us)
-  if (!wasOpen && page !== 'pause') {
+  // Pause game if needed (not for pause page or when on welcome screen)
+  if (!wasOpen && page !== 'pause' && gameState !== 'welcome') {
     if (gameState === 'playing')  { enterPause(true); }
     else if (gameState === 'counting') { cancelCountdown(); _modalWasOpenOnPause = true; }
     else if (gameState === 'paused')   { _modalWasOpenOnPause = true; }
@@ -4135,6 +4346,8 @@ function openSettings(page) {
   // Populate content
   if (page === 'browser')    _refreshBrowserContent();
   if (page === 'keyboard')   { updateModalToggles(); updateKbSizeToggle(); }
+  if (page === 'difficulty') _refreshDifficultyPanel();
+  if (page === 'pause')      _refreshPausePanel();
 
   // Align panel width to keyboard
   _spAlignPanel();
@@ -4144,17 +4357,21 @@ function openSettings(page) {
   allPages.forEach(function(p) {
     var el = _spPageEl(p);
     if (!el) return;
-    el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left');
+    el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left', 'sp-wipe-in-up');
   });
 
   var pageEl = _spPageEl(page);
   if (pageEl) {
     pageEl.classList.add('sp-active');
     if (wasOpen && prevPage !== page) {
-      // Wipe direction: based on page order
-      var prevIdx = SP_PAGE_ORDER.indexOf(prevPage);
-      var nextIdx = SP_PAGE_ORDER.indexOf(page);
-      pageEl.classList.add(nextIdx > prevIdx ? 'sp-wipe-in' : 'sp-wipe-in-left');
+      // Difficulty always rises up; other pages wipe left/right by order
+      if (page === 'difficulty' || prevPage === 'difficulty') {
+        pageEl.classList.add('sp-wipe-in-up');
+      } else {
+        var prevIdx = SP_PAGE_ORDER.indexOf(prevPage);
+        var nextIdx = SP_PAGE_ORDER.indexOf(page);
+        pageEl.classList.add(nextIdx > prevIdx ? 'sp-wipe-in' : 'sp-wipe-in-left');
+      }
     }
   }
 
@@ -4183,7 +4400,7 @@ function closeSettings() {
   // Hide all pages
   ['keyboard', 'browser', 'difficulty', 'pause'].forEach(function(p) {
     var el = _spPageEl(p);
-    if (el) el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left');
+    if (el) el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left', 'sp-wipe-in-up');
   });
 
   _unpinTooltip();
@@ -4193,9 +4410,8 @@ function closeSettings() {
   // Reset wrap height
   var wrap = document.getElementById('keyboardWrap');
   if (wrap) wrap.style.minHeight = '';
-  // Only snap keyboard to face if not paused — when paused, runCountdown will
-  // animate it up at the right time as the player resumes.
-  if (gameState !== 'paused' && gameState !== 'counting') {
+  // Only snap keyboard to face if not paused or on welcome — runCountdown / resetToIdle handles it
+  if (gameState !== 'paused' && gameState !== 'counting' && gameState !== 'welcome') {
     setKbPosition('face');
   }
 }
@@ -4213,7 +4429,7 @@ function _closeAllModalsInstant() {
   if (sp) sp.classList.remove('sp-open');
   ['keyboard', 'browser', 'difficulty', 'pause'].forEach(function(p) {
     var el = _spPageEl(p);
-    if (el) el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left');
+    if (el) el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left', 'sp-wipe-in-up');
   });
   _unpinTooltip();
   var stage2 = document.getElementById('kbFlipStage');
@@ -4538,7 +4754,13 @@ function dbgReport() {
   }
   var body    = '\nBug report from Keyboard Warriors:\n\n' + dbgBuildReport() + '\n\nPlease describe the issue here:\n';
   var subject = 'Keyboard Warriors error report';
-  window.location.href = 'mailto:Wednesday%20Dessauer%20%3Cddessauer%40swin.edu.au%3E?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  var a = document.createElement('a');
+  a.href = 'mailto:Wednesday%20Dessauer%20%3Cddessauer%40swin.edu.au%3E?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function dbgRefreshCtx() {
@@ -4750,6 +4972,154 @@ function getBrowserConflictSet() {
 buildAppPill();
 positionIcons();
 
+/* ══════════════════════════════════════
+   WELCOME SCREEN
+   Shown on first load if no saved difficulty preference exists.
+   On choice (or skip), transitions to idle state.
+══════════════════════════════════════ */
+
+function _showWelcomeScreen() {
+  gameState = 'welcome';
+  titleEl.textContent = 'Welcome to Keyboard Warriors';
+  var tagline = document.getElementById('welcomeTagline');
+  if (tagline) tagline.style.display = 'block';
+  // Needle starts left (Fundamentals position) on the landing screen
+  _diffFirst = true;
+  setDiffState(-1);
+  // Open the difficulty settings panel — keyboard tilts to partial, buttons appear
+  openSettings('difficulty');
+}
+
+// Shared handler for both the welcome panel and the difficulty settings panel
+function diffBtnClick(mode) {
+  var hardcoreUnlocked = bestRecord.accuracy !== null && bestRecord.accuracy >= 100;
+  if (mode === 'hardcore' && !hardcoreUnlocked) {
+    showToast('To unlock Hardcore you must achieve 100% accuracy.');
+    return;
+  }
+
+  var modeMap = { fundamentals: -1, normal: 0, hardcore: 1 };
+
+  // If a game is paused mid-play, require confirmation before changing difficulty
+  if (_wasPlaying && answersLeft > 0 && gameState === 'paused') {
+    _prevDifficulty    = currentDifficulty;
+    _pendingDifficulty = mode;
+    // Move needle and update button styles immediately so the player sees the pending choice
+    _diffFirst = true;
+    setDiffState(modeMap[mode]);
+    _updateDiffBtnStyles(mode);
+    _updateDiffSubtitle(mode);
+    enterConfirmDiffChange();
+    return;
+  }
+
+  // No active game — apply immediately
+  currentDifficulty = mode;
+  _diffFirst = true;
+  setDiffState(modeMap[mode]);
+  _updateDiffBtnStyles(mode);
+  _updateDiffSubtitle(mode);
+  try { localStorage.setItem('kw_difficulty', currentDifficulty); } catch(e) {}
+
+  // If we are still on the welcome screen, dismiss it into idle
+  if (gameState === 'welcome') {
+    _dismissWelcome();
+  }
+}
+
+// Updates the active/inactive classes on the difficulty buttons immediately,
+// using the supplied mode rather than reading currentDifficulty (which may
+// lag during the confirm-diff-change pending state).
+function _updateDiffBtnStyles(activeMode) {
+  var hardcoreUnlocked = bestRecord.accuracy !== null && bestRecord.accuracy >= 100;
+  var btns = document.querySelectorAll('#spDifficulty .diff-btn');
+  btns.forEach(function(btn) {
+    var m = btn.getAttribute('data-mode');
+    if (m === 'hardcore' && !hardcoreUnlocked) {
+      btn.classList.add('diff-btn-inactive');
+      btn.classList.remove('diff-btn-active');
+    } else {
+      btn.classList.remove('diff-btn-inactive');
+      btn.classList.toggle('diff-btn-active', m === activeMode);
+    }
+  });
+}
+
+// welcomeDiffClick is an alias used by the panel buttons (both contexts)
+function welcomeDiffClick(mode) { diffBtnClick(mode); }
+
+function _refreshDifficultyPanel() {
+  // Use pendingDifficulty if a confirmation is in flight, otherwise current
+  var displayMode = _pendingDifficulty !== null ? _pendingDifficulty : currentDifficulty;
+  _updateDiffBtnStyles(displayMode);
+  _updateDiffSubtitle(displayMode);
+}
+
+function _updateDiffSubtitle(mode) {
+  var el = document.getElementById('diffSubtitle');
+  if (!el) return;
+  var subtitles = {
+    fundamentals: 'Mild. We will only ask things you really should know.',
+    normal:       '',
+    hardcore:     'Spicy! We have thrown in some tricky questions.'
+  };
+  var text = subtitles[mode] !== undefined ? subtitles[mode] : '';
+  el.textContent = text || '\u00a0'; // non-breaking space holds the line height
+}
+
+function _refreshPausePanel() {
+  var hasTime = bestRecord.time !== null;
+  var hasAcc  = bestRecord.accuracy !== null;
+  var allInactive = !hasTime && !hasAcc;
+  var timeBtn  = document.getElementById('clearTimeBtn');
+  var bothBtn  = document.getElementById('clearBothBtn');
+  var accBtn   = document.getElementById('clearAccBtn');
+  var clearLbl = document.getElementById('spClearLabel');
+  if (timeBtn)  timeBtn.classList.toggle('score-pill-inactive', !hasTime);
+  if (bothBtn)  bothBtn.classList.toggle('score-pill-inactive', allInactive);
+  if (accBtn)   accBtn.classList.toggle('score-pill-inactive', !hasAcc);
+  if (clearLbl) clearLbl.classList.toggle('sp-clear-label-inactive', allInactive);
+}
+
+function _pauseClearClick(target) {
+  var hasTime = bestRecord.time !== null;
+  var hasAcc  = bestRecord.accuracy !== null;
+  if (target === 'time'     && !hasTime) return;
+  if (target === 'accuracy' && !hasAcc)  return;
+  if (target === 'both'     && !hasTime && !hasAcc) return;
+  enterConfirmReset(target);
+}
+
+function _reportImpossibleQuestion() {
+  var body    = '\nImpossible question report from Keyboard Warriors:\n\n' + dbgBuildReport() + '\n\nPlease describe the question and the problem:\n';
+  var subject = 'Keyboard Warriors — impossible question report';
+  var a = document.createElement('a');
+  a.href = 'mailto:Wednesday%20Dessauer%20%3Cddessauer%40swin.edu.au%3E?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function _dismissWelcome() {
+  var tagline = document.getElementById('welcomeTagline');
+  if (tagline) tagline.style.display = 'none';
+  closeSettings();
+  resetToIdle();
+}
+
+// On load: show welcome screen every fresh session (sessionStorage resets on tab close)
+(function() {
+  var seenThisSession = false;
+  try { seenThisSession = sessionStorage.getItem('kw_welcomed') !== null; } catch(e) {}
+  if (!seenThisSession) {
+    try { sessionStorage.setItem('kw_welcomed', '1'); } catch(e) {}
+    // Defer slightly so keyboard is built and positioned first
+    setTimeout(_showWelcomeScreen, 80);
+  }
+})();
+
 
 /* ══════════════════════════════════════
    POOL BUILDER
@@ -4782,12 +5152,32 @@ function requiresExtKey(shortcut) {
   return shortcutToCodes(shortcut).some(c => EXT_CODES.has(c));
 }
 
+// Current difficulty mode: 'fundamentals' | 'normal' | 'hardcore'
+// Default: load from localStorage, fall back to 'normal'
+var currentDifficulty = 'normal';
+(function() {
+  try {
+    var saved = localStorage.getItem('kw_difficulty');
+    if (saved === 'fundamentals' || saved === 'normal' || saved === 'hardcore') {
+      currentDifficulty = saved;
+      // Restore needle to match saved difficulty
+      var stateMap = { fundamentals: -1, normal: 0, hardcore: 1 };
+      _diffFirst = true;
+      setDiffState(stateMap[saved]);
+    }
+  } catch(e) {}
+})();
+
+// Max difficulty value included per mode
+var DIFF_MAX = { fundamentals: 1, normal: 3, hardcore: 5 };
+
 function buildPool() {
+  var maxDiff = DIFF_MAX[currentDifficulty] || 3;
   const browserSkip   = getBrowserConflictSet();
   const allShortcuts  = UNIVERSAL_SHORTCUTS.concat(loadedAppShortcuts);
   return allShortcuts.filter(s => {
     if (!s.pc_safe && currentOs === 'pc') return false;
-    if (s.difficulty > 3) return false;
+    if (s.difficulty > maxDiff) return false;
     if ((touchEnabled || !hasFullKeyboard) && requiresExtKey(s.shortcut)) return false;
     if (browserSkip.has(s.shortcut)) return false;
     return true;
@@ -5442,12 +5832,12 @@ function showDiffToast(msg) {
 }
 
 /* ── Difficulty needle states (ready, not yet wired to click) ── */
-var _diffState = 0;   // -1 = basics, 0 = normal, 1 = hardcore
+var _diffState = -1;   // -1 = fundamentals, 0 = normal, 1 = hardcore
 var _diffFirst = false;
 var DIFF_ANGLES = { '-1': -60, '0': 0, '1': 60 };
 var DIFF_TOASTS = {
-  '-1': 'Basics mode coming soon.',
-   '0': 'You are in normal mode.',
+  '-1': 'Fundamentals mode coming soon.',
+   '0': 'Normal mode.',
    '1': 'Hardcore mode coming soon.'
 };
 function setDiffState(newState) {
@@ -5505,7 +5895,74 @@ document.addEventListener('DOMContentLoaded', function() {
   pointer-events: none;
 }
 
-/* ── Difficulty icon ──────────────────────────────── */
+/* ── Pause panel additions ───────────────────────── */
+.sp-paused-heading {
+  font-size: 15px !important;
+  margin-bottom: 10px !important;
+}
+.sp-clear-label {
+  margin-bottom: 6px !important;
+}
+.score-clear-pill {
+  display: flex;
+  width: 100%;
+  border: 1.5px solid #d1d5db;
+  border-radius: 20px;
+  overflow: hidden;
+  background: white;
+}
+.score-pill-seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 0;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  outline: none;
+  -webkit-appearance: none;
+}
+.score-pill-seg + .score-pill-seg {
+  border-left: 1.5px solid #d1d5db;
+}
+.score-pill-quarter { flex: 1; }   /* 25% each */
+.score-pill-half    { flex: 2; }   /* 50% */
+.score-pill-full    { flex: 1; width: 100%; }
+.score-pill-seg svg { pointer-events: none; }
+.score-pill-seg:hover:not(.score-pill-inactive) {
+  background: #f3f4f6;
+  color: #111827;
+}
+.score-pill-seg:hover:not(.score-pill-inactive) svg {
+  stroke: #111827;
+}
+.score-pill-inactive {
+  color: #d1d5db;
+  cursor: default;
+}
+.score-pill-inactive svg {
+  stroke: #d1d5db;
+}
+.sp-clear-label-inactive {
+  color: #d1d5db !important;
+}
+.sp-clear-label-inactive strong {
+  color: inherit;
+}
+.diff-subtitle {
+  font-size: 12px;
+  font-style: italic;
+  color: #9ca3af;
+  text-align: center;
+  margin: 8px 0 0;
+  min-height: 1.6em;
+  line-height: 1.6;
+}
 /* ── Keyboard flip animation ──────────────────────── */
 
 /* ─── 3D STAGE ──────────────────────────────────────*/
