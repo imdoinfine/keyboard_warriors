@@ -4458,8 +4458,13 @@ function closeSettings() {
     openSettings('pause');
     return;
   }
-  // Only snap keyboard to face if not mid-countdown or on welcome — those flows handle it themselves
-  if (gameState !== 'counting' && gameState !== 'welcome') {
+  // If on a landing screen, restore the appropriate welcome panel
+  if (gameState === 'welcome') {
+    openSettings(_welcomeIsReturning ? 'returning' : 'difficulty');
+    return;
+  }
+  // Only snap keyboard to face if not mid-countdown — that flow handles it itself
+  if (gameState !== 'counting') {
     setKbPosition('face');
   }
 }
