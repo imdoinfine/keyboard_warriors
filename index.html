@@ -9,7 +9,6 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<link rel="icon" type="image/x-icon" href="/favicon.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Keyboard Warriors</title>
 <script>
@@ -4434,6 +4433,7 @@ function openSettings(page) {
 
 function closeSettings() {
   if (activeSettings === null) return;
+  var closingPage = activeSettings;
   activeSettings = null;
   kbModalOpen    = false;
   browserModalOpen = false;
@@ -4459,10 +4459,15 @@ function closeSettings() {
     openSettings('pause');
     return;
   }
-  // If on a landing screen, restore the appropriate welcome panel
+  // If on a landing screen and the user closed a *different* panel (e.g. keyboard/browser
+  // settings opened on top of the welcome panel), restore the welcome panel.
+  // If the welcome panel itself was closed, let it close normally.
   if (gameState === 'welcome') {
-    openSettings(_welcomeIsReturning ? 'returning' : 'difficulty');
-    return;
+    var welcomePage = _welcomeIsReturning ? 'returning' : 'difficulty';
+    if (closingPage !== welcomePage) {
+      openSettings(welcomePage);
+      return;
+    }
   }
   // Only snap keyboard to face if not mid-countdown — that flow handles it itself
   if (gameState !== 'counting') {
@@ -5477,6 +5482,7 @@ function startGame() {
   helpBtn.style.color = '';
   titleEl.className = '';
   titleEl.textContent = questionPool[0].display;
+  questionCountEl.classList.remove('blurred', 'blur-instant');
   buildProgressDots();
   showProgressDots();
   resetTimerBox();
