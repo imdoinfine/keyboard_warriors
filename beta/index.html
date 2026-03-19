@@ -4,13 +4,13 @@
      and production logic lives in computer.html.
      Do not deploy. Merge approved changes back manually.
      ═══════════════════════════════════════════════════ -->
-<script>const DBG_DEVICE = 'beta4';</script>
+<script>const DBG_DEVICE = 'comp1.013';</script>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Keyboard Warriors — BETA</title>
+<title>Keyboard Warriors</title>
 <script>
   // Redirect iPad users to the optimised iPad build
   (function() {
@@ -428,7 +428,7 @@ body {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 8px 60px 10px;
+  padding: 8px 60px 4px;
   position: relative;
   box-sizing: border-box;
   min-height: 37px;
@@ -611,22 +611,11 @@ body.pc-mode #extKeyPill {
 
 /* ── Keyboard modal shell ─────────────────────────────────────── */
 
-/* ── Modal dismiss X ──────────────────────────────────────────── */
-
-#kbModalInner {
-  width: 100%;
-  padding: 16px 22px;
-  box-sizing: border-box;
-  font-family: 'Lato', system-ui, sans-serif;
-  font-size: 13px;
-  color: #374151;
-  line-height: 1.5;
-}
 .modal-toggle-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   user-select: none;
 }
 .modal-toggle-row label {
@@ -643,7 +632,7 @@ body.pc-mode #extKeyPill {
   font-size: 13px;
   color: #374151;
 }
-.modal-section-gap { height: 8px; }
+.modal-section-gap { height: 4px; }
 .modal-section-title {
   font-size: 12px;
   font-weight: 700;
@@ -670,20 +659,193 @@ body.pc-mode #extKeyPill {
 .modal-radio-fill { opacity: 0; transition: opacity 0.15s ease; }
 .modal-radio.on .modal-radio-fill { opacity: 1; }
 
-@keyframes paperUnfurl {
-  0%   { opacity: 0; transform: perspective(800px) rotateX(22deg) scale(1.1); }
-  100% { opacity: 1; transform: perspective(800px) rotateX(0deg)  scale(1); }
+/* ══════════════════════════════════════
+   SETTINGS PANEL
+   Absolutely positioned inside #keyboardWrap, top-aligned.
+   As the keyboard tilts down it reveals this content above it.
+   Width/left aligned to keyboardPanel by JS.
+══════════════════════════════════════ */
+
+#settingsPanel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1; /* above bg, below keyboard 3D stage */
+  overflow: hidden;
 }
-@keyframes paperFurl {
-  /* Top edge rises toward the viewer first — rotateX negative tilts top forward */
-  0%   { opacity: 1; transform: perspective(800px) rotateX(0deg)   scale(1); }
-  100% { opacity: 0; transform: perspective(800px) rotateX(-20deg) scale(1.05); }
+
+#settingsPanelInner {
+  position: absolute;
+  top: 0;
+  /* left and width set by JS to match keyboardPanel */
+  padding: 0 0 8px;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.55;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity   0.3s ease 0.25s,
+    transform 0.3s ease 0.25s;
+  pointer-events: none;
 }
-@keyframes paperFurlFront {
-  /* Front modal dismiss: rises up and tilts bottom toward viewer */
-  0%   { opacity: 1; transform: perspective(800px) rotateX(0deg)   translateY(0)     scale(1); }
-  100% { opacity: 0; transform: perspective(800px) rotateX(14deg)  translateY(-24px) scale(0.97); }
+
+#settingsPanel.sp-open #settingsPanelInner {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
+
+/* ── Two-column grid ──────────────────────────────── */
+.sp-page {
+  display: none;
+  gap: 0;
+  width: 100%;
+}
+.sp-page.sp-active {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Difficulty page: full-width single column, centred buttons */
+#spDifficulty.sp-active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+#spDifficulty.sp-active::after { display: none; }
+
+/* Gutter: a 1px line at the midpoint — centred above diffIcon */
+.sp-page.sp-active::after {
+  content: '';
+  position: absolute;
+  top: 16px;
+  bottom: 12px;
+  left: 50%;
+  width: 1px;
+  background: #e5e7eb;
+  pointer-events: none;
+}
+
+.sp-col {
+  min-width: 0;
+}
+.sp-col-left  { padding-right: 20px; }
+.sp-col-right { padding-left:  20px; }
+
+/* ── Typography ──────────────────────────────────── */
+.sp-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+  margin: 4px 0 5px 0;
+}
+.sp-body {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.6;
+  margin: 0 0 10px 0;
+}
+.sp-hint {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 8px;
+}
+
+/* ── Welcome screen — middlePanel tagline ─────────── */
+#welcomeTagline {
+  display: none;
+  font-size: 14px;
+  font-style: italic;
+  color: #6b7280;
+  margin: 4px 0 0;
+  text-align: center;
+  line-height: 1.5;
+}
+.diff-btn {
+  flex: 1;
+  max-width: 140px;
+  padding: 9px 10px;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  background: white;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  line-height: 1.2;
+}
+.diff-btn:hover:not(.diff-btn-inactive) {
+  background: #f0fdf4;
+  border-color: #10b981;
+  color: #065f46;
+}
+.diff-btn-inactive {
+  color: #9ca3af;
+  border-color: #e5e7eb;
+  cursor: default;
+  background: #fafafa;
+}
+.diff-btn-active {
+  color: #374151;
+  border-color: #374151;
+  background: white;
+}
+.sp-key-chip {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  color: #1e3a5f;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  padding: 1px 4px 0;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+/* ── Browser conflict list ───────────────────────── */
+.sp-conflict-list {
+  margin: 0 0 8px 0;
+  padding-left: 0;
+  list-style: none;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.75;
+}
+.sp-conflict-list li {
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0;
+  line-height: 1.6;
+  cursor: pointer;
+}
+
+/* ── Page switch wipe animation ──────────────────── */
+@keyframes spWipeIn {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+@keyframes spWipeInLeft {
+  from { opacity: 0; transform: translateX(-18px); }
+  to   { opacity: 1; transform: translateX(0);     }
+}
+@keyframes spWipeInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+.sp-page.sp-wipe-in       { animation: spWipeIn     0.22s ease forwards; }
+.sp-page.sp-wipe-in-left  { animation: spWipeInLeft 0.22s ease forwards; }
+.sp-page.sp-wipe-in-up    { animation: spWipeInUp   0.22s ease forwards; }
+
 @keyframes btnPulse {
   0%   { transform: scale(1); }
   35%  { transform: scale(1.13); }
@@ -692,25 +854,6 @@ body.pc-mode #extKeyPill {
 }
 #mainBtn.pulse {
   animation: btnPulse 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-#kbModal {
-  position: fixed;
-  background: white;
-  border-radius: 0;
-  box-shadow:
-    0 6px 16px rgba(0,0,0,0.18),
-    0 18px 40px rgba(0,0,0,0.24);
-  z-index: 200;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-  overflow: hidden;
-  transform-origin: top center;
-}
-#kbModal.visible {
-  opacity: 1;
-  pointer-events: auto;
-  animation: paperUnfurl 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 
 
@@ -791,34 +934,30 @@ body.pc-mode #extKeyPill {
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-top: 4px;
+  margin-top: 0;
   position: relative;
   min-height: 282px;
+  transition: min-height 0.75s cubic-bezier(0.4, 0, 0.2, 1);
 }
 #kbIcon {
   display: block;
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 0;
-  pointer-events: auto;
   cursor: pointer;
+  fill: #9ca3af;
+  transition: fill 0.2s ease;
 }
 @keyframes kbIconPulse {
-  0%   { transform: translateY(-50%) scale(1); }
-  40%  { transform: translateY(-50%) scale(1.22); }
-  100% { transform: translateY(-50%) scale(1); }
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.22); }
+  100% { transform: scale(1); }
 }
 #kbIcon.pulse {
   animation: kbIconPulse 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 #kbIcon:hover {
-  transform: translateY(-50%) scale(1.12);
+  transform: scale(1.12);
   transition: transform 0.18s ease;
 }
 #kbIcon.pulse:hover {
-  /* don't interfere with pulse animation */
   transform: none;
   transition: none;
 }
@@ -827,23 +966,20 @@ body.pc-mode #extKeyPill {
 /* ── Browser icon (mirrors kbIcon, right side) ─────────────────── */
 #browserIcon {
   display: block;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 0;
-  pointer-events: auto;
   cursor: pointer;
+  fill: #9ca3af;
+  transition: fill 0.2s ease;
 }
 @keyframes browserIconPulse {
-  0%   { transform: translateY(-50%) scale(1); }
-  40%  { transform: translateY(-50%) scale(1.22); }
-  100% { transform: translateY(-50%) scale(1); }
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.22); }
+  100% { transform: scale(1); }
 }
 #browserIcon.pulse {
   animation: browserIconPulse 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 #browserIcon:hover {
-  transform: translateY(-50%) scale(1.12);
+  transform: scale(1.12);
   transition: transform 0.18s ease;
 }
 #browserIcon.pulse:hover {
@@ -851,78 +987,8 @@ body.pc-mode #extKeyPill {
   transition: none;
 }
 
-/* ── Browser modal (same spec as kbModal) ──────────────────────── */
-#browserModal {
-  position: fixed;
-  background: white;
-  border-radius: 0;
-  box-shadow:
-    0 6px 16px rgba(0,0,0,0.18),
-    0 18px 40px rgba(0,0,0,0.24);
-  z-index: 200;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease, height 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
-  overflow: hidden;
-  transform-origin: top center;
-}
-#browserModal.visible {
-  opacity: 1;
-  pointer-events: auto;
-  animation: paperUnfurl 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
-}
-
-/* ── Modal dismiss X (shared style) ───────────────────────────── */
-.modal-dismiss-btn {
-  position: absolute;
-  top: 10px; right: 10px;
-  width: 24px; height: 24px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  color: #9ca3af;
-  font-size: 17px;
-  line-height: 1;
-  border: none; background: none; padding: 0;
-  z-index: 10;
-  transition: color 0.15s;
-}
-.modal-dismiss-btn:hover { color: #374151; }
-
 /* ── Browser modal inner content ──────────────────────────────── */
-#browserModalInner {
-  width: 100%;
-  padding: 16px 20px 18px;
-  box-sizing: border-box;
-  font-family: 'Lato', system-ui, sans-serif;
-  font-size: 12px;
-  color: #374151;
-  line-height: 1.55;
-}
-#browserModalInner .compat-heading {
-  font-size: 12px;
-  font-weight: 400;
-  color: #374151;
-  margin: 0 0 0 0;
-  padding-right: 24px;
-  line-height: 1.6;
-}
-#browserModalInner .compat-intro {
-  font-size: 12px;
-  color: #374151;
-  margin: 10px 0 8px;
-  line-height: 1.6;
-}
-
-#browserModalInner ul {
-  margin: 0 0 12px 0;
-  padding-left: 0;
-  list-style: none;
-  font-size: 12px;
-  color: #6b7280;
-  line-height: 1.75;
-}
-#browserModalInner ul li { margin-bottom: 2px; }
-/* Default conflict chip — flat, no fill, no shadow */
+/* Conflict chip and dismissed styles — still used in settings panel */
 .conflict-chip {
   background: transparent;
   box-shadow: none;
@@ -935,18 +1001,6 @@ li.conflict-dismissed .conflict-chip {
 li.conflict-dismissed .conflict-desc {
   text-decoration: line-through;
   color: #c0c5cc;
-}
-#browserModalInner .compat-footer {
-  font-size: 12px;
-  color: #374151;
-  line-height: 1.6;
-  margin: 0;
-}
-#browserModalInner .compat-debug-hint {
-  font-size: 12px;
-  color: #374151;
-  line-height: 1.6;
-  margin: 0;
 }
 /* ══════════════════════════════════════
    KEYBOARD PANEL
@@ -1653,8 +1707,9 @@ li.conflict-dismissed .conflict-desc {
       <button id="helpBtn" onclick="helpButtonClick()">Help</button>
     </div>
     <div class="middlePanel">
-      <div style="position:relative;display:flex;align-items:center;justify-content:center;width:100%;">
+      <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;">
           <h2 id="title">Play Keyboard Warriors</h2>
+          <p id="welcomeTagline"><em>The keyboard shortcuts coach for graphic designers.</em></p>
           <div id="countdownOverlay"><span id="countdownNum"></span></div>
         </div>
     </div>
@@ -1704,10 +1759,169 @@ li.conflict-dismissed .conflict-desc {
 
 <div id="keyboardWrap">
   <div id="kbIconWrap">
-  <svg id="kbIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;fill:#9ca3af;">
+  <svg id="kbIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;">
     <path d="M98.6,32.4H11.4c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h87.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM99.9,65.9c0,.7-.6,1.3-1.3,1.3H11.4c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h87.2c.7,0,1.3.6,1.3,1.3v29.6ZM15.2,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM15.2,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM95.9,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM15.2,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM65.8,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM95.9,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM24.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM33,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.1,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM49.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM57.4,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM65.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM73.7,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM27.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM40.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM44.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM57.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM66.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM74.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM83.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM36.3,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM44.3,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM53.1,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM56.7,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.7,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.5,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM81.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.9,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM35.4,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM28.3,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM21.2,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM73.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM81,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM88.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM95.9,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/>
   </svg>
+  <span class="icon-tip">keyboard<br>settings</span>
   </div>
+  <div id="settingsPanel" aria-hidden="true">
+    <div id="settingsPanelInner">
+
+    <!-- ── Browser Settings ─────────────────────────────── -->
+    <div id="spBrowser" class="sp-page">
+      <div class="sp-col sp-col-left">
+        <p class="sp-body" id="browserCompatHeading"></p>
+        <p class="sp-body" id="browserCompatIntro"></p>
+        <p class="sp-body" id="browserCompatFooter"></p>
+      </div>
+      <div class="sp-col sp-col-right">
+        <ul id="browserCompatList" class="sp-conflict-list"></ul>
+        <p class="sp-body sp-hint">If you encounter an error, hold down
+          <span class="sp-key-chip">Esc</span>
+          to open the debug window and send a report.</p>
+      </div>
+    </div>
+
+    <!-- ── Pause Screen ──────────────────────────────── -->
+    <div id="spPause" class="sp-page">
+      <div class="sp-col sp-col-left">
+        <p class="sp-body sp-paused-heading"><strong>Your game is paused.</strong></p>
+        <p class="sp-body sp-clear-label" id="spClearLabel"><strong>Clear High Score Record?</strong></p>
+        <div class="score-clear-pill">
+          <button id="clearTimeBtn" class="score-pill-seg score-pill-quarter" onclick="_pauseClearClick('time')" title="Clear best time">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6"/><path d="M12 3v2"/></svg>
+          </button>
+          <button id="clearBothBtn" class="score-pill-seg score-pill-half" onclick="_pauseClearClick('both')">both</button>
+          <button id="clearAccBtn" class="score-pill-seg score-pill-quarter" onclick="_pauseClearClick('accuracy')" title="Clear best accuracy">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/></svg>
+          </button>
+        </div>
+        <p class="sp-body sp-clear-label" style="margin-top:8px;"><strong>Report impossible question:</strong></p>
+        <div class="score-clear-pill">
+          <button class="score-pill-seg score-pill-full" onclick="_reportImpossibleQuestion()" title="Report an impossible question">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="sp-col sp-col-right">
+        <p class="sp-body"><strong>Privacy statement:</strong></p>
+        <p class="sp-body"><em>Digital produce that thinks local.</em></p>
+        <p class="sp-body">Made for you, and stored with you, 'Keyboard Warriors' runs entirely on your device using local memory. No clouds, no crumbs.</p>
+      </div>
+    </div>
+
+    <!-- ── Difficulty Settings ──────────────────────────── -->
+    <div id="spDifficulty" class="sp-page">
+      <p class="sp-title" style="margin-bottom:10px;">Difficulty</p>
+      <div style="display:flex;gap:10px;justify-content:center;width:100%;">
+        <button class="diff-btn" data-mode="fundamentals" onclick="diffBtnClick('fundamentals')">Fundamentals</button>
+        <button class="diff-btn" data-mode="normal" onclick="diffBtnClick('normal')">Normal</button>
+        <button class="diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')">Hardcore</button>
+      </div>
+      <p id="diffSubtitle" class="diff-subtitle">&nbsp;</p>
+    </div>
+
+    <!-- ── Keyboard Settings ────────────────────────────── -->
+    <div id="spKeyboard" class="sp-page">
+      <div class="sp-col sp-col-left">
+        <p class="sp-title">Keyboard Behaviour</p>
+
+        <div class="modal-toggle-row" id="touchRow">
+          <label onclick="onTouchToggle()">
+            <span class="modal-radio" id="touchRadio">
+              <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
+                <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
+              </svg>
+            </span>
+            <span class="modal-toggle-label">Touch Enabled (soft keys)</span>
+          </label>
+        </div>
+
+        <div style="display:flex;gap:20px;align-items:center;margin-bottom:6px;">
+          <div class="modal-toggle-row" id="stickyRow" style="margin-bottom:0;">
+            <label onclick="onStickyKeysToggle()">
+              <span class="modal-radio" id="stickyRadio">
+                <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
+                  <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
+                </svg>
+              </span>
+              <span class="modal-toggle-label">Sticky Keys</span>
+            </label>
+          </div>
+          <div class="modal-toggle-row disabled" id="audibleRow" style="margin-bottom:0;">
+            <label onclick="onAudibleToggle()">
+              <span class="modal-radio" id="audibleRadio">
+                <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
+                  <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
+                </svg>
+              </span>
+              <span class="modal-toggle-label">Audible</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-section-gap"></div>
+        <p class="sp-title">Keyboard Layout</p>
+
+        <div class="modal-layout-rows">
+          <div class="modal-inline-row">
+            <div class="modal-left-label"><span>3</span></div>
+            <div class="modal-switch-wrap">
+              <label class="os-switch" title="Keys left of space" style="cursor:pointer;">
+                <input type="checkbox" id="modalOsToggle" onchange="onModalOsToggle()">
+                <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect id="modalOsTrackRect" x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+                  <circle id="modalOsKnobEl" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
+                          style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
+                </svg>
+              </label>
+            </div>
+            <div class="modal-right-label"><span class="modal-inline-val">4</span>&ensp;<span class="modal-inline-label">keys to the left of spacebar</span></div>
+          </div>
+          <div class="modal-inline-row" id="modalFnRow">
+            <div class="modal-left-label"><span id="modalFnLabelLeft"></span></div>
+            <div class="modal-switch-wrap">
+              <label class="os-switch" title="Leftmost key" style="cursor:pointer;">
+                <input type="checkbox" id="modalFnToggle" onchange="onModalFnToggle()">
+                <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+                  <circle id="modalFnKnobEl" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
+                          style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
+                </svg>
+              </label>
+            </div>
+            <div class="modal-right-label"><span id="modalFnLabelRight" class="modal-inline-val"></span>&ensp;<span class="modal-inline-label">is the leftmost key</span></div>
+          </div>
+        </div>
+      </div><!-- /.sp-col-left -->
+
+      <div class="sp-col sp-col-right">
+        <div id="modalKbSizeSection">
+          <p class="sp-body">The on-screen display shows a compact keyboard, but the game also accepts input from full-sized keyboards with their extended keys.</p>
+          <p class="sp-body">Don&#8217;t have a full-sized keyboard? Let us know so we won&#8217;t ask you any impossible questions:</p>
+          <div class="modal-kbsize-row" id="modalKbSizeRow">
+            <div class="modal-left-label"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 167 101.8" style="width:66px;height:auto;fill:#9ca3af;flex-shrink:0;"><path d="M142.1,32.4H24.9c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h117.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM143.4,65.9c0,.7-.6,1.3-1.3,1.3H24.9c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h117.2c.7,0,1.3.6,1.3,1.3v29.6ZM28.7,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM28.7,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM109.4,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM28.7,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM79.3,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM109.4,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM38.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM46.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM54.6,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM62.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.9,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM79,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM87.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.3,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM54.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM58.3,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM71.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM88.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM96.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM49.8,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM57.8,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM66.6,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM70.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM84.2,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM93,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM118.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM109.4,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM118.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM118.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM118.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM48.9,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM41.8,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM34.7,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM87,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM94.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM102,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM109.4,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/></svg></div>
+            <div class="modal-switch-wrap">
+              <label class="os-switch" title="Keyboard size" style="cursor:pointer;">
+                <input type="checkbox" id="modalKbSizeToggle" onchange="onKbSizeToggle()">
+                <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+                  <circle id="modalKbSizeKnob" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
+                          style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
+                </svg>
+              </label>
+            </div>
+            <div class="modal-right-label"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;fill:#9ca3af;"><path d="M98.6,32.4H11.4c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h87.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM99.9,65.9c0,.7-.6,1.3-1.3,1.3H11.4c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h87.2c.7,0,1.3.6,1.3,1.3v29.6ZM15.2,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM15.2,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM95.9,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM15.2,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM65.8,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM95.9,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM24.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM33,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.1,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM49.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM57.4,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM65.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM73.7,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM27.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM40.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM44.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM57.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM66.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM74.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM83.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM36.3,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM44.3,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM53.1,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM56.7,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.7,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.5,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM81.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.9,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM35.4,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM28.3,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM21.2,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM73.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM81,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM88.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM95.9,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/></svg></div>
+          </div>
+        </div><!-- /#modalKbSizeSection -->
+      </div><!-- /.sp-col-right -->
+    </div><!-- /#spKeyboard -->
+
+  </div><!-- /#settingsPanelInner -->
+  </div><!-- /#settingsPanel -->
   <div id="kbFlipStage">
   <div id="keyboardPanel">
     <div id="kb-slab-back"></div>
@@ -1724,7 +1938,7 @@ li.conflict-dismissed .conflict-desc {
   </div>
   </div>
   <div id="brIconWrap">
-  <svg id="browserIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 86 64.1" style="width:44px;height:auto;fill:#9ca3af;" cursor="pointer">
+  <svg id="browserIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 86 64.1" style="width:44px;height:auto;" cursor="pointer">
     <g>
     <path d="M7,11.7v42c0,2.2,1.8,4,4,4h63c2.2,0,4-1.8,4-4V11.7c0-2.2-1.8-4-4-4H11c-2.2,0-4,1.8-4,4ZM9,19.7h67v34c0,1.1-.9,2-2,2H11c-1.1,0-2-.9-2-2V19.7ZM9,11.7c0-1.1.9-2,2-2h63c1.1,0,2,.9,2,2v6H9v-6Z"/>
     <circle cx="19.3" cy="13.7" r="2"/>
@@ -1733,6 +1947,7 @@ li.conflict-dismissed .conflict-desc {
   </g>
   <path d="M42.5,23.4c-6,0-11.4,2.1-14.9,5.4h0c0,0-.1.1-.2.2-2.4,2.3-3.8,5.2-3.8,8.4s1.4,6,3.8,8.4c0,0,0,.1.2.2,3.4,3.3,8.8,5.4,14.9,5.4s11.4-2.1,14.9-5.4h0c0,0,.1-.1.2-.2,0,0,0,0,0,0,2.4-2.3,3.8-5.2,3.8-8.4s-1.4-6-3.8-8.4c0,0-.1-.1-.2-.2-3.4-3.3-8.8-5.4-14.9-5.4h0ZM41.3,25.3v5.4c-1.9,0-3.7-.2-5.4-.4.3-.6.7-1.2,1-1.7,1.3-1.7,2.8-2.8,4.4-3.2h0ZM43.7,25.3c1.6.4,3.1,1.5,4.4,3.2.4.5.7,1.1,1.1,1.7-1.7.2-3.5.4-5.4.4v-5.3ZM49,26.2c2.1.7,4,1.7,5.5,2.9-.9.3-1.9.5-2.9.8-.4-.8-.8-1.5-1.3-2.2-.4-.5-.8-1-1.3-1.5h0ZM36,26.2c-.5.4-.9.9-1.2,1.5-.5.7-.9,1.4-1.3,2.2-1.1-.2-2.1-.5-2.9-.8,1.5-1.2,3.4-2.2,5.5-2.9h0ZM28.9,30.6c1.1.4,2.4.8,3.8,1-.5,1.5-.8,3.1-.9,4.8h-5.6c.2-2.1,1.2-4.1,2.7-5.8h0ZM56.1,30.6c1.5,1.7,2.5,3.7,2.7,5.8h-5.6c0-1.7-.4-3.3-.9-4.8,1.4-.3,2.7-.6,3.8-1h0ZM35.1,32c1.9.3,4,.4,6.1.5v3.9h-7c0-1.5.4-3,.8-4.3h0ZM49.9,32c.4,1.3.7,2.8.8,4.3h-7v-3.9c2.2,0,4.2-.2,6.1-.5h0ZM26.2,38.2h5.6c0,1.7.4,3.3.9,4.8-1.4.3-2.7.6-3.8,1-1.5-1.7-2.5-3.7-2.7-5.8h0ZM34.3,38.2h7v3.9c-2.2,0-4.2.2-6.1.5-.4-1.3-.7-2.8-.8-4.3h0ZM43.7,38.2h7c0,1.5-.4,3-.8,4.3-1.9-.3-4-.4-6.1-.5v-3.9ZM53.2,38.2h5.6c-.2,2.1-1.2,4.1-2.7,5.8-1.1-.4-2.4-.8-3.8-1,.5-1.5.8-3.1.9-4.8h0ZM41.3,43.9v5.4c-1.6-.4-3.1-1.4-4.4-3.2-.4-.5-.7-1.1-1.1-1.7,1.7-.2,3.5-.4,5.4-.4h0ZM43.7,43.9c1.9,0,3.7.2,5.4.4-.3.6-.7,1.2-1.1,1.7-1.3,1.7-2.8,2.8-4.4,3.2v-5.3ZM33.4,44.7c.4.8.8,1.5,1.3,2.2.4.5.8,1,1.2,1.5-2.1-.7-4-1.7-5.5-2.9.9-.3,1.9-.5,2.9-.8h0ZM51.6,44.7c1.1.2,2.1.5,2.9.8-1.5,1.2-3.4,2.2-5.5,2.9.5-.4.9-.9,1.3-1.5.5-.7.9-1.4,1.3-2.2h0Z"/>
   </svg>
+  <span class="icon-tip">browser<br>settings</span>
   </div>
 </div>
 
@@ -1824,12 +2039,11 @@ li.conflict-dismissed .conflict-desc {
       <circle cx="45" cy="50.9" r="2.7"/>
     </g>
   </svg>
+  <span class="icon-tip">difficulty<br>settings</span>
 </div>
 
 <div id="diffToast"></div>
 <div id="kwToast"></div>
-
-<div id="iconTooltip"></div>
 
 <script>
 /* ══════════════════════════════════════
@@ -2151,37 +2365,23 @@ let toastTimer = null;
 
 var _kwToastTimer = null;
 
+function _kbPanelRect() {
+  var p = document.getElementById('keyboardPanel');
+  return p ? p.getBoundingClientRect() : null;
+}
+
 function showToast(msg, duration) {
   var readingDuration = Math.min(6000, 1800 + msg.length * 65);
   duration = duration || readingDuration;
   var el = document.getElementById('kwToast');
   if (!el) return;
-  // Position: centred above the keyboard panel, or top-of-modal when a modal is open
-  var modalFront = null;
-  if (kbModalOpen || browserModalOpen) {
-    var kbM  = document.getElementById('kbModal');
-    var brM  = document.getElementById('browserModal');
-    if (kbModalOpen && browserModalOpen) {
-      var kbZ  = parseInt(kbM.style.zIndex  || 200);
-      var brZ  = parseInt(brM.style.zIndex  || 200);
-      modalFront = kbZ >= brZ ? kbM : brM;
-    } else {
-      modalFront = kbModalOpen ? kbM : brM;
-    }
-  }
-  if (modalFront) {
-    var mr = modalFront.getBoundingClientRect();
-    el.style.left = Math.round(mr.left + mr.width / 2) + 'px';
-    el.style.top  = Math.round(mr.top + 18) + 'px';
+  var r = _kbPanelRect();
+  if (r) {
+    el.style.left = Math.round(r.left + window.scrollX + r.width / 2) + 'px';
+    el.style.top  = Math.round(r.top  + window.scrollY + r.height / 2) + 'px';
   } else {
-    var r = _kbPanelRect();
-    if (r) {
-      el.style.left = Math.round(r.left + window.scrollX + r.width / 2) + 'px';
-      el.style.top  = Math.round(r.top  + window.scrollY + r.height / 2) + 'px';
-    } else {
-      el.style.left = '50%';
-      el.style.top  = '50%';
-    }
+    el.style.left = '50%';
+    el.style.top  = '50%';
   }
   clearTimeout(_kwToastTimer);
   el.textContent = msg;
@@ -2311,8 +2511,8 @@ function buildOsLabels() {
   leftLabel.style.cursor  = 'pointer';
   rightLabel.style.cursor = 'pointer';
 
-  leftLabel.addEventListener('click',  function() { applyOsMode(leftOperatingSystem);  if (kbModalOpen) updateModalToggles(); });
-  rightLabel.addEventListener('click', function() { applyOsMode(rightOperatingSystem); if (kbModalOpen) updateModalToggles(); });
+  leftLabel.addEventListener('click',  function() { applyOsMode(leftOperatingSystem);  if (activeSettings === 'keyboard') updateModalToggles(); });
+  rightLabel.addEventListener('click', function() { applyOsMode(rightOperatingSystem); if (activeSettings === 'keyboard') updateModalToggles(); });
 }
 
 function updateToggleVisual(os) {
@@ -2328,8 +2528,19 @@ function updateToggleVisual(os) {
 
 function applyOsMode(os) {
   currentOs = os;
-  // If keyboard is flipped, snap it back before rebuilding
-  if (_kbFlipped || _flipBusy) _resetFlipState();
+  var savedPos = _kbPos;
+  var panel = document.getElementById('keyboardPanel');
+  var stage = document.getElementById('kbFlipStage');
+  var wrap  = document.getElementById('keyboardWrap');
+
+  // Disable CSS transitions before any transform change so nothing animates
+  if (savedPos !== 'face') {
+    panel.style.transition = 'none';
+    stage.style.transition = 'none';
+  }
+
+  if (savedPos !== 'face') _resetFlipState();
+
   var nativeMac = (detectedOs === 'mac' || detectedOs === 'mobile');
   osToggleEl.checked = nativeMac ? (os === 'pc') : (os === 'mac');
   updateToggleVisual(os);
@@ -2340,8 +2551,29 @@ function applyOsMode(os) {
     buildKeyboard(currentKbMode === 'mini');
   }
   _syncKbCountFromVariant();
-  // Mid-game OS toggle: rebuild pool and replace current question if it
-  // is no longer valid (e.g. a mac-only shortcut when switching to PC).
+  if (activeSettings !== null) _spAlignPanel();
+
+  // Restore keyboard position without any animation after DOM rebuild
+  if (savedPos !== 'face') {
+    _kbPos     = savedPos;
+    _kbFlipped = (savedPos === 'edge');
+    panel.classList.toggle('kb-partial', savedPos === 'partial');
+    panel.classList.add('kb-edged');
+    if (savedPos === 'edge') {
+      panel.classList.add('kb-edges-visible');
+      stage.classList.add('kb-show-base');
+    }
+    wrap.classList.add('kb-flipping');
+    panel.style.transform = KB_POS[savedPos].panel;
+    stage.style.transform = KB_POS[savedPos].stage;
+    // Force a reflow so the browser commits the transform at this position,
+    // then re-enable transitions synchronously — no async gap for clicks to fall into.
+    void panel.offsetWidth;
+    panel.style.transition = '';
+    stage.style.transition = '';
+  }
+
+  // Mid-game OS toggle: rebuild pool and replace current question if no longer valid
   if (gameState === 'playing') {
     const newPool = shuffleArray(buildPool());
     const currentStillValid = newPool.some(s =>
@@ -2354,7 +2586,6 @@ function applyOsMode(os) {
       titleEl.className = '';
       titleEl.textContent = questionPool[0].display;
     } else {
-      // Keep playing but refresh pool for future questions
       questionPool = newPool;
       questionIndex = 0;
     }
@@ -2388,8 +2619,8 @@ function onOsToggle() {
   applyOsMode(osToggleEl.checked
     ? (nativeMac ? 'pc'  : 'mac')
     : (nativeMac ? 'mac' : 'pc'));
-  if (kbModalOpen) updateModalToggles();
-  if (browserModalOpen) _refreshBrowserContent();
+  if (activeSettings === 'keyboard') updateModalToggles();
+  if (activeSettings === 'browser')  _refreshBrowserContent();
 }
 
 // On mobile: auto-enable sticky + touch modes, show updated message
@@ -2427,29 +2658,14 @@ function updateKeyboardMode() {
     buildKeyboard(mode === 'mini');
   }
 }
-function alignKbIcon() {
-  var icon   = document.getElementById('kbIcon');
-  var kpanel = document.getElementById('keyboardPanel');
-  var kwrap  = document.getElementById('keyboardWrap');
-  if (!icon || !kpanel || !kwrap) return;
-  var iconW      = icon.offsetWidth || 44;
-  var kpanelLeft = kpanel.getBoundingClientRect().left - kwrap.getBoundingClientRect().left;
-  icon.style.left = (kpanelLeft - iconW * 2) + 'px';
-}
 
 window.addEventListener('resize', function() {
   updateKeyboardMode();
-  alignKbIcon();
-  if (kbModalOpen) {
-    if (window.innerWidth < 600) {
-      closeKbModal();
-    } else {
-      positionKbModal();
-    }
-  }
+  positionIcons();
+  if (activeSettings !== null) _spAlignPanel();
 });
 updateKeyboardMode();
-setTimeout(alignKbIcon, 50);
+setTimeout(positionIcons, 50);
 // Show mismatch pill after initial keyboard build
 updateMismatchPill();
 // Apply rounded style if starting in PC mode
@@ -2892,6 +3108,11 @@ function updateKeyboardLighting(e, isDown) {
 let gameState = 'idle';
 let currentMedal = null;
 let _confirmFromFinished  = false; // true when confirm-reset entered from finished state
+let _confirmFromPause     = false; // true when confirm-reset entered from active paused game
+let _pendingDifficulty   = null;  // difficulty mode awaiting confirmation
+let _prevDifficulty      = null;  // difficulty to restore on cancel
+let _clearTarget         = null;  // 'time' | 'accuracy' | 'both' — which record the pending reset affects
+let _confirmAfterUpgrade = null;  // mode label string when ramp-up reset prompt is pending
 let _countdownMode        = 'start'; // 'start' | 'resume'
 let _modalWasOpenOnPause  = false;   // true when a modal was open entering/during pause
 let _wasPlaying           = false;   // true once any question has been answered (answersLeft decremented)
@@ -3087,16 +3308,17 @@ function _closeAllModals() {
 
 function mainButtonClick() {
   mainBtn.blur();
+  if (gameState === 'welcome') { _dismissWelcome(); return; }
   if (gameState === 'idle' || gameState === 'finished') { _closeAllModals(); beginCountdown(); return; }
   if (gameState === 'counting')      { cancelCountdown(); return; }
   if (gameState === 'playing')       { skipShortcut(); return; }
   if (gameState === 'paused') {
-    var needsCountdown = _modalWasOpenOnPause || kbModalOpen || browserModalOpen;
     _closeAllModals();
-    if (needsCountdown) { beginResumeCountdown(); } else { unpause(); }
+    beginResumeCountdown();
     return;
   }
   if (gameState === 'confirm-reset') { confirmResetYes(); return; }
+  if (gameState === 'confirm-diff-change') { confirmDiffChangeYes(); return; }
 }
 
 const IMPROVEMENT_TIPS = [
@@ -3132,8 +3354,9 @@ function helpButtonClick() {
   resetEndScreenInactivityTimer();
   if (gameState === 'idle')           { titleEl.textContent = bestRecord.time !== null ? 'To reset your score, press the lock key on the keyboard.' : 'Press start to begin.'; return; }
   if (gameState === 'playing')        { toggleHelp(); return; }
-  if (gameState === 'paused')         { enterConfirmReset(); return; }
-  if (gameState === 'confirm-reset')  { confirmResetNo(); return; }
+  if (gameState === 'paused')         { if (lockKeyEl) lockKeyEl.classList.remove('active'); resetToIdle(); return; }
+  if (gameState === 'confirm-reset')       { confirmResetNo(); return; }
+  if (gameState === 'confirm-diff-change') { confirmDiffChangeNo(); return; }
   if (gameState === 'finished')       { showTip(tipIndex + 1); tipIndex++; return; }
 }
 
@@ -3141,15 +3364,17 @@ function helpButtonClick() {
 function timerBoxClick() {
   if (gameState === 'playing') { enterPause(); return; }
   if (gameState === 'paused') {
-    // Treat exactly like the Unpause button: close modals, countdown if needed
-    var needsCountdown = _modalWasOpenOnPause || kbModalOpen || browserModalOpen;
     _closeAllModals();
-    if (needsCountdown) { beginResumeCountdown(); } else { unpause(); }
+    beginResumeCountdown();
     return;
   }
   if (gameState === 'confirm-reset' && _wasPlaying) {
-    // Pause icon is still visible — tapping it means "cancel reset, go back"
+    // Pause icon is still visible — tapping it means "cancel, go back"
     confirmResetNo();
+    return;
+  }
+  if (gameState === 'confirm-diff-change') {
+    confirmDiffChangeNo();
     return;
   }
 }
@@ -3261,6 +3486,12 @@ function enterPause(instantBlur) {
   transitioning = false; // clear skip-in-progress if pause interrupts it
   clearHelp();
   resetPartialShortcutNudgeTimers();
+  // Settings panel sets its own position before calling enterPause; only move
+  // to edge if no settings screen is already driving a different position.
+  if (activeSettings === null) {
+    setKbPosition('edge');
+    openSettings('pause');
+  }
 
   if (instantBlur) {
     titleEl.classList.add('blur-instant');
@@ -3277,11 +3508,11 @@ function enterPause(instantBlur) {
   timerDiv.innerHTML = '<svg width="26" height="26" viewBox="0 0 26 26" style="display:block;vertical-align:top;" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="2" width="4" height="22" rx="1.5" fill="white"/><rect x="16" y="2" width="4" height="22" rx="1.5" fill="white"/></svg>';
   setTimerState('paused');
   mainBtn.textContent = 'Unpause';
-  helpBtn.textContent = 'Reset';
+  helpBtn.textContent = 'Quit';
   helpBtn.style.background = '#6b7280';
   helpBtn.style.color = 'white';
   if (lockKeyEl) lockKeyEl.classList.add('active');
-  _modalWasOpenOnPause = (kbModalOpen || browserModalOpen);
+  _modalWasOpenOnPause = (activeSettings !== null);
 }
 
 function unpause() {
@@ -3305,25 +3536,31 @@ function unpause() {
   timerInterval = setInterval(updateTimer, 100);
 }
 
-function _closeAllModalsInstant() {
-  // Dismiss modals without animation — used when confirm-reset overlay needs clear focus
-  var km = document.getElementById('kbModal');
-  var bm = document.getElementById('browserModal');
-  if (kbModalOpen && km)      { km.classList.remove('visible'); km.style.animation = ''; km.style.pointerEvents = ''; kbModalOpen = false; }
-  if (browserModalOpen && bm) { bm.classList.remove('visible'); bm.style.animation = ''; bm.style.pointerEvents = ''; browserModalOpen = false; }
-}
 
-function enterConfirmReset() {
+function enterConfirmReset(target) {
+  // target: 'time' | 'accuracy' | 'both' (default 'both' for legacy lock-key call)
+  _clearTarget = target || 'both';
   _confirmFromFinished = (gameState === 'finished');
+  _confirmFromPause    = _wasPlaying && answersLeft > 0 && gameState !== 'finished';
   _closeAllModalsInstant();
   gameState = 'confirm-reset';
   if (currentMedal && !_confirmFromFinished) resetTimerBox();
   titleEl.classList.remove('blurred');
   questionCountEl.classList.remove('blurred');
   titleEl.className = '';
-  titleEl.textContent = _confirmFromFinished
-    ? 'Do you want to reset your high scores?'
-    : 'Reset your best score and start again?';
+  var msg;
+  if (_confirmAfterUpgrade) {
+    msg = 'You ramped up difficulty. Shall I reset your high scores then?';
+  } else if (_clearTarget === 'time') {
+    msg = 'Do you really want to wipe your best time record?';
+  } else if (_clearTarget === 'accuracy') {
+    msg = 'Do you really want to wipe your highest accuracy record?';
+  } else {
+    msg = _confirmFromFinished
+      ? 'Are you sure you want to clear your high scores?'
+      : 'Are you sure you want to clear your high scores?';
+  }
+  titleEl.textContent = msg;
   if (_confirmFromFinished) setAppSelectorGameActive(false);
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
@@ -3334,25 +3571,72 @@ function enterConfirmReset() {
 }
 
 function confirmResetYes() {
-  var fromFinished = _confirmFromFinished;
+  var fromFinished  = _confirmFromFinished;
+  var fromPause     = _confirmFromPause;
+  var afterUpgrade  = _confirmAfterUpgrade;
+  var target        = _clearTarget;
   _confirmFromFinished = false;
-  bestRecord = { time: null, accuracy: null };
-  try { localStorage.removeItem('kw_best'); } catch(e) {}
+  _confirmFromPause    = false;
+  _confirmAfterUpgrade = null;
+  _clearTarget = null;
+
+  // Apply the partial or full clear
+  if (target === 'time') {
+    bestRecord.time = null;
+  } else if (target === 'accuracy') {
+    bestRecord.accuracy = null;
+  } else {
+    bestRecord = { time: null, accuracy: null };
+  }
+  // Persist: if both are now null remove the key, otherwise update it
+  if (bestRecord.time === null && bestRecord.accuracy === null) {
+    try { localStorage.removeItem('kw_best'); } catch(e) {}
+  } else {
+    try { localStorage.setItem('kw_best', JSON.stringify(bestRecord)); } catch(e) {}
+  }
   updateBestDisplay();
   if (lockKeyEl) lockKeyEl.classList.remove('active');
+
+  if (afterUpgrade) {
+    resetToIdle();
+    titleEl.textContent = afterUpgrade + ' mode ready.';
+    return;
+  }
+
+  // Came from a paused game — clear the record then return to pause screen
+  if (fromPause) {
+    _refreshPausePanel();
+    openSettings('pause');
+    return;
+  }
+
   resetToIdle();
   if (fromFinished) {
-    titleEl.textContent = 'Both records have been cleared.';
+    var cleared = target === 'time' ? 'Time record cleared.'
+                : target === 'accuracy' ? 'Accuracy record cleared.'
+                : 'Both records have been cleared.';
+    titleEl.textContent = cleared;
   }
 }
 
 function confirmResetNo() {
+  var afterUpgrade = _confirmAfterUpgrade;
+  _confirmAfterUpgrade = null;
+  _clearTarget = null;
   if (lockKeyEl) lockKeyEl.classList.remove('active');
+
+  // Post-upgrade "No" — just go to idle with mode-ready message, no score change
+  if (afterUpgrade) {
+    _confirmFromFinished = false;
+    resetToIdle();
+    titleEl.textContent = afterUpgrade + ' mode ready.';
+    return;
+  }
+
   if (_confirmFromFinished) {
     // Return to medal screen — keep everything intact, show a tip
     _confirmFromFinished = false;
     gameState = 'finished';
-    // Restore medal on timerBox in case anything disturbed it
     if (currentMedal) {
       timerBox.className = 'timerBox medal-' + currentMedal;
       timerBox.style.background = MEDAL_RIM[currentMedal](rimCurrent);
@@ -3363,18 +3647,17 @@ function confirmResetNo() {
     helpBtn.style.background = '';
     helpBtn.style.color = '';
     titleEl.className = '';
-    setAppSelectorGameActive(false); // app selector stays active (between games)
+    setAppSelectorGameActive(false);
     showTip(tipIndex);
     return;
   }
-  // If a game was in progress, count straight back in — no stop at paused
+  // If a game was in progress, count straight back in
   if (_wasPlaying && questionPool.length > 0 && answersLeft > 0) {
-    // Set up paused UI so enterPause state is correct, then immediately resume
     gameState = 'paused';
     titleEl.classList.add('blurred');
     titleEl.textContent = questionPool[questionIndex]?.display || '';
     mainBtn.textContent = 'Unpause';
-    helpBtn.textContent = 'Reset';
+    helpBtn.textContent = 'Quit';
     helpBtn.style.background = '#6b7280';
     helpBtn.style.color = 'white';
     beginResumeCountdown();
@@ -3383,10 +3666,76 @@ function confirmResetNo() {
   }
 }
 
+function enterConfirmDiffChange() {
+  _closeAllModalsInstant();
+  gameState = 'confirm-diff-change';
+  titleEl.classList.remove('blurred');
+  questionCountEl.classList.remove('blurred');
+  titleEl.className = '';
+  titleEl.textContent = 'Changing difficulty will cancel your paused game. Proceed?';
+  mainBtn.textContent = 'Yes';
+  mainBtn.style.background = '#10b981';
+  helpBtn.textContent = 'No';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+  if (lockKeyEl) lockKeyEl.classList.add('active');
+}
+
+function confirmDiffChangeYes() {
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  var prevDiff = _prevDifficulty;
+  currentDifficulty = _pendingDifficulty;
+  _pendingDifficulty = null;
+  _prevDifficulty    = null;
+  try { localStorage.setItem('kw_difficulty', currentDifficulty); } catch(e) {}
+
+  var diffRank = { fundamentals: 0, normal: 1, hardcore: 2 };
+  var isUpgrade = (diffRank[currentDifficulty] || 0) > (diffRank[prevDiff] || 0);
+  var hasRecord = bestRecord.time !== null || bestRecord.accuracy !== null;
+  var label = currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1);
+
+  if (isUpgrade && hasRecord) {
+    // Chain into ramp-up reset prompt before going to idle
+    _confirmAfterUpgrade = label;
+    _clearTarget = 'both';
+    enterConfirmReset('both');
+    return;
+  }
+
+  resetToIdle();
+  titleEl.textContent = label + ' mode ready.';
+}
+
+function confirmDiffChangeNo() {
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  // Restore difficulty and needle to the game that is still active
+  var modeMap = { fundamentals: -1, normal: 0, hardcore: 1 };
+  currentDifficulty  = _prevDifficulty;
+  _diffFirst = true;
+  setDiffState(modeMap[_prevDifficulty] !== undefined ? modeMap[_prevDifficulty] : 0);
+  _updateDiffBtnStyles(currentDifficulty);
+  _updateDiffSubtitle(currentDifficulty);
+  _pendingDifficulty = null;
+  _prevDifficulty    = null;
+  // Resume the paused game directly
+  gameState = 'paused';
+  titleEl.classList.add('blurred');
+  titleEl.textContent = questionPool[questionIndex]?.display || '';
+  mainBtn.textContent = 'Unpause';
+  helpBtn.textContent = 'Quit';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+  beginResumeCountdown();
+}
+
 function resetToIdle() {
   gameState = 'idle';
   _wasPlaying = false;
+  // Hide welcome-screen elements if visible
+  var _wTag = document.getElementById('welcomeTagline');
+  if (_wTag) _wTag.style.display = 'none';
   setAppSelectorGameActive(false);
+  setKbPosition('face');
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
   clearTimeout(endScreenInactivityTimer);
@@ -3626,24 +3975,15 @@ function matchesShortcut(event, str) {
    reveals more of itself when opened.
    Non-selected rows fade out when closed.
 ══════════════════════════════════════ */
-const APPS = [
-  { key: 'Ps', label: 'Photoshop (Ps)',    short: 'Photoshop'    },
-  { key: 'Ai', label: 'Illustrator (Ai)',  short: 'Illustrator'  },
-  { key: 'In', label: 'InDesign (In)',     short: 'InDesign'     },
-  { key: 'Ae', label: 'After Effects (Ae)',short: 'After Effects'},
-  { key: 'Fi', label: 'Figma',             short: 'Figma'        },
-];
+// APPS and APP_JSON_FILE_PATH are populated at runtime from KeyboardWarrior_Apps.json.
+// Until the fetch resolves these remain empty; init is deferred to _onAppsLoaded().
+var APPS = [];
+var APP_JSON_FILE_PATH = {};
 
 // Each row is 22px. Closed: scroll to show selected row.
 const ROW_H = 24; // px — must match CSS height: 24px on .app-option
 
-let currentApp = (() => {
-  try {
-    const saved = localStorage.getItem('kw_app');
-    if (saved && APPS.find(a => a.key === saved)) return saved;
-  } catch(e) {}
-  return 'Ps';
-})();
+var currentApp = 'Ps'; // placeholder; overwritten by _onAppsLoaded once APPS is known
 
 const appPillEl = document.getElementById('appPill');
 
@@ -3917,149 +4257,187 @@ function onModalFnToggle() {
   updateModalToggles();
 }
 
-// ── Keyboard icon modal ──────────────────────────────────────────────────────
+// ── Settings panel ──────────────────────────────────────────────
+// activeSettings: null | 'keyboard' | 'browser' | 'difficulty'
+var activeSettings = null;
+
+// Kept as aliases so existing code that checks kbModalOpen/browserModalOpen
+// continues to work during the transition. Both are now always false.
 var kbModalOpen = false;
 var browserModalOpen = false;
 
+var SP_PAGE_ORDER = ['keyboard', 'browser', 'difficulty', 'pause'];
 
-function positionIcons() {
-  var panel    = document.getElementById('keyboardPanel');
-  var wrap     = document.getElementById('keyboardWrap');
-  var kbWrap   = document.getElementById('kbIconWrap');
-  var brWrap   = document.getElementById('brIconWrap');
-  var kb       = document.getElementById('kbIcon');
-  var br       = document.getElementById('browserIcon');
-  if (!panel || !wrap) return;
-  var pRect = panel.getBoundingClientRect();
-  var wRect = wrap.getBoundingClientRect();
-  var KB_GAP = 18;
-  var BR_GAP = 36;
-  var kbLeft = Math.round(pRect.left - wRect.left - (kb ? kb.offsetWidth : 44) - KB_GAP);
-  var brLeft = Math.round(pRect.right - wRect.left + BR_GAP);
-  if (kbWrap) kbWrap.style.left = kbLeft + 'px';
-  else if (kb) kb.style.left = kbLeft + 'px';
-  if (brWrap) brWrap.style.left = brLeft + 'px';
-  else if (br) br.style.left = brLeft + 'px';
-}
-var MODAL_W = 340;
-var MODAL_H = 460;
-var BROWSER_MODAL_W = 340;
-var BROWSER_MODAL_H = 412;
-var BROWSER_ROW_PX  = 26;   // extra px per conflict row beyond the 4 that fit at base height
-var BROWSER_BASE_ROWS = 4;  // rows that fit comfortably at BROWSER_MODAL_H
-
-function getBrowserModalHeight() {
-  var n = getBrowserConflicts().keys.length;
-  return BROWSER_MODAL_H + Math.max(0, n - BROWSER_BASE_ROWS) * BROWSER_ROW_PX;
+function _spPageEl(page) {
+  var ids = { keyboard: 'spKeyboard', browser: 'spBrowser', difficulty: 'spDifficulty', pause: 'spPause' };
+  return document.getElementById(ids[page]);
 }
 
-function _kbPanelRect() {
-  var p = document.getElementById('keyboardPanel');
-  return p ? p.getBoundingClientRect() : null;
+function _spAlignPanel() {
+  // keyboardPanel's offsetParent is kbFlipStage (position:relative).
+  // settingsPanelInner's offsetParent is settingsPanel → keyboardWrap.
+  // We need panel's left offset relative to keyboardWrap, so add stage.offsetLeft too.
+  var panel = document.getElementById('keyboardPanel');
+  var stage = document.getElementById('kbFlipStage');
+  var inner = document.getElementById('settingsPanelInner');
+  var wrap  = document.getElementById('keyboardWrap');
+  if (!panel || !stage || !inner || !wrap) return;
+  var left  = stage.offsetLeft + panel.offsetLeft;
+  var width = panel.offsetWidth;
+  inner.style.left  = left + 'px';
+  inner.style.width = width + 'px';
+  // Adapt wrap height to fit content — rAF so browser lays out content first
+  requestAnimationFrame(function() {
+    var contentH = inner.scrollHeight;
+    var needed = contentH + 50;
+    wrap.style.minHeight = Math.max(needed, 282) + 'px';
+  });
 }
 
-var MODAL_OFFSET = 30;
+var _iconWrapIds = { keyboard: 'kbIconWrap', browser: 'brIconWrap', difficulty: 'diffIconWrap' };
 
-function _modalBasePos() {
-  var r = _kbPanelRect();
-  if (!r) return {top: 100, left: 100};
-  // Anchor: bottom-left corner of modal at centre of C key
-  // C key centre ≈ panel.left + 32.5% width, panel.top + 72.6% height
-  var cKeyX = r.left + window.scrollX + r.width  * 0.325;
-  var cKeyY = r.top  + window.scrollY + r.height * 0.726;
-  var top  = Math.round(cKeyY - MODAL_H);
-  var left = Math.round(cKeyX);
-  // Clamp to viewport
-  top  = Math.max(top,  window.scrollY + 8);
-  left = Math.max(left, 8);
-  left = Math.min(left, window.innerWidth - MODAL_W - 8);
-  return {top: top, left: left};
+function _pinTooltip(page) {
+  // Remove active class from all icon wraps, then add to the active one
+  Object.values(_iconWrapIds).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('sp-icon-active');
+  });
+  var wrapId = _iconWrapIds[page];
+  if (wrapId) {
+    var wrap = document.getElementById(wrapId);
+    if (wrap) wrap.classList.add('sp-icon-active');
+  }
 }
 
-// KB modal: always top-left (base pos). Browser modal: always bottom-right (base + offset).
-// Only z-index changes when bring-to-front; positions never swap.
-function _applyKbPos(modal) {
-  var p = _modalBasePos();
-  modal.style.top   = p.top  + 'px';
-  modal.style.left  = p.left + 'px';
-  modal.style.width = MODAL_W + 'px';
-  if (!modal.style.height) modal.style.height = MODAL_H + 'px';
-}
-function _applyBrowserPos(modal) {
-  var p = _modalBasePos();
-  modal.style.top   = (p.top  + MODAL_OFFSET) + 'px';
-  modal.style.left  = (p.left + MODAL_OFFSET) + 'px';
-  modal.style.width = MODAL_W + 'px';
-  if (!modal.style.height) modal.style.height = MODAL_H + 'px';
+function _unpinTooltip() {
+  if (activeSettings === null) {
+    Object.values(_iconWrapIds).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.remove('sp-icon-active');
+    });
+  }
 }
 
-function positionKbModal() {
-  var modal = document.getElementById('kbModal');
-  if (!modal) return;
-  _applyKbPos(modal);
-}
+function openSettings(page) {
+  var wasOpen  = activeSettings !== null;
+  var prevPage = activeSettings;
+  activeSettings = page;
 
-function openKbModal() {
-  var km = document.getElementById('kbModal');
-  var bm = document.getElementById('browserModal');
-  // If browser modal is already showing, demote it to rear instantly (no animation restart)
-  if (bm && browserModalOpen) bm.style.zIndex = '201';
-  km.style.zIndex = '202';
-  km.style.height = MODAL_H + 'px';
-  _applyKbPos(km);
-  // Reset animation state so paperUnfurl plays fresh
-  km.classList.remove('visible');
-  km.style.animation = '';
-  void km.offsetWidth;
-  km.classList.add('visible');
-  kbModalOpen = true;
-  if (gameState === 'playing') { enterPause(true); }
-  else if (gameState === 'counting') { cancelCountdown(); _modalWasOpenOnPause = true; }
-  else if (gameState === 'paused') { _modalWasOpenOnPause = true; }
-}
+  // Update kbPos — difficulty and keyboard use partial; browser, pause use edge
+  var pos = (page === 'keyboard' || page === 'difficulty') ? 'partial' : 'edge';
+  setKbPosition(pos);
 
-// Wrap to also update modal toggles on open
-var _origOpenKbModal = openKbModal;
-openKbModal = function() {
-  _origOpenKbModal();
-  updateModalToggles();
-  updateKbSizeToggle();
-};
+  // Pause game if needed (not for pause page or when on welcome screen)
+  if (!wasOpen && page !== 'pause' && gameState !== 'welcome') {
+    if (gameState === 'playing')  { enterPause(true); }
+    else if (gameState === 'counting') { cancelCountdown(); _modalWasOpenOnPause = true; }
+    else if (gameState === 'paused')   { _modalWasOpenOnPause = true; }
+  }
 
-function closeKbModal() {
-  kbModalOpen = false;
-  var modal = document.getElementById('kbModal');
-  // Snapshot front/rear NOW before any z-index changes
-  var isFront = !browserModalOpen || modal.style.zIndex === '202';
-  var dur = isFront ? 450 : 550;
-  var anim = isFront
-    ? 'paperFurlFront 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards'
-    : 'paperFurl 0.55s cubic-bezier(0.64, 0, 0.78, 0) forwards';
-  modal.style.animation = anim;
-  modal.style.pointerEvents = 'none';
-  // If kb was rear, promote browser to front ONLY after kb has fully disappeared
-  // If kb was front, browser is already at z=201 and needs no change during animation
-  setTimeout(function() {
-    modal.classList.remove('visible');
-    modal.style.animation = '';
-    modal.style.pointerEvents = '';
-    // Promote surviving modal only after animation is complete
-    if (browserModalOpen) {
-      var bm = document.getElementById('browserModal');
-      if (bm) { bm.style.zIndex = '202'; }
+  // Populate content
+  if (page === 'browser')    _refreshBrowserContent();
+  if (page === 'keyboard')   { updateModalToggles(); updateKbSizeToggle(); }
+  if (page === 'difficulty') _refreshDifficultyPanel();
+  if (page === 'pause')      _refreshPausePanel();
+
+  // Align panel width to keyboard
+  _spAlignPanel();
+
+  // Show/activate the right page
+  var allPages = ['keyboard', 'browser', 'difficulty', 'pause'];
+  allPages.forEach(function(p) {
+    var el = _spPageEl(p);
+    if (!el) return;
+    el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left', 'sp-wipe-in-up');
+  });
+
+  var pageEl = _spPageEl(page);
+  if (pageEl) {
+    pageEl.classList.add('sp-active');
+    if (wasOpen && prevPage !== page) {
+      // Difficulty always rises up; other pages wipe left/right by order
+      if (page === 'difficulty' || prevPage === 'difficulty') {
+        pageEl.classList.add('sp-wipe-in-up');
+      } else {
+        var prevIdx = SP_PAGE_ORDER.indexOf(prevPage);
+        var nextIdx = SP_PAGE_ORDER.indexOf(page);
+        pageEl.classList.add(nextIdx > prevIdx ? 'sp-wipe-in' : 'sp-wipe-in-left');
+      }
     }
-  }, dur);
+  }
+
+  // Open panel
+  var sp = document.getElementById('settingsPanel');
+  if (sp) sp.classList.add('sp-open');
+
+  // Disable pointer-events on the keyboard stage so the tilted panel
+  // doesn't intercept clicks on diffIcon and other elements below it
+  var stage = document.getElementById('kbFlipStage');
+  if (stage) stage.style.pointerEvents = 'none';
+
+  // Pin tooltip for active settings icon (not for pause page)
+  if (page !== 'pause') _pinTooltip(page);
 }
 
-function toggleKbModal() {
-  kbModalOpen ? closeKbModal() : openKbModal();
+function closeSettings() {
+  if (activeSettings === null) return;
+  activeSettings = null;
+  kbModalOpen    = false;
+  browserModalOpen = false;
+
+  var sp = document.getElementById('settingsPanel');
+  if (sp) sp.classList.remove('sp-open');
+
+  // Hide all pages
+  ['keyboard', 'browser', 'difficulty', 'pause'].forEach(function(p) {
+    var el = _spPageEl(p);
+    if (el) el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left', 'sp-wipe-in-up');
+  });
+
+  _unpinTooltip();
+  // Restore keyboard pointer-events
+  var stage = document.getElementById('kbFlipStage');
+  if (stage) stage.style.pointerEvents = '';
+  // Reset wrap height
+  var wrap = document.getElementById('keyboardWrap');
+  if (wrap) wrap.style.minHeight = '';
+  // Only snap keyboard to face if not paused or on welcome — runCountdown / resetToIdle handles it
+  if (gameState !== 'paused' && gameState !== 'counting' && gameState !== 'welcome') {
+    setKbPosition('face');
+  }
 }
 
-function positionBrowserModal() {
-  var modal = document.getElementById('browserModal');
-  if (!modal) return;
-  _applyBrowserPos(modal);
+function _closeAllModals() {
+  if (activeSettings !== null) closeSettings();
 }
+
+function _closeAllModalsInstant() {
+  if (activeSettings === null) return;
+  activeSettings = null;
+  kbModalOpen    = false;
+  browserModalOpen = false;
+  var sp = document.getElementById('settingsPanel');
+  if (sp) sp.classList.remove('sp-open');
+  ['keyboard', 'browser', 'difficulty', 'pause'].forEach(function(p) {
+    var el = _spPageEl(p);
+    if (el) el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left', 'sp-wipe-in-up');
+  });
+  _unpinTooltip();
+  var stage2 = document.getElementById('kbFlipStage');
+  if (stage2) stage2.style.pointerEvents = '';
+  var wrap2 = document.getElementById('keyboardWrap');
+  if (wrap2) wrap2.style.minHeight = '';
+}
+
+// Legacy aliases — kept so remaining call sites compile
+function openKbModal()       { openSettings('keyboard'); }
+function closeKbModal()      { closeSettings(); }
+function toggleKbModal()     { activeSettings === 'keyboard' ? closeSettings() : openSettings('keyboard'); }
+function openBrowserModal()  { openSettings('browser'); }
+function closeBrowserModal() { closeSettings(); }
+function toggleBrowserModal(){ activeSettings === 'browser'  ? closeSettings() : openSettings('browser');  }
+function positionKbModal()   { _spAlignPanel(); }
+function positionBrowserModal() { _spAlignPanel(); }
 
 function _renderKeyChips(label) {
   var em      = '\u2014';
@@ -4113,9 +4491,6 @@ function _makeConflictRadio(canonicalKey) {
     + '<circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>'
     + '</svg>';
   wrap.addEventListener('click', function(e) {
-    // Ignore taps near the right edge of the modal
-    var bm = document.getElementById('browserModal');
-    if (bm && e.clientX >= bm.getBoundingClientRect().right - 35) return;
     var li = wrap.closest('li');
     if (dismissedConflicts.has(canonicalKey)) {
       // Restore
@@ -4137,9 +4512,9 @@ function _makeConflictRadio(canonicalKey) {
 }
 
 function _refreshBrowserContent() {
-  // Rebuild browser modal text/list to reflect current OS — no animation or z-index changes.
   var d     = getBrowserConflicts();
-  var bname = d.name;
+  var bname = d.name;    // e.g. 'Chrome' or 'your browser' if unknown
+  var knownBrowser = (bname !== 'your browser');
 
   var h = document.getElementById('browserCompatHeading');
   if (h) {
@@ -4147,20 +4522,29 @@ function _refreshBrowserContent() {
     var t1 = document.createElement('strong');
     t1.style.color = '#1e3a5f';
     t1.textContent = 'Keyboard Warriors';
-    var t2 = document.createTextNode(', the shortcuts coach, is compatible with your browser, ');
-    var t3 = document.createElement('strong');
-    t3.textContent = bname + '.';
-    h.appendChild(t1); h.appendChild(t2); h.appendChild(t3);
+    h.appendChild(t1);
+    if (knownBrowser) {
+      h.appendChild(document.createTextNode(', the shortcuts coach, is compatible with your browser, '));
+      var t3 = document.createElement('strong');
+      t3.textContent = bname + '.';
+      h.appendChild(t3);
+    } else {
+      h.appendChild(document.createTextNode(', the shortcuts coach, is compatible with your browser.'));
+    }
   }
 
   var intro = document.getElementById('browserCompatIntro');
   if (intro) {
     if (d.labels.length > 0) {
-      intro.textContent = 'But, you may find that ' + bname + ' can take over if it hears one of its favourite shortcuts called:';
+      intro.textContent = 'But, you may find it can take over if it hears one of its favourite shortcuts. We will try not to ask you any questions that use these specific key combinations, but if we do get interrupted during play, just click back into our window to continue training.';
     } else {
       intro.textContent = 'We haven\u2019t spotted any shortcut conflicts for your current setup \u2014 you\u2019re good to go.';
     }
   }
+
+  // Hide the footer paragraph when intro already contains the full explanation
+  var ft = document.getElementById('browserCompatFooter');
+  if (ft) ft.textContent = '';
 
   var ul = document.getElementById('browserCompatList');
   if (ul) {
@@ -4176,76 +4560,13 @@ function _refreshBrowserContent() {
       label.className = 'conflict-label';
       label.appendChild(_renderKeyChips(s));
       li.appendChild(label);
-      // Clicking anywhere on the row also toggles
       li.addEventListener('click', function(e) {
-        // Ignore taps near the right edge (used to bring modal to front, not interact)
-        var bm = document.getElementById('browserModal');
-        if (bm) {
-          var bmRight = bm.getBoundingClientRect().right;
-          if (e.clientX >= bmRight - 35) return;
-        }
-        if (e.target.closest('.modal-radio')) return; // radio handles its own click
+        if (e.target.closest('.modal-radio')) return;
         li.querySelector('.modal-radio').click();
       });
       ul.appendChild(li);
     });
   }
-
-  var ft = document.getElementById('browserCompatFooter');
-  if (ft) ft.textContent = 'We will try not to ask you any questions that use these specific key combinations, but if we do get interrupted during play, just click back into our window to continue training.';
-  // Update modal height live (e.g. OS toggle changes conflict count)
-  if (browserModalOpen) {
-    var bm2 = document.getElementById('browserModal');
-    if (bm2) bm2.style.height = getBrowserModalHeight() + 'px';
-  }
-}
-
-function openBrowserModal() {
-  _refreshBrowserContent();
-
-  var bm = document.getElementById('browserModal');
-  var km = document.getElementById('kbModal');
-  // If kb modal is already showing, demote it to rear instantly (no animation restart)
-  if (km && kbModalOpen) km.style.zIndex = '201';
-  bm.style.zIndex = '202';
-  bm.style.height = getBrowserModalHeight() + 'px';
-  _applyBrowserPos(bm);
-  // Reset animation state so paperUnfurl plays fresh
-  bm.classList.remove('visible');
-  bm.style.animation = '';
-  void bm.offsetWidth;
-  bm.classList.add('visible');
-  browserModalOpen = true;
-  if (gameState === 'playing') { enterPause(true); }
-  else if (gameState === 'counting') { cancelCountdown(); _modalWasOpenOnPause = true; }
-  else if (gameState === 'paused') { _modalWasOpenOnPause = true; }
-}
-
-function closeBrowserModal() {
-  browserModalOpen = false;
-  var modal = document.getElementById('browserModal');
-  // Snapshot front/rear NOW before any z-index changes
-  var isFront = !kbModalOpen || modal.style.zIndex === '202';
-  var dur = isFront ? 450 : 550;
-  var anim = isFront
-    ? 'paperFurlFront 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards'
-    : 'paperFurl 0.55s cubic-bezier(0.64, 0, 0.78, 0) forwards';
-  modal.style.animation = anim;
-  modal.style.pointerEvents = 'none';
-  setTimeout(function() {
-    modal.classList.remove('visible');
-    modal.style.animation = '';
-    modal.style.pointerEvents = '';
-    // Promote surviving modal only after animation is complete
-    if (kbModalOpen) {
-      var km = document.getElementById('kbModal');
-      if (km) { km.style.zIndex = '202'; }
-    }
-  }, dur);
-}
-
-function toggleBrowserModal() {
-  browserModalOpen ? closeBrowserModal() : openBrowserModal();
 }
 
 // ── Unified icon click handlers ──────────────────────────────────────────────
@@ -4261,41 +4582,9 @@ document.getElementById('browserIcon').addEventListener('click', function(e) {
   toggleBrowserModal();
 });
 
-// ── Clicking the back modal brings it to front (deferred: modals are after script tag) ──
-window.addEventListener('load', function() {
-  document.getElementById('kbModal').addEventListener('mousedown', function(e) {
-    var km = document.getElementById('kbModal');
-    var bm = document.getElementById('browserModal');
-    if (!browserModalOpen || km.style.zIndex === '202') return;
-    // X button must never trigger bring-to-front
-    if (e.target.closest('.modal-dismiss-btn')) return;
-    // Only bring to front if the click point is NOT inside the front modal
-    var frontRect = bm.getBoundingClientRect();
-    if (e.clientX >= frontRect.left && e.clientX <= frontRect.right &&
-        e.clientY >= frontRect.top  && e.clientY <= frontRect.bottom) return;
-    km.style.zIndex = '202';
-    bm.style.zIndex = '201';
-  });
-  document.getElementById('browserModal').addEventListener('mousedown', function(e) {
-    var bm = document.getElementById('browserModal');
-    var km = document.getElementById('kbModal');
-    if (!kbModalOpen || bm.style.zIndex === '202') return;
-    // X button must never trigger bring-to-front
-    if (e.target.closest('.modal-dismiss-btn')) return;
-    // Only bring to front if the click point is NOT inside the front modal
-    var frontRect = km.getBoundingClientRect();
-    if (e.clientX >= frontRect.left && e.clientX <= frontRect.right &&
-        e.clientY >= frontRect.top  && e.clientY <= frontRect.bottom) return;
-    bm.style.zIndex = '202';
-    km.style.zIndex = '201';
-  });
-});
-
-// ── Outside-click: modals are no longer dismissed by clicking empty space.
-//    Only X buttons or resuming play closes them.
-//    App pill is still blocked during play.
+// ── Outside-click: app pill blocked during play, settings unaffected ─────────
 document.addEventListener('click', function(e) {
-  if (!kbModalOpen && !browserModalOpen) return;
+  if (activeSettings === null) return;
   var midGame = (gameState === 'playing' || gameState === 'paused');
   if (!midGame) return;
   var appP = document.getElementById('appPill');
@@ -4305,10 +4594,29 @@ document.addEventListener('click', function(e) {
   }
 });
 
+function positionIcons() {
+  var panel = document.getElementById('keyboardPanel');
+  var wrap  = document.getElementById('keyboardWrap');
+  var kbWrap = document.getElementById('kbIconWrap');
+  var brWrap = document.getElementById('brIconWrap');
+  var kb = document.getElementById('kbIcon');
+  var br = document.getElementById('browserIcon');
+  if (!panel || !wrap) return;
+  var pRect = panel.getBoundingClientRect();
+  var wRect = wrap.getBoundingClientRect();
+  var KB_GAP = 36;
+  var BR_GAP = 36;
+  var kbLeft = Math.round(pRect.left - wRect.left - (kbWrap ? kbWrap.offsetWidth : 44) - KB_GAP);
+  var brLeft = Math.round(pRect.right - wRect.left + BR_GAP);
+  if (kbWrap) { kbWrap.style.left = kbLeft + 'px'; kbWrap.style.right = 'auto'; }
+  else if (kb) kb.style.left = kbLeft + 'px';
+  if (brWrap) { brWrap.style.left = brLeft + 'px'; brWrap.style.right = 'auto'; }
+  else if (br) br.style.left = brLeft + 'px';
+}
+
 window.addEventListener('resize', function() {
   positionIcons();
-  if (kbModalOpen)      positionKbModal();
-  if (browserModalOpen) positionBrowserModal();
+  if (activeSettings !== null) _spAlignPanel();
 });
 
 // ── Game-area click pulses the contextually useful button ────────────────────
@@ -4316,7 +4624,7 @@ document.getElementById('gameContainer').addEventListener('click', function(e) {
   // Don't intercept clicks on actual buttons/interactive elements
   var tag = e.target.tagName;
   if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'LABEL' || tag === 'A') return;
-  if (e.target.closest('button, input, label, a, #timerBox, #kbIcon, #browserIcon, #appPill, #appDropdown, #debugOverlay')) return;
+  if (e.target.closest('button, input, label, a, #timerBox, #kbIcon, #browserIcon, #appPill, #appDropdown, #debugOverlay, #settingsPanel')) return;
 
   if (gameState === 'paused') {
     pulseBtn(document.getElementById('mainBtn'));
@@ -4437,15 +4745,21 @@ function dbgReport() {
   }
   var body    = '\nBug report from Keyboard Warriors:\n\n' + dbgBuildReport() + '\n\nPlease describe the issue here:\n';
   var subject = 'Keyboard Warriors error report';
-  window.location.href = 'mailto:Wednesday%20Dessauer%20%3Cddessauer%40swin.edu.au%3E?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  var a = document.createElement('a');
+  a.href = 'mailto:Wednesday%20Dessauer%20%3Cddessauer%40swin.edu.au%3E?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function dbgRefreshCtx() {
   const top = document.getElementById('dbgCtxTop');
   const sub = document.getElementById('dbgCtxSub');
   if (!top) return;
-  const appLabels = {Ps:'Photoshop', Ai:'Illustrator', In:'InDesign', Ae:'After Effects', Fi:'Figma'};
-  const appName  = appLabels[currentApp] || currentApp;
+  const appEntry = APPS.find(function(a) { return a.key === currentApp; });
+  const appName  = appEntry ? appEntry.label : currentApp;
   const osName   = currentOs === 'pc' ? 'PC/Windows' : 'Mac';
   const device   = typeof DBG_DEVICE !== 'undefined' ? DBG_DEVICE : 'computer';
   const state    = gameState;
@@ -4645,9 +4959,153 @@ function getBrowserConflictSet() {
   return new Set(all.filter(function(k) { return !dismissedConflicts.has(k); }));
 }
 
-// Initialise
-buildAppPill();
-positionIcons();
+/* ══════════════════════════════════════
+   WELCOME SCREEN
+   Shown on first load if no saved difficulty preference exists.
+   On choice (or skip), transitions to idle state.
+══════════════════════════════════════ */
+
+function _showWelcomeScreen() {
+  gameState = 'welcome';
+  titleEl.textContent = 'Welcome to Keyboard Warriors';
+  var tagline = document.getElementById('welcomeTagline');
+  if (tagline) tagline.style.display = 'block';
+  // Needle starts left (Fundamentals position) on the landing screen
+  _diffFirst = true;
+  setDiffState(-1);
+  // Open the difficulty settings panel — keyboard tilts to partial, buttons appear
+  openSettings('difficulty');
+}
+
+// Shared handler for both the welcome panel and the difficulty settings panel
+function diffBtnClick(mode) {
+  var hardcoreUnlocked = bestRecord.accuracy !== null && bestRecord.accuracy >= 100;
+  if (mode === 'hardcore' && !hardcoreUnlocked) {
+    showToast('To unlock Hardcore you must achieve 100% accuracy.');
+    return;
+  }
+
+  var modeMap = { fundamentals: -1, normal: 0, hardcore: 1 };
+
+  // If a game is paused mid-play, require confirmation before changing difficulty
+  if (_wasPlaying && answersLeft > 0 && gameState === 'paused') {
+    _prevDifficulty    = currentDifficulty;
+    _pendingDifficulty = mode;
+    // Move needle and update button styles immediately so the player sees the pending choice
+    _diffFirst = true;
+    setDiffState(modeMap[mode]);
+    _updateDiffBtnStyles(mode);
+    _updateDiffSubtitle(mode);
+    enterConfirmDiffChange();
+    return;
+  }
+
+  // No active game — apply immediately
+  currentDifficulty = mode;
+  _diffFirst = true;
+  setDiffState(modeMap[mode]);
+  _updateDiffBtnStyles(mode);
+  _updateDiffSubtitle(mode);
+  try { localStorage.setItem('kw_difficulty', currentDifficulty); } catch(e) {}
+
+  // If we are still on the welcome screen, dismiss it into idle
+  if (gameState === 'welcome') {
+    _dismissWelcome();
+  }
+}
+
+// Updates the active/inactive classes on the difficulty buttons immediately,
+// using the supplied mode rather than reading currentDifficulty (which may
+// lag during the confirm-diff-change pending state).
+function _updateDiffBtnStyles(activeMode) {
+  var hardcoreUnlocked = bestRecord.accuracy !== null && bestRecord.accuracy >= 100;
+  var btns = document.querySelectorAll('#spDifficulty .diff-btn');
+  btns.forEach(function(btn) {
+    var m = btn.getAttribute('data-mode');
+    if (m === 'hardcore' && !hardcoreUnlocked) {
+      btn.classList.add('diff-btn-inactive');
+      btn.classList.remove('diff-btn-active');
+    } else {
+      btn.classList.remove('diff-btn-inactive');
+      btn.classList.toggle('diff-btn-active', m === activeMode);
+    }
+  });
+}
+
+// welcomeDiffClick is an alias used by the panel buttons (both contexts)
+function welcomeDiffClick(mode) { diffBtnClick(mode); }
+
+function _refreshDifficultyPanel() {
+  // Use pendingDifficulty if a confirmation is in flight, otherwise current
+  var displayMode = _pendingDifficulty !== null ? _pendingDifficulty : currentDifficulty;
+  _updateDiffBtnStyles(displayMode);
+  _updateDiffSubtitle(displayMode);
+}
+
+function _updateDiffSubtitle(mode) {
+  var el = document.getElementById('diffSubtitle');
+  if (!el) return;
+  var subtitles = {
+    fundamentals: 'Mild. We will only ask things you really should know.',
+    normal:       '',
+    hardcore:     'Spicy! We have thrown in some tricky questions.'
+  };
+  var text = subtitles[mode] !== undefined ? subtitles[mode] : '';
+  el.textContent = text || '\u00a0'; // non-breaking space holds the line height
+}
+
+function _refreshPausePanel() {
+  var hasTime = bestRecord.time !== null;
+  var hasAcc  = bestRecord.accuracy !== null;
+  var allInactive = !hasTime && !hasAcc;
+  var timeBtn  = document.getElementById('clearTimeBtn');
+  var bothBtn  = document.getElementById('clearBothBtn');
+  var accBtn   = document.getElementById('clearAccBtn');
+  var clearLbl = document.getElementById('spClearLabel');
+  if (timeBtn)  timeBtn.classList.toggle('score-pill-inactive', !hasTime);
+  if (bothBtn)  bothBtn.classList.toggle('score-pill-inactive', allInactive);
+  if (accBtn)   accBtn.classList.toggle('score-pill-inactive', !hasAcc);
+  if (clearLbl) clearLbl.classList.toggle('sp-clear-label-inactive', allInactive);
+}
+
+function _pauseClearClick(target) {
+  var hasTime = bestRecord.time !== null;
+  var hasAcc  = bestRecord.accuracy !== null;
+  if (target === 'time'     && !hasTime) return;
+  if (target === 'accuracy' && !hasAcc)  return;
+  if (target === 'both'     && !hasTime && !hasAcc) return;
+  enterConfirmReset(target);
+}
+
+function _reportImpossibleQuestion() {
+  var body    = '\nImpossible question report from Keyboard Warriors:\n\n' + dbgBuildReport() + '\n\nPlease describe the question and the problem:\n';
+  var subject = 'Keyboard Warriors — impossible question report';
+  var a = document.createElement('a');
+  a.href = 'mailto:Wednesday%20Dessauer%20%3Cddessauer%40swin.edu.au%3E?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function _dismissWelcome() {
+  var tagline = document.getElementById('welcomeTagline');
+  if (tagline) tagline.style.display = 'none';
+  closeSettings();
+  resetToIdle();
+}
+
+// On load: show welcome screen every fresh session (sessionStorage resets on tab close)
+(function() {
+  var seenThisSession = false;
+  try { seenThisSession = sessionStorage.getItem('kw_welcomed') !== null; } catch(e) {}
+  if (!seenThisSession) {
+    try { sessionStorage.setItem('kw_welcomed', '1'); } catch(e) {}
+    // Defer slightly so keyboard is built and positioned first
+    setTimeout(_showWelcomeScreen, 80);
+  }
+})();
 
 
 /* ══════════════════════════════════════
@@ -4657,14 +5115,7 @@ positionIcons();
    Filters by current OS, difficulty, keyboard, and browser.
 ══════════════════════════════════════ */
 
-// Maps each app key to its JSON filename (no extension)
-const APP_JSON_FILE_PATH = {
-  Ps: '/keyboard_warriors/data/shortcuts_photoshop.json',
-  Ai: '/keyboard_warriors/data/shortcuts_illustrator.json',
-  In: '/keyboard_warriors/data/shortcuts_inDesign.json',
-  Ae: '/keyboard_warriors/data/shortcuts_afterEffects.json',
-  Fi: '/keyboard_warriors/data/shortcuts_figma.json'
-};
+// APP_JSON_FILE_PATH is built from KeyboardWarrior_Apps.json at startup (see below).
 
 // The app key whose shortcuts are currently held in memory (null = nothing loaded yet)
 let loadedAppName      = null;
@@ -4672,6 +5123,53 @@ let loadedAppName      = null;
 let loadedAppShortcuts = [];
 // Increments each time a load is requested, used to ignore stale fetch responses
 let loadSequenceNumber = 0;
+
+// Called once KeyboardWarrior_Apps.json has been fetched and parsed.
+function _onAppsLoaded(appsData) {
+  // Populate the two structures the rest of the code uses
+  APPS = appsData.map(function(a) {
+    return { key: a.key, label: a.label };
+  });
+  appsData.forEach(function(a) {
+    APP_JSON_FILE_PATH[a.key] = a.path;
+  });
+
+  // Restore saved app choice, falling back to the first entry
+  var defaultKey = APPS.length ? APPS[0].key : 'Ps';
+  try {
+    var saved = localStorage.getItem('kw_app');
+    currentApp = (saved && APPS.find(function(a) { return a.key === saved; })) ? saved : defaultKey;
+  } catch(e) {
+    currentApp = defaultKey;
+  }
+
+  // Now it's safe to build the UI
+  buildAppPill();
+  positionIcons();
+}
+
+// Fetch the apps manifest on startup. Falls back to a minimal built-in list if the
+// file cannot be reached (e.g. running the HTML file locally without a server).
+(function() {
+  fetch('/keyboard_warriors/data/KeyboardWarrior_Apps.json')
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      _onAppsLoaded(data);
+    })
+    .catch(function(err) {
+      console.warn('[Apps] Could not load KeyboardWarrior_Apps.json:', err, '— using built-in fallback.');
+      _onAppsLoaded([
+        { key: 'Ps', label: 'Photoshop (Ps)',    path: '/keyboard_warriors/data/shortcuts_photoshop.json'    },
+        { key: 'Ai', label: 'Illustrator (Ai)',  path: '/keyboard_warriors/data/shortcuts_illustrator.json'  },
+        { key: 'Id', label: 'InDesign (Id)',      path: '/keyboard_warriors/data/shortcuts_inDesign.json'     },
+        { key: 'Ae', label: 'After Effects (Ae)', path: '/keyboard_warriors/data/shortcuts_afterEffects.json' },
+        { key: 'Fi', label: 'Figma (Fi)',         path: '/keyboard_warriors/data/shortcuts_figma.json'        }
+      ]);
+    });
+})();
 
 // Codes that only exist on the extended keyboard (not on the graphical layout)
 const EXT_CODES = new Set(Object.keys(EXT_KEY_LABELS));
@@ -4681,12 +5179,32 @@ function requiresExtKey(shortcut) {
   return shortcutToCodes(shortcut).some(c => EXT_CODES.has(c));
 }
 
+// Current difficulty mode: 'fundamentals' | 'normal' | 'hardcore'
+// Default: load from localStorage, fall back to 'normal'
+var currentDifficulty = 'normal';
+(function() {
+  try {
+    var saved = localStorage.getItem('kw_difficulty');
+    if (saved === 'fundamentals' || saved === 'normal' || saved === 'hardcore') {
+      currentDifficulty = saved;
+      // Restore needle to match saved difficulty
+      var stateMap = { fundamentals: -1, normal: 0, hardcore: 1 };
+      _diffFirst = true;
+      setDiffState(stateMap[saved]);
+    }
+  } catch(e) {}
+})();
+
+// Max difficulty value included per mode
+var DIFF_MAX = { fundamentals: 1, normal: 3, hardcore: 5 };
+
 function buildPool() {
+  var maxDiff = DIFF_MAX[currentDifficulty] || 3;
   const browserSkip   = getBrowserConflictSet();
   const allShortcuts  = UNIVERSAL_SHORTCUTS.concat(loadedAppShortcuts);
   return allShortcuts.filter(s => {
     if (!s.pc_safe && currentOs === 'pc') return false;
-    if (s.difficulty > 3) return false;
+    if (s.difficulty > maxDiff) return false;
     if ((touchEnabled || !hasFullKeyboard) && requiresExtKey(s.shortcut)) return false;
     if (browserSkip.has(s.shortcut)) return false;
     return true;
@@ -5090,6 +5608,13 @@ function runCountdown(onComplete) {
   // Clear any running countdown
   if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
 
+  // Start moving keyboard to face position immediately — it has the full
+  // countdown duration (~2.7s) to complete the 850ms transition.
+  setKbPosition('face');
+
+  // Close any open settings panel (including pause screen)
+  _closeAllModalsInstant();
+
   var overlay = document.getElementById('countdownOverlay');
   var numEl   = document.getElementById('countdownNum');
   if (!overlay || !numEl) { onComplete(); return; }
@@ -5208,9 +5733,8 @@ function releaseAllKeys() {
 }
 
 window.addEventListener('blur', releaseAllKeys);
-window.addEventListener('blur', function() { _flipBusy = false; });
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { releaseAllKeys(); _flipBusy = false; }
+  if (document.hidden) releaseAllKeys();
 });
 
 function handleKeyup(e) {
@@ -5242,89 +5766,82 @@ function handleKeyup(e) {
 }
 
 /* ── Keyboard flip ────────────────────────────────── */
-var _kbFlipped  = false;
-var _flipBusy   = false;
-var _flipSeq    = 0;   // increments each flip; stale timeouts self-cancel
+var _kbPos     = 'face'; // 'face' | 'partial' | 'edge'
+var _flipBusy  = false;  // kept for applyOsMode compatibility — unused by setKbPosition
+var _kbFlipped = false;  // kept for applyOsMode compatibility — true when pos is 'edge'
+var _flipSeq   = 0;      // still used by the show/hide icon timing
 
-// DEBUG timing — slow so we can study the animation
-var FLIP_DUR    = 800;   // total flip duration ms
-var EDGE_AT     = 400;   // when row edges appear (ms into flip)
-var BASE_AT     = 650;   // when base edge appears (ms into flip)
+// KB position targets
+var KB_POS = {
+  face:    { stage: 'translateY(0px)',   panel: 'rotateX(0deg)'  },
+  partial: { stage: 'translateY(89px)',  panel: 'rotateX(62deg)' },
+  edge:    { stage: 'translateY(118px)', panel: 'rotateX(82deg)' },
+};
+
+function setKbPosition(pos) {
+  if (pos === _kbPos) return;
+  var prev = _kbPos;
+  _kbPos     = pos;
+  _kbFlipped = (pos === 'edge');
+  _flipBusy  = false;
+  var seq = ++_flipSeq;
+
+  var panel = document.getElementById('keyboardPanel');
+  var stage = document.getElementById('kbFlipStage');
+  var wrap  = document.getElementById('keyboardWrap');
+
+  // Going away from face — hide icons, show 3D edges
+  if (prev === 'face') {
+    wrap.classList.add('kb-flipping');
+    setTimeout(function() {
+      if (_flipSeq !== seq) return;
+      panel.classList.add('kb-edged');
+    }, 200);
+  }
+
+  // Going to face — remove 3D edges, reveal icons after transition
+  if (pos === 'face') {
+    stage.classList.remove('kb-show-base');
+    panel.classList.remove('kb-edges-visible', 'kb-edged');
+    setTimeout(function() {
+      if (_flipSeq !== seq) return;
+      wrap.classList.remove('kb-flipping');
+    }, 900);
+  }
+
+  // Arriving at edge — show edge details
+  if (pos === 'edge') {
+    setTimeout(function() {
+      if (_flipSeq !== seq) return;
+      panel.classList.add('kb-edges-visible');
+    }, 400);
+    setTimeout(function() {
+      if (_flipSeq !== seq) return;
+      stage.classList.add('kb-show-base');
+    }, 650);
+  } else {
+    panel.classList.remove('kb-edges-visible');
+    stage.classList.remove('kb-show-base');
+  }
+
+  // Apply the CSS transform — transition handles smooth interpolation from any position
+  stage.style.transform = KB_POS[pos].stage;
+  panel.style.transform = KB_POS[pos].panel;
+  panel.classList.toggle('kb-partial', pos === 'partial');
+}
 
 function _resetFlipState() {
-  // Instantly snap panel back to face-up, clearing all flip classes/styles.
-  // Safe to call at any point — used by OS toggle and other rebuilds.
+  // Instantly snaps to face — used by applyOsMode when rebuilding the keyboard
   _flipSeq++;
-  _flipBusy  = false;
+  _kbPos     = 'face';
   _kbFlipped = false;
+  _flipBusy  = false;
   var panel = document.getElementById('keyboardPanel');
   var stage = document.getElementById('kbFlipStage');
   var wrap  = document.getElementById('keyboardWrap');
-  if (panel) { panel.classList.remove('kb-edged', 'kb-edges-visible'); panel.style.transform = ''; }
+  if (panel) { panel.classList.remove('kb-edged', 'kb-edges-visible', 'kb-partial'); panel.style.transform = ''; }
   if (stage) { stage.classList.remove('kb-show-base'); stage.style.transform = ''; }
   if (wrap)  { wrap.classList.remove('kb-flipping'); }
-}
-
-function flipToEdge() {
-  if (_flipBusy) return;
-  _flipBusy = true;
-  var seq = ++_flipSeq;
-
-  var panel = document.getElementById('keyboardPanel');
-  var stage = document.getElementById('kbFlipStage');
-  var wrap  = document.getElementById('keyboardWrap');
-
-  wrap.classList.add('kb-flipping');
-  stage.style.transform = 'translateY(118px)';
-  panel.style.transform = 'rotateX(82deg)';
-
-  setTimeout(function() {
-    if (_flipSeq !== seq) return;
-    panel.classList.add('kb-edged');
-  }, 200);
-
-  setTimeout(function() {
-    if (_flipSeq !== seq) return;
-    panel.classList.add('kb-edges-visible');
-  }, EDGE_AT);
-
-  setTimeout(function() {
-    if (_flipSeq !== seq) return;
-    stage.classList.add('kb-show-base');
-  }, BASE_AT);
-
-  setTimeout(function() {
-    if (_flipSeq !== seq) return;
-    _flipBusy  = false;
-    _kbFlipped = true;
-  }, FLIP_DUR);
-}
-
-function flipToFace() {
-  if (_flipBusy) return;
-  _flipBusy = true;
-  var seq = ++_flipSeq;
-
-  var panel = document.getElementById('keyboardPanel');
-  var stage = document.getElementById('kbFlipStage');
-  var wrap  = document.getElementById('keyboardWrap');
-
-  stage.classList.remove('kb-show-base');
-  panel.classList.remove('kb-edges-visible');
-  panel.classList.remove('kb-edged');
-
-  setTimeout(function() {
-    if (_flipSeq !== seq) return;
-    stage.style.transform = 'translateY(0px)';
-    panel.style.transform = 'rotateX(0deg)';
-  }, 60);
-
-  setTimeout(function() {
-    if (_flipSeq !== seq) return;
-    wrap.classList.remove('kb-flipping');
-    _flipBusy  = false;
-    _kbFlipped = false;
-  }, FLIP_DUR + 60);
 }
 
 /* ── Difficulty toast helper ───────────────────────── */
@@ -5342,12 +5859,12 @@ function showDiffToast(msg) {
 }
 
 /* ── Difficulty needle states (ready, not yet wired to click) ── */
-var _diffState = 0;   // -1 = basics, 0 = normal, 1 = hardcore
+var _diffState = -1;   // -1 = fundamentals, 0 = normal, 1 = hardcore
 var _diffFirst = false;
 var DIFF_ANGLES = { '-1': -60, '0': 0, '1': 60 };
 var DIFF_TOASTS = {
-  '-1': 'Basics mode coming soon.',
-   '0': 'You are in normal mode.',
+  '-1': 'Fundamentals mode coming soon.',
+   '0': 'Normal mode.',
    '1': 'Hardcore mode coming soon.'
 };
 function setDiffState(newState) {
@@ -5362,181 +5879,28 @@ function setDiffState(newState) {
 /* ── Active click handler — flip animation ───────────── */
 function diffIconClick() {
   resetEndScreenInactivityTimer();
-  if (_kbFlipped) flipToFace(); else flipToEdge();
+  if (activeSettings === 'difficulty') {
+    closeSettings();
+  } else {
+    openSettings('difficulty');
+  }
 }
 
 /* ── Shared icon tooltip ──────────────────────────── */
-var _tipTimer = null;
-var _tipDelay = 600;
-
-function showIconTip(el, text) {
-  clearTimeout(_tipTimer);
-  _tipTimer = setTimeout(function() {
-    var tip = document.getElementById('iconTooltip');
-    if (!tip) return;
-    tip.innerHTML = text;
-    tip.classList.remove('visible');
-    tip.style.left = '-9999px';
-    tip.style.top  = '-9999px';
-    // Force layout so offsetWidth is accurate, then position and show
-    requestAnimationFrame(function() {
-      var r  = el.getBoundingClientRect();
-      var tw = tip.offsetWidth;
-      tip.style.left = Math.round(r.left + r.width / 2 - tw / 2) + 'px';
-      tip.style.top  = Math.round(r.bottom + 16) + 'px';
-      requestAnimationFrame(function() {
-        tip.classList.add('visible');
-      });
-    });
-  }, _tipDelay);
-}
-
-function hideIconTip() {
-  clearTimeout(_tipTimer);
-  var tip = document.getElementById('iconTooltip');
-  if (tip) tip.classList.remove('visible');
-}
+// Tooltips are now pure CSS (.icon-tip inside each wrap).
+// _pinTooltip / _unpinTooltip toggle .sp-icon-active class on the wrap.
 
 document.addEventListener('DOMContentLoaded', function() {
   var di = document.getElementById('diffIcon');
   if (di) di.addEventListener('click', diffIconClick);
-
-  var tips = [
-    { id: 'kbIcon',       text: 'keyboard<br>settings'   },
-    { id: 'browserIcon',  text: 'browser<br>settings'    },
-    { id: 'diffIcon',     text: 'difficulty<br>settings' },
-  ];
-  tips.forEach(function(t) {
-    var el = document.getElementById(t.id);
-    if (!el) return;
-    el.addEventListener('mouseenter', function() { showIconTip(el, t.text); });
-    el.addEventListener('mouseleave', hideIconTip);
-  });
 });
 </script>
-<div id="kbModal" role="dialog" aria-modal="true">
-  <button class="modal-dismiss-btn" onclick="closeKbModal()">&times;</button>
-  <div id="kbModalInner">
-
-    <p class="modal-section-title">Keyboard Behaviour:</p>
-    <div class="modal-section-gap"></div>
-
-    <div class="modal-toggle-row" id="stickyRow">
-      <label onclick="onStickyKeysToggle()">
-        <span class="modal-radio" id="stickyRadio">
-          <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
-            <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
-          </svg>
-        </span>
-        <span class="modal-toggle-label">Sticky Keys</span>
-      </label>
-    </div>
-
-    <div class="modal-toggle-row" id="touchRow">
-      <label onclick="onTouchToggle()">
-        <span class="modal-radio" id="touchRadio">
-          <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
-            <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
-          </svg>
-        </span>
-        <span class="modal-toggle-label">Touch Enabled (soft keys)</span>
-      </label>
-    </div>
-
-    <div class="modal-toggle-row disabled" id="audibleRow">
-      <label onclick="onAudibleToggle()">
-        <span class="modal-radio" id="audibleRadio">
-          <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
-            <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
-          </svg>
-        </span>
-        <span class="modal-toggle-label">Audible</span>
-      </label>
-    </div>
-
-    <div class="modal-section-gap"></div>
-    <div class="modal-section-gap"></div>
-
-    <p class="modal-section-title">Keyboard Layout:</p>
-    <div class="modal-section-gap"></div>
-
-    <div class="modal-layout-rows">
-
-      <!-- Row 1: 3 / 4 keys -->
-      <div class="modal-inline-row">
-        <div class="modal-left-label"><span>3</span></div>
-        <div class="modal-switch-wrap">
-          <label class="os-switch" title="Keys left of space" style="cursor:pointer;">
-            <input type="checkbox" id="modalOsToggle" onchange="onModalOsToggle()">
-            <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect id="modalOsTrackRect" x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
-              <circle id="modalOsKnobEl" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
-                      style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
-            </svg>
-          </label>
-        </div>
-        <div class="modal-right-label"><span class="modal-inline-val">4</span>&ensp;<span class="modal-inline-label">keys to the left of spacebar</span></div>
-      </div>
-
-      <!-- Row 2: ctrl / fn -->
-      <div class="modal-inline-row" id="modalFnRow">
-        <div class="modal-left-label"><span id="modalFnLabelLeft"></span></div>
-        <div class="modal-switch-wrap">
-          <label class="os-switch" title="Leftmost key" style="cursor:pointer;">
-            <input type="checkbox" id="modalFnToggle" onchange="onModalFnToggle()">
-            <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
-              <circle id="modalFnKnobEl" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
-                      style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
-            </svg>
-          </label>
-        </div>
-        <div class="modal-right-label"><span id="modalFnLabelRight" class="modal-inline-val"></span>&ensp;<span class="modal-inline-label">is the leftmost key</span></div>
-      </div>
-
-    </div><!-- /.modal-layout-rows -->
-
-    <div class="modal-section-gap"></div>
-    <div id="modalKbSizeSection">
-      <p>The on-screen display shows a compact keyboard, but the game also accepts input from full-sized keyboards with their extended keys.</p>
-      <p>Don&#8217;t have a full-sized keyboard? Let us know so we won&#8217;t ask you any impossible questions:</p>
-      <div class="modal-kbsize-row" id="modalKbSizeRow">
-        <div class="modal-left-label"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 167 101.8" style="width:66px;height:auto;fill:#9ca3af;flex-shrink:0;"><path d="M142.1,32.4H24.9c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h117.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM143.4,65.9c0,.7-.6,1.3-1.3,1.3H24.9c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h117.2c.7,0,1.3.6,1.3,1.3v29.6ZM28.7,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM28.7,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM109.4,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM28.7,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM79.3,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM109.4,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM38.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM46.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM54.6,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM62.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.9,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM79,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM87.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.3,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM54.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM58.3,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM71.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM88.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM96.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM49.8,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM57.8,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM66.6,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM70.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM84.2,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM93,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM118.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM109.4,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM118.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM118.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM118.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM48.9,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM41.8,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM34.7,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM87,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM94.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM102,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM109.4,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/></svg></div>
-        <div class="modal-switch-wrap">
-          <label class="os-switch" title="Keyboard size" style="cursor:pointer;">
-            <input type="checkbox" id="modalKbSizeToggle" onchange="onKbSizeToggle()">
-            <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
-              <circle id="modalKbSizeKnob" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
-                      style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
-            </svg>
-          </label>
-        </div>
-        <div class="modal-right-label"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;fill:#9ca3af;"> <path d="M98.6,32.4H11.4c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h87.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM99.9,65.9c0,.7-.6,1.3-1.3,1.3H11.4c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h87.2c.7,0,1.3.6,1.3,1.3v29.6ZM15.2,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM15.2,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM95.9,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM15.2,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM65.8,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM95.9,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM24.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM33,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.1,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM49.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM57.4,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM65.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM73.7,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM27.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM40.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM44.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM57.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM66.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM74.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM83.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM36.3,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM44.3,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM53.1,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM56.7,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.7,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.5,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM81.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.9,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM35.4,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM28.3,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM21.2,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM73.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM81,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM88.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM95.9,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/> </svg></div>
-      </div>
-    </div><!-- /#modalKbSizeSection -->
-
-</div><!-- /#kbModalInner -->
-</div><!-- /#kbModal -->
-
-<div id="browserModal" role="dialog" aria-modal="true">
-  <button class="modal-dismiss-btn" onclick="closeBrowserModal()">&times;</button>
-  <div id="browserModalInner">
-    <p class="modal-section-title" style="padding-right:24px;">Browser Compatibility Report:</p>
-    <div class="modal-section-gap"></div>
-    <p class="compat-heading" id="browserCompatHeading"></p>
-    <p class="compat-intro"   id="browserCompatIntro"></p>
-    <ul id="browserCompatList"></ul>
-    <p class="compat-footer"  id="browserCompatFooter"></p>
-    <div class="modal-section-gap"></div>
-    <p class="compat-debug-hint">If you encounter an error, please hold down
-      <span style="display:inline-block;font-size:10px;font-weight:600;color:#1e3a5f;border:1px solid #d1d5db;border-radius:3px;padding:1px 4px 0;line-height:1.6;white-space:nowrap;">Esc</span>
-      to wake my debug window where you can send me a report.</p>
-  </div>
-</div>
+<!-- ══════════════════════════════════════
+     SETTINGS PANEL
+     Sits in page flow between statsRow and keyboardWrap.
+     Width is aligned to keyboardPanel via JS on open.
+     Content fades/wipes in as keyboard descends.
+══════════════════════════════════════ -->
 
 <style>
 #modalKbSizeSection {
@@ -5558,16 +5922,85 @@ document.addEventListener('DOMContentLoaded', function() {
   pointer-events: none;
 }
 
-/* ── Difficulty icon ──────────────────────────────── */
+/* ── Pause panel additions ───────────────────────── */
+.sp-paused-heading {
+  font-size: 15px !important;
+  margin-bottom: 10px !important;
+}
+.sp-clear-label {
+  margin-bottom: 6px !important;
+}
+.score-clear-pill {
+  display: flex;
+  width: 100%;
+  border: 1.5px solid #d1d5db;
+  border-radius: 20px;
+  overflow: hidden;
+  background: white;
+}
+.score-pill-seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 0;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  outline: none;
+  -webkit-appearance: none;
+}
+.score-pill-seg + .score-pill-seg {
+  border-left: 1.5px solid #d1d5db;
+}
+.score-pill-quarter { flex: 1; }   /* 25% each */
+.score-pill-half    { flex: 2; }   /* 50% */
+.score-pill-full    { flex: 1; width: 100%; }
+.score-pill-seg svg { pointer-events: none; }
+.score-pill-seg:hover:not(.score-pill-inactive) {
+  background: #f3f4f6;
+  color: #111827;
+}
+.score-pill-seg:hover:not(.score-pill-inactive) svg {
+  stroke: #111827;
+}
+.score-pill-inactive {
+  color: #d1d5db;
+  cursor: default;
+}
+.score-pill-inactive svg {
+  stroke: #d1d5db;
+}
+.sp-clear-label-inactive {
+  color: #d1d5db !important;
+}
+.sp-clear-label-inactive strong {
+  color: inherit;
+}
+.diff-subtitle {
+  font-size: 12px;
+  font-style: italic;
+  color: #9ca3af;
+  text-align: center;
+  margin: 8px 0 0;
+  min-height: 1.6em;
+  line-height: 1.6;
+}
 /* ── Keyboard flip animation ──────────────────────── */
 
 /* ─── 3D STAGE ──────────────────────────────────────*/
 #kbFlipStage {
-  perspective:        6000px;
+  perspective:        900px;
   perspective-origin: 50% 50%;
   transform-style:    preserve-3d;
   transition:         transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
   overflow:           visible;
+  position:           relative;
+  z-index:            2; /* above settingsPanel (z:1) */
 }
 
 /* ─── PANEL ──────────────────────────────────────────*/
@@ -5631,6 +6064,12 @@ document.addEventListener('DOMContentLoaded', function() {
 #keyboardPanel.kb-edged #kb-wall-bottom {
   opacity: 1;
 }
+
+/* Bottom wall corner radius: capped at half wall height (3px) at partial so the
+   arc never exceeds the foreshortened strip height at any viewing angle. At full
+   edge (82deg) the strip is nearly perpendicular so 14px/22px reads correctly. */
+#keyboardPanel.kb-partial #kb-wall-bottom          { border-radius: 3px 3px 0 0; }
+#keyboardPanel.pc-keys.kb-partial #kb-wall-bottom  { border-radius: 3px 3px 0 0; }
 
 /* PC panel has 22px radius — bottom wall corners match */
 #keyboardPanel.pc-keys #kb-wall-bottom {
@@ -5744,9 +6183,20 @@ document.addEventListener('DOMContentLoaded', function() {
 .kb-row::after { display: none; }
 
 /* ─── ICONS ──────────────────────────────────────────*/
-#kbIconWrap, #brIconWrap { transition: opacity 0.3s ease; }
-#kbIconWrap  { position: absolute; left:  0; top: 50%; transform: translateY(-50%); }
-#brIconWrap  { position: absolute; right: 0; top: 50%; transform: translateY(-50%); }
+#kbIconWrap, #brIconWrap {
+  transition: opacity 0.3s ease;
+  overflow: visible;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#kbIconWrap { left: 0; }
+#brIconWrap { right: 0; }
 
 /* ─── DIFF GAUGE ─────────────────────────────────────*/
 #diffIconWrap { display: flex; justify-content: center; margin-top: 4px; }
@@ -5760,15 +6210,50 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 /* ─── TOOLTIP ────────────────────────────────────────*/
-#iconTooltip {
-  position: fixed;
+/* ─── ICON TOOLTIPS — pure CSS, anchored to each icon wrap ──────*/
+#diffIconWrap { position: relative; }
+
+.icon-tip {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   font-family: 'Lato', system-ui, sans-serif;
-  font-size: 10px; color: #9ca3af;
-  line-height: 1.25; text-align: center;
-  white-space: nowrap; pointer-events: none;
-  opacity: 0; transition: opacity 0.18s ease; z-index: 9990;
+  font-size: 10px;
+  color: #9ca3af;
+  line-height: 1.25;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  z-index: 9990;
 }
-#iconTooltip.visible { opacity: 1; }
+
+/* For kb/browser wraps: wrap is sized to the icon, tip sits directly below */
+#kbIconWrap  .icon-tip { top: calc(100% + 6px); }
+#brIconWrap  .icon-tip { top: calc(100% + 6px); }
+/* diffIconWrap is normal flow — tip sits below the svg */
+#diffIconWrap .icon-tip { top: calc(100% + 4px); }
+
+/* Show on hover */
+#kbIconWrap:hover  .icon-tip,
+#brIconWrap:hover  .icon-tip,
+#diffIconWrap:hover .icon-tip { opacity: 1; }
+
+/* Keep visible and darken when that settings page is active */
+#kbIconWrap.sp-icon-active  .icon-tip,
+#brIconWrap.sp-icon-active  .icon-tip,
+#diffIconWrap.sp-icon-active .icon-tip {
+  opacity: 1;
+  color: #374151;
+}
+
+/* Darken the icon SVG fill when active */
+#kbIconWrap.sp-icon-active  #kbIcon      { fill: #374151; }
+#brIconWrap.sp-icon-active  #browserIcon { fill: #374151; }
+#diffIconWrap.sp-icon-active #diffIcon   { fill: #374151; }
+#diffIconWrap.sp-icon-active #diffIcon .gauge-stroke { stroke: #374151; }
+#diffIconWrap.sp-icon-active #diffIcon #Needle        { fill:  #374151; }
 </style>
 
 </body>
