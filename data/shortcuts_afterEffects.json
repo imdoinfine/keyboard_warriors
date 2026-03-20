@@ -979,5 +979,32 @@
     "pc_safe": true,
     "difficulty": 5,
     "group": ""
+  },
+  {
+    "shortcut": "CMD+X",
+    "display": "Cut the selection",
+    "mac_sc": "⌘  X",
+    "pc_sc": "Ctrl X",
+    "pc_safe": true,
+    "difficulty": 1,
+    "group": ""
+  },
+  {
+    "shortcut": "CMD+C",
+    "display": "Copy the selection",
+    "mac_sc": "⌘  C",
+    "pc_sc": "Ctrl C",
+    "pc_safe": true,
+    "difficulty": 1,
+    "group": ""
+  },
+  {
+    "shortcut": "CMD+V",
+    "display": "Paste",
+    "mac_sc": "⌘  V",
+    "pc_sc": "Ctrl V",
+    "pc_safe": true,
+    "difficulty": 1,
+    "group": ""
   }
 ]
