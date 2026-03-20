@@ -2807,22 +2807,19 @@ function shortcutToCodes(s) {
   const OPT  = ['AltLeft','AltRight'];
   const SH   = ['ShiftLeft','ShiftRight'];
 
-  if (u === 'SPACE')  return ['Space'];
-  if (u === 'TAB')    return ['Tab'];
+  if (u === 'SPACE')     return ['Space'];
+  if (u === 'TAB')       return ['Tab'];
   if (u === 'HOME')      return ['Home'];
   if (u === 'END')       return ['End'];
-  if (u === 'DEL')       return ['Backspace','Delete'];
+  if (u === 'DEL')       return ['Backspace', 'Delete'];
   if (u === 'GRAVE')     return ['Backquote'];
   if (u === 'BACKSLASH') return ['Backslash'];
-  if (u === 'CTRL')      return ['ControlLeft','ControlRight'];
-  if (u === 'DEL')    return ['Backspace'];
-  if (u === 'PAGEUP')   return ['PageUp'];
-  if (u === 'PAGEDOWN') return ['PageDown'];
-  if (u === 'GRAVE')  return ['Backquote'];
-  if (u === 'END')    return ['End'];
-  if (u === 'CMD')    return CMD;
-  if (u === 'SHIFT')  return SH;
-  if (u === 'OPTION') return OPT;
+  if (u === 'PAGEUP')    return ['PageUp'];
+  if (u === 'PAGEDOWN')  return ['PageDown'];
+  if (u === 'CMD')       return CMD;
+  if (u === 'CTRL')      return ['ControlLeft', 'ControlRight'];
+  if (u === 'SHIFT')     return SH;
+  if (u === 'OPTION')    return OPT;
 
   // Arrow keys bare
   if (u === 'ARROWLEFT')  return ['ArrowLeft'];
@@ -4083,34 +4080,35 @@ function matchesShortcut(event, str) {
     return punctMap[c] || null;
   })();
 
-  // Helper: does the event key match the expected bare char/token?
   function keyIs(exp) {
-    if (exp === '='   ) return k === '=' || k === '+';
-    if (exp === 'RETURN') return k === 'Enter';
-    if (exp === 'ENTER')  return k === 'Enter';
+    if (exp === 'RETURN' || exp === 'ENTER') return k === 'Enter' || event.code === 'Enter' || event.code === 'NumpadEnter';
     if (exp === 'ARROWLEFT')  return k === 'ArrowLeft';
     if (exp === 'ARROWRIGHT') return k === 'ArrowRight';
     if (exp === 'ARROWUP')    return k === 'ArrowUp';
     if (exp === 'ARROWDOWN')  return k === 'ArrowDown';
-    if (exp === 'HOME') return k === 'Home';
-    if (exp === 'END')  return k === 'End';
-    if (exp === '[')    return k === '[' || (k === '{' && sh) || codeChar === '[';
-    if (exp === ']')    return k === ']' || (k === '}' && sh) || codeChar === ']';
-    if (exp === '/')    return k === '/';
-    if (exp === '.')    return k === '.';
-    if (exp === ',')    return k === ',';
-    if (exp === ';')    return k === ';' || k === '…';
-    if (exp === '-')    return k === '-';
-    if (exp === '<')    return k === '<' || (k === ',' && sh);
-    if (exp === '>')    return k === '>' || (k === '.' && sh);
-    if (exp === '2')    return k === '2' || k === '™';
-    if (exp === '3')    return k === '3' || k === '£';
-    if (exp === '8')    return k === '8' || k === '•';
+    if (exp === 'HOME')       return k === 'Home'     || event.code === 'Home';
+    if (exp === 'END')        return k === 'End'      || event.code === 'End';
+    if (exp === 'PAGEUP')     return k === 'PageUp'   || event.code === 'PageUp';
+    if (exp === 'PAGEDOWN')   return k === 'PageDown' || event.code === 'PageDown';
+    if (exp === 'BACKSLASH')  return event.code === 'Backslash';
+    if (exp === 'GRAVE')      return event.code === 'Backquote';
+    if (exp === '[')  return k === '[' || (k === '{' && sh) || codeChar === '[';
+    if (exp === ']')  return k === ']' || (k === '}' && sh) || codeChar === ']';
+    if (exp === '=')  return k === '=' || k === '+' || codeChar === '=';
+    if (exp === '-')  return k === '-' || k === '_' || codeChar === '-';
+    if (exp === '/')  return k === '/' || k === '?' || codeChar === '/';
+    if (exp === '.')  return k === '.' || codeChar === '.';
+    if (exp === ',')  return k === ',' || codeChar === ',';
+    if (exp === ';')  return k === ';' || k === ':' || k === '\u2026' || codeChar === ';';
+    if (exp === "'")  return k === "'" || k === '"' || codeChar === "'";
+    if (exp === '<')  return k === '<' || (k === ',' && sh) || codeChar === ',';
+    if (exp === '>')  return k === '>' || (k === '.' && sh) || codeChar === '.';
+    if (exp === '2')  return k === '2' || k === '\u2122';
+    if (exp === '3')  return k === '3' || k === '\u00a3';
+    if (exp === '8')  return k === '8' || k === '\u2022';
     if (exp === 'A' && s.startsWith('SHIFT+A') && !s.includes('CMD') && !s.includes('OPTION')) {
       return ku === 'A';
     }
-    // For letters/digits: accept event.key match OR physical code match.
-    // This handles Option remapping (e.g. Option+C → event.key='ç' but code='KeyC').
     if (codeChar && codeChar === exp) return true;
     return ku === exp;
   }
@@ -4128,8 +4126,7 @@ function matchesShortcut(event, str) {
   if (s === 'PAGEUP')   return k === 'PageUp'      && nocmd && !opt && !sh;
   if (s === 'PAGEDOWN') return k === 'PageDown'    && nocmd && !opt && !sh;
   if (s === 'ENTER')  return k === 'Enter'       && nocmd && !opt && !sh;
-  if (s === 'SHIFT+GRAVE') return sh && !cmd && !opt && (k==='`'||k==="'");
-  if (s === 'GRAVE')  return (k === '`' || k === "'") && nocmd && !opt && !sh;
+  if (s === 'GRAVE')  return event.code === 'Backquote' && nocmd && !opt && !sh;
   if (s === '[')      return (k === '[' || codeChar === '[') && nocmd && !opt && !sh;
   if (s === ']')      return (k === ']' || codeChar === ']') && nocmd && !opt && !sh;
   if (s === '.')      return k === '.'           && nocmd && !opt && !sh;
@@ -4154,19 +4151,17 @@ function matchesShortcut(event, str) {
   if (s === 'SHIFT+ARROWUP')    return k === 'ArrowUp'    && sh && nocmd && !opt;
   if (s === 'SHIFT+ARROWDOWN')  return k === 'ArrowDown'  && sh && nocmd && !opt;
 
-  if (s === 'SHIFT++' || s === 'SHIFT+=') return sh && !cmd && !opt && (k==='+'||k==='=');
-  if (s === 'SHIFT+-') return sh && !cmd && !opt && k==='-';
-  // ── SHIFT + punctuation ────────────────────────────────────────────
-  if (s === 'SHIFT++') return (k === '+' || k === '=') && sh && !cmd && !opt;
-  if (s === 'SHIFT+-') return k === '-' && sh && !cmd && !opt;
-  if (s === "SHIFT+'") return (k === "'" || k === '`' || e.code === 'Backquote') && sh && !cmd && !opt;
-  if (s === 'SHIFT+~') return (k === '~' || k === '`') && sh && !cmd && !opt;
+  if (s === 'SHIFT+GRAVE') return event.code === 'Backquote' && sh && !cmd && !opt;
+  if (s === "SHIFT+'")     return event.code === 'Quote'     && sh && !cmd && !opt;
+  if (s === 'SHIFT++' || s === 'SHIFT+=') return (k === '+' || k === '=' || codeChar === '=') && sh && !cmd && !opt;
+  if (s === 'SHIFT+-') return (k === '-' || codeChar === '-') && sh && !cmd && !opt;
+  if (s === 'SHIFT+~') return event.code === 'Backquote'     && sh && !cmd && !opt;
 
-  // ── OPTION + arrow ────────────────────────────────────────────────
-  if (s === 'OPTION+ARROWLEFT')  return k === 'ArrowLeft'  && opt && !cmd && !sh;
-  if (s === 'OPTION+ARROWRIGHT') return k === 'ArrowRight' && opt && !cmd && !sh;
-  if (s === 'OPTION+ARROWUP')    return k === 'ArrowUp'    && opt && !cmd && !sh;
-  if (s === 'OPTION+ARROWDOWN')  return k === 'ArrowDown'  && opt && !cmd && !sh;
+  // ── OPTION + arrow ─────────────────────────────────────────────────────────
+  if (s === 'OPTION+ARROWLEFT')  return k === 'ArrowLeft'  && opt && nocmd && !sh;
+  if (s === 'OPTION+ARROWRIGHT') return k === 'ArrowRight' && opt && nocmd && !sh;
+  if (s === 'OPTION+ARROWUP')    return k === 'ArrowUp'    && opt && nocmd && !sh;
+  if (s === 'OPTION+ARROWDOWN')  return k === 'ArrowDown'  && opt && nocmd && !sh;
 
   // ── SHIFT+OPTION + arrow ─────────────────────────────────────────
   if (s === 'SHIFT+OPTION+ARROWLEFT')  return k === 'ArrowLeft'  && sh && opt && !cmd;
@@ -4197,12 +4192,6 @@ function matchesShortcut(event, str) {
     const exp = s.slice(6);
     return sh && !cmd && !opt && keyIs(exp);
   }
-
-  // ── OPTION + arrow ─────────────────────────────────────────────────────────
-  if (s === 'OPTION+ARROWLEFT')  return k === 'ArrowLeft'  && opt && nocmd && !sh;
-  if (s === 'OPTION+ARROWRIGHT') return k === 'ArrowRight' && opt && nocmd && !sh;
-  if (s === 'OPTION+ARROWUP')    return k === 'ArrowUp'    && opt && nocmd && !sh;
-  if (s === 'OPTION+ARROWDOWN')  return k === 'ArrowDown'  && opt && nocmd && !sh;
 
   // ── OPTION + bracket ───────────────────────────────────────────────────────
   if (s === 'OPTION+[') return (k === '[' || codeChar === '[') && opt && nocmd && !sh;
@@ -4629,6 +4618,21 @@ function openSettings(page) {
   var prevPage = activeSettings;
   activeSettings = page;
 
+  // If counting, cancel before anything else so gameState is settled
+  // before setKbPosition and content rendering run.
+  if (!wasOpen && page !== 'panelPause' && gameState !== 'welcome') {
+    if (gameState === 'counting') {
+      var wasResume = (_countdownMode === 'resume');
+      cancelCountdown(true);
+      if (wasResume) {
+        gameState = 'paused';
+        RefreshGameContentVisibility();
+        if (lockKeyEl) lockKeyEl.classList.add('active');
+      }
+      _modalWasOpenOnPause = wasResume;
+    }
+  }
+
   // Update kbPos — partial for most panels; edge for browser and pause
   var pos = (page === 'panelBrowser' || page === 'panelPause') ? 'edge' : 'partial';
   setKbPosition(pos);
@@ -4636,7 +4640,6 @@ function openSettings(page) {
   // Pause game if needed (not for pause panel or when on welcome screen)
   if (!wasOpen && page !== 'panelPause' && gameState !== 'welcome') {
     if (gameState === 'playing')  { enterPause(true); }
-    else if (gameState === 'counting') { cancelCountdown(); _modalWasOpenOnPause = true; }
     else if (gameState === 'paused')   { _modalWasOpenOnPause = true; }
   }
 
@@ -5515,12 +5518,11 @@ function _dismissWelcome() {
 }
 
 function _startFromWelcome() {
-  // Start pressed on a landing screen without choosing an option.
-  // First-time: default to Normal. Returning: keep existing settings.
   if (!_welcomeIsReturning) {
     currentDifficulty = 'normal';
     try { localStorage.setItem('kw_difficulty', currentDifficulty); } catch(e) {}
   }
+  document.body.classList.remove('returning-screen');
   var tagline = document.getElementById('welcomeTagline');
   if (tagline) tagline.style.display = 'none';
   _welcomeIsReturning = false;
@@ -5691,7 +5693,7 @@ function loadAppShortcutsIfNeeded(appKey, onReady) {
       }
     });
 }
-function cancelCountdown() {
+function cancelCountdown(SuppressPause) {
   if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
   OverlayCountdownNumberEl.className = '';
   OverlayCountdownNumberEl.textContent = '';
@@ -5700,7 +5702,7 @@ function cancelCountdown() {
   helpBtn.disabled  = false;
   if (_countdownMode === 'resume') {
     _countdownMode = 'start';
-    enterPause();
+    if (!SuppressPause) enterPause();
   } else {
     resetToIdle();
   }
