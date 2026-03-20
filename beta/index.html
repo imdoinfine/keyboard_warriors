@@ -4,13 +4,13 @@
      and production logic lives in computer.html.
      Do not deploy. Merge approved changes back manually.
      ═══════════════════════════════════════════════════ -->
-<script>const DBG_DEVICE = 'comp1.013';</script>
+<script>const DBG_DEVICE = 'comp1.014';</script>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Keyboard Warriors</title>
+<title>BETA</title>
 <script>
   // Redirect iPad users to the optimised iPad build
   (function() {
@@ -384,16 +384,23 @@ body {
   line-height: 1.3;
   color: #1f2937;
   opacity: 1;
-  transition: opacity 0.3s, filter 0.4s;
+  transition: filter 0.4s;
   filter: none;
   white-space: pre-line;
 }
-#title.hidden  { opacity: 0; }
 #title.strike  { text-decoration: line-through; opacity: 0.45; }
 #title.blurred { filter: blur(6px); opacity: 0.6; user-select: none; }
-#title.blur-instant,
-#questionRow.blur-instant { transition: none !important; }
 #questionRow.blurred { filter: blur(3px); opacity: 0.6; user-select: none; }
+#title.no-transition { transition: none !important; }
+
+/* Fresh-start countdown: title blurs and colour-shifts into the background over 3s */
+#title.blur-out {
+  filter: blur(24px);
+  color: #e0f2fe;
+  opacity: 0;
+  transition: filter 3s linear, color 3s linear, opacity 3s linear;
+  user-select: none;
+}
 
 /* ══════════════════════════════════════
    INFO ROWS (question count + best record)
@@ -711,14 +718,18 @@ body.pc-mode #extKeyPill {
   grid-template-columns: 1fr 1fr;
 }
 
-/* Difficulty page: full-width single column, centred buttons */
-#spDifficulty.sp-active {
+/* Returning-user, Welcome, and Difficulty pages: full-width single column, centred */
+#panelDifficulty.sp-active,
+#panelReturning.sp-active,
+#panelWelcome.sp-active {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-#spDifficulty.sp-active::after { display: none; }
+#panelDifficulty.sp-active::after,
+#panelReturning.sp-active::after,
+#panelWelcome.sp-active::after  { display: none; }
 
 /* Gutter: a 1px line at the midpoint — centred above diffIcon */
 .sp-page.sp-active::after {
@@ -779,23 +790,19 @@ body.pc-mode #extKeyPill {
   border: 1.5px solid #d1d5db;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.15s;
   line-height: 1.2;
 }
 .diff-btn:hover:not(.diff-btn-inactive) {
-  background: #f0fdf4;
-  border-color: #10b981;
-  color: #065f46;
+  background: #e0f2fe;
 }
 .diff-btn-inactive {
-  color: #9ca3af;
-  border-color: #e5e7eb;
+  color: #374151;
+  background: transparent;
   cursor: default;
-  background: #fafafa;
 }
 .diff-btn-active {
   color: #374151;
-  border-color: #374151;
   background: white;
 }
 .sp-key-chip {
@@ -1624,22 +1631,26 @@ li.conflict-dismissed .conflict-desc {
   transform: rotate(90deg);   /* points down ▼ when open */
 }
 
-/* Countdown overlay inside #title area */
-@keyframes questionPop {
+/* ══════════════════════════════════════
+   TITLE — question-pop animation retained
+   for the sharp playing state only
+══════════════════════════════════════ */
+@keyframes QuestionPopAnimation {
   0%   { opacity: 0; transform: scale(0.94); }
   60%  { opacity: 1; transform: scale(1.015); }
   100% { opacity: 1; transform: scale(1); }
 }
 #title.question-pop {
-  animation: questionPop 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  animation: QuestionPopAnimation 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
-@keyframes countPop {
-  0%   { transform: scale(2.2); opacity: 0; }
-  20%  { transform: scale(1.0); opacity: 1; }
-  75%  { transform: scale(1.0); opacity: 1; }
-  100% { transform: scale(0.6); opacity: 0; }
-}
-#countdownOverlay {
+
+/* ══════════════════════════════════════
+   GAME CONTENT OVERLAY
+   Sits above blurred game content.
+   Used for: countdowns, confirm messages.
+   Fades in/out quickly via .visible class.
+══════════════════════════════════════ */
+#gameContentOverlay {
   position: absolute;
   inset: 0;
   display: flex;
@@ -1647,8 +1658,32 @@ li.conflict-dismissed .conflict-desc {
   justify-content: center;
   pointer-events: none;
   z-index: 10;
+  opacity: 0;
+  transition: opacity 0.18s ease;
 }
-#countdownNum {
+#gameContentOverlay.visible {
+  opacity: 1;
+}
+
+/* Confirm message — sharp text above blurred game content */
+#overlayMessage {
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
+  color: #1f2937;
+  white-space: pre-line;
+  padding: 0 8px;
+}
+
+/* Countdown number */
+@keyframes CountdownPopAnimation {
+  0%   { transform: scale(2.2); opacity: 0; }
+  20%  { transform: scale(1.0); opacity: 1; }
+  75%  { transform: scale(1.0); opacity: 1; }
+  100% { transform: scale(0.6); opacity: 0; }
+}
+#overlayCountdownNumber {
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 64px;
   font-weight: 600;
@@ -1656,8 +1691,8 @@ li.conflict-dismissed .conflict-desc {
   opacity: 0;
   line-height: 1;
 }
-#countdownNum.pop {
-  animation: countPop 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+#overlayCountdownNumber.pop {
+  animation: CountdownPopAnimation 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 </style>
 </head>
@@ -1708,10 +1743,13 @@ li.conflict-dismissed .conflict-desc {
     </div>
     <div class="middlePanel">
       <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;">
-          <h2 id="title">Play Keyboard Warriors</h2>
-          <p id="welcomeTagline"><em>The keyboard shortcuts coach for graphic designers.</em></p>
-          <div id="countdownOverlay"><span id="countdownNum"></span></div>
+        <h2 id="title">Play Keyboard Warriors</h2>
+        <p id="welcomeTagline"><em>Your keyboard shortcuts coach &amp; personal trainer.</em></p>
+        <div id="gameContentOverlay">
+          <p id="overlayMessage"></p>
+          <span id="overlayCountdownNumber"></span>
         </div>
+      </div>
     </div>
     <div class="rightPanel">
       <!-- CHANGE 5: timer click unpauses -->
@@ -1762,13 +1800,13 @@ li.conflict-dismissed .conflict-desc {
   <svg id="kbIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;">
     <path d="M98.6,32.4H11.4c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h87.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM99.9,65.9c0,.7-.6,1.3-1.3,1.3H11.4c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h87.2c.7,0,1.3.6,1.3,1.3v29.6ZM15.2,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM15.2,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM95.9,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM15.2,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM65.8,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM95.9,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM24.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM33,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.1,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM49.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM57.4,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM65.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM73.7,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM27.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM40.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM44.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM57.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM66.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM74.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM83.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM36.3,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM44.3,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM53.1,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM56.7,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.7,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.5,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM81.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.9,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM35.4,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM28.3,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM21.2,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM73.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM81,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM88.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM95.9,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/>
   </svg>
-  <span class="icon-tip">keyboard<br>settings</span>
+  <span class="icon-tip" onclick="event.stopPropagation();toggleKbModal()">keyboard<br>settings</span>
   </div>
   <div id="settingsPanel" aria-hidden="true">
     <div id="settingsPanelInner">
 
     <!-- ── Browser Settings ─────────────────────────────── -->
-    <div id="spBrowser" class="sp-page">
+    <div id="panelBrowser" class="sp-page">
       <div class="sp-col sp-col-left">
         <p class="sp-body" id="browserCompatHeading"></p>
         <p class="sp-body" id="browserCompatIntro"></p>
@@ -1783,10 +1821,49 @@ li.conflict-dismissed .conflict-desc {
     </div>
 
     <!-- ── Pause Screen ──────────────────────────────── -->
-    <div id="spPause" class="sp-page">
+    <div id="panelPause" class="sp-page">
       <div class="sp-col sp-col-left">
         <p class="sp-body sp-paused-heading"><strong>Your game is paused.</strong></p>
-        <p class="sp-body sp-clear-label" id="spClearLabel"><strong>Clear High Score Record?</strong></p>
+        <a class="sp-settings-nudge" onclick="event.preventDefault();openSettings('panelKeyboard');" href="#">
+          <span class="sp-nudge-text">Adjust the keyboard layout so the one on the screen matches your actual device.</span>
+          <svg class="sp-nudge-icon" viewBox="0 0 110 101.8" xmlns="http://www.w3.org/2000/svg"><path d="M98.6,32.4H11.4c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h87.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM99.9,65.9c0,.7-.6,1.3-1.3,1.3H11.4c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h87.2c.7,0,1.3.6,1.3,1.3v29.6ZM15.2,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM15.2,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM95.9,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM15.2,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM65.8,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM95.9,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM24.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM33,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.1,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM49.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM57.4,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM65.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM73.7,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM27.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM40.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM44.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM57.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM66.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM74.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM83.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM36.3,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM44.3,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM53.1,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM56.7,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.7,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.5,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM81.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.9,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM35.4,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM28.3,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM21.2,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM73.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM81,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM88.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM95.9,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/></svg>
+        </a>
+        <a class="sp-settings-nudge" onclick="event.preventDefault();openSettings('panelBrowser');" href="#">
+          <span class="sp-nudge-text">We can't simulate all shortcuts because your <small>OS</small> &amp; browser own some. Fine-tune here.</span>
+          <svg class="sp-nudge-icon" viewBox="0 0 86 64.1" xmlns="http://www.w3.org/2000/svg"><g><path d="M7,11.7v42c0,2.2,1.8,4,4,4h63c2.2,0,4-1.8,4-4V11.7c0-2.2-1.8-4-4-4H11c-2.2,0-4,1.8-4,4ZM9,19.7h67v34c0,1.1-.9,2-2,2H11c-1.1,0-2-.9-2-2V19.7ZM9,11.7c0-1.1.9-2,2-2h63c1.1,0,2,.9,2,2v6H9v-6Z"/><circle cx="19.3" cy="13.7" r="2"/><circle cx="13.3" cy="13.7" r="2"/><circle cx="25.3" cy="13.7" r="2"/></g><path d="M42.5,23.4c-6,0-11.4,2.1-14.9,5.4h0c0,0-.1.1-.2.2-2.4,2.3-3.8,5.2-3.8,8.4s1.4,6,3.8,8.4c0,0,0,.1.2.2,3.4,3.3,8.8,5.4,14.9,5.4s11.4-2.1,14.9-5.4h0c0,0,.1-.1.2-.2,0,0,0,0,0,0,2.4-2.3,3.8-5.2,3.8-8.4s-1.4-6-3.8-8.4c0,0-.1-.1-.2-.2-3.4-3.3-8.8-5.4-14.9-5.4h0ZM41.3,25.3v5.4c-1.9,0-3.7-.2-5.4-.4.3-.6.7-1.2,1-1.7,1.3-1.7,2.8-2.8,4.4-3.2h0ZM43.7,25.3c1.6.4,3.1,1.5,4.4,3.2.4.5.7,1.1,1.1,1.7-1.7.2-3.5.4-5.4.4v-5.3ZM49,26.2c2.1.7,4,1.7,5.5,2.9-.9.3-1.9.5-2.9.8-.4-.8-.8-1.5-1.3-2.2-.4-.5-.8-1-1.3-1.5h0ZM36,26.2c-.5.4-.9.9-1.2,1.5-.5.7-.9,1.4-1.3,2.2-1.1-.2-2.1-.5-2.9-.8,1.5-1.2,3.4-2.2,5.5-2.9h0ZM28.9,30.6c1.1.4,2.4.8,3.8,1-.5,1.5-.8,3.1-.9,4.8h-5.6c.2-2.1,1.2-4.1,2.7-5.8h0ZM56.1,30.6c1.5,1.7,2.5,3.7,2.7,5.8h-5.6c0-1.7-.4-3.3-.9-4.8,1.4-.3,2.7-.6,3.8-1h0ZM35.1,32c1.9.3,4,.4,6.1.5v3.9h-7c0-1.5.4-3,.8-4.3h0ZM49.9,32c.4,1.3.7,2.8.8,4.3h-7v-3.9c2.2,0,4.2-.2,6.1-.5h0ZM26.2,38.2h5.6c0,1.7.4,3.3.9,4.8-1.4.3-2.7.6-3.8,1-1.5-1.7-2.5-3.7-2.7-5.8h0ZM34.3,38.2h7v3.9c-2.2,0-4.2.2-6.1.5-.4-1.3-.7-2.8-.8-4.3h0ZM43.7,38.2h7c0,1.5-.4,3-.8,4.3-1.9-.3-4-.4-6.1-.5v-3.9ZM53.2,38.2h5.6c-.2,2.1-1.2,4.1-2.7,5.8-1.1-.4-2.4-.8-3.8-1,.5-1.5.8-3.1.9-4.8h0ZM41.3,43.9v5.4c-1.6-.4-3.1-1.4-4.4-3.2-.4-.5-.7-1.1-1.1-1.7,1.7-.2,3.5-.4,5.4-.4h0ZM43.7,43.9c1.9,0,3.7.2,5.4.4-.3.6-.7,1.2-1.1,1.7-1.3,1.7-2.8,2.8-4.4,3.2v-5.3ZM33.4,44.7c.4.8.8,1.5,1.3,2.2.4.5.8,1,1.2,1.5-2.1-.7-4-1.7-5.5-2.9.9-.3,1.9-.5,2.9-.8h0ZM51.6,44.7c1.1.2,2.1.5,2.9.8-1.5,1.2-3.4,2.2-5.5,2.9.5-.4.9-.9,1.3-1.5.5-.7.9-1.4,1.3-2.2h0Z"/></svg>
+        </a>
+        <span class="sp-settings-nudge sp-nudge-inactive" onclick="_pauseDifficultyNudgeClick()">
+          <span class="sp-nudge-text">We are adding knowledge and training your muscle memory.<br><em>As you level up, raise the bar.</em></span>
+          <svg class="sp-nudge-icon" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+            <style>.pn-stroke{fill:none;stroke:currentColor;stroke-width:2px;stroke-linecap:round;stroke-miterlimit:10;}</style>
+            <g id="PauseNudgeDiffStatic">
+              <line class="pn-stroke" x1="44.7" y1="24.1" x2="44.7" y2="19.8"/>
+              <line class="pn-stroke" x1="25.9" y1="32.1" x2="22.8" y2="29.1"/>
+              <line class="pn-stroke" x1="18.2" y1="51.1" x2="13.9" y2="51.1"/>
+              <line class="pn-stroke" x1="71.7" y1="50.6" x2="76.1" y2="50.6"/>
+              <line class="pn-stroke" x1="63.7" y1="31.8" x2="66.8" y2="28.7"/>
+              <line class="pn-stroke" x1="37.8" y1="25.1" x2="37.2" y2="22.9"/>
+              <line class="pn-stroke" x1="31.4" y1="27.8" x2="30.3" y2="25.8"/>
+              <line class="pn-stroke" x1="21.7" y1="37.7" x2="19.7" y2="36.5"/>
+              <line class="pn-stroke" x1="19.1" y1="44.2" x2="16.9" y2="43.6"/>
+              <line class="pn-stroke" x1="19.2" y1="58" x2="17" y2="58.6"/>
+              <line class="pn-stroke" x1="70.9" y1="57.5" x2="73.1" y2="58.1"/>
+              <line class="pn-stroke" x1="70.8" y1="43.7" x2="73" y2="43.1"/>
+              <line class="pn-stroke" x1="68" y1="37.3" x2="70" y2="36.1"/>
+              <line class="pn-stroke" x1="58.1" y1="27.6" x2="59.3" y2="25.6"/>
+              <line class="pn-stroke" x1="51.7" y1="25" x2="52.3" y2="22.7"/>
+              <path class="pn-stroke" d="M11.9,59.9c-.8-2.9-1.2-5.9-1.2-9,0-18.9,15.3-34.3,34.3-34.3s34.3,15.3,34.3,34.3-.4,5.9-1.1,8.6"/>
+            </g>
+            <g style="transform:rotate(60deg);transform-origin:45px 50.9px;">
+              <path class="pn-stroke" d="M50.1,40.4c3.9,1.9,6.5,5.9,6.5,10.5s-5.2,11.7-11.7,11.7-11.7-5.2-11.7-11.7,2.6-8.5,6.5-10.5"/>
+              <path fill="currentColor" d="M46.9,45.1l-1.1-16.9c0-1.2-1.8-1.2-1.9,0l-1.1,17c0,.8-.4,1.6-1,2.1-1.1,1-1.8,2.6-1.4,4.4s1.8,3.3,3.6,3.6c3,.6,5.7-1.7,5.7-4.6s-.7-2.8-1.8-3.7-.9-1.2-1-2ZM44.2,54.4c-1.3-.3-2.4-1.2-2.8-2.5s-.1-2.2.4-3c0,0,0,0,0-.1,0-.1.2-.3.3-.4,0,0,.1-.1.2-.2,0,0,0-.1.2-.2h0c.6-.5,1.4-.8,2.3-.8s1.5.2,2.1.7h0c1,.6,1.6,1.7,1.6,3,0,2.3-2.1,4.1-4.4,3.6Z"/>
+              <circle fill="currentColor" cx="45" cy="50.9" r="2.7"/>
+            </g>
+          </svg>
+        </span>
+      </div>
+      <div class="sp-col sp-col-right">
+        <p class="sp-body sp-clear-label" id="spClearLabel">Clear high score record?</p>
         <div class="score-clear-pill">
           <button id="clearTimeBtn" class="score-pill-seg score-pill-quarter" onclick="_pauseClearClick('time')" title="Clear best time">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6"/><path d="M12 3v2"/></svg>
@@ -1803,26 +1880,45 @@ li.conflict-dismissed .conflict-desc {
           </button>
         </div>
       </div>
-      <div class="sp-col sp-col-right">
-        <p class="sp-body"><strong>Privacy statement:</strong></p>
-        <p class="sp-body"><em>Digital produce that thinks local.</em></p>
-        <p class="sp-body">Made for you, and stored with you, 'Keyboard Warriors' runs entirely on your device using local memory. No clouds, no crumbs.</p>
+    </div>
+
+    <!-- ── Returning User Landing ───────────────────────── -->
+    <div id="panelReturning" class="sp-page">
+      <p class="sp-title" style="margin-bottom:10px;text-align:center;"><em>Would you like to?</em></p>
+      <div class="sp-returning-inner">
+        <div class="sp-seg-pill sp-seg-pill-two">
+          <button class="sp-seg-btn sp-seg-btn-left" onclick="_returningContinue()">Continue your last session</button>
+          <button class="sp-seg-btn sp-seg-btn-right" onclick="_returningStartOver()">Forget and start over fresh</button>
+        </div>
+        <p class="sp-body sp-returning-privacy" style="text-align:center;"><strong><em>Made for you, and stored with you.</em></strong><br><strong>Keyboard Warriors</strong> runs entirely on your device using local memory.<br><em class="sp-returning-tagline">No clouds, no crumbs.</em></p>
       </div>
     </div>
 
     <!-- ── Difficulty Settings ──────────────────────────── -->
-    <div id="spDifficulty" class="sp-page">
-      <p class="sp-title" style="margin-bottom:10px;">Difficulty</p>
-      <div style="display:flex;gap:10px;justify-content:center;width:100%;">
-        <button class="diff-btn" data-mode="fundamentals" onclick="diffBtnClick('fundamentals')">Fundamentals</button>
-        <button class="diff-btn" data-mode="normal" onclick="diffBtnClick('normal')">Normal</button>
-        <button class="diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')">Hardcore</button>
+    <div id="panelDifficulty" class="sp-page">
+      <p class="sp-title" style="margin-bottom:10px;">Question Difficulty</p>
+      <div class="sp-seg-pill sp-seg-pill-three" id="difficultyPill">
+        <button class="sp-seg-btn diff-btn" data-mode="fundamentals" onclick="diffBtnClick('fundamentals')">Fundamentals</button>
+        <button class="sp-seg-btn diff-btn" data-mode="normal" onclick="diffBtnClick('normal')">Normal</button>
+        <button class="sp-seg-btn diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')">Hardcore</button>
       </div>
       <p id="diffSubtitle" class="diff-subtitle">&nbsp;</p>
     </div>
 
+    <!-- ── Welcome Landing ──────────────────────────────── -->
+    <div id="panelWelcome" class="sp-page">
+      <p class="sp-title" style="margin-bottom:10px;">Question Difficulty</p>
+      <div class="sp-seg-pill sp-seg-pill-three" id="welcomeDifficultyPill">
+        <button class="sp-seg-btn diff-btn" data-mode="fundamentals" onclick="diffBtnClick('fundamentals')">Fundamentals</button>
+        <button class="sp-seg-btn diff-btn" data-mode="normal" onclick="diffBtnClick('normal')">Normal</button>
+        <button class="sp-seg-btn diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')">Hardcore</button>
+      </div>
+      <p id="welcomeDiffSubtitle" class="diff-subtitle">&nbsp;</p>
+      <p class="sp-returning-privacy" style="text-align:center;"><strong>Skill-set loaded:</strong><br>You are currently training with <strong>Graphic Design</strong> applications.<br><em class="sp-returning-tagline">Other skill-sets coming soon.</em></p>
+    </div>
+
     <!-- ── Keyboard Settings ────────────────────────────── -->
-    <div id="spKeyboard" class="sp-page">
+    <div id="panelKeyboard" class="sp-page">
       <div class="sp-col sp-col-left">
         <p class="sp-title">Keyboard Behaviour</p>
 
@@ -1899,6 +1995,18 @@ li.conflict-dismissed .conflict-desc {
       </div><!-- /.sp-col-left -->
 
       <div class="sp-col sp-col-right">
+        <div class="modal-toggle-row" id="ghostRow">
+          <label onclick="onGhostModeToggle()">
+            <span class="modal-radio" id="ghostRadio">
+              <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
+                <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
+              </svg>
+            </span>
+            <span class="modal-toggle-label">Ghost Mode</span>
+          </label>
+        </div>
+        <div class="modal-section-gap"></div>
         <div id="modalKbSizeSection">
           <p class="sp-body">The on-screen display shows a compact keyboard, but the game also accepts input from full-sized keyboards with their extended keys.</p>
           <p class="sp-body">Don&#8217;t have a full-sized keyboard? Let us know so we won&#8217;t ask you any impossible questions:</p>
@@ -1918,7 +2026,7 @@ li.conflict-dismissed .conflict-desc {
           </div>
         </div><!-- /#modalKbSizeSection -->
       </div><!-- /.sp-col-right -->
-    </div><!-- /#spKeyboard -->
+    </div><!-- /#panelKeyboard -->
 
   </div><!-- /#settingsPanelInner -->
   </div><!-- /#settingsPanel -->
@@ -1947,7 +2055,7 @@ li.conflict-dismissed .conflict-desc {
   </g>
   <path d="M42.5,23.4c-6,0-11.4,2.1-14.9,5.4h0c0,0-.1.1-.2.2-2.4,2.3-3.8,5.2-3.8,8.4s1.4,6,3.8,8.4c0,0,0,.1.2.2,3.4,3.3,8.8,5.4,14.9,5.4s11.4-2.1,14.9-5.4h0c0,0,.1-.1.2-.2,0,0,0,0,0,0,2.4-2.3,3.8-5.2,3.8-8.4s-1.4-6-3.8-8.4c0,0-.1-.1-.2-.2-3.4-3.3-8.8-5.4-14.9-5.4h0ZM41.3,25.3v5.4c-1.9,0-3.7-.2-5.4-.4.3-.6.7-1.2,1-1.7,1.3-1.7,2.8-2.8,4.4-3.2h0ZM43.7,25.3c1.6.4,3.1,1.5,4.4,3.2.4.5.7,1.1,1.1,1.7-1.7.2-3.5.4-5.4.4v-5.3ZM49,26.2c2.1.7,4,1.7,5.5,2.9-.9.3-1.9.5-2.9.8-.4-.8-.8-1.5-1.3-2.2-.4-.5-.8-1-1.3-1.5h0ZM36,26.2c-.5.4-.9.9-1.2,1.5-.5.7-.9,1.4-1.3,2.2-1.1-.2-2.1-.5-2.9-.8,1.5-1.2,3.4-2.2,5.5-2.9h0ZM28.9,30.6c1.1.4,2.4.8,3.8,1-.5,1.5-.8,3.1-.9,4.8h-5.6c.2-2.1,1.2-4.1,2.7-5.8h0ZM56.1,30.6c1.5,1.7,2.5,3.7,2.7,5.8h-5.6c0-1.7-.4-3.3-.9-4.8,1.4-.3,2.7-.6,3.8-1h0ZM35.1,32c1.9.3,4,.4,6.1.5v3.9h-7c0-1.5.4-3,.8-4.3h0ZM49.9,32c.4,1.3.7,2.8.8,4.3h-7v-3.9c2.2,0,4.2-.2,6.1-.5h0ZM26.2,38.2h5.6c0,1.7.4,3.3.9,4.8-1.4.3-2.7.6-3.8,1-1.5-1.7-2.5-3.7-2.7-5.8h0ZM34.3,38.2h7v3.9c-2.2,0-4.2.2-6.1.5-.4-1.3-.7-2.8-.8-4.3h0ZM43.7,38.2h7c0,1.5-.4,3-.8,4.3-1.9-.3-4-.4-6.1-.5v-3.9ZM53.2,38.2h5.6c-.2,2.1-1.2,4.1-2.7,5.8-1.1-.4-2.4-.8-3.8-1,.5-1.5.8-3.1.9-4.8h0ZM41.3,43.9v5.4c-1.6-.4-3.1-1.4-4.4-3.2-.4-.5-.7-1.1-1.1-1.7,1.7-.2,3.5-.4,5.4-.4h0ZM43.7,43.9c1.9,0,3.7.2,5.4.4-.3.6-.7,1.2-1.1,1.7-1.3,1.7-2.8,2.8-4.4,3.2v-5.3ZM33.4,44.7c.4.8.8,1.5,1.3,2.2.4.5.8,1,1.2,1.5-2.1-.7-4-1.7-5.5-2.9.9-.3,1.9-.5,2.9-.8h0ZM51.6,44.7c1.1.2,2.1.5,2.9.8-1.5,1.2-3.4,2.2-5.5,2.9.5-.4.9-.9,1.3-1.5.5-.7.9-1.4,1.3-2.2h0Z"/>
   </svg>
-  <span class="icon-tip">browser<br>settings</span>
+  <span class="icon-tip" onclick="event.stopPropagation();toggleBrowserModal()">browser<br>settings</span>
   </div>
 </div>
 
@@ -2039,7 +2147,7 @@ li.conflict-dismissed .conflict-desc {
       <circle cx="45" cy="50.9" r="2.7"/>
     </g>
   </svg>
-  <span class="icon-tip">difficulty<br>settings</span>
+  <span class="icon-tip" onclick="event.stopPropagation();diffIconClick()">difficulty<br>settings</span>
 </div>
 
 <div id="diffToast"></div>
@@ -2511,8 +2619,8 @@ function buildOsLabels() {
   leftLabel.style.cursor  = 'pointer';
   rightLabel.style.cursor = 'pointer';
 
-  leftLabel.addEventListener('click',  function() { applyOsMode(leftOperatingSystem);  if (activeSettings === 'keyboard') updateModalToggles(); });
-  rightLabel.addEventListener('click', function() { applyOsMode(rightOperatingSystem); if (activeSettings === 'keyboard') updateModalToggles(); });
+  leftLabel.addEventListener('click',  function() { applyOsMode(leftOperatingSystem);  if (activeSettings === 'panelKeyboard') updateModalToggles(); });
+  rightLabel.addEventListener('click', function() { applyOsMode(rightOperatingSystem); if (activeSettings === 'panelKeyboard') updateModalToggles(); });
 }
 
 function updateToggleVisual(os) {
@@ -2619,8 +2727,8 @@ function onOsToggle() {
   applyOsMode(osToggleEl.checked
     ? (nativeMac ? 'pc'  : 'mac')
     : (nativeMac ? 'mac' : 'pc'));
-  if (activeSettings === 'keyboard') updateModalToggles();
-  if (activeSettings === 'browser')  _refreshBrowserContent();
+  if (activeSettings === 'panelKeyboard') updateModalToggles();
+  if (activeSettings === 'panelBrowser')  _refreshBrowserContent();
 }
 
 // On mobile: auto-enable sticky + touch modes, show updated message
@@ -2671,6 +2779,24 @@ updateMismatchPill();
 // Apply rounded style if starting in PC mode
 document.getElementById('keyboardPanel').classList.toggle('pc-keys', currentOs === 'pc');
 
+// Wire data-hovering on segmented pills so CSS can fade the active segment
+// when the user hovers over a sibling (signalling a potential state change).
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.sp-seg-pill').forEach(function(pill) {
+    pill.querySelectorAll('.sp-seg-btn').forEach(function(btn) {
+      btn.addEventListener('mouseenter', function() {
+        if (!btn.classList.contains('diff-btn-active') &&
+            !btn.classList.contains('diff-btn-inactive')) {
+          pill.setAttribute('data-hovering', '');
+        }
+      });
+      btn.addEventListener('mouseleave', function() {
+        pill.removeAttribute('data-hovering');
+      });
+    });
+  });
+});
+
 /* ══════════════════════════════════════
    SHORTCUT → KEY CODES
    CHANGE 1: extended for new shortcuts
@@ -2681,21 +2807,19 @@ function shortcutToCodes(s) {
   const OPT  = ['AltLeft','AltRight'];
   const SH   = ['ShiftLeft','ShiftRight'];
 
-  if (u === 'SPACE')  return ['Space'];
-  if (u === 'TAB')    return ['Tab'];
+  if (u === 'SPACE')     return ['Space'];
+  if (u === 'TAB')       return ['Tab'];
   if (u === 'HOME')      return ['Home'];
   if (u === 'END')       return ['End'];
-  if (u === 'DEL')       return ['Backspace','Delete'];
+  if (u === 'DEL')       return ['Backspace', 'Delete'];
   if (u === 'GRAVE')     return ['Backquote'];
   if (u === 'BACKSLASH') return ['Backslash'];
-  if (u === 'CTRL')      return ['ControlLeft','ControlRight'];
-  if (u === 'DEL')    return ['Backspace'];
-  if (u === 'PAGEUP')   return ['PageUp'];
-  if (u === 'PAGEDOWN') return ['PageDown'];
-  if (u === 'GRAVE')  return ['Backquote'];
-  if (u === 'END')    return ['End'];
-  if (u === 'SHIFT')  return SH;
-  if (u === 'OPTION') return OPT;
+  if (u === 'PAGEUP')    return ['PageUp'];
+  if (u === 'PAGEDOWN')  return ['PageDown'];
+  if (u === 'CMD')       return CMD;
+  if (u === 'CTRL')      return ['ControlLeft', 'ControlRight'];
+  if (u === 'SHIFT')     return SH;
+  if (u === 'OPTION')    return OPT;
 
   // Arrow keys bare
   if (u === 'ARROWLEFT')  return ['ArrowLeft'];
@@ -3102,18 +3226,73 @@ function updateKeyboardLighting(e, isDown) {
 }
 
 /* ══════════════════════════════════════
+   GAME CONTENT VISIBILITY
+   Single source of truth for blur state
+   and overlay content across all states.
+
+   Blur rules:
+     titleEl        — blurred during: paused | confirm-* | counting
+     questionCountEl — blurred during: paused | confirm-* | counting
+
+   Overlay rules:
+     visible during: confirm-* | counting
+     hidden during:  paused | playing | idle | finished
+══════════════════════════════════════ */
+const BlurredStates = new Set([
+  'paused', 'counting',
+  'confirm-quit', 'confirm-reset',
+  'confirm-diff-change', 'confirm-trophy'
+]);
+const OverlayStates = new Set([
+  'counting',
+  'confirm-quit', 'confirm-reset',
+  'confirm-diff-change', 'confirm-trophy'
+]);
+
+const GameContentOverlayEl      = document.getElementById('gameContentOverlay');
+const OverlayMessageEl          = document.getElementById('overlayMessage');
+const OverlayCountdownNumberEl  = document.getElementById('overlayCountdownNumber');
+
+function RefreshGameContentVisibility() {
+  const ShouldBlur   = BlurredStates.has(gameState);
+  const ShowOverlay  = OverlayStates.has(gameState);
+  titleEl.classList.toggle('blurred', ShouldBlur);
+  questionCountEl.classList.toggle('blurred', ShouldBlur);
+  GameContentOverlayEl.classList.toggle('visible', ShowOverlay);
+  // When leaving overlay states, clear content so it cannot flash on re-entry
+  if (!ShowOverlay) {
+    OverlayMessageEl.innerHTML = '';
+    OverlayCountdownNumberEl.className = '';
+    OverlayCountdownNumberEl.textContent = '';
+  }
+}
+
+function SetOverlayMessage(HtmlContent) {
+  OverlayMessageEl.innerHTML = HtmlContent;
+  OverlayCountdownNumberEl.className = '';
+  OverlayCountdownNumberEl.textContent = '';
+}
+
+function SetOverlayCountdown(NumberText) {
+  OverlayMessageEl.innerHTML = '';
+  OverlayCountdownNumberEl.textContent = NumberText;
+}
+
+/* ══════════════════════════════════════
    GAME STATE
-   States: idle | playing | paused | confirm-reset | finished
+   States: idle | playing | paused | confirm-quit | confirm-reset | finished
 ══════════════════════════════════════ */
 let gameState = 'idle';
 let currentMedal = null;
 let _confirmFromFinished  = false; // true when confirm-reset entered from finished state
 let _confirmFromPause     = false; // true when confirm-reset entered from active paused game
+let _welcomeIsReturning   = false; // true when the returning-visitor landing screen is showing
 let _pendingDifficulty   = null;  // difficulty mode awaiting confirmation
 let _prevDifficulty      = null;  // difficulty to restore on cancel
 let _clearTarget         = null;  // 'time' | 'accuracy' | 'both' — which record the pending reset affects
 let _confirmAfterUpgrade = null;  // mode label string when ramp-up reset prompt is pending
 let _countdownMode        = 'start'; // 'start' | 'resume'
+var _countdownTimer       = null;
 let _modalWasOpenOnPause  = false;   // true when a modal was open entering/during pause
 let _wasPlaying           = false;   // true once any question has been answered (answersLeft decremented)
 let totalTime  = 0;
@@ -3130,6 +3309,7 @@ let partialShortcutFollowUpTimer = null;
 let partialShortcutNudgeArmed    = false;
 let endScreenInactivityTimer     = null;
 let bestRecord    = { time: null, accuracy: null };  // independent bests
+let hasEverAchievedPerfectAccuracy = false;           // never cleared, gates Hardcore and trophy
 let greenHits       = 0;
 let totalHits       = 0;
 let hintPenaltyPct  = 0;  // decaying hint penalty in percentage points
@@ -3148,6 +3328,10 @@ try {
       localStorage.removeItem('kw_best');
     }
   }
+} catch(e) {}
+
+try {
+  if (localStorage.getItem('kw_perfect') === '1') hasEverAchievedPerfectAccuracy = true;
 } catch(e) {}
 
 const mainBtn         = document.getElementById('mainBtn');
@@ -3245,8 +3429,10 @@ function updateBestDisplay(pulseTime, pulseAcc) {
     statLeftEl.innerHTML = '';
   }
   if (bestRecord.accuracy !== null) {
-    const trophy = bestRecord.accuracy >= 100 ? ' 🏆' : '';
+    const trophy = hasEverAchievedPerfectAccuracy ? ' 🏆' : '';
     statRightEl.innerHTML = 'best ' + BULLSEYE_SVG_STR + '= ' + bestRecord.accuracy + '%' + trophy;
+  } else if (hasEverAchievedPerfectAccuracy) {
+    statRightEl.innerHTML = '🏆';
   } else {
     statRightEl.textContent = '';
   }
@@ -3308,7 +3494,7 @@ function _closeAllModals() {
 
 function mainButtonClick() {
   mainBtn.blur();
-  if (gameState === 'welcome') { _dismissWelcome(); return; }
+  if (gameState === 'welcome') { _startFromWelcome(); return; }
   if (gameState === 'idle' || gameState === 'finished') { _closeAllModals(); beginCountdown(); return; }
   if (gameState === 'counting')      { cancelCountdown(); return; }
   if (gameState === 'playing')       { skipShortcut(); return; }
@@ -3318,7 +3504,9 @@ function mainButtonClick() {
     return;
   }
   if (gameState === 'confirm-reset') { confirmResetYes(); return; }
+  if (gameState === 'confirm-quit')  { confirmQuitYes();  return; }
   if (gameState === 'confirm-diff-change') { confirmDiffChangeYes(); return; }
+  if (gameState === 'confirm-trophy') { confirmTrophyYes(); return; }
 }
 
 const IMPROVEMENT_TIPS = [
@@ -3354,13 +3542,14 @@ function helpButtonClick() {
   resetEndScreenInactivityTimer();
   if (gameState === 'idle')           { titleEl.textContent = bestRecord.time !== null ? 'To reset your score, press the lock key on the keyboard.' : 'Press start to begin.'; return; }
   if (gameState === 'playing')        { toggleHelp(); return; }
-  if (gameState === 'paused')         { if (lockKeyEl) lockKeyEl.classList.remove('active'); resetToIdle(); return; }
+  if (gameState === 'paused')         { enterConfirmQuit(); return; }
   if (gameState === 'confirm-reset')       { confirmResetNo(); return; }
+  if (gameState === 'confirm-quit')        { confirmQuitNo();  return; }
   if (gameState === 'confirm-diff-change') { confirmDiffChangeNo(); return; }
+  if (gameState === 'confirm-trophy')      { confirmTrophyNo(); return; }
   if (gameState === 'finished')       { showTip(tipIndex + 1); tipIndex++; return; }
 }
 
-/* CHANGE 5: clicking the ⏸ timer unpauses */
 function timerBoxClick() {
   if (gameState === 'playing') { enterPause(); return; }
   if (gameState === 'paused') {
@@ -3368,9 +3557,16 @@ function timerBoxClick() {
     beginResumeCountdown();
     return;
   }
+  if (gameState === 'confirm-trophy') {
+    confirmTrophyNo();
+    return;
+  }
   if (gameState === 'confirm-reset' && _wasPlaying) {
-    // Pause icon is still visible — tapping it means "cancel, go back"
     confirmResetNo();
+    return;
+  }
+  if (gameState === 'confirm-quit') {
+    confirmQuitNo();
     return;
   }
   if (gameState === 'confirm-diff-change') {
@@ -3483,28 +3679,15 @@ function enterPause(instantBlur) {
   gameState = 'paused';
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
-  transitioning = false; // clear skip-in-progress if pause interrupts it
+  transitioning = false;
   clearHelp();
   resetPartialShortcutNudgeTimers();
-  // Settings panel sets its own position before calling enterPause; only move
-  // to edge if no settings screen is already driving a different position.
+  RefreshGameContentVisibility();
+  titleEl.classList.remove('strike');
   if (activeSettings === null) {
     setKbPosition('edge');
-    openSettings('pause');
+    openSettings('panelPause');
   }
-
-  if (instantBlur) {
-    titleEl.classList.add('blur-instant');
-    questionCountEl.classList.add('blur-instant');
-    // Remove the instant flag next frame so future transitions are restored
-    requestAnimationFrame(function() {
-      titleEl.classList.remove('blur-instant');
-      questionCountEl.classList.remove('blur-instant');
-    });
-  }
-  titleEl.classList.add('blurred');
-  questionCountEl.classList.add('blurred');
-  titleEl.classList.remove('strike','hidden');
   timerDiv.innerHTML = '<svg width="26" height="26" viewBox="0 0 26 26" style="display:block;vertical-align:top;" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="2" width="4" height="22" rx="1.5" fill="white"/><rect x="16" y="2" width="4" height="22" rx="1.5" fill="white"/></svg>';
   setTimerState('paused');
   mainBtn.textContent = 'Unpause';
@@ -3515,18 +3698,39 @@ function enterPause(instantBlur) {
   _modalWasOpenOnPause = (activeSettings !== null);
 }
 
+function enterConfirmQuit() {
+  _closeAllModalsInstant();
+  gameState = 'confirm-quit';
+  SetOverlayMessage('Are you sure you want to abandon this game?');
+  RefreshGameContentVisibility();
+  mainBtn.textContent = 'Yes';
+  mainBtn.style.background = '#10b981';
+  helpBtn.textContent = 'No';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+}
+
+function confirmQuitYes() {
+  mainBtn.style.background = '';
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  resetToIdle();
+}
+
+function confirmQuitNo() {
+  _returnToPauseScreen();
+}
+
 function unpause() {
   gameState = 'playing';
   clearAllLit();
   heldKeys.clear();
-  // Restore question title — may have been blanked by the resume countdown
   if (questionPool.length > 0 && (!titleEl.textContent || titleEl.textContent === '')) {
     titleEl.className = '';
     titleEl.textContent = questionPool[questionIndex]?.display || '';
     currentAnswer = questionPool[questionIndex]?.shortcut || '';
   }
-  titleEl.classList.remove('blurred');
-  questionCountEl.classList.remove('blurred');
+  RefreshGameContentVisibility();
+  titleEl.classList.remove('strike');
   helpBtn.style.background = '';
   helpBtn.style.color = '';
   resetTimerBox();
@@ -3538,16 +3742,12 @@ function unpause() {
 
 
 function enterConfirmReset(target) {
-  // target: 'time' | 'accuracy' | 'both' (default 'both' for legacy lock-key call)
   _clearTarget = target || 'both';
   _confirmFromFinished = (gameState === 'finished');
   _confirmFromPause    = _wasPlaying && answersLeft > 0 && gameState !== 'finished';
   _closeAllModalsInstant();
   gameState = 'confirm-reset';
   if (currentMedal && !_confirmFromFinished) resetTimerBox();
-  titleEl.classList.remove('blurred');
-  questionCountEl.classList.remove('blurred');
-  titleEl.className = '';
   var msg;
   if (_confirmAfterUpgrade) {
     msg = 'You ramped up difficulty. Shall I reset your high scores then?';
@@ -3556,11 +3756,10 @@ function enterConfirmReset(target) {
   } else if (_clearTarget === 'accuracy') {
     msg = 'Do you really want to wipe your highest accuracy record?';
   } else {
-    msg = _confirmFromFinished
-      ? 'Are you sure you want to clear your high scores?'
-      : 'Are you sure you want to clear your high scores?';
+    msg = 'Are you sure you want to clear your high scores?';
   }
-  titleEl.textContent = msg;
+  SetOverlayMessage(msg);
+  RefreshGameContentVisibility();
   if (_confirmFromFinished) setAppSelectorGameActive(false);
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
@@ -3570,17 +3769,53 @@ function enterConfirmReset(target) {
   if (lockKeyEl) lockKeyEl.classList.add('active');
 }
 
+function _returnToPauseScreen() {
+  gameState = 'paused';
+  RefreshGameContentVisibility();
+  titleEl.classList.remove('strike');
+  mainBtn.textContent = 'Unpause';
+  mainBtn.style.background = '';
+  helpBtn.textContent = 'Quit';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  _refreshPausePanel();
+  openSettings('panelPause');
+}
+
 function confirmResetYes() {
   var fromFinished  = _confirmFromFinished;
   var fromPause     = _confirmFromPause;
   var afterUpgrade  = _confirmAfterUpgrade;
   var target        = _clearTarget;
+
+  // If accuracy is being cleared and a trophy exists, ask about the trophy first
+  var clearingAccuracy = (target === 'accuracy' || target === 'both');
+  if (clearingAccuracy && hasEverAchievedPerfectAccuracy && !afterUpgrade) {
+    // Clear the accuracy portion now; trophy decision comes next
+    if (target === 'both') {
+      bestRecord.time = null;
+    }
+    bestRecord.accuracy = null;
+    if (bestRecord.time === null) {
+      try { localStorage.removeItem('kw_best'); } catch(e) {}
+    } else {
+      try { localStorage.setItem('kw_best', JSON.stringify(bestRecord)); } catch(e) {}
+    }
+    updateBestDisplay();
+    _confirmFromFinished = false;
+    _confirmFromPause    = false;
+    _confirmAfterUpgrade = null;
+    _clearTarget = null;
+    enterConfirmTrophy(fromFinished, fromPause);
+    return;
+  }
+
   _confirmFromFinished = false;
   _confirmFromPause    = false;
   _confirmAfterUpgrade = null;
   _clearTarget = null;
 
-  // Apply the partial or full clear
   if (target === 'time') {
     bestRecord.time = null;
   } else if (target === 'accuracy') {
@@ -3588,14 +3823,12 @@ function confirmResetYes() {
   } else {
     bestRecord = { time: null, accuracy: null };
   }
-  // Persist: if both are now null remove the key, otherwise update it
   if (bestRecord.time === null && bestRecord.accuracy === null) {
     try { localStorage.removeItem('kw_best'); } catch(e) {}
   } else {
     try { localStorage.setItem('kw_best', JSON.stringify(bestRecord)); } catch(e) {}
   }
   updateBestDisplay();
-  if (lockKeyEl) lockKeyEl.classList.remove('active');
 
   if (afterUpgrade) {
     resetToIdle();
@@ -3603,38 +3836,95 @@ function confirmResetYes() {
     return;
   }
 
-  // Came from a paused game — clear the record then return to pause screen
   if (fromPause) {
-    _refreshPausePanel();
-    openSettings('pause');
+    var clearedMsg = target === 'time'     ? 'Time record cleared.'
+                   : target === 'accuracy' ? 'Accuracy record cleared.'
+                   : 'Both records have been cleared.';
+    _returnToPauseScreen();
+    showToast(clearedMsg);
     return;
   }
 
   resetToIdle();
   if (fromFinished) {
-    var cleared = target === 'time' ? 'Time record cleared.'
+    var cleared = target === 'time'     ? 'Time record cleared.'
                 : target === 'accuracy' ? 'Accuracy record cleared.'
                 : 'Both records have been cleared.';
     titleEl.textContent = cleared;
   }
 }
 
+// Track context through the trophy follow-up question
+var _trophyFromFinished = false;
+var _trophyFromPause    = false;
+
+function enterConfirmTrophy(fromFinished, fromPause) {
+  _trophyFromFinished = fromFinished || false;
+  _trophyFromPause    = fromPause    || false;
+  gameState = 'confirm-trophy';
+  SetOverlayMessage('Do you want to return your trophy too?<br><small style="font-size:13px;font-weight:400;color:#6b7280;">(the highest difficulty modes require a trophy)</small>');
+  RefreshGameContentVisibility();
+  mainBtn.textContent = '';
+  mainBtn.disabled = true;
+  helpBtn.textContent = '';
+  helpBtn.disabled = true;
+  setTimeout(function() {
+    if (gameState !== 'confirm-trophy') return;
+    mainBtn.textContent = 'Yes, return it';
+    mainBtn.disabled = false;
+    helpBtn.textContent = 'No, keep it';
+    helpBtn.disabled = false;
+  }, 1000);
+}
+
+function confirmTrophyYes() {
+  // Return the trophy: wipe hasEverAchievedPerfectAccuracy
+  hasEverAchievedPerfectAccuracy = false;
+  try { localStorage.removeItem('kw_perfect'); } catch(e) {}
+  updateBestDisplay();
+  _finishAfterTrophy('Accuracy record and trophy cleared.');
+}
+
+function confirmTrophyNo() {
+  // Keep the trophy: accuracy already cleared, trophy remains
+  updateBestDisplay();
+  _finishAfterTrophy('Accuracy record cleared.');
+}
+
+function _finishAfterTrophy(message) {
+  var fromFinished = _trophyFromFinished;
+  var fromPause    = _trophyFromPause;
+  _trophyFromFinished = false;
+  _trophyFromPause    = false;
+  mainBtn.style.background = '';
+  helpBtn.style.background = '';
+  helpBtn.style.color = '';
+  mainBtn.disabled = false;
+  helpBtn.disabled = false;
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  if (fromPause) {
+    _returnToPauseScreen();
+    showToast(message);
+    return;
+  }
+  resetToIdle();
+  if (fromFinished) titleEl.textContent = message;
+}
+
 function confirmResetNo() {
   var afterUpgrade = _confirmAfterUpgrade;
   _confirmAfterUpgrade = null;
   _clearTarget = null;
-  if (lockKeyEl) lockKeyEl.classList.remove('active');
 
-  // Post-upgrade "No" — just go to idle with mode-ready message, no score change
   if (afterUpgrade) {
     _confirmFromFinished = false;
+    _confirmFromPause    = false;
     resetToIdle();
     titleEl.textContent = afterUpgrade + ' mode ready.';
     return;
   }
 
   if (_confirmFromFinished) {
-    // Return to medal screen — keep everything intact, show a tip
     _confirmFromFinished = false;
     gameState = 'finished';
     if (currentMedal) {
@@ -3651,16 +3941,10 @@ function confirmResetNo() {
     showTip(tipIndex);
     return;
   }
-  // If a game was in progress, count straight back in
+
   if (_wasPlaying && questionPool.length > 0 && answersLeft > 0) {
-    gameState = 'paused';
-    titleEl.classList.add('blurred');
-    titleEl.textContent = questionPool[questionIndex]?.display || '';
-    mainBtn.textContent = 'Unpause';
-    helpBtn.textContent = 'Quit';
-    helpBtn.style.background = '#6b7280';
-    helpBtn.style.color = 'white';
-    beginResumeCountdown();
+    _confirmFromPause = false;
+    _returnToPauseScreen();
   } else {
     resetToIdle();
   }
@@ -3669,10 +3953,8 @@ function confirmResetNo() {
 function enterConfirmDiffChange() {
   _closeAllModalsInstant();
   gameState = 'confirm-diff-change';
-  titleEl.classList.remove('blurred');
-  questionCountEl.classList.remove('blurred');
-  titleEl.className = '';
-  titleEl.textContent = 'Changing difficulty will cancel your paused game. Proceed?';
+  SetOverlayMessage('Changing difficulty will cancel your paused game. Proceed?');
+  RefreshGameContentVisibility();
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
   helpBtn.textContent = 'No';
@@ -3717,21 +3999,12 @@ function confirmDiffChangeNo() {
   _updateDiffSubtitle(currentDifficulty);
   _pendingDifficulty = null;
   _prevDifficulty    = null;
-  // Resume the paused game directly
-  gameState = 'paused';
-  titleEl.classList.add('blurred');
-  titleEl.textContent = questionPool[questionIndex]?.display || '';
-  mainBtn.textContent = 'Unpause';
-  helpBtn.textContent = 'Quit';
-  helpBtn.style.background = '#6b7280';
-  helpBtn.style.color = 'white';
-  beginResumeCountdown();
+  _returnToPauseScreen();
 }
 
 function resetToIdle() {
   gameState = 'idle';
   _wasPlaying = false;
-  // Hide welcome-screen elements if visible
   var _wTag = document.getElementById('welcomeTagline');
   if (_wTag) _wTag.style.display = 'none';
   setAppSelectorGameActive(false);
@@ -3751,6 +4024,7 @@ function resetToIdle() {
   if (lockKeyEl) lockKeyEl.classList.remove('active');
   titleEl.className = '';
   titleEl.textContent = 'Play Keyboard Warriors';
+  RefreshGameContentVisibility();
   questionCountEl.innerHTML = ''; dotEls = [];
   timerBox.style.background = '';
   timerBox.style.removeProperty('--face-rot');
@@ -3806,34 +4080,35 @@ function matchesShortcut(event, str) {
     return punctMap[c] || null;
   })();
 
-  // Helper: does the event key match the expected bare char/token?
   function keyIs(exp) {
-    if (exp === '='   ) return k === '=' || k === '+';
-    if (exp === 'RETURN') return k === 'Enter';
-    if (exp === 'ENTER')  return k === 'Enter';
+    if (exp === 'RETURN' || exp === 'ENTER') return k === 'Enter' || event.code === 'Enter' || event.code === 'NumpadEnter';
     if (exp === 'ARROWLEFT')  return k === 'ArrowLeft';
     if (exp === 'ARROWRIGHT') return k === 'ArrowRight';
     if (exp === 'ARROWUP')    return k === 'ArrowUp';
     if (exp === 'ARROWDOWN')  return k === 'ArrowDown';
-    if (exp === 'HOME') return k === 'Home';
-    if (exp === 'END')  return k === 'End';
-    if (exp === '[')    return k === '[' || (k === '{' && sh) || codeChar === '[';
-    if (exp === ']')    return k === ']' || (k === '}' && sh) || codeChar === ']';
-    if (exp === '/')    return k === '/';
-    if (exp === '.')    return k === '.';
-    if (exp === ',')    return k === ',';
-    if (exp === ';')    return k === ';' || k === '…';
-    if (exp === '-')    return k === '-';
-    if (exp === '<')    return k === '<' || (k === ',' && sh);
-    if (exp === '>')    return k === '>' || (k === '.' && sh);
-    if (exp === '2')    return k === '2' || k === '™';
-    if (exp === '3')    return k === '3' || k === '£';
-    if (exp === '8')    return k === '8' || k === '•';
+    if (exp === 'HOME')       return k === 'Home'     || event.code === 'Home';
+    if (exp === 'END')        return k === 'End'      || event.code === 'End';
+    if (exp === 'PAGEUP')     return k === 'PageUp'   || event.code === 'PageUp';
+    if (exp === 'PAGEDOWN')   return k === 'PageDown' || event.code === 'PageDown';
+    if (exp === 'BACKSLASH')  return event.code === 'Backslash';
+    if (exp === 'GRAVE')      return event.code === 'Backquote';
+    if (exp === '[')  return k === '[' || (k === '{' && sh) || codeChar === '[';
+    if (exp === ']')  return k === ']' || (k === '}' && sh) || codeChar === ']';
+    if (exp === '=')  return k === '=' || k === '+' || codeChar === '=';
+    if (exp === '-')  return k === '-' || k === '_' || codeChar === '-';
+    if (exp === '/')  return k === '/' || k === '?' || codeChar === '/';
+    if (exp === '.')  return k === '.' || codeChar === '.';
+    if (exp === ',')  return k === ',' || codeChar === ',';
+    if (exp === ';')  return k === ';' || k === ':' || k === '\u2026' || codeChar === ';';
+    if (exp === "'")  return k === "'" || k === '"' || codeChar === "'";
+    if (exp === '<')  return k === '<' || (k === ',' && sh) || codeChar === ',';
+    if (exp === '>')  return k === '>' || (k === '.' && sh) || codeChar === '.';
+    if (exp === '2')  return k === '2' || k === '\u2122';
+    if (exp === '3')  return k === '3' || k === '\u00a3';
+    if (exp === '8')  return k === '8' || k === '\u2022';
     if (exp === 'A' && s.startsWith('SHIFT+A') && !s.includes('CMD') && !s.includes('OPTION')) {
       return ku === 'A';
     }
-    // For letters/digits: accept event.key match OR physical code match.
-    // This handles Option remapping (e.g. Option+C → event.key='ç' but code='KeyC').
     if (codeChar && codeChar === exp) return true;
     return ku === exp;
   }
@@ -3851,8 +4126,7 @@ function matchesShortcut(event, str) {
   if (s === 'PAGEUP')   return k === 'PageUp'      && nocmd && !opt && !sh;
   if (s === 'PAGEDOWN') return k === 'PageDown'    && nocmd && !opt && !sh;
   if (s === 'ENTER')  return k === 'Enter'       && nocmd && !opt && !sh;
-  if (s === 'SHIFT+GRAVE') return sh && !cmd && !opt && (k==='`'||k==="'");
-  if (s === 'GRAVE')  return (k === '`' || k === "'") && nocmd && !opt && !sh;
+  if (s === 'GRAVE')  return event.code === 'Backquote' && nocmd && !opt && !sh;
   if (s === '[')      return (k === '[' || codeChar === '[') && nocmd && !opt && !sh;
   if (s === ']')      return (k === ']' || codeChar === ']') && nocmd && !opt && !sh;
   if (s === '.')      return k === '.'           && nocmd && !opt && !sh;
@@ -3877,19 +4151,17 @@ function matchesShortcut(event, str) {
   if (s === 'SHIFT+ARROWUP')    return k === 'ArrowUp'    && sh && nocmd && !opt;
   if (s === 'SHIFT+ARROWDOWN')  return k === 'ArrowDown'  && sh && nocmd && !opt;
 
-  if (s === 'SHIFT++' || s === 'SHIFT+=') return sh && !cmd && !opt && (k==='+'||k==='=');
-  if (s === 'SHIFT+-') return sh && !cmd && !opt && k==='-';
-  // ── SHIFT + punctuation ────────────────────────────────────────────
-  if (s === 'SHIFT++') return (k === '+' || k === '=') && sh && !cmd && !opt;
-  if (s === 'SHIFT+-') return k === '-' && sh && !cmd && !opt;
-  if (s === "SHIFT+'") return (k === "'" || k === '`' || e.code === 'Backquote') && sh && !cmd && !opt;
-  if (s === 'SHIFT+~') return (k === '~' || k === '`') && sh && !cmd && !opt;
+  if (s === 'SHIFT+GRAVE') return event.code === 'Backquote' && sh && !cmd && !opt;
+  if (s === "SHIFT+'")     return event.code === 'Quote'     && sh && !cmd && !opt;
+  if (s === 'SHIFT++' || s === 'SHIFT+=') return (k === '+' || k === '=' || codeChar === '=') && sh && !cmd && !opt;
+  if (s === 'SHIFT+-') return (k === '-' || codeChar === '-') && sh && !cmd && !opt;
+  if (s === 'SHIFT+~') return event.code === 'Backquote'     && sh && !cmd && !opt;
 
-  // ── OPTION + arrow ────────────────────────────────────────────────
-  if (s === 'OPTION+ARROWLEFT')  return k === 'ArrowLeft'  && opt && !cmd && !sh;
-  if (s === 'OPTION+ARROWRIGHT') return k === 'ArrowRight' && opt && !cmd && !sh;
-  if (s === 'OPTION+ARROWUP')    return k === 'ArrowUp'    && opt && !cmd && !sh;
-  if (s === 'OPTION+ARROWDOWN')  return k === 'ArrowDown'  && opt && !cmd && !sh;
+  // ── OPTION + arrow ─────────────────────────────────────────────────────────
+  if (s === 'OPTION+ARROWLEFT')  return k === 'ArrowLeft'  && opt && nocmd && !sh;
+  if (s === 'OPTION+ARROWRIGHT') return k === 'ArrowRight' && opt && nocmd && !sh;
+  if (s === 'OPTION+ARROWUP')    return k === 'ArrowUp'    && opt && nocmd && !sh;
+  if (s === 'OPTION+ARROWDOWN')  return k === 'ArrowDown'  && opt && nocmd && !sh;
 
   // ── SHIFT+OPTION + arrow ─────────────────────────────────────────
   if (s === 'SHIFT+OPTION+ARROWLEFT')  return k === 'ArrowLeft'  && sh && opt && !cmd;
@@ -3920,12 +4192,6 @@ function matchesShortcut(event, str) {
     const exp = s.slice(6);
     return sh && !cmd && !opt && keyIs(exp);
   }
-
-  // ── OPTION + arrow ─────────────────────────────────────────────────────────
-  if (s === 'OPTION+ARROWLEFT')  return k === 'ArrowLeft'  && opt && nocmd && !sh;
-  if (s === 'OPTION+ARROWRIGHT') return k === 'ArrowRight' && opt && nocmd && !sh;
-  if (s === 'OPTION+ARROWUP')    return k === 'ArrowUp'    && opt && nocmd && !sh;
-  if (s === 'OPTION+ARROWDOWN')  return k === 'ArrowDown'  && opt && nocmd && !sh;
 
   // ── OPTION + bracket ───────────────────────────────────────────────────────
   if (s === 'OPTION+[') return (k === '[' || codeChar === '[') && opt && nocmd && !sh;
@@ -3997,7 +4263,7 @@ function buildAppPill() {
     row.innerHTML = `<span class="app-caret">${app.key === currentApp ? '▶' : '  '}</span><span class="app-label">${app.label}</span>`;
     row.addEventListener('click', e => {
       e.stopPropagation();     // stop bubbling to pill's own onclick
-      if (gameState === 'playing' || gameState === 'paused' || gameState === 'confirm-reset') return;
+      if (gameState === 'playing' || gameState === 'paused' || gameState === 'confirm-reset' || gameState === 'confirm-quit') return;
       currentApp = app.key;
       try { localStorage.setItem('kw_app', currentApp); } catch(e) {}
       buildAppPill();
@@ -4016,7 +4282,7 @@ function scrollPillToSelected() {
 }
 
 function toggleAppDropdown() {
-  if (gameState === 'playing' || gameState === 'paused' || gameState === 'confirm-reset') return;
+  if (gameState === 'playing' || gameState === 'paused' || gameState === 'confirm-reset' || gameState === 'confirm-quit') return;
   appPillEl.classList.contains('open') ? closeAppPill() : openAppPill();
 }
 
@@ -4119,6 +4385,22 @@ function onAudibleToggle() {
   setSoundEnabled(!soundEnabled);
 }
 
+var ghostModeOn = false;
+
+function onGhostModeToggle() {
+  ghostModeOn = !ghostModeOn;
+  var radio = document.getElementById('ghostRadio');
+  if (radio) radio.classList.toggle('on', ghostModeOn);
+  document.getElementById('keyboardPanel').classList.toggle('ghost-mode', ghostModeOn);
+  if (ghostModeOn && touchEnabled) {
+    setTouchEnabled(false);
+    document.getElementById('stickyRow').classList.remove('disabled');
+    var touchRadio = document.getElementById('touchRadio');
+    if (touchRadio) touchRadio.classList.remove('on');
+  }
+  showModeToast(ghostModeOn ? 'Ghost Mode on' : 'Ghost Mode off');
+}
+
 function onStickyKeysToggle() {
   var stickyRow = document.getElementById('stickyRow');
   if (stickyRow.classList.contains('disabled')) return;
@@ -4132,6 +4414,12 @@ function onStickyKeysToggle() {
 function onTouchToggle() {
   setTouchEnabled(!touchEnabled);
   if (touchEnabled) {
+    if (ghostModeOn) {
+      ghostModeOn = false;
+      var ghostRadio = document.getElementById('ghostRadio');
+      if (ghostRadio) ghostRadio.classList.remove('on');
+      document.getElementById('keyboardPanel').classList.remove('ghost-mode');
+    }
     setStickyKeys(true);
     document.getElementById('stickyRow').classList.add('disabled');
     showModeToast('On-Screen Keyboard Active');
@@ -4258,7 +4546,7 @@ function onModalFnToggle() {
 }
 
 // ── Settings panel ──────────────────────────────────────────────
-// activeSettings: null | 'keyboard' | 'browser' | 'difficulty'
+// activeSettings: null | 'panelKeyboard' | 'panelBrowser' | 'panelDifficulty' | 'panelPause' | 'panelReturning' | 'panelWelcome'
 var activeSettings = null;
 
 // Kept as aliases so existing code that checks kbModalOpen/browserModalOpen
@@ -4266,10 +4554,17 @@ var activeSettings = null;
 var kbModalOpen = false;
 var browserModalOpen = false;
 
-var SP_PAGE_ORDER = ['keyboard', 'browser', 'difficulty', 'pause'];
+var SP_PAGE_ORDER = ['panelKeyboard', 'panelBrowser', 'panelDifficulty', 'panelPause', 'panelReturning', 'panelWelcome'];
 
 function _spPageEl(page) {
-  var ids = { keyboard: 'spKeyboard', browser: 'spBrowser', difficulty: 'spDifficulty', pause: 'spPause' };
+  var ids = {
+    panelKeyboard:   'panelKeyboard',
+    panelBrowser:    'panelBrowser',
+    panelDifficulty: 'panelDifficulty',
+    panelPause:      'panelPause',
+    panelReturning:  'panelReturning',
+    panelWelcome:    'panelWelcome',
+  };
   return document.getElementById(ids[page]);
 }
 
@@ -4294,7 +4589,7 @@ function _spAlignPanel() {
   });
 }
 
-var _iconWrapIds = { keyboard: 'kbIconWrap', browser: 'brIconWrap', difficulty: 'diffIconWrap' };
+var _iconWrapIds = { panelKeyboard: 'kbIconWrap', panelBrowser: 'brIconWrap', panelDifficulty: 'diffIconWrap' };
 
 function _pinTooltip(page) {
   // Remove active class from all icon wraps, then add to the active one
@@ -4323,29 +4618,42 @@ function openSettings(page) {
   var prevPage = activeSettings;
   activeSettings = page;
 
-  // Update kbPos — difficulty and keyboard use partial; browser, pause use edge
-  var pos = (page === 'keyboard' || page === 'difficulty') ? 'partial' : 'edge';
+  // If counting, cancel before anything else so gameState is settled
+  // before setKbPosition and content rendering run.
+  if (!wasOpen && page !== 'panelPause' && gameState !== 'welcome') {
+    if (gameState === 'counting') {
+      var wasResume = (_countdownMode === 'resume');
+      cancelCountdown(true);
+      if (wasResume) {
+        gameState = 'paused';
+        RefreshGameContentVisibility();
+        if (lockKeyEl) lockKeyEl.classList.add('active');
+      }
+      _modalWasOpenOnPause = wasResume;
+    }
+  }
+
+  // Update kbPos — partial for most panels; edge for browser and pause
+  var pos = (page === 'panelBrowser' || page === 'panelPause') ? 'edge' : 'partial';
   setKbPosition(pos);
 
-  // Pause game if needed (not for pause page or when on welcome screen)
-  if (!wasOpen && page !== 'pause' && gameState !== 'welcome') {
+  // Pause game if needed (not for pause panel or when on welcome screen)
+  if (!wasOpen && page !== 'panelPause' && gameState !== 'welcome') {
     if (gameState === 'playing')  { enterPause(true); }
-    else if (gameState === 'counting') { cancelCountdown(); _modalWasOpenOnPause = true; }
     else if (gameState === 'paused')   { _modalWasOpenOnPause = true; }
   }
 
   // Populate content
-  if (page === 'browser')    _refreshBrowserContent();
-  if (page === 'keyboard')   { updateModalToggles(); updateKbSizeToggle(); }
-  if (page === 'difficulty') _refreshDifficultyPanel();
-  if (page === 'pause')      _refreshPausePanel();
+  if (page === 'panelBrowser')    _refreshBrowserContent();
+  if (page === 'panelKeyboard')   { updateModalToggles(); updateKbSizeToggle(); }
+  if (page === 'panelDifficulty') _refreshDifficultyPanel();
+  if (page === 'panelPause')      _refreshPausePanel();
 
   // Align panel width to keyboard
   _spAlignPanel();
 
   // Show/activate the right page
-  var allPages = ['keyboard', 'browser', 'difficulty', 'pause'];
-  allPages.forEach(function(p) {
+  SP_PAGE_ORDER.forEach(function(p) {
     var el = _spPageEl(p);
     if (!el) return;
     el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left', 'sp-wipe-in-up');
@@ -4355,8 +4663,10 @@ function openSettings(page) {
   if (pageEl) {
     pageEl.classList.add('sp-active');
     if (wasOpen && prevPage !== page) {
-      // Difficulty always rises up; other pages wipe left/right by order
-      if (page === 'difficulty' || prevPage === 'difficulty') {
+      // Difficulty panels always rise up; other pages wipe left/right by order
+      var isDiffPage = (page === 'panelDifficulty' || page === 'panelWelcome');
+      var wasDiffPage = (prevPage === 'panelDifficulty' || prevPage === 'panelWelcome');
+      if (isDiffPage || wasDiffPage) {
         pageEl.classList.add('sp-wipe-in-up');
       } else {
         var prevIdx = SP_PAGE_ORDER.indexOf(prevPage);
@@ -4375,12 +4685,14 @@ function openSettings(page) {
   var stage = document.getElementById('kbFlipStage');
   if (stage) stage.style.pointerEvents = 'none';
 
-  // Pin tooltip for active settings icon (not for pause page)
-  if (page !== 'pause') _pinTooltip(page);
+  // Pin tooltip only for the three true settings pages
+  var isPinnableSettings = (page === 'panelKeyboard' || page === 'panelBrowser' || page === 'panelDifficulty');
+  if (isPinnableSettings) _pinTooltip(page);
 }
 
 function closeSettings() {
   if (activeSettings === null) return;
+  var closingPage = activeSettings;
   activeSettings = null;
   kbModalOpen    = false;
   browserModalOpen = false;
@@ -4389,7 +4701,7 @@ function closeSettings() {
   if (sp) sp.classList.remove('sp-open');
 
   // Hide all pages
-  ['keyboard', 'browser', 'difficulty', 'pause'].forEach(function(p) {
+  SP_PAGE_ORDER.forEach(function(p) {
     var el = _spPageEl(p);
     if (el) el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left', 'sp-wipe-in-up');
   });
@@ -4401,8 +4713,23 @@ function closeSettings() {
   // Reset wrap height
   var wrap = document.getElementById('keyboardWrap');
   if (wrap) wrap.style.minHeight = '';
-  // Only snap keyboard to face if not paused or on welcome — runCountdown / resetToIdle handles it
-  if (gameState !== 'paused' && gameState !== 'counting' && gameState !== 'welcome') {
+  // If paused, show the pause panel rather than leaving the keyboard in limbo
+  if (gameState === 'paused') {
+    openSettings('panelPause');
+    return;
+  }
+  // If on a landing screen and the user closed a *different* panel (e.g. keyboard/browser
+  // settings opened on top of the welcome panel), restore the welcome panel.
+  // If the welcome panel itself was closed, let it close normally.
+  if (gameState === 'welcome') {
+    var welcomePage = _welcomeIsReturning ? 'panelReturning' : 'panelWelcome';
+    if (closingPage !== welcomePage) {
+      openSettings(welcomePage);
+      return;
+    }
+  }
+  // Only snap keyboard to face if not mid-countdown — that flow handles it itself
+  if (gameState !== 'counting') {
     setKbPosition('face');
   }
 }
@@ -4418,7 +4745,7 @@ function _closeAllModalsInstant() {
   browserModalOpen = false;
   var sp = document.getElementById('settingsPanel');
   if (sp) sp.classList.remove('sp-open');
-  ['keyboard', 'browser', 'difficulty', 'pause'].forEach(function(p) {
+  SP_PAGE_ORDER.forEach(function(p) {
     var el = _spPageEl(p);
     if (el) el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left', 'sp-wipe-in-up');
   });
@@ -4430,12 +4757,12 @@ function _closeAllModalsInstant() {
 }
 
 // Legacy aliases — kept so remaining call sites compile
-function openKbModal()       { openSettings('keyboard'); }
+function openKbModal()       { openSettings('panelKeyboard'); }
 function closeKbModal()      { closeSettings(); }
-function toggleKbModal()     { activeSettings === 'keyboard' ? closeSettings() : openSettings('keyboard'); }
-function openBrowserModal()  { openSettings('browser'); }
+function toggleKbModal()     { activeSettings === 'panelKeyboard' ? closeSettings() : openSettings('panelKeyboard'); }
+function openBrowserModal()  { openSettings('panelBrowser'); }
 function closeBrowserModal() { closeSettings(); }
-function toggleBrowserModal(){ activeSettings === 'browser'  ? closeSettings() : openSettings('browser');  }
+function toggleBrowserModal(){ activeSettings === 'panelBrowser'  ? closeSettings() : openSettings('panelBrowser');  }
 function positionKbModal()   { _spAlignPanel(); }
 function positionBrowserModal() { _spAlignPanel(); }
 
@@ -4831,11 +5158,11 @@ function getBrowserConflicts() {
   // Conflict tables — Mac shortcuts use Cmd, PC use Ctrl (same token in our shortcut strings)
   // Values are the canonical shortcut strings used in SHORTCUTS[].shortcut
   var mac = {
-    Edge:    ['CMD+T','CMD+OPTION+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Firefox: ['CMD+T','CMD+OPTION+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Safari:  ['CMD+T','CMD+OPTION+U','CMD+OPTION+I','CMD+OPTION+C','CMD+SHIFT+H','CMD+SHIFT+I','CMD+SHIFT+L'],
-    Opera:   ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Chrome:  ['CMD+T','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
+    Edge:    ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Firefox: ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Safari:  ['CMD+T','CMD+GRAVE','CMD+OPTION+U','CMD+OPTION+I','CMD+OPTION+C','CMD+SHIFT+H','CMD+SHIFT+I','CMD+SHIFT+L'],
+    Opera:   ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+D','CMD+SHIFT+N'],
+    Chrome:  ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
   };
   var pc = {
     Edge:    ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
@@ -4848,6 +5175,7 @@ function getBrowserConflicts() {
   var macLabels = {
     Edge: [
       'Cmd+T \u2014 opens new tab',
+      'Cmd+` \u2014 cycles app windows (macOS)',
       'Cmd+Opt+I \u2014 opens DevTools',
       'Cmd+Shift+C \u2014 opens DevTools inspector',
       'Cmd+Shift+J \u2014 opens DevTools console',
@@ -4857,6 +5185,7 @@ function getBrowserConflicts() {
     ],
     Firefox: [
       'Cmd+T \u2014 opens new tab',
+      'Cmd+` \u2014 cycles app windows (macOS)',
       'Cmd+Opt+I \u2014 opens DevTools',
       'Cmd+Shift+A \u2014 opens Add-ons',
       'Cmd+Shift+H \u2014 opens History',
@@ -4866,6 +5195,7 @@ function getBrowserConflicts() {
     ],
     Safari: [
       'Cmd+T \u2014 opens new tab',
+      'Cmd+` \u2014 cycles app windows (macOS)',
       'Cmd+Opt+U \u2014 opens Page Source',
       'Cmd+Opt+I \u2014 opens Web Inspector',
       'Cmd+Opt+C \u2014 opens Inspector Console',
@@ -4875,6 +5205,7 @@ function getBrowserConflicts() {
     ],
     Opera: [
       'Cmd+T \u2014 opens new tab',
+      'Cmd+` \u2014 cycles app windows (macOS)',
       'Cmd+Opt+I \u2014 opens DevTools',
       'Cmd+Opt+J \u2014 opens DevTools console',
       'Cmd+Shift+D \u2014 saves bookmark',
@@ -4882,6 +5213,7 @@ function getBrowserConflicts() {
     ],
     Chrome: [
       'Cmd+T \u2014 opens new tab',
+      'Cmd+` \u2014 cycles app windows (macOS)',
       'Cmd+Opt+I \u2014 opens DevTools',
       'Cmd+Opt+J \u2014 opens DevTools console',
       'Cmd+Shift+C \u2014 opens DevTools inspector',
@@ -4935,10 +5267,10 @@ function getBrowserConflicts() {
   } else {
     // Generic fallback — show both platforms' most universal conflicts
     conflictKeys = isMacOs
-      ? ['CMD+T','CMD+OPTION+I','CMD+SHIFT+H','CMD+SHIFT+N']
+      ? ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+SHIFT+H','CMD+SHIFT+N']
       : ['CMD+T','CMD+SHIFT+I', 'CMD+SHIFT+H','CMD+SHIFT+N'];
     labels = isMacOs
-      ? ['Cmd+T \u2014 opens new tab','Cmd+Opt+I \u2014 opens DevTools','Cmd+Shift+H \u2014 opens History','Cmd+Shift+N \u2014 opens Private window']
+      ? ['Cmd+T \u2014 opens new tab','Cmd+` \u2014 cycles app windows (macOS)','Cmd+Opt+I \u2014 opens DevTools','Cmd+Shift+H \u2014 opens History','Cmd+Shift+N \u2014 opens Private window']
       : ['Ctrl+T \u2014 opens new tab','Ctrl+Shift+I \u2014 opens DevTools','Ctrl+Shift+H \u2014 opens History','Ctrl+Shift+N \u2014 opens Private window'];
   }
 
@@ -4966,20 +5298,23 @@ function getBrowserConflictSet() {
 ══════════════════════════════════════ */
 
 function _showWelcomeScreen() {
+  _welcomeIsReturning = false;
   gameState = 'welcome';
+  titleEl.className = '';
   titleEl.textContent = 'Welcome to Keyboard Warriors';
   var tagline = document.getElementById('welcomeTagline');
   if (tagline) tagline.style.display = 'block';
-  // Needle starts left (Fundamentals position) on the landing screen
   _diffFirst = true;
-  setDiffState(-1);
-  // Open the difficulty settings panel — keyboard tilts to partial, buttons appear
-  openSettings('difficulty');
+  setDiffState(0);
+  _updateDiffBtnStyles('normal');
+  _updateDiffSubtitle('normal');
+  RefreshGameContentVisibility();
+  openSettings('panelWelcome');
 }
 
 // Shared handler for both the welcome panel and the difficulty settings panel
 function diffBtnClick(mode) {
-  var hardcoreUnlocked = bestRecord.accuracy !== null && bestRecord.accuracy >= 100;
+  var hardcoreUnlocked = hasEverAchievedPerfectAccuracy;
   if (mode === 'hardcore' && !hardcoreUnlocked) {
     showToast('To unlock Hardcore you must achieve 100% accuracy.');
     return;
@@ -5018,8 +5353,8 @@ function diffBtnClick(mode) {
 // using the supplied mode rather than reading currentDifficulty (which may
 // lag during the confirm-diff-change pending state).
 function _updateDiffBtnStyles(activeMode) {
-  var hardcoreUnlocked = bestRecord.accuracy !== null && bestRecord.accuracy >= 100;
-  var btns = document.querySelectorAll('#spDifficulty .diff-btn');
+  var hardcoreUnlocked = hasEverAchievedPerfectAccuracy;
+  var btns = document.querySelectorAll('#panelDifficulty .diff-btn, #panelWelcome .diff-btn');
   btns.forEach(function(btn) {
     var m = btn.getAttribute('data-mode');
     if (m === 'hardcore' && !hardcoreUnlocked) {
@@ -5043,42 +5378,76 @@ function _refreshDifficultyPanel() {
 }
 
 function _updateDiffSubtitle(mode) {
-  var el = document.getElementById('diffSubtitle');
-  if (!el) return;
   var subtitles = {
     fundamentals: 'Mild. We will only ask things you really should know.',
     normal:       '',
     hardcore:     'Spicy! We have thrown in some tricky questions.'
   };
   var text = subtitles[mode] !== undefined ? subtitles[mode] : '';
-  el.textContent = text || '\u00a0'; // non-breaking space holds the line height
+  ['diffSubtitle', 'welcomeDiffSubtitle'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = text || '\u00a0';
+  });
 }
 
 function _refreshPausePanel() {
   var hasTime = bestRecord.time !== null;
   var hasAcc  = bestRecord.accuracy !== null;
-  var allInactive = !hasTime && !hasAcc;
+  var bothActive = hasTime && hasAcc;
+  var noneActive = !hasTime && !hasAcc;
   var timeBtn  = document.getElementById('clearTimeBtn');
   var bothBtn  = document.getElementById('clearBothBtn');
   var accBtn   = document.getElementById('clearAccBtn');
   var clearLbl = document.getElementById('spClearLabel');
-  if (timeBtn)  timeBtn.classList.toggle('score-pill-inactive', !hasTime);
-  if (bothBtn)  bothBtn.classList.toggle('score-pill-inactive', allInactive);
-  if (accBtn)   accBtn.classList.toggle('score-pill-inactive', !hasAcc);
-  if (clearLbl) clearLbl.classList.toggle('sp-clear-label-inactive', allInactive);
+
+  if (timeBtn) {
+    timeBtn.classList.toggle('score-pill-inactive', !hasTime);
+    timeBtn.style.borderRadius = '';
+  }
+  if (bothBtn) {
+    bothBtn.classList.toggle('score-pill-inactive', !bothActive);
+    bothBtn.style.borderRadius = '';
+  }
+  if (accBtn) {
+    accBtn.classList.toggle('score-pill-inactive', !hasAcc);
+    accBtn.style.borderRadius = '';
+  }
+  if (clearLbl) clearLbl.style.color = noneActive ? '#9ca3af' : '';
 }
 
 function _pauseClearClick(target) {
   var hasTime = bestRecord.time !== null;
   var hasAcc  = bestRecord.accuracy !== null;
-  if (target === 'time'     && !hasTime) return;
-  if (target === 'accuracy' && !hasAcc)  return;
-  if (target === 'both'     && !hasTime && !hasAcc) return;
+  var isInactive =
+    (target === 'time'     && !hasTime) ||
+    (target === 'accuracy' && !hasAcc)  ||
+    (target === 'both'     && !hasTime && !hasAcc);
+  if (isInactive) { showToast('Nothing to clear.'); return; }
   enterConfirmReset(target);
 }
 
 function _reportImpossibleQuestion() {
-  var body    = '\nImpossible question report from Keyboard Warriors:\n\n' + dbgBuildReport() + '\n\nPlease describe the question and the problem:\n';
+  // Build the same report dbgBuildReport() produces, but directly from live
+  // state so it is always current regardless of debug overlay visibility.
+  var appEntry = APPS.find(function(a) { return a.key === currentApp; });
+  var appName  = appEntry ? appEntry.label : currentApp;
+  var osName   = currentOs === 'pc' ? 'PC/Windows' : 'Mac';
+  var device   = typeof DBG_DEVICE !== 'undefined' ? DBG_DEVICE : 'unknown';
+  var pool     = questionPool.length;
+  var qi       = pool > 0 ? (questionIndex % pool) + 1 : '—';
+  var qStr     = (gameState === 'idle' || gameState === 'welcome') ? '—/0' : qi + '/' + pool;
+  var question = questionPool[questionIndex] || null;
+
+  var lines = [
+    'build:' + device + '  os:' + osName,
+    'app:' + appName + '  state:' + gameState + '  Q:' + qStr,
+    question ? 'answer: ' + question.shortcut : '',
+    question ? 'display: ' + question.display : '',
+    question ? 'difficulty: ' + question.difficulty : '',
+  ];
+  var report = lines.filter(function(l) { return l.trim(); }).join('\n');
+
+  var body    = '\nImpossible question report from Keyboard Warriors:\n\n' + report + '\n\nPlease describe the question and the problem:\n';
   var subject = 'Keyboard Warriors — impossible question report';
   var a = document.createElement('a');
   a.href = 'mailto:Wednesday%20Dessauer%20%3Cddessauer%40swin.edu.au%3E?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
@@ -5089,21 +5458,93 @@ function _reportImpossibleQuestion() {
   document.body.removeChild(a);
 }
 
+function _pauseDifficultyNudgeClick() {
+  showToast('Change difficulty between game rounds.');
+}
+
+function _showReturningScreen() {
+  _welcomeIsReturning = true;
+  gameState = 'welcome';
+  document.body.classList.add('returning-screen');
+  titleEl.className = '';
+  titleEl.textContent = 'Thanks for coming back.';
+  var tagline = document.getElementById('welcomeTagline');
+  if (tagline) tagline.style.display = 'none';
+  var modeMap = { fundamentals: -1, normal: 0, hardcore: 1 };
+  _diffFirst = true;
+  setDiffState(modeMap[currentDifficulty] !== undefined ? modeMap[currentDifficulty] : 0);
+  _updateDiffBtnStyles(currentDifficulty);
+  _updateDiffSubtitle(currentDifficulty);
+  RefreshGameContentVisibility();
+  openSettings('panelReturning');
+}
+
+function _returningContinue() {
+  _welcomeIsReturning = false;
+  document.body.classList.remove('returning-screen');
+  var tagline = document.getElementById('welcomeTagline');
+  if (tagline) tagline.style.display = 'none';
+  var modeMap = { fundamentals: -1, normal: 0, hardcore: 1 };
+  _diffFirst = true;
+  setDiffState(modeMap[currentDifficulty] !== undefined ? modeMap[currentDifficulty] : 0);
+  closeSettings();
+  resetToIdle();
+  beginCountdown();
+}
+
+function _returningStartOver() {
+  document.body.classList.remove('returning-screen');
+  try { localStorage.removeItem('kw_best'); } catch(e) {}
+  try { localStorage.removeItem('kw_app'); } catch(e) {}
+  try { localStorage.removeItem('kw_difficulty'); } catch(e) {}
+  try { localStorage.removeItem('kw_perfect'); } catch(e) {}
+  try { sessionStorage.removeItem('kw_welcomed'); } catch(e) {}
+  bestRecord = { time: null, accuracy: null };
+  hasEverAchievedPerfectAccuracy = false;
+  currentDifficulty = 'normal';
+  _diffFirst = true;
+  setDiffState(0);
+  updateBestDisplay();
+  closeSettings();
+  _showWelcomeScreen();
+}
+
 function _dismissWelcome() {
   var tagline = document.getElementById('welcomeTagline');
   if (tagline) tagline.style.display = 'none';
+  _welcomeIsReturning = false;
   closeSettings();
   resetToIdle();
 }
 
-// On load: show welcome screen every fresh session (sessionStorage resets on tab close)
+function _startFromWelcome() {
+  if (!_welcomeIsReturning) {
+    currentDifficulty = 'normal';
+    try { localStorage.setItem('kw_difficulty', currentDifficulty); } catch(e) {}
+  }
+  document.body.classList.remove('returning-screen');
+  var tagline = document.getElementById('welcomeTagline');
+  if (tagline) tagline.style.display = 'none';
+  _welcomeIsReturning = false;
+  closeSettings();
+  resetToIdle();
+  beginCountdown();
+}
+
+// On load: show appropriate landing screen every fresh session (sessionStorage resets on tab close)
 (function() {
   var seenThisSession = false;
   try { seenThisSession = sessionStorage.getItem('kw_welcomed') !== null; } catch(e) {}
   if (!seenThisSession) {
     try { sessionStorage.setItem('kw_welcomed', '1'); } catch(e) {}
-    // Defer slightly so keyboard is built and positioned first
-    setTimeout(_showWelcomeScreen, 80);
+    var hasPriorSession = false;
+    try {
+      hasPriorSession = localStorage.getItem('kw_best')       !== null
+                     || localStorage.getItem('kw_app')        !== null
+                     || localStorage.getItem('kw_difficulty') !== null
+                     || localStorage.getItem('kw_perfect')    !== null;
+    } catch(e) {}
+    setTimeout(hasPriorSession ? _showReturningScreen : _showWelcomeScreen, 80);
   }
 })();
 
@@ -5252,26 +5693,27 @@ function loadAppShortcutsIfNeeded(appKey, onReady) {
       }
     });
 }
-function cancelCountdown() {
+function cancelCountdown(SuppressPause) {
   if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
-  var numEl = document.getElementById('countdownNum');
-  if (numEl) { numEl.className = ''; numEl.textContent = ''; }
-  titleEl.style.position = '';
+  OverlayCountdownNumberEl.className = '';
+  OverlayCountdownNumberEl.textContent = '';
+  titleEl.classList.remove('blur-out');
   mainBtn.disabled  = false;
   helpBtn.disabled  = false;
   if (_countdownMode === 'resume') {
     _countdownMode = 'start';
-    enterPause();
+    if (!SuppressPause) enterPause();
   } else {
     resetToIdle();
   }
 }
 
 function beginCountdown() {
-  // Prevent double-triggers during countdown
   if (_countdownTimer) return;
   _countdownMode    = 'start';
   gameState         = 'counting';
+  RefreshGameContentVisibility();
+  titleEl.classList.add('blur-out');
   mainBtn.textContent = 'Cancel';
   mainBtn.disabled  = true;
   helpBtn.disabled  = true;
@@ -5291,6 +5733,7 @@ function beginResumeCountdown() {
   _countdownMode = 'resume';
   _modalWasOpenOnPause = false;
   gameState = 'counting';
+  RefreshGameContentVisibility();
   mainBtn.textContent = 'Cancel';
   mainBtn.disabled = false;
   helpBtn.disabled = true;
@@ -5300,6 +5743,32 @@ function beginResumeCountdown() {
     _countdownMode = 'start';
     unpause();
   });
+}
+
+function runCountdown(OnComplete) {
+  if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
+  setKbPosition('face');
+  _closeAllModalsInstant();
+
+  var counts = [3, 2, 1];
+  var step = 0;
+
+  function tick() {
+    if (step >= counts.length) {
+      OverlayCountdownNumberEl.className = '';
+      OverlayCountdownNumberEl.textContent = '';
+      _countdownTimer = null;
+      OnComplete();
+      return;
+    }
+    SetOverlayCountdown(counts[step]);
+    OverlayCountdownNumberEl.className = '';
+    void OverlayCountdownNumberEl.offsetWidth;
+    OverlayCountdownNumberEl.className = 'pop';
+    step++;
+    _countdownTimer = setTimeout(tick, 900);
+  }
+  tick();
 }
 
 function startGame() {
@@ -5323,8 +5792,11 @@ function startGame() {
   helpBtn.textContent = 'Help';
   helpBtn.style.background = '';
   helpBtn.style.color = '';
-  titleEl.className = '';
+  titleEl.className = 'no-transition';
   titleEl.textContent = questionPool[0].display;
+  void titleEl.offsetWidth;
+  titleEl.className = 'question-pop';
+  RefreshGameContentVisibility();
   buildProgressDots();
   showProgressDots();
   resetTimerBox();
@@ -5382,9 +5854,11 @@ function advanceQuestion() {
   }
   currentAnswer = questionPool[questionIndex].shortcut;
   titleEl.className = '';
-  void titleEl.offsetWidth; // flush so animation restarts
+  void titleEl.offsetWidth;
   titleEl.textContent = questionPool[questionIndex].display;
-  titleEl.classList.add('question-pop');
+  if (gameState === 'playing') {
+    titleEl.classList.add('question-pop');
+  }
   mainBtn.textContent = 'Skip';
   clearHelp();
   transitioning = false;
@@ -5464,6 +5938,10 @@ function endGame() {
   if (bestRecord.accuracy === null || finalAccuracy > bestRecord.accuracy) {
     bestRecord.accuracy = finalAccuracy; newBestAcc = true;
   }
+  if (finalAccuracy >= 100 && !hasEverAchievedPerfectAccuracy) {
+    hasEverAchievedPerfectAccuracy = true;
+    try { localStorage.setItem('kw_perfect', '1'); } catch(e) {}
+  }
   if (newBestTime || newBestAcc) {
     try { localStorage.setItem('kw_best', JSON.stringify(bestRecord)); } catch(e) {}
     updateBestDisplay(newBestTime, newBestAcc);
@@ -5484,6 +5962,7 @@ function endGame() {
   mainBtn.textContent = 'Try again?';
   titleEl.className = '';
   titleEl.textContent = endGameMessage(totalTime, finalAccuracy, bestRecord, wasFirstRecord);
+  RefreshGameContentVisibility();
   startEndScreenInactivityTimer();
   fillProgressDot(9);
   setTimeout(hideProgressDots, 0);
@@ -5549,7 +6028,7 @@ function medalPressUp() {
 
 document.addEventListener('mousemove', e => {
   if (!currentMedal) return;
-  if (gameState !== 'finished' && gameState !== 'confirm-reset') return;
+  if (gameState !== 'finished' && gameState !== 'confirm-reset' && gameState !== 'confirm-quit') return;
   const d = (e.clientX / window.innerWidth) - 0.5; // -0.5..+0.5
   rimTarget = d * 30; // ±15°
   if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
@@ -5600,50 +6079,7 @@ function playKeyClick() {
   } catch(e) {}
 }
 
-/* ══════════════════════════════════════
-   COUNTDOWN 3-2-1
-══════════════════════════════════════ */
-var _countdownTimer = null;
-function runCountdown(onComplete) {
-  // Clear any running countdown
-  if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
 
-  // Start moving keyboard to face position immediately — it has the full
-  // countdown duration (~2.7s) to complete the 850ms transition.
-  setKbPosition('face');
-
-  // Close any open settings panel (including pause screen)
-  _closeAllModalsInstant();
-
-  var overlay = document.getElementById('countdownOverlay');
-  var numEl   = document.getElementById('countdownNum');
-  if (!overlay || !numEl) { onComplete(); return; }
-
-  // Prep the title area
-  titleEl.textContent = '';
-  titleEl.style.position = 'relative';
-
-  var counts = [3, 2, 1];
-  var step = 0;
-
-  function tick() {
-    if (step >= counts.length) {
-      numEl.className = '';
-      numEl.textContent = '';
-      titleEl.style.position = '';
-      _countdownTimer = null;
-      onComplete();
-      return;
-    }
-    numEl.textContent = counts[step];
-    numEl.className = '';
-    void numEl.offsetWidth; // force reflow so animation restarts
-    numEl.className = 'pop';
-    step++;
-    _countdownTimer = setTimeout(tick, 900);
-  }
-  tick();
-}
 document.addEventListener('keydown', handleKeydown);
 document.addEventListener('keyup',   handleKeyup);
 
@@ -5678,7 +6114,7 @@ function handleKeydown(e) {
     if (e.key === 'ArrowRight') { showTip(tipIndex + 1); e.preventDefault(); return; }
     if (e.key === 'ArrowLeft')  { showTip(tipIndex - 1); e.preventDefault(); return; }
   }
-  if (gameState === 'paused' || gameState === 'confirm-reset') { e.preventDefault(); return; }
+  if (gameState === 'paused' || gameState === 'confirm-reset' || gameState === 'confirm-quit') { e.preventDefault(); return; }
   if (gameState !== 'playing' || transitioning) { e.preventDefault(); return; }
 
   // Check correctness: sticky mode uses accumulated toggled keys; normal uses simultaneity
@@ -5688,8 +6124,7 @@ function handleKeydown(e) {
     clearHelp();
     clearInterval(timerInterval);
     setTimerState('green', 'right');
-    titleEl.style.color = '#10b981'; // instant green — directs attention before hiding
-    requestAnimationFrame(() => titleEl.classList.add('hidden'));
+    titleEl.style.color = '#10b981';
     fillProgressDot(10 - answersLeft);
     setTimeout(() => {
       titleEl.style.color = '';
@@ -5879,10 +6314,10 @@ function setDiffState(newState) {
 /* ── Active click handler — flip animation ───────────── */
 function diffIconClick() {
   resetEndScreenInactivityTimer();
-  if (activeSettings === 'difficulty') {
+  if (activeSettings === 'panelDifficulty' || activeSettings === 'panelReturning') {
     closeSettings();
   } else {
-    openSettings('difficulty');
+    openSettings('panelDifficulty');
   }
 }
 
@@ -5935,9 +6370,12 @@ document.addEventListener('DOMContentLoaded', function() {
   width: 100%;
   border: 1.5px solid #d1d5db;
   border-radius: 20px;
-  overflow: hidden;
-  background: white;
+  background: transparent;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
+.score-clear-pill .score-pill-seg:first-child { border-radius: 18px 0 0 18px; }
+.score-clear-pill .score-pill-seg:last-child  { border-radius: 0 18px 18px 0; }
+.score-clear-pill .score-pill-seg:only-child  { border-radius: 18px; }
 .score-pill-seg {
   display: flex;
   align-items: center;
@@ -5946,8 +6384,8 @@ document.addEventListener('DOMContentLoaded', function() {
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 600;
-  color: #374151;
-  background: transparent;
+  color: #9ca3af; /* passive: grey label */
+  background: #e0f2fe;
   border: none;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
@@ -5957,23 +6395,24 @@ document.addEventListener('DOMContentLoaded', function() {
 .score-pill-seg + .score-pill-seg {
   border-left: 1.5px solid #d1d5db;
 }
-.score-pill-quarter { flex: 1; }   /* 25% each */
-.score-pill-half    { flex: 2; }   /* 50% */
+.score-pill-quarter { flex: 1; }
+.score-pill-half    { flex: 2; }
 .score-pill-full    { flex: 1; width: 100%; }
-.score-pill-seg svg { pointer-events: none; }
+.score-pill-seg svg { pointer-events: none; stroke: #9ca3af; transition: stroke 0.15s; }
 .score-pill-seg:hover:not(.score-pill-inactive) {
-  background: #f3f4f6;
-  color: #111827;
+  background: white;
+  color: #374151;
 }
 .score-pill-seg:hover:not(.score-pill-inactive) svg {
-  stroke: #111827;
+  stroke: #374151;
 }
 .score-pill-inactive {
-  color: #d1d5db;
+  background: linear-gradient(to bottom, #f0f4f8 70%, #dfe1e5 100%);
   cursor: default;
+  color: #9ca3af;
 }
 .score-pill-inactive svg {
-  stroke: #d1d5db;
+  stroke: #9ca3af;
 }
 .sp-clear-label-inactive {
   color: #d1d5db !important;
@@ -5987,8 +6426,146 @@ document.addEventListener('DOMContentLoaded', function() {
   color: #9ca3af;
   text-align: center;
   margin: 8px 0 0;
-  min-height: 1.6em;
   line-height: 1.6;
+}
+/* Welcome panel: collapse the subtitle gap so Skill-set loaded sits flush */
+#panelWelcome .diff-subtitle {
+  display: none;
+}
+/* ── Pause panel: settings nudge rows ───────────────── */
+.sp-settings-nudge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 4px 2px;
+  transition: opacity 0.15s;
+}
+.sp-settings-nudge:hover:not(.sp-nudge-inactive) {
+  opacity: 0.7;
+}
+.sp-nudge-inactive {
+  cursor: default;
+  color: #9ca3af;
+}
+.sp-nudge-inactive .sp-nudge-text {
+  color: #9ca3af;
+}
+.sp-nudge-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: auto;
+  fill: currentColor;
+}
+.sp-nudge-inactive .sp-nudge-icon {
+  opacity: 1;
+  color: #9ca3af;
+}
+.sp-nudge-text {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.55;
+  margin: 0;
+  flex: 1;
+}
+/* When diff-btn is inside a segmented pill, suppress its own border/radius/max-width */
+.sp-seg-pill .diff-btn {
+  border: none;
+  border-radius: 0;
+  max-width: none;
+}
+/* ── Segmented control pill (returning + difficulty screens) ── */
+.sp-seg-pill {
+  display: flex;
+  width: 100%;
+  border: 1.5px solid #d1d5db;
+  border-radius: 20px;
+  background: transparent;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.sp-seg-pill .sp-seg-btn:first-child,
+.sp-seg-pill .diff-btn:first-child { border-radius: 18px 0 0 18px; }
+.sp-seg-pill .sp-seg-btn:last-child,
+.sp-seg-pill .diff-btn:last-child  { border-radius: 0 18px 18px 0; }
+.sp-seg-btn {
+  flex: 1;
+  padding: 10px 12px;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #9ca3af; /* passive: grey label */
+  background: #e0f2fe;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  line-height: 1.2;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.sp-seg-btn:focus { outline: none; }
+/* Divider: always light grey */
+.sp-seg-btn + .sp-seg-btn {
+  border-left: 1.5px solid #d1d5db;
+}
+/* Hover on available: white background, dark label — preview of active state */
+.sp-seg-btn:hover:not(.diff-btn-inactive) {
+  background: white;
+  color: #374151;
+}
+/* Left/right alignment for two-part pill */
+.sp-seg-btn.sp-seg-btn-left  { text-align: right; }
+.sp-seg-btn.sp-seg-btn-right { text-align: left; }
+/* Three-part pill: all labels centred */
+.sp-seg-pill-three .sp-seg-btn { text-align: center; }
+/* Unavailable: flat page grey with subtle shadow hint at the very bottom */
+.sp-seg-btn.diff-btn-inactive,
+.sp-seg-pill .diff-btn.diff-btn-inactive {
+  background: linear-gradient(to bottom, #f0f4f8 70%, #dfe1e5 100%);
+  color: #9ca3af;
+  cursor: default;
+}
+/* Hardcore is always the last segment — restore its pill corner radii */
+.sp-seg-pill .diff-btn.diff-btn-inactive:last-child {
+  border-radius: 0 18px 18px 0;
+}
+/* Active/selected: white fill, dark label */
+.sp-seg-btn.diff-btn-active,
+.sp-seg-pill .diff-btn.diff-btn-active {
+  background: white;
+  color: #374151;
+}
+/* While a sibling is hovered, fade active back to blue and grey label —
+   signals "you are about to leave this setting". */
+.sp-seg-pill[data-hovering] .sp-seg-btn.diff-btn-active,
+.sp-seg-pill[data-hovering] .diff-btn.diff-btn-active {
+  background: #e0f2fe;
+  color: #9ca3af;
+}
+/* ── Returning screen layout ─────────────────────────── */
+.sp-returning-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+}
+.sp-returning-privacy {
+  margin-top: 16px;
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.6;
+}
+.sp-returning-tagline {
+  display: block;
+  text-align: center;
+  margin-top: 6px;
+  color: #9ca3af;
 }
 /* ── Keyboard flip animation ──────────────────────── */
 
@@ -6246,14 +6823,90 @@ document.addEventListener('DOMContentLoaded', function() {
 #diffIconWrap.sp-icon-active .icon-tip {
   opacity: 1;
   color: #374151;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
-/* Darken the icon SVG fill when active */
+/* Returning screen: all settings icons passive, no hover, no interaction */
+body.returning-screen #kbIconWrap,
+body.returning-screen #brIconWrap,
+body.returning-screen #diffIconWrap {
+  opacity: 0.4;
+  pointer-events: none;
+}
+body.returning-screen #kbIconWrap  .icon-tip,
+body.returning-screen #brIconWrap  .icon-tip,
+body.returning-screen #diffIconWrap .icon-tip { display: none; }
 #kbIconWrap.sp-icon-active  #kbIcon      { fill: #374151; }
 #brIconWrap.sp-icon-active  #browserIcon { fill: #374151; }
 #diffIconWrap.sp-icon-active #diffIcon   { fill: #374151; }
 #diffIconWrap.sp-icon-active #diffIcon .gauge-stroke { stroke: #374151; }
 #diffIconWrap.sp-icon-active #diffIcon #Needle        { fill:  #374151; }
+
+/* ── Ghost Mode ───────────────────────────────────────────────────────────────
+   Keyboard panel becomes invisible. Only green/orange lit states show.       */
+#keyboardPanel.ghost-mode {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#keyboardPanel.ghost-mode .key {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#keyboardPanel.ghost-mode .key .letter-lbl,
+#keyboardPanel.ghost-mode .key .sym-main,
+#keyboardPanel.ghost-mode .key .sym-sub,
+#keyboardPanel.ghost-mode .key .util-lbl,
+#keyboardPanel.ghost-mode .key .fn-lbl,
+#keyboardPanel.ghost-mode .key .mod-sym,
+#keyboardPanel.ghost-mode .key .mod-sym-only,
+#keyboardPanel.ghost-mode .key .mod-word,
+#keyboardPanel.ghost-mode .key .util-sym-only,
+#keyboardPanel.ghost-mode .key .lock-svg,
+#keyboardPanel.ghost-mode .key .win-svg { opacity: 0; }
+#keyboardPanel.ghost-mode #kb-wall-top,
+#keyboardPanel.ghost-mode #kb-wall-bottom,
+#keyboardPanel.ghost-mode #kb-slab-back,
+#keyboardPanel.ghost-mode #kb-shadow,
+#keyboardPanel.ghost-mode #kb-base-edge { display: none; }
+/* Lit states remain fully visible in ghost mode */
+#keyboardPanel.ghost-mode .key.lit-green-up,
+#keyboardPanel.ghost-mode .key.lit-green-down {
+  background: #10b981 !important;
+  box-shadow: 0 0 12px rgba(16,185,129,0.7) !important;
+}
+#keyboardPanel.ghost-mode .key.lit-orange-up,
+#keyboardPanel.ghost-mode .key.lit-orange-down {
+  background: #f97316 !important;
+  box-shadow: 0 0 12px rgba(249,115,22,0.7) !important;
+}
+#keyboardPanel.ghost-mode .key.lit-green-up  .letter-lbl,
+#keyboardPanel.ghost-mode .key.lit-green-down .letter-lbl,
+#keyboardPanel.ghost-mode .key.lit-green-up  .sym-main,
+#keyboardPanel.ghost-mode .key.lit-green-down .sym-main,
+#keyboardPanel.ghost-mode .key.lit-green-up  .mod-sym,
+#keyboardPanel.ghost-mode .key.lit-green-down .mod-sym,
+#keyboardPanel.ghost-mode .key.lit-green-up  .mod-sym-only,
+#keyboardPanel.ghost-mode .key.lit-green-down .mod-sym-only,
+#keyboardPanel.ghost-mode .key.lit-green-up  .util-lbl,
+#keyboardPanel.ghost-mode .key.lit-green-down .util-lbl,
+#keyboardPanel.ghost-mode .key.lit-green-up  .util-sym-only,
+#keyboardPanel.ghost-mode .key.lit-green-down .util-sym-only,
+#keyboardPanel.ghost-mode .key.lit-orange-up  .letter-lbl,
+#keyboardPanel.ghost-mode .key.lit-orange-down .letter-lbl,
+#keyboardPanel.ghost-mode .key.lit-orange-up  .sym-main,
+#keyboardPanel.ghost-mode .key.lit-orange-down .sym-main,
+#keyboardPanel.ghost-mode .key.lit-orange-up  .mod-sym,
+#keyboardPanel.ghost-mode .key.lit-orange-down .mod-sym,
+#keyboardPanel.ghost-mode .key.lit-orange-up  .mod-sym-only,
+#keyboardPanel.ghost-mode .key.lit-orange-down .mod-sym-only,
+#keyboardPanel.ghost-mode .key.lit-orange-up  .util-lbl,
+#keyboardPanel.ghost-mode .key.lit-orange-down .util-lbl,
+#keyboardPanel.ghost-mode .key.lit-orange-up  .util-sym-only,
+#keyboardPanel.ghost-mode .key.lit-orange-down .util-sym-only {
+  opacity: 1 !important;
+  color: white !important;
+}
 </style>
 
 </body>
