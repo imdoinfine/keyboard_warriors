@@ -384,16 +384,23 @@ body {
   line-height: 1.3;
   color: #1f2937;
   opacity: 1;
-  transition: opacity 0.3s, filter 0.4s;
+  transition: filter 0.4s;
   filter: none;
   white-space: pre-line;
 }
-#title.hidden  { opacity: 0; }
 #title.strike  { text-decoration: line-through; opacity: 0.45; }
 #title.blurred { filter: blur(6px); opacity: 0.6; user-select: none; }
-#title.blur-instant,
-#questionRow.blur-instant { transition: none !important; }
 #questionRow.blurred { filter: blur(3px); opacity: 0.6; user-select: none; }
+#title.no-transition { transition: none !important; }
+
+/* Fresh-start countdown: title blurs and colour-shifts into the background over 3s */
+#title.blur-out {
+  filter: blur(24px);
+  color: #e0f2fe;
+  opacity: 0;
+  transition: filter 3s linear, color 3s linear, opacity 3s linear;
+  user-select: none;
+}
 
 /* ══════════════════════════════════════
    INFO ROWS (question count + best record)
@@ -1624,22 +1631,26 @@ li.conflict-dismissed .conflict-desc {
   transform: rotate(90deg);   /* points down ▼ when open */
 }
 
-/* Countdown overlay inside #title area */
-@keyframes questionPop {
+/* ══════════════════════════════════════
+   TITLE — question-pop animation retained
+   for the sharp playing state only
+══════════════════════════════════════ */
+@keyframes QuestionPopAnimation {
   0%   { opacity: 0; transform: scale(0.94); }
   60%  { opacity: 1; transform: scale(1.015); }
   100% { opacity: 1; transform: scale(1); }
 }
 #title.question-pop {
-  animation: questionPop 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  animation: QuestionPopAnimation 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
-@keyframes countPop {
-  0%   { transform: scale(2.2); opacity: 0; }
-  20%  { transform: scale(1.0); opacity: 1; }
-  75%  { transform: scale(1.0); opacity: 1; }
-  100% { transform: scale(0.6); opacity: 0; }
-}
-#countdownOverlay {
+
+/* ══════════════════════════════════════
+   GAME CONTENT OVERLAY
+   Sits above blurred game content.
+   Used for: countdowns, confirm messages.
+   Fades in/out quickly via .visible class.
+══════════════════════════════════════ */
+#gameContentOverlay {
   position: absolute;
   inset: 0;
   display: flex;
@@ -1647,8 +1658,32 @@ li.conflict-dismissed .conflict-desc {
   justify-content: center;
   pointer-events: none;
   z-index: 10;
+  opacity: 0;
+  transition: opacity 0.18s ease;
 }
-#countdownNum {
+#gameContentOverlay.visible {
+  opacity: 1;
+}
+
+/* Confirm message — sharp text above blurred game content */
+#overlayMessage {
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
+  color: #1f2937;
+  white-space: pre-line;
+  padding: 0 8px;
+}
+
+/* Countdown number */
+@keyframes CountdownPopAnimation {
+  0%   { transform: scale(2.2); opacity: 0; }
+  20%  { transform: scale(1.0); opacity: 1; }
+  75%  { transform: scale(1.0); opacity: 1; }
+  100% { transform: scale(0.6); opacity: 0; }
+}
+#overlayCountdownNumber {
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 64px;
   font-weight: 600;
@@ -1656,8 +1691,8 @@ li.conflict-dismissed .conflict-desc {
   opacity: 0;
   line-height: 1;
 }
-#countdownNum.pop {
-  animation: countPop 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+#overlayCountdownNumber.pop {
+  animation: CountdownPopAnimation 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 </style>
 </head>
@@ -1708,10 +1743,13 @@ li.conflict-dismissed .conflict-desc {
     </div>
     <div class="middlePanel">
       <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;">
-          <h2 id="title">Play Keyboard Warriors</h2>
-          <p id="welcomeTagline"><em>Your keyboard shortcuts coach &amp; personal trainer.</em></p>
-          <div id="countdownOverlay"><span id="countdownNum"></span></div>
+        <h2 id="title">Play Keyboard Warriors</h2>
+        <p id="welcomeTagline"><em>Your keyboard shortcuts coach &amp; personal trainer.</em></p>
+        <div id="gameContentOverlay">
+          <p id="overlayMessage"></p>
+          <span id="overlayCountdownNumber"></span>
         </div>
+      </div>
     </div>
     <div class="rightPanel">
       <!-- CHANGE 5: timer click unpauses -->
@@ -3191,6 +3229,59 @@ function updateKeyboardLighting(e, isDown) {
 }
 
 /* ══════════════════════════════════════
+   GAME CONTENT VISIBILITY
+   Single source of truth for blur state
+   and overlay content across all states.
+
+   Blur rules:
+     titleEl        — blurred during: paused | confirm-* | counting
+     questionCountEl — blurred during: paused | confirm-* | counting
+
+   Overlay rules:
+     visible during: confirm-* | counting
+     hidden during:  paused | playing | idle | finished
+══════════════════════════════════════ */
+const BlurredStates = new Set([
+  'paused', 'counting',
+  'confirm-quit', 'confirm-reset',
+  'confirm-diff-change', 'confirm-trophy'
+]);
+const OverlayStates = new Set([
+  'counting',
+  'confirm-quit', 'confirm-reset',
+  'confirm-diff-change', 'confirm-trophy'
+]);
+
+const GameContentOverlayEl      = document.getElementById('gameContentOverlay');
+const OverlayMessageEl          = document.getElementById('overlayMessage');
+const OverlayCountdownNumberEl  = document.getElementById('overlayCountdownNumber');
+
+function RefreshGameContentVisibility() {
+  const ShouldBlur   = BlurredStates.has(gameState);
+  const ShowOverlay  = OverlayStates.has(gameState);
+  titleEl.classList.toggle('blurred', ShouldBlur);
+  questionCountEl.classList.toggle('blurred', ShouldBlur);
+  GameContentOverlayEl.classList.toggle('visible', ShowOverlay);
+  // When leaving overlay states, clear content so it cannot flash on re-entry
+  if (!ShowOverlay) {
+    OverlayMessageEl.innerHTML = '';
+    OverlayCountdownNumberEl.className = '';
+    OverlayCountdownNumberEl.textContent = '';
+  }
+}
+
+function SetOverlayMessage(HtmlContent) {
+  OverlayMessageEl.innerHTML = HtmlContent;
+  OverlayCountdownNumberEl.className = '';
+  OverlayCountdownNumberEl.textContent = '';
+}
+
+function SetOverlayCountdown(NumberText) {
+  OverlayMessageEl.innerHTML = '';
+  OverlayCountdownNumberEl.textContent = NumberText;
+}
+
+/* ══════════════════════════════════════
    GAME STATE
    States: idle | playing | paused | confirm-quit | confirm-reset | finished
 ══════════════════════════════════════ */
@@ -3204,6 +3295,7 @@ let _prevDifficulty      = null;  // difficulty to restore on cancel
 let _clearTarget         = null;  // 'time' | 'accuracy' | 'both' — which record the pending reset affects
 let _confirmAfterUpgrade = null;  // mode label string when ramp-up reset prompt is pending
 let _countdownMode        = 'start'; // 'start' | 'resume'
+var _countdownTimer       = null;
 let _modalWasOpenOnPause  = false;   // true when a modal was open entering/during pause
 let _wasPlaying           = false;   // true once any question has been answered (answersLeft decremented)
 let totalTime  = 0;
@@ -3461,7 +3553,6 @@ function helpButtonClick() {
   if (gameState === 'finished')       { showTip(tipIndex + 1); tipIndex++; return; }
 }
 
-/* CHANGE 5: clicking the ⏸ timer unpauses */
 function timerBoxClick() {
   if (gameState === 'playing') { enterPause(); return; }
   if (gameState === 'paused') {
@@ -3591,25 +3682,15 @@ function enterPause(instantBlur) {
   gameState = 'paused';
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
-  transitioning = false; // clear skip-in-progress if pause interrupts it
+  transitioning = false;
   clearHelp();
   resetPartialShortcutNudgeTimers();
-  // Settings panel sets its own position before calling enterPause; only move
-  // to edge if no settings screen is already driving a different position.
+  RefreshGameContentVisibility();
+  titleEl.classList.remove('strike');
   if (activeSettings === null) {
     setKbPosition('edge');
     openSettings('panelPause');
-    titleEl.classList.add('blur-instant');
-    questionCountEl.classList.add('blur-instant');
-    // Remove the instant flag next frame so future transitions are restored
-    requestAnimationFrame(function() {
-      titleEl.classList.remove('blur-instant');
-      questionCountEl.classList.remove('blur-instant');
-    });
   }
-  titleEl.classList.add('blurred');
-  questionCountEl.classList.add('blurred');
-  titleEl.classList.remove('strike','hidden');
   timerDiv.innerHTML = '<svg width="26" height="26" viewBox="0 0 26 26" style="display:block;vertical-align:top;" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="2" width="4" height="22" rx="1.5" fill="white"/><rect x="16" y="2" width="4" height="22" rx="1.5" fill="white"/></svg>';
   setTimerState('paused');
   mainBtn.textContent = 'Unpause';
@@ -3623,9 +3704,8 @@ function enterPause(instantBlur) {
 function enterConfirmQuit() {
   _closeAllModalsInstant();
   gameState = 'confirm-quit';
-  titleEl.className = '';
-  titleEl.classList.remove('blurred');
-  titleEl.textContent = 'Are you sure you want to abandon this game?';
+  SetOverlayMessage('Are you sure you want to abandon this game?');
+  RefreshGameContentVisibility();
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
   helpBtn.textContent = 'No';
@@ -3640,21 +3720,20 @@ function confirmQuitYes() {
 }
 
 function confirmQuitNo() {
-  _returnToPauseScreen(null);
+  _returnToPauseScreen();
 }
 
 function unpause() {
   gameState = 'playing';
   clearAllLit();
   heldKeys.clear();
-  // Restore question title — may have been blanked by the resume countdown
   if (questionPool.length > 0 && (!titleEl.textContent || titleEl.textContent === '')) {
     titleEl.className = '';
     titleEl.textContent = questionPool[questionIndex]?.display || '';
     currentAnswer = questionPool[questionIndex]?.shortcut || '';
   }
-  titleEl.classList.remove('blurred');
-  questionCountEl.classList.remove('blurred');
+  RefreshGameContentVisibility();
+  titleEl.classList.remove('strike');
   helpBtn.style.background = '';
   helpBtn.style.color = '';
   resetTimerBox();
@@ -3666,16 +3745,12 @@ function unpause() {
 
 
 function enterConfirmReset(target) {
-  // target: 'time' | 'accuracy' | 'both' (default 'both' for legacy lock-key call)
   _clearTarget = target || 'both';
   _confirmFromFinished = (gameState === 'finished');
   _confirmFromPause    = _wasPlaying && answersLeft > 0 && gameState !== 'finished';
   _closeAllModalsInstant();
   gameState = 'confirm-reset';
   if (currentMedal && !_confirmFromFinished) resetTimerBox();
-  titleEl.classList.remove('blurred');
-  questionCountEl.classList.remove('blurred');
-  titleEl.className = '';
   var msg;
   if (_confirmAfterUpgrade) {
     msg = 'You ramped up difficulty. Shall I reset your high scores then?';
@@ -3684,11 +3759,10 @@ function enterConfirmReset(target) {
   } else if (_clearTarget === 'accuracy') {
     msg = 'Do you really want to wipe your highest accuracy record?';
   } else {
-    msg = _confirmFromFinished
-      ? 'Are you sure you want to clear your high scores?'
-      : 'Are you sure you want to clear your high scores?';
+    msg = 'Are you sure you want to clear your high scores?';
   }
-  titleEl.textContent = msg;
+  SetOverlayMessage(msg);
+  RefreshGameContentVisibility();
   if (_confirmFromFinished) setAppSelectorGameActive(false);
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
@@ -3698,17 +3772,10 @@ function enterConfirmReset(target) {
   if (lockKeyEl) lockKeyEl.classList.add('active');
 }
 
-function _returnToPauseScreen(titleMessage) {
+function _returnToPauseScreen() {
   gameState = 'paused';
-  titleEl.className = '';
-  if (titleMessage) {
-    titleEl.textContent = titleMessage;
-    titleEl.classList.remove('blurred');
-  } else {
-    titleEl.classList.add('blurred');
-    titleEl.textContent = questionPool[questionIndex]?.display || '';
-  }
-  questionCountEl.classList.remove('blurred');
+  RefreshGameContentVisibility();
+  titleEl.classList.remove('strike');
   mainBtn.textContent = 'Unpause';
   mainBtn.style.background = '';
   helpBtn.textContent = 'Quit';
@@ -3776,7 +3843,8 @@ function confirmResetYes() {
     var clearedMsg = target === 'time'     ? 'Time record cleared.'
                    : target === 'accuracy' ? 'Accuracy record cleared.'
                    : 'Both records have been cleared.';
-    _returnToPauseScreen(clearedMsg);
+    _returnToPauseScreen();
+    showToast(clearedMsg);
     return;
   }
 
@@ -3797,17 +3865,12 @@ function enterConfirmTrophy(fromFinished, fromPause) {
   _trophyFromFinished = fromFinished || false;
   _trophyFromPause    = fromPause    || false;
   gameState = 'confirm-trophy';
-
-  titleEl.className = '';
-  titleEl.innerHTML = 'Do you want to return your trophy too?<br><small style="font-size:13px;font-weight:400;color:#6b7280;">(the highest difficulty modes require a trophy)</small>';
-
-  // Blank buttons immediately, disable interaction
+  SetOverlayMessage('Do you want to return your trophy too?<br><small style="font-size:13px;font-weight:400;color:#6b7280;">(the highest difficulty modes require a trophy)</small>');
+  RefreshGameContentVisibility();
   mainBtn.textContent = '';
   mainBtn.disabled = true;
   helpBtn.textContent = '';
   helpBtn.disabled = true;
-
-  // After one second reveal labels and re-enable
   setTimeout(function() {
     if (gameState !== 'confirm-trophy') return;
     mainBtn.textContent = 'Yes, return it';
@@ -3843,7 +3906,8 @@ function _finishAfterTrophy(message) {
   helpBtn.disabled = false;
   if (lockKeyEl) lockKeyEl.classList.remove('active');
   if (fromPause) {
-    _returnToPauseScreen(message);
+    _returnToPauseScreen();
+    showToast(message);
     return;
   }
   resetToIdle();
@@ -3883,7 +3947,7 @@ function confirmResetNo() {
 
   if (_wasPlaying && questionPool.length > 0 && answersLeft > 0) {
     _confirmFromPause = false;
-    _returnToPauseScreen(null);
+    _returnToPauseScreen();
   } else {
     resetToIdle();
   }
@@ -3892,10 +3956,8 @@ function confirmResetNo() {
 function enterConfirmDiffChange() {
   _closeAllModalsInstant();
   gameState = 'confirm-diff-change';
-  titleEl.classList.remove('blurred');
-  questionCountEl.classList.remove('blurred');
-  titleEl.className = '';
-  titleEl.textContent = 'Changing difficulty will cancel your paused game. Proceed?';
+  SetOverlayMessage('Changing difficulty will cancel your paused game. Proceed?');
+  RefreshGameContentVisibility();
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
   helpBtn.textContent = 'No';
@@ -3940,14 +4002,12 @@ function confirmDiffChangeNo() {
   _updateDiffSubtitle(currentDifficulty);
   _pendingDifficulty = null;
   _prevDifficulty    = null;
-  // Resume the paused game directly
-  _returnToPauseScreen(null);
+  _returnToPauseScreen();
 }
 
 function resetToIdle() {
   gameState = 'idle';
   _wasPlaying = false;
-  // Hide welcome-screen elements if visible
   var _wTag = document.getElementById('welcomeTagline');
   if (_wTag) _wTag.style.display = 'none';
   setAppSelectorGameActive(false);
@@ -3967,6 +4027,7 @@ function resetToIdle() {
   if (lockKeyEl) lockKeyEl.classList.remove('active');
   titleEl.className = '';
   titleEl.textContent = 'Play Keyboard Warriors';
+  RefreshGameContentVisibility();
   questionCountEl.innerHTML = ''; dotEls = [];
   timerBox.style.background = '';
   timerBox.style.removeProperty('--face-rot');
@@ -5236,14 +5297,15 @@ function getBrowserConflictSet() {
 function _showWelcomeScreen() {
   _welcomeIsReturning = false;
   gameState = 'welcome';
+  titleEl.className = '';
   titleEl.textContent = 'Welcome to Keyboard Warriors';
   var tagline = document.getElementById('welcomeTagline');
   if (tagline) tagline.style.display = 'block';
-  // Default to Normal on first visit
   _diffFirst = true;
   setDiffState(0);
   _updateDiffBtnStyles('normal');
   _updateDiffSubtitle('normal');
+  RefreshGameContentVisibility();
   openSettings('panelWelcome');
 }
 
@@ -5401,6 +5463,7 @@ function _showReturningScreen() {
   _welcomeIsReturning = true;
   gameState = 'welcome';
   document.body.classList.add('returning-screen');
+  titleEl.className = '';
   titleEl.textContent = 'Thanks for coming back.';
   var tagline = document.getElementById('welcomeTagline');
   if (tagline) tagline.style.display = 'none';
@@ -5409,6 +5472,7 @@ function _showReturningScreen() {
   setDiffState(modeMap[currentDifficulty] !== undefined ? modeMap[currentDifficulty] : 0);
   _updateDiffBtnStyles(currentDifficulty);
   _updateDiffSubtitle(currentDifficulty);
+  RefreshGameContentVisibility();
   openSettings('panelReturning');
 }
 
@@ -5629,9 +5693,9 @@ function loadAppShortcutsIfNeeded(appKey, onReady) {
 }
 function cancelCountdown() {
   if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
-  var numEl = document.getElementById('countdownNum');
-  if (numEl) { numEl.className = ''; numEl.textContent = ''; }
-  titleEl.style.position = '';
+  OverlayCountdownNumberEl.className = '';
+  OverlayCountdownNumberEl.textContent = '';
+  titleEl.classList.remove('blur-out');
   mainBtn.disabled  = false;
   helpBtn.disabled  = false;
   if (_countdownMode === 'resume') {
@@ -5643,10 +5707,11 @@ function cancelCountdown() {
 }
 
 function beginCountdown() {
-  // Prevent double-triggers during countdown
   if (_countdownTimer) return;
   _countdownMode    = 'start';
   gameState         = 'counting';
+  RefreshGameContentVisibility();
+  titleEl.classList.add('blur-out');
   mainBtn.textContent = 'Cancel';
   mainBtn.disabled  = true;
   helpBtn.disabled  = true;
@@ -5666,6 +5731,7 @@ function beginResumeCountdown() {
   _countdownMode = 'resume';
   _modalWasOpenOnPause = false;
   gameState = 'counting';
+  RefreshGameContentVisibility();
   mainBtn.textContent = 'Cancel';
   mainBtn.disabled = false;
   helpBtn.disabled = true;
@@ -5675,6 +5741,32 @@ function beginResumeCountdown() {
     _countdownMode = 'start';
     unpause();
   });
+}
+
+function runCountdown(OnComplete) {
+  if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
+  setKbPosition('face');
+  _closeAllModalsInstant();
+
+  var counts = [3, 2, 1];
+  var step = 0;
+
+  function tick() {
+    if (step >= counts.length) {
+      OverlayCountdownNumberEl.className = '';
+      OverlayCountdownNumberEl.textContent = '';
+      _countdownTimer = null;
+      OnComplete();
+      return;
+    }
+    SetOverlayCountdown(counts[step]);
+    OverlayCountdownNumberEl.className = '';
+    void OverlayCountdownNumberEl.offsetWidth;
+    OverlayCountdownNumberEl.className = 'pop';
+    step++;
+    _countdownTimer = setTimeout(tick, 900);
+  }
+  tick();
 }
 
 function startGame() {
@@ -5698,9 +5790,11 @@ function startGame() {
   helpBtn.textContent = 'Help';
   helpBtn.style.background = '';
   helpBtn.style.color = '';
-  titleEl.className = '';
+  titleEl.className = 'no-transition';
   titleEl.textContent = questionPool[0].display;
-  questionCountEl.classList.remove('blurred', 'blur-instant');
+  void titleEl.offsetWidth;
+  titleEl.className = 'question-pop';
+  RefreshGameContentVisibility();
   buildProgressDots();
   showProgressDots();
   resetTimerBox();
@@ -5758,11 +5852,9 @@ function advanceQuestion() {
   }
   currentAnswer = questionPool[questionIndex].shortcut;
   titleEl.className = '';
-  void titleEl.offsetWidth; // flush so animation restarts
+  void titleEl.offsetWidth;
   titleEl.textContent = questionPool[questionIndex].display;
-  if (gameState === 'paused') {
-    titleEl.classList.add('blurred');
-  } else {
+  if (gameState === 'playing') {
     titleEl.classList.add('question-pop');
   }
   mainBtn.textContent = 'Skip';
@@ -5868,6 +5960,7 @@ function endGame() {
   mainBtn.textContent = 'Try again?';
   titleEl.className = '';
   titleEl.textContent = endGameMessage(totalTime, finalAccuracy, bestRecord, wasFirstRecord);
+  RefreshGameContentVisibility();
   startEndScreenInactivityTimer();
   fillProgressDot(9);
   setTimeout(hideProgressDots, 0);
@@ -5984,50 +6077,7 @@ function playKeyClick() {
   } catch(e) {}
 }
 
-/* ══════════════════════════════════════
-   COUNTDOWN 3-2-1
-══════════════════════════════════════ */
-var _countdownTimer = null;
-function runCountdown(onComplete) {
-  // Clear any running countdown
-  if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
 
-  // Start moving keyboard to face position immediately — it has the full
-  // countdown duration (~2.7s) to complete the 850ms transition.
-  setKbPosition('face');
-
-  // Close any open settings panel (including pause screen)
-  _closeAllModalsInstant();
-
-  var overlay = document.getElementById('countdownOverlay');
-  var numEl   = document.getElementById('countdownNum');
-  if (!overlay || !numEl) { onComplete(); return; }
-
-  // Prep the title area
-  titleEl.textContent = '';
-  titleEl.style.position = 'relative';
-
-  var counts = [3, 2, 1];
-  var step = 0;
-
-  function tick() {
-    if (step >= counts.length) {
-      numEl.className = '';
-      numEl.textContent = '';
-      titleEl.style.position = '';
-      _countdownTimer = null;
-      onComplete();
-      return;
-    }
-    numEl.textContent = counts[step];
-    numEl.className = '';
-    void numEl.offsetWidth; // force reflow so animation restarts
-    numEl.className = 'pop';
-    step++;
-    _countdownTimer = setTimeout(tick, 900);
-  }
-  tick();
-}
 document.addEventListener('keydown', handleKeydown);
 document.addEventListener('keyup',   handleKeyup);
 
@@ -6072,8 +6122,7 @@ function handleKeydown(e) {
     clearHelp();
     clearInterval(timerInterval);
     setTimerState('green', 'right');
-    titleEl.style.color = '#10b981'; // instant green — directs attention before hiding
-    requestAnimationFrame(() => titleEl.classList.add('hidden'));
+    titleEl.style.color = '#10b981';
     fillProgressDot(10 - answersLeft);
     setTimeout(() => {
       titleEl.style.color = '';
