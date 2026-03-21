@@ -1882,7 +1882,7 @@ li.conflict-dismissed .conflict-desc {
     <!-- ── Keyboard Settings ────────────────────────────── -->
     <div id="panelKeyboard" class="sp-page">
       <div class="sp-col sp-col-left">
-        <p class="sp-title"><small>QWERTY</small> Keyboard Behaviour</p>
+        <p class="sp-title">Keyboard Behaviour <small style="color:#9ca3af;font-weight:400;">QWERTY</small></p>
 
         <div class="modal-toggle-row" id="touchRow">
           <label onclick="onTouchToggle()">
@@ -4682,7 +4682,7 @@ function openSettings(page) {
   activeSettings = page;
 
   // Update kbPos — partial for most panels; edge for browser and pause
-  var pos = (page === 'panelBrowser' || page === 'panelPause') ? 'edge' : 'partial';
+  var pos = (page === 'panelBrowser' || page === 'panelPause' || page === 'panelDifficulty') ? 'edge' : 'partial';
   setKbPosition(pos);
 
   // Pause game if needed (not for pause panel or when on welcome screen)
@@ -4801,8 +4801,9 @@ function _closeAllModalsInstant() {
     if (el) el.classList.remove('sp-active', 'sp-wipe-in', 'sp-wipe-in-left', 'sp-wipe-in-up');
   });
   _unpinTooltip();
-  var stage2 = document.getElementById('kbFlipStage');
-  if (stage2) stage2.style.pointerEvents = '';
+  // Note: stage pointer-events are intentionally NOT restored here.
+  // They are restored by setKbPosition when the keyboard returns to face,
+  // so confirm states that follow immediately don't expose the icons.
   var wrap2 = document.getElementById('keyboardWrap');
   if (wrap2) wrap2.style.minHeight = '';
 }
@@ -6350,6 +6351,8 @@ function setKbPosition(pos) {
     setTimeout(function() {
       if (_flipSeq !== seq) return;
       wrap.classList.remove('kb-flipping');
+      // Restore keyboard stage pointer-events now that it is flat and not obscuring icons
+      stage.style.pointerEvents = '';
     }, 900);
   }
 
@@ -6430,6 +6433,7 @@ function setDiffState(newState) {
 /* ── Active click handler — flip animation ───────────── */
 function diffIconClick() {
   resetEndScreenInactivityTimer();
+  if (gameState === 'playing') { showToast('Change difficulty between games.'); return; }
   if (activeSettings === 'panelDifficulty' || activeSettings === 'panelReturning') {
     closeSettings();
   } else {
