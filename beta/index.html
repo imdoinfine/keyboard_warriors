@@ -457,6 +457,13 @@ body {
   width: 100%;
   padding: 8px 60px 0;
   box-sizing: border-box;
+  transform: translateY(0);
+  transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* Nudge credit and difficulty icon up into the keyboard shadow when face-down */
+#keyboardWrap.kb-at-face ~ #credit,
+#keyboardWrap.kb-at-face ~ #diffIconWrap {
+  transform: translateY(-14px);
 }
 
 /* Extended key ghost pill — appears in statsRow when a key not on the
@@ -936,7 +943,7 @@ body.pc-mode #extKeyPill {
   width: 100%;
   margin-top: 0;
   position: relative;
-  min-height: 282px;
+  min-height: 320px;
   transition: min-height 0.75s cubic-bezier(0.4, 0, 0.2, 1);
 }
 #kbIcon {
@@ -1873,7 +1880,7 @@ li.conflict-dismissed .conflict-desc {
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="3"  onclick="questionTimerBtnClick(3)">3</button>
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="5"  onclick="questionTimerBtnClick(5)">5</button>
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="10" onclick="questionTimerBtnClick(10)">10</button>
-          <button class="sp-seg-btn diff-five-btn" data-timer="null" onclick="questionTimerBtnClick(null)"><svg class="infinity-svg" viewBox="0 0 28 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14,7 C12,3.5 9.5,1.5 7,1.5 A5.5,5.5 0 0 0 7,12.5 C9.5,12.5 12,10.5 14,7 Z M14,7 C16,3.5 18.5,1.5 21,1.5 A5.5,5.5 0 0 1 21,12.5 C18.5,12.5 16,10.5 14,7 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/></svg></button>
+          <button class="sp-seg-btn diff-five-btn" data-timer="null" onclick="questionTimerBtnClick(null)"><svg class="infinity-svg" viewBox="0 0 40 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20,7 C18,4.2 15,2 11,2 A5,5 0 0 0 11,12 C15,12 18,9.8 20,7 Z M20,7 C22,4.2 25,2 29,2 A5,5 0 0 1 29,12 C25,12 22,9.8 20,7 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/></svg></button>
         </div>
         <p class="sp-title" style="margin-bottom:6px;margin-top:8px;text-align:center;">Player Lives</p>
         <div class="sp-seg-pill sp-seg-pill-five" id="playerLivesPill">
@@ -1881,7 +1888,7 @@ li.conflict-dismissed .conflict-desc {
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="3"  onclick="playerLivesBtnClick(3)">3</button>
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="5"  onclick="playerLivesBtnClick(5)">5</button>
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="10" onclick="playerLivesBtnClick(10)">10</button>
-          <button class="sp-seg-btn diff-five-btn" data-lives="null" onclick="playerLivesBtnClick(null)"><svg class="infinity-svg" viewBox="0 0 28 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14,7 C12,3.5 9.5,1.5 7,1.5 A5.5,5.5 0 0 0 7,12.5 C9.5,12.5 12,10.5 14,7 Z M14,7 C16,3.5 18.5,1.5 21,1.5 A5.5,5.5 0 0 1 21,12.5 C18.5,12.5 16,10.5 14,7 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/></svg></button>
+          <button class="sp-seg-btn diff-five-btn" data-lives="null" onclick="playerLivesBtnClick(null)"><svg class="infinity-svg" viewBox="0 0 40 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20,7 C18,4.2 15,2 11,2 A5,5 0 0 0 11,12 C15,12 18,9.8 20,7 Z M20,7 C22,4.2 25,2 29,2 A5,5 0 0 1 29,12 C25,12 22,9.8 20,7 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/></svg></button>
         </div>
       </div>
     </div>
@@ -4690,7 +4697,7 @@ function _spAlignPanel() {
   requestAnimationFrame(function() {
     var contentH = inner.scrollHeight;
     var needed = contentH + 50;
-    wrap.style.minHeight = Math.max(needed, 282) + 'px';
+    wrap.style.minHeight = Math.max(needed, 320) + 'px';
   });
 }
 
@@ -6512,6 +6519,8 @@ function setKbPosition(pos) {
   stage.style.transform = KB_POS[pos].stage;
   panel.style.transform = KB_POS[pos].panel;
   panel.classList.toggle('kb-partial', pos === 'partial');
+  // Drive credit/diffIcon nudge — class applied immediately so CSS transition runs in sync
+  wrap.classList.toggle('kb-at-face', pos === 'face');
 }
 
 function _resetFlipState() {
@@ -6525,7 +6534,7 @@ function _resetFlipState() {
   var wrap  = document.getElementById('keyboardWrap');
   if (panel) { panel.classList.remove('kb-edged', 'kb-edges-visible', 'kb-partial'); panel.style.transform = ''; }
   if (stage) { stage.classList.remove('kb-show-base'); stage.style.transform = ''; }
-  if (wrap)  { wrap.classList.remove('kb-flipping'); }
+  if (wrap)  { wrap.classList.remove('kb-flipping'); wrap.classList.add('kb-at-face'); }
 }
 
 /* ── Difficulty toast helper ───────────────────────── */
@@ -6621,7 +6630,7 @@ document.addEventListener('DOMContentLoaded', function() {
   border: 1.5px solid #d1d5db;
   border-radius: 20px;
   background: transparent;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
 }
 .score-clear-pill .score-pill-seg:first-child { border-radius: 18px 0 0 18px; }
 .score-clear-pill .score-pill-seg:last-child  { border-radius: 0 18px 18px 0; }
@@ -6718,10 +6727,15 @@ document.addEventListener('DOMContentLoaded', function() {
   padding: 0 4px;
   font-size: 12px;
 }
-/* SVG infinity icon — sized to sit flush with the number labels */
+/* Infinity segment takes one third of total width (flex 2 out of 6 total units) */
+.diff-five-btn[data-timer="null"],
+.diff-five-btn[data-lives="null"] {
+  flex: 2;
+}
+/* SVG infinity icon — wider to fill the larger flex share */
 .diff-five-btn .infinity-svg {
   display: block;
-  width: 22px;
+  width: 28px;
   height: 12px;
 }
 /* Locked/unavailable: flat background-grey, looks empty, no hover */
@@ -6800,7 +6814,7 @@ document.addEventListener('DOMContentLoaded', function() {
   border: 1.5px solid #d1d5db;
   border-radius: 20px;
   background: transparent;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
 }
 .sp-seg-pill .sp-seg-btn:first-child,
 .sp-seg-pill .diff-btn:first-child { border-radius: 18px 0 0 18px; }
@@ -7090,7 +7104,13 @@ document.addEventListener('DOMContentLoaded', function() {
 #brIconWrap { right: 0; }
 
 /* ─── DIFF GAUGE ─────────────────────────────────────*/
-#diffIconWrap { display: flex; justify-content: center; margin-top: 4px; }
+#diffIconWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+  transform: translateY(0);
+  transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+}
 #diffIcon {
   display: block; fill: #9ca3af; pointer-events: auto;
   cursor: pointer; width: 44px; transition: transform 0.18s ease;
