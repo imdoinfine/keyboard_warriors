@@ -867,7 +867,7 @@
     "group": ""
   },
   {
-    "shortcut": "CMD+GRAVE",
+    "shortcut": "CMD+'",
     "display": "Toggle Grid visibility",
     "mac_sc": "⌘  '",
     "pc_sc": "Ctrl '",
