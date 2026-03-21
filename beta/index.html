@@ -1867,7 +1867,7 @@ li.conflict-dismissed .conflict-desc {
       <p id="diffSubtitle" class="diff-subtitle">&nbsp;</p>
       <div class="diff-horiz-divider"></div>
       <div class="diff-extra-controls">
-        <p class="sp-title" style="margin-bottom:8px;">Question Timer <span id="diffTimerLockIcon" class="diff-lock-icon">🔒</span></p>
+        <p class="sp-title" style="margin-bottom:6px;text-align:center;">Question Timer</p>
         <div class="sp-seg-pill sp-seg-pill-five" id="questionTimerPill">
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="1"  onclick="questionTimerBtnClick(1)">1</button>
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="3"  onclick="questionTimerBtnClick(3)">3</button>
@@ -1875,7 +1875,7 @@ li.conflict-dismissed .conflict-desc {
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="10" onclick="questionTimerBtnClick(10)">10</button>
           <button class="sp-seg-btn diff-five-btn" data-timer="null" onclick="questionTimerBtnClick(null)">∞</button>
         </div>
-        <p class="sp-title" style="margin-bottom:8px;margin-top:10px;">Player Lives <span id="diffLivesLockIcon" class="diff-lock-icon">🔒</span></p>
+        <p class="sp-title" style="margin-bottom:6px;margin-top:8px;text-align:center;">Player Lives</p>
         <div class="sp-seg-pill sp-seg-pill-five" id="playerLivesPill">
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="1"  onclick="playerLivesBtnClick(1)">1</button>
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="3"  onclick="playerLivesBtnClick(3)">3</button>
@@ -2782,8 +2782,9 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.sp-seg-pill').forEach(function(pill) {
     pill.querySelectorAll('.sp-seg-btn').forEach(function(btn) {
       btn.addEventListener('mouseenter', function() {
-        if (!btn.classList.contains('diff-btn-active') &&
-            !btn.classList.contains('diff-btn-inactive')) {
+        var isActive   = btn.classList.contains('diff-btn-active')   || btn.classList.contains('diff-five-active');
+        var isInactive = btn.classList.contains('diff-btn-inactive')  || btn.classList.contains('diff-five-inactive');
+        if (!isActive && !isInactive) {
           pill.setAttribute('data-hovering', '');
         }
       });
@@ -4797,9 +4798,12 @@ function closeSettings() {
   });
 
   _unpinTooltip();
-  // Restore keyboard pointer-events
+  // Only restore stage pointer-events if the keyboard is returning to face position.
+  // If another openSettings call follows immediately (e.g. returnToPause, readyToUnpause),
+  // that call will re-set pointerEvents = 'none' correctly.
+  // Restoring here while the keyboard is still tilted was causing the icons to fire through the stage.
   var stage = document.getElementById('kbFlipStage');
-  if (stage) stage.style.pointerEvents = '';
+  if (stage && _kbPos === 'face') stage.style.pointerEvents = '';
   // Reset wrap height
   var wrap = document.getElementById('keyboardWrap');
   if (wrap) wrap.style.minHeight = '';
@@ -5494,12 +5498,6 @@ function _refreshDifficultyPanel() {
 
 function _updateTimerLivesPills() {
   var unlocked = hasEverAchievedPerfectAccuracy;
-
-  // Update lock icons
-  var timerLock = document.getElementById('diffTimerLockIcon');
-  var livesLock = document.getElementById('diffLivesLockIcon');
-  if (timerLock) timerLock.classList.toggle('unlocked', unlocked);
-  if (livesLock) livesLock.classList.toggle('unlocked', unlocked);
 
   // Timer pill
   var timerBtns = document.querySelectorAll('#questionTimerPill .diff-five-btn');
@@ -6683,12 +6681,12 @@ document.addEventListener('DOMContentLoaded', function() {
   display: none;
 }
 
-/* Horizontal divider on difficulty panel — matches vertical divider colour */
+/* Horizontal divider on difficulty panel — inset to align with pill corner radius */
 .diff-horiz-divider {
-  width: 100%;
+  width: calc(100% - 40px);
   height: 1px;
   background: #e5e7eb;
-  margin: 4px 0 12px;
+  margin: 4px 20px 8px;
   flex-shrink: 0;
 }
 
@@ -6700,33 +6698,47 @@ document.addEventListener('DOMContentLoaded', function() {
   align-items: stretch;
 }
 
-/* Five-part pill */
-.sp-seg-pill-five .sp-seg-btn:first-child { border-radius: 18px 0 0 18px; }
-.sp-seg-pill-five .sp-seg-btn:last-child  { border-radius: 0 18px 18px 0; }
+/* Five-part pill — skinnier than the main difficulty pill */
+.sp-seg-pill-five {
+  border-radius: 12px;
+}
+.sp-seg-pill-five .sp-seg-btn:first-child { border-radius: 11px 0 0 11px; }
+.sp-seg-pill-five .sp-seg-btn:last-child  { border-radius: 0 11px 11px 0; }
 
+/* Skinnier button for the five-part pills */
 .diff-five-btn {
   flex: 1;
   text-align: center;
+  padding: 5px 4px;
+  font-size: 12px;
 }
-.diff-five-inactive {
+/* Larger infinity symbol */
+.diff-five-btn[data-timer="null"],
+.diff-five-btn[data-lives="null"] {
+  font-size: 22px;
+  line-height: 1;
+  padding-bottom: 3px;
+}
+/* Locked/unavailable: flat background-grey, looks empty */
+.diff-five-btn.diff-five-inactive {
   background: linear-gradient(to bottom, #f0f4f8 70%, #dfe1e5 100%);
   color: #9ca3af;
   cursor: default;
 }
-.diff-five-active {
+/* Active/selected: white fill, dark text */
+.diff-five-btn.diff-five-active {
   background: white;
   color: #374151;
 }
-
-/* Lock icon — small, inline, dims when unlocked */
-.diff-lock-icon {
-  font-size: 10px;
-  opacity: 0.5;
-  transition: opacity 0.3s;
+/* Hover on an available (non-inactive) button */
+.diff-five-btn:not(.diff-five-inactive):hover {
+  background: white;
+  color: #374151;
 }
-.diff-lock-icon.unlocked {
-  opacity: 0;
-  pointer-events: none;
+/* While a sibling is hovered, dim the current active segment */
+.sp-seg-pill[data-hovering] .diff-five-btn.diff-five-active {
+  background: #e0f2fe;
+  color: #9ca3af;
 }
 /* ── Pause panel: settings nudge rows ───────────────── */
 .sp-settings-nudge {
