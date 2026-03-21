@@ -10,7 +10,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BETA</title>
+<title>Keyboard Warriors</title>
 <script>
   // Redirect iPad users to the optimised iPad build
   (function() {
@@ -384,23 +384,16 @@ body {
   line-height: 1.3;
   color: #1f2937;
   opacity: 1;
-  transition: filter 0.4s;
+  transition: opacity 0.3s, filter 0.4s;
   filter: none;
   white-space: pre-line;
 }
+#title.hidden  { opacity: 0; }
 #title.strike  { text-decoration: line-through; opacity: 0.45; }
 #title.blurred { filter: blur(6px); opacity: 0.6; user-select: none; }
+#title.blur-instant,
+#questionRow.blur-instant { transition: none !important; }
 #questionRow.blurred { filter: blur(3px); opacity: 0.6; user-select: none; }
-#title.no-transition { transition: none !important; }
-
-/* Fresh-start countdown: title blurs and colour-shifts into the background over 3s */
-#title.blur-out {
-  filter: blur(24px);
-  color: #e0f2fe;
-  opacity: 0;
-  transition: filter 3s linear, color 3s linear, opacity 3s linear;
-  user-select: none;
-}
 
 /* ══════════════════════════════════════
    INFO ROWS (question count + best record)
@@ -1631,26 +1624,22 @@ li.conflict-dismissed .conflict-desc {
   transform: rotate(90deg);   /* points down ▼ when open */
 }
 
-/* ══════════════════════════════════════
-   TITLE — question-pop animation retained
-   for the sharp playing state only
-══════════════════════════════════════ */
-@keyframes QuestionPopAnimation {
+/* Countdown overlay inside #title area */
+@keyframes questionPop {
   0%   { opacity: 0; transform: scale(0.94); }
   60%  { opacity: 1; transform: scale(1.015); }
   100% { opacity: 1; transform: scale(1); }
 }
 #title.question-pop {
-  animation: QuestionPopAnimation 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  animation: questionPop 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
-
-/* ══════════════════════════════════════
-   GAME CONTENT OVERLAY
-   Sits above blurred game content.
-   Used for: countdowns, confirm messages.
-   Fades in/out quickly via .visible class.
-══════════════════════════════════════ */
-#gameContentOverlay {
+@keyframes countPop {
+  0%   { transform: scale(2.2); opacity: 0; }
+  20%  { transform: scale(1.0); opacity: 1; }
+  75%  { transform: scale(1.0); opacity: 1; }
+  100% { transform: scale(0.6); opacity: 0; }
+}
+#countdownOverlay {
   position: absolute;
   inset: 0;
   display: flex;
@@ -1658,32 +1647,8 @@ li.conflict-dismissed .conflict-desc {
   justify-content: center;
   pointer-events: none;
   z-index: 10;
-  opacity: 0;
-  transition: opacity 0.18s ease;
 }
-#gameContentOverlay.visible {
-  opacity: 1;
-}
-
-/* Confirm message — sharp text above blurred game content */
-#overlayMessage {
-  font-size: 24px;
-  font-weight: 600;
-  text-align: center;
-  line-height: 1.3;
-  color: #1f2937;
-  white-space: pre-line;
-  padding: 0 8px;
-}
-
-/* Countdown number */
-@keyframes CountdownPopAnimation {
-  0%   { transform: scale(2.2); opacity: 0; }
-  20%  { transform: scale(1.0); opacity: 1; }
-  75%  { transform: scale(1.0); opacity: 1; }
-  100% { transform: scale(0.6); opacity: 0; }
-}
-#overlayCountdownNumber {
+#countdownNum {
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 64px;
   font-weight: 600;
@@ -1691,8 +1656,8 @@ li.conflict-dismissed .conflict-desc {
   opacity: 0;
   line-height: 1;
 }
-#overlayCountdownNumber.pop {
-  animation: CountdownPopAnimation 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+#countdownNum.pop {
+  animation: countPop 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 </style>
 </head>
@@ -1743,13 +1708,10 @@ li.conflict-dismissed .conflict-desc {
     </div>
     <div class="middlePanel">
       <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;">
-        <h2 id="title">Play Keyboard Warriors</h2>
-        <p id="welcomeTagline"><em>Your keyboard shortcuts coach &amp; personal trainer.</em></p>
-        <div id="gameContentOverlay">
-          <p id="overlayMessage"></p>
-          <span id="overlayCountdownNumber"></span>
+          <h2 id="title">Play Keyboard Warriors</h2>
+          <p id="welcomeTagline"><em>Your keyboard shortcuts coach &amp; personal trainer.</em></p>
+          <div id="countdownOverlay"><span id="countdownNum"></span></div>
         </div>
-      </div>
     </div>
     <div class="rightPanel">
       <!-- CHANGE 5: timer click unpauses -->
@@ -2074,7 +2036,10 @@ li.conflict-dismissed .conflict-desc {
     <!-- Collapsible body -->
     <div id="dbgCollapsible" style="border-top:1px solid #333;margin-top:3px;display:flex;flex-direction:column;justify-content:space-between;flex:1;">
       <div style="padding-top:3px;">
-        <div id="dbgAnswer"></div>
+        <div style="display:flex;gap:8px;overflow:hidden;white-space:nowrap;">
+          <div id="dbgAnswer" style="flex-shrink:0;"></div>
+          <div id="dbgQuestion" style="overflow:hidden;text-overflow:ellipsis;color:#8af;opacity:0.7;"></div>
+        </div>
         <div id="dbgKey"></div>
         <div id="dbgMatch"></div>
       </div>
@@ -2807,19 +2772,22 @@ function shortcutToCodes(s) {
   const OPT  = ['AltLeft','AltRight'];
   const SH   = ['ShiftLeft','ShiftRight'];
 
-  if (u === 'SPACE')     return ['Space'];
-  if (u === 'TAB')       return ['Tab'];
+  if (u === 'SPACE')  return ['Space'];
+  if (u === 'TAB')    return ['Tab'];
   if (u === 'HOME')      return ['Home'];
   if (u === 'END')       return ['End'];
-  if (u === 'DEL')       return ['Backspace', 'Delete'];
+  if (u === 'DEL')       return ['Backspace','Delete'];
   if (u === 'GRAVE')     return ['Backquote'];
   if (u === 'BACKSLASH') return ['Backslash'];
-  if (u === 'PAGEUP')    return ['PageUp'];
-  if (u === 'PAGEDOWN')  return ['PageDown'];
-  if (u === 'CMD')       return CMD;
-  if (u === 'CTRL')      return ['ControlLeft', 'ControlRight'];
-  if (u === 'SHIFT')     return SH;
-  if (u === 'OPTION')    return OPT;
+  if (u === 'CTRL')      return ['ControlLeft','ControlRight'];
+  if (u === 'DEL')    return ['Backspace'];
+  if (u === 'PAGEUP')   return ['PageUp'];
+  if (u === 'PAGEDOWN') return ['PageDown'];
+  if (u === 'GRAVE')  return ['Backquote'];
+  if (u === 'END')    return ['End'];
+  if (u === 'CMD')    return CMD;
+  if (u === 'SHIFT')  return SH;
+  if (u === 'OPTION') return OPT;
 
   // Arrow keys bare
   if (u === 'ARROWLEFT')  return ['ArrowLeft'];
@@ -3226,59 +3194,6 @@ function updateKeyboardLighting(e, isDown) {
 }
 
 /* ══════════════════════════════════════
-   GAME CONTENT VISIBILITY
-   Single source of truth for blur state
-   and overlay content across all states.
-
-   Blur rules:
-     titleEl        — blurred during: paused | confirm-* | counting
-     questionCountEl — blurred during: paused | confirm-* | counting
-
-   Overlay rules:
-     visible during: confirm-* | counting
-     hidden during:  paused | playing | idle | finished
-══════════════════════════════════════ */
-const BlurredStates = new Set([
-  'paused', 'counting',
-  'confirm-quit', 'confirm-reset',
-  'confirm-diff-change', 'confirm-trophy'
-]);
-const OverlayStates = new Set([
-  'counting',
-  'confirm-quit', 'confirm-reset',
-  'confirm-diff-change', 'confirm-trophy'
-]);
-
-const GameContentOverlayEl      = document.getElementById('gameContentOverlay');
-const OverlayMessageEl          = document.getElementById('overlayMessage');
-const OverlayCountdownNumberEl  = document.getElementById('overlayCountdownNumber');
-
-function RefreshGameContentVisibility() {
-  const ShouldBlur   = BlurredStates.has(gameState);
-  const ShowOverlay  = OverlayStates.has(gameState);
-  titleEl.classList.toggle('blurred', ShouldBlur);
-  questionCountEl.classList.toggle('blurred', ShouldBlur);
-  GameContentOverlayEl.classList.toggle('visible', ShowOverlay);
-  // When leaving overlay states, clear content so it cannot flash on re-entry
-  if (!ShowOverlay) {
-    OverlayMessageEl.innerHTML = '';
-    OverlayCountdownNumberEl.className = '';
-    OverlayCountdownNumberEl.textContent = '';
-  }
-}
-
-function SetOverlayMessage(HtmlContent) {
-  OverlayMessageEl.innerHTML = HtmlContent;
-  OverlayCountdownNumberEl.className = '';
-  OverlayCountdownNumberEl.textContent = '';
-}
-
-function SetOverlayCountdown(NumberText) {
-  OverlayMessageEl.innerHTML = '';
-  OverlayCountdownNumberEl.textContent = NumberText;
-}
-
-/* ══════════════════════════════════════
    GAME STATE
    States: idle | playing | paused | confirm-quit | confirm-reset | finished
 ══════════════════════════════════════ */
@@ -3292,7 +3207,6 @@ let _prevDifficulty      = null;  // difficulty to restore on cancel
 let _clearTarget         = null;  // 'time' | 'accuracy' | 'both' — which record the pending reset affects
 let _confirmAfterUpgrade = null;  // mode label string when ramp-up reset prompt is pending
 let _countdownMode        = 'start'; // 'start' | 'resume'
-var _countdownTimer       = null;
 let _modalWasOpenOnPause  = false;   // true when a modal was open entering/during pause
 let _wasPlaying           = false;   // true once any question has been answered (answersLeft decremented)
 let totalTime  = 0;
@@ -3307,7 +3221,9 @@ let transitioning = false;
 let partialShortcutNudgeTimer    = null;
 let partialShortcutFollowUpTimer = null;
 let partialShortcutNudgeArmed    = false;
+let consecutiveExtraKeyCount     = 0;  // increments when correct keys + a wrong key are all present
 let endScreenInactivityTimer     = null;
+let readyToUnpauseInactivityTimer = null;
 let bestRecord    = { time: null, accuracy: null };  // independent bests
 let hasEverAchievedPerfectAccuracy = false;           // never cleared, gates Hardcore and trophy
 let greenHits       = 0;
@@ -3498,6 +3414,11 @@ function mainButtonClick() {
   if (gameState === 'idle' || gameState === 'finished') { _closeAllModals(); beginCountdown(); return; }
   if (gameState === 'counting')      { cancelCountdown(); return; }
   if (gameState === 'playing')       { skipShortcut(); return; }
+  if (gameState === 'readyToUnpause') {
+    _enterReadyToUnpauseCleanup();
+    beginResumeCountdown();
+    return;
+  }
   if (gameState === 'paused') {
     _closeAllModals();
     beginResumeCountdown();
@@ -3542,6 +3463,7 @@ function helpButtonClick() {
   resetEndScreenInactivityTimer();
   if (gameState === 'idle')           { titleEl.textContent = bestRecord.time !== null ? 'To reset your score, press the lock key on the keyboard.' : 'Press start to begin.'; return; }
   if (gameState === 'playing')        { toggleHelp(); return; }
+  if (gameState === 'readyToUnpause') { _enterReadyToUnpauseCleanup(); enterPause(); enterConfirmQuit(); return; }
   if (gameState === 'paused')         { enterConfirmQuit(); return; }
   if (gameState === 'confirm-reset')       { confirmResetNo(); return; }
   if (gameState === 'confirm-quit')        { confirmQuitNo();  return; }
@@ -3550,8 +3472,11 @@ function helpButtonClick() {
   if (gameState === 'finished')       { showTip(tipIndex + 1); tipIndex++; return; }
 }
 
+/* CHANGE 5: clicking the ⏸ timer unpauses */
 function timerBoxClick() {
+  if (gameState === 'counting')  { cancelCountdown(); return; }
   if (gameState === 'playing') { enterPause(); return; }
+  if (gameState === 'readyToUnpause') { _enterReadyToUnpauseCleanup(); enterPause(); return; }
   if (gameState === 'paused') {
     _closeAllModals();
     beginResumeCountdown();
@@ -3664,6 +3589,7 @@ function clearHelp() {
 function togglePause() {
   if (gameState === 'counting')  { cancelCountdown(); return; }
   if (gameState === 'playing')   { enterPause(); return; }
+  if (gameState === 'readyToUnpause') { _enterReadyToUnpauseCleanup(); enterPause(); return; }
   if (gameState === 'paused')    {
     // Only offer reset if there's actually a score to reset
     if (bestRecord.time !== null) { enterConfirmReset(); return; }
@@ -3675,19 +3601,59 @@ function togglePause() {
   }
 }
 
+function _enterReadyToUnpause() {
+  gameState = 'readyToUnpause';
+  setKbPosition('face');
+  mainBtn.textContent = 'Unpause';
+  helpBtn.textContent = 'Quit';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+  titleEl.classList.remove('blurred');
+  titleEl.className = '';
+  titleEl.textContent = questionPool[questionIndex]?.display || '';
+  questionCountEl.classList.remove('blurred');
+  // Pulse the unpause button once the keyboard has returned to face position,
+  // then keep pulsing on a repeat timer as a persistent CTA.
+  _startReadyToUnpauseInactivityTimer(1000);
+}
+
+function _startReadyToUnpauseInactivityTimer(initialDelay) {
+  clearTimeout(readyToUnpauseInactivityTimer);
+  readyToUnpauseInactivityTimer = setTimeout(function pulseAndReschedule() {
+    if (gameState !== 'readyToUnpause') { readyToUnpauseInactivityTimer = null; return; }
+    pulseBtn(mainBtn);
+    readyToUnpauseInactivityTimer = setTimeout(pulseAndReschedule, 5000);
+  }, initialDelay || 5000);
+}
+
+function _enterReadyToUnpauseCleanup() {
+  clearTimeout(readyToUnpauseInactivityTimer);
+  readyToUnpauseInactivityTimer = null;
+}
+
 function enterPause(instantBlur) {
   gameState = 'paused';
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
-  transitioning = false;
+  transitioning = false; // clear skip-in-progress if pause interrupts it
   clearHelp();
   resetPartialShortcutNudgeTimers();
-  RefreshGameContentVisibility();
-  titleEl.classList.remove('strike');
+  // Settings panel sets its own position before calling enterPause; only move
+  // to edge if no settings screen is already driving a different position.
   if (activeSettings === null) {
     setKbPosition('edge');
     openSettings('panelPause');
+    titleEl.classList.add('blur-instant');
+    questionCountEl.classList.add('blur-instant');
+    // Remove the instant flag next frame so future transitions are restored
+    requestAnimationFrame(function() {
+      titleEl.classList.remove('blur-instant');
+      questionCountEl.classList.remove('blur-instant');
+    });
   }
+  titleEl.classList.add('blurred');
+  questionCountEl.classList.add('blurred');
+  titleEl.classList.remove('strike','hidden');
   timerDiv.innerHTML = '<svg width="26" height="26" viewBox="0 0 26 26" style="display:block;vertical-align:top;" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="2" width="4" height="22" rx="1.5" fill="white"/><rect x="16" y="2" width="4" height="22" rx="1.5" fill="white"/></svg>';
   setTimerState('paused');
   mainBtn.textContent = 'Unpause';
@@ -3701,8 +3667,9 @@ function enterPause(instantBlur) {
 function enterConfirmQuit() {
   _closeAllModalsInstant();
   gameState = 'confirm-quit';
-  SetOverlayMessage('Are you sure you want to abandon this game?');
-  RefreshGameContentVisibility();
+  titleEl.className = '';
+  titleEl.classList.remove('blurred');
+  titleEl.textContent = 'Are you sure you want to abandon this game?';
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
   helpBtn.textContent = 'No';
@@ -3717,20 +3684,21 @@ function confirmQuitYes() {
 }
 
 function confirmQuitNo() {
-  _returnToPauseScreen();
+  _returnToPauseScreen(null);
 }
 
 function unpause() {
   gameState = 'playing';
   clearAllLit();
   heldKeys.clear();
+  // Restore question title — may have been blanked by the resume countdown
   if (questionPool.length > 0 && (!titleEl.textContent || titleEl.textContent === '')) {
     titleEl.className = '';
     titleEl.textContent = questionPool[questionIndex]?.display || '';
     currentAnswer = questionPool[questionIndex]?.shortcut || '';
   }
-  RefreshGameContentVisibility();
-  titleEl.classList.remove('strike');
+  titleEl.classList.remove('blurred');
+  questionCountEl.classList.remove('blurred');
   helpBtn.style.background = '';
   helpBtn.style.color = '';
   resetTimerBox();
@@ -3742,12 +3710,16 @@ function unpause() {
 
 
 function enterConfirmReset(target) {
+  // target: 'time' | 'accuracy' | 'both' (default 'both' for legacy lock-key call)
   _clearTarget = target || 'both';
   _confirmFromFinished = (gameState === 'finished');
   _confirmFromPause    = _wasPlaying && answersLeft > 0 && gameState !== 'finished';
   _closeAllModalsInstant();
   gameState = 'confirm-reset';
   if (currentMedal && !_confirmFromFinished) resetTimerBox();
+  titleEl.classList.remove('blurred');
+  questionCountEl.classList.remove('blurred');
+  titleEl.className = '';
   var msg;
   if (_confirmAfterUpgrade) {
     msg = 'You ramped up difficulty. Shall I reset your high scores then?';
@@ -3756,10 +3728,11 @@ function enterConfirmReset(target) {
   } else if (_clearTarget === 'accuracy') {
     msg = 'Do you really want to wipe your highest accuracy record?';
   } else {
-    msg = 'Are you sure you want to clear your high scores?';
+    msg = _confirmFromFinished
+      ? 'Are you sure you want to clear your high scores?'
+      : 'Are you sure you want to clear your high scores?';
   }
-  SetOverlayMessage(msg);
-  RefreshGameContentVisibility();
+  titleEl.textContent = msg;
   if (_confirmFromFinished) setAppSelectorGameActive(false);
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
@@ -3769,10 +3742,17 @@ function enterConfirmReset(target) {
   if (lockKeyEl) lockKeyEl.classList.add('active');
 }
 
-function _returnToPauseScreen() {
+function _returnToPauseScreen(titleMessage) {
   gameState = 'paused';
-  RefreshGameContentVisibility();
-  titleEl.classList.remove('strike');
+  titleEl.className = '';
+  if (titleMessage) {
+    titleEl.textContent = titleMessage;
+    titleEl.classList.remove('blurred');
+  } else {
+    titleEl.classList.add('blurred');
+    titleEl.textContent = questionPool[questionIndex]?.display || '';
+  }
+  questionCountEl.classList.remove('blurred');
   mainBtn.textContent = 'Unpause';
   mainBtn.style.background = '';
   helpBtn.textContent = 'Quit';
@@ -3840,8 +3820,7 @@ function confirmResetYes() {
     var clearedMsg = target === 'time'     ? 'Time record cleared.'
                    : target === 'accuracy' ? 'Accuracy record cleared.'
                    : 'Both records have been cleared.';
-    _returnToPauseScreen();
-    showToast(clearedMsg);
+    _returnToPauseScreen(clearedMsg);
     return;
   }
 
@@ -3862,12 +3841,17 @@ function enterConfirmTrophy(fromFinished, fromPause) {
   _trophyFromFinished = fromFinished || false;
   _trophyFromPause    = fromPause    || false;
   gameState = 'confirm-trophy';
-  SetOverlayMessage('Do you want to return your trophy too?<br><small style="font-size:13px;font-weight:400;color:#6b7280;">(the highest difficulty modes require a trophy)</small>');
-  RefreshGameContentVisibility();
+
+  titleEl.className = '';
+  titleEl.innerHTML = 'Do you want to return your trophy too?<br><small style="font-size:13px;font-weight:400;color:#6b7280;">(the highest difficulty modes require a trophy)</small>';
+
+  // Blank buttons immediately, disable interaction
   mainBtn.textContent = '';
   mainBtn.disabled = true;
   helpBtn.textContent = '';
   helpBtn.disabled = true;
+
+  // After one second reveal labels and re-enable
   setTimeout(function() {
     if (gameState !== 'confirm-trophy') return;
     mainBtn.textContent = 'Yes, return it';
@@ -3903,8 +3887,7 @@ function _finishAfterTrophy(message) {
   helpBtn.disabled = false;
   if (lockKeyEl) lockKeyEl.classList.remove('active');
   if (fromPause) {
-    _returnToPauseScreen();
-    showToast(message);
+    _returnToPauseScreen(message);
     return;
   }
   resetToIdle();
@@ -3944,7 +3927,7 @@ function confirmResetNo() {
 
   if (_wasPlaying && questionPool.length > 0 && answersLeft > 0) {
     _confirmFromPause = false;
-    _returnToPauseScreen();
+    _returnToPauseScreen(null);
   } else {
     resetToIdle();
   }
@@ -3953,8 +3936,10 @@ function confirmResetNo() {
 function enterConfirmDiffChange() {
   _closeAllModalsInstant();
   gameState = 'confirm-diff-change';
-  SetOverlayMessage('Changing difficulty will cancel your paused game. Proceed?');
-  RefreshGameContentVisibility();
+  titleEl.classList.remove('blurred');
+  questionCountEl.classList.remove('blurred');
+  titleEl.className = '';
+  titleEl.textContent = 'Changing difficulty will cancel your paused game. Proceed?';
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
   helpBtn.textContent = 'No';
@@ -3999,12 +3984,14 @@ function confirmDiffChangeNo() {
   _updateDiffSubtitle(currentDifficulty);
   _pendingDifficulty = null;
   _prevDifficulty    = null;
-  _returnToPauseScreen();
+  // Resume the paused game directly
+  _returnToPauseScreen(null);
 }
 
 function resetToIdle() {
   gameState = 'idle';
   _wasPlaying = false;
+  // Hide welcome-screen elements if visible
   var _wTag = document.getElementById('welcomeTagline');
   if (_wTag) _wTag.style.display = 'none';
   setAppSelectorGameActive(false);
@@ -4013,6 +4000,7 @@ function resetToIdle() {
   clearTimeout(penaltyTimeout);
   clearTimeout(endScreenInactivityTimer);
   endScreenInactivityTimer = null;
+  _enterReadyToUnpauseCleanup();
   clearHelp();
   clearAllLit();
   heldKeys.clear();
@@ -4024,7 +4012,6 @@ function resetToIdle() {
   if (lockKeyEl) lockKeyEl.classList.remove('active');
   titleEl.className = '';
   titleEl.textContent = 'Play Keyboard Warriors';
-  RefreshGameContentVisibility();
   questionCountEl.innerHTML = ''; dotEls = [];
   timerBox.style.background = '';
   timerBox.style.removeProperty('--face-rot');
@@ -4080,35 +4067,34 @@ function matchesShortcut(event, str) {
     return punctMap[c] || null;
   })();
 
+  // Helper: does the event key match the expected bare char/token?
   function keyIs(exp) {
-    if (exp === 'RETURN' || exp === 'ENTER') return k === 'Enter' || event.code === 'Enter' || event.code === 'NumpadEnter';
+    if (exp === '='   ) return k === '=' || k === '+';
+    if (exp === 'RETURN') return k === 'Enter';
+    if (exp === 'ENTER')  return k === 'Enter';
     if (exp === 'ARROWLEFT')  return k === 'ArrowLeft';
     if (exp === 'ARROWRIGHT') return k === 'ArrowRight';
     if (exp === 'ARROWUP')    return k === 'ArrowUp';
     if (exp === 'ARROWDOWN')  return k === 'ArrowDown';
-    if (exp === 'HOME')       return k === 'Home'     || event.code === 'Home';
-    if (exp === 'END')        return k === 'End'      || event.code === 'End';
-    if (exp === 'PAGEUP')     return k === 'PageUp'   || event.code === 'PageUp';
-    if (exp === 'PAGEDOWN')   return k === 'PageDown' || event.code === 'PageDown';
-    if (exp === 'BACKSLASH')  return event.code === 'Backslash';
-    if (exp === 'GRAVE')      return event.code === 'Backquote';
-    if (exp === '[')  return k === '[' || (k === '{' && sh) || codeChar === '[';
-    if (exp === ']')  return k === ']' || (k === '}' && sh) || codeChar === ']';
-    if (exp === '=')  return k === '=' || k === '+' || codeChar === '=';
-    if (exp === '-')  return k === '-' || k === '_' || codeChar === '-';
-    if (exp === '/')  return k === '/' || k === '?' || codeChar === '/';
-    if (exp === '.')  return k === '.' || codeChar === '.';
-    if (exp === ',')  return k === ',' || codeChar === ',';
-    if (exp === ';')  return k === ';' || k === ':' || k === '\u2026' || codeChar === ';';
-    if (exp === "'")  return k === "'" || k === '"' || codeChar === "'";
-    if (exp === '<')  return k === '<' || (k === ',' && sh) || codeChar === ',';
-    if (exp === '>')  return k === '>' || (k === '.' && sh) || codeChar === '.';
-    if (exp === '2')  return k === '2' || k === '\u2122';
-    if (exp === '3')  return k === '3' || k === '\u00a3';
-    if (exp === '8')  return k === '8' || k === '\u2022';
+    if (exp === 'HOME') return k === 'Home';
+    if (exp === 'END')  return k === 'End';
+    if (exp === '[')    return k === '[' || (k === '{' && sh) || codeChar === '[';
+    if (exp === ']')    return k === ']' || (k === '}' && sh) || codeChar === ']';
+    if (exp === '/')    return k === '/';
+    if (exp === '.')    return k === '.';
+    if (exp === ',')    return k === ',';
+    if (exp === ';')    return k === ';' || k === '…';
+    if (exp === '-')    return k === '-';
+    if (exp === '<')    return k === '<' || (k === ',' && sh);
+    if (exp === '>')    return k === '>' || (k === '.' && sh);
+    if (exp === '2')    return k === '2' || k === '™';
+    if (exp === '3')    return k === '3' || k === '£';
+    if (exp === '8')    return k === '8' || k === '•';
     if (exp === 'A' && s.startsWith('SHIFT+A') && !s.includes('CMD') && !s.includes('OPTION')) {
       return ku === 'A';
     }
+    // For letters/digits: accept event.key match OR physical code match.
+    // This handles Option remapping (e.g. Option+C → event.key='ç' but code='KeyC').
     if (codeChar && codeChar === exp) return true;
     return ku === exp;
   }
@@ -4126,7 +4112,8 @@ function matchesShortcut(event, str) {
   if (s === 'PAGEUP')   return k === 'PageUp'      && nocmd && !opt && !sh;
   if (s === 'PAGEDOWN') return k === 'PageDown'    && nocmd && !opt && !sh;
   if (s === 'ENTER')  return k === 'Enter'       && nocmd && !opt && !sh;
-  if (s === 'GRAVE')  return event.code === 'Backquote' && nocmd && !opt && !sh;
+  if (s === 'SHIFT+GRAVE') return sh && !cmd && !opt && (k==='`'||k==="'");
+  if (s === 'GRAVE')  return (k === '`' || k === "'") && nocmd && !opt && !sh;
   if (s === '[')      return (k === '[' || codeChar === '[') && nocmd && !opt && !sh;
   if (s === ']')      return (k === ']' || codeChar === ']') && nocmd && !opt && !sh;
   if (s === '.')      return k === '.'           && nocmd && !opt && !sh;
@@ -4151,17 +4138,19 @@ function matchesShortcut(event, str) {
   if (s === 'SHIFT+ARROWUP')    return k === 'ArrowUp'    && sh && nocmd && !opt;
   if (s === 'SHIFT+ARROWDOWN')  return k === 'ArrowDown'  && sh && nocmd && !opt;
 
-  if (s === 'SHIFT+GRAVE') return event.code === 'Backquote' && sh && !cmd && !opt;
-  if (s === "SHIFT+'")     return event.code === 'Quote'     && sh && !cmd && !opt;
-  if (s === 'SHIFT++' || s === 'SHIFT+=') return (k === '+' || k === '=' || codeChar === '=') && sh && !cmd && !opt;
-  if (s === 'SHIFT+-') return (k === '-' || codeChar === '-') && sh && !cmd && !opt;
-  if (s === 'SHIFT+~') return event.code === 'Backquote'     && sh && !cmd && !opt;
+  if (s === 'SHIFT++' || s === 'SHIFT+=') return sh && !cmd && !opt && (k==='+'||k==='=');
+  if (s === 'SHIFT+-') return sh && !cmd && !opt && k==='-';
+  // ── SHIFT + punctuation ────────────────────────────────────────────
+  if (s === 'SHIFT++') return (k === '+' || k === '=') && sh && !cmd && !opt;
+  if (s === 'SHIFT+-') return k === '-' && sh && !cmd && !opt;
+  if (s === "SHIFT+'") return (k === "'" || k === '`' || e.code === 'Backquote') && sh && !cmd && !opt;
+  if (s === 'SHIFT+~') return (k === '~' || k === '`') && sh && !cmd && !opt;
 
-  // ── OPTION + arrow ─────────────────────────────────────────────────────────
-  if (s === 'OPTION+ARROWLEFT')  return k === 'ArrowLeft'  && opt && nocmd && !sh;
-  if (s === 'OPTION+ARROWRIGHT') return k === 'ArrowRight' && opt && nocmd && !sh;
-  if (s === 'OPTION+ARROWUP')    return k === 'ArrowUp'    && opt && nocmd && !sh;
-  if (s === 'OPTION+ARROWDOWN')  return k === 'ArrowDown'  && opt && nocmd && !sh;
+  // ── OPTION + arrow ────────────────────────────────────────────────
+  if (s === 'OPTION+ARROWLEFT')  return k === 'ArrowLeft'  && opt && !cmd && !sh;
+  if (s === 'OPTION+ARROWRIGHT') return k === 'ArrowRight' && opt && !cmd && !sh;
+  if (s === 'OPTION+ARROWUP')    return k === 'ArrowUp'    && opt && !cmd && !sh;
+  if (s === 'OPTION+ARROWDOWN')  return k === 'ArrowDown'  && opt && !cmd && !sh;
 
   // ── SHIFT+OPTION + arrow ─────────────────────────────────────────
   if (s === 'SHIFT+OPTION+ARROWLEFT')  return k === 'ArrowLeft'  && sh && opt && !cmd;
@@ -4192,6 +4181,12 @@ function matchesShortcut(event, str) {
     const exp = s.slice(6);
     return sh && !cmd && !opt && keyIs(exp);
   }
+
+  // ── OPTION + arrow ─────────────────────────────────────────────────────────
+  if (s === 'OPTION+ARROWLEFT')  return k === 'ArrowLeft'  && opt && nocmd && !sh;
+  if (s === 'OPTION+ARROWRIGHT') return k === 'ArrowRight' && opt && nocmd && !sh;
+  if (s === 'OPTION+ARROWUP')    return k === 'ArrowUp'    && opt && nocmd && !sh;
+  if (s === 'OPTION+ARROWDOWN')  return k === 'ArrowDown'  && opt && nocmd && !sh;
 
   // ── OPTION + bracket ───────────────────────────────────────────────────────
   if (s === 'OPTION+[') return (k === '[' || codeChar === '[') && opt && nocmd && !sh;
@@ -4282,7 +4277,8 @@ function scrollPillToSelected() {
 }
 
 function toggleAppDropdown() {
-  if (gameState === 'playing' || gameState === 'paused' || gameState === 'confirm-reset' || gameState === 'confirm-quit') return;
+  if (gameState === 'playing' || gameState === 'confirm-reset' || gameState === 'confirm-quit') return;
+  if (gameState === 'paused') { showToast('Change the app between games.'); return; }
   appPillEl.classList.contains('open') ? closeAppPill() : openAppPill();
 }
 
@@ -4618,21 +4614,6 @@ function openSettings(page) {
   var prevPage = activeSettings;
   activeSettings = page;
 
-  // If counting, cancel before anything else so gameState is settled
-  // before setKbPosition and content rendering run.
-  if (!wasOpen && page !== 'panelPause' && gameState !== 'welcome') {
-    if (gameState === 'counting') {
-      var wasResume = (_countdownMode === 'resume');
-      cancelCountdown(true);
-      if (wasResume) {
-        gameState = 'paused';
-        RefreshGameContentVisibility();
-        if (lockKeyEl) lockKeyEl.classList.add('active');
-      }
-      _modalWasOpenOnPause = wasResume;
-    }
-  }
-
   // Update kbPos — partial for most panels; edge for browser and pause
   var pos = (page === 'panelBrowser' || page === 'panelPause') ? 'edge' : 'partial';
   setKbPosition(pos);
@@ -4640,6 +4621,7 @@ function openSettings(page) {
   // Pause game if needed (not for pause panel or when on welcome screen)
   if (!wasOpen && page !== 'panelPause' && gameState !== 'welcome') {
     if (gameState === 'playing')  { enterPause(true); }
+    else if (gameState === 'counting') { cancelCountdown(); _modalWasOpenOnPause = true; }
     else if (gameState === 'paused')   { _modalWasOpenOnPause = true; }
   }
 
@@ -4713,9 +4695,11 @@ function closeSettings() {
   // Reset wrap height
   var wrap = document.getElementById('keyboardWrap');
   if (wrap) wrap.style.minHeight = '';
-  // If paused, show the pause panel rather than leaving the keyboard in limbo
+  // If paused mid-game and the user closes a settings panel, enter readyToUnpause
+  // rather than immediately showing the pause screen — the keyboard comes back up
+  // and the unpause button pulses as the CTA.
   if (gameState === 'paused') {
-    openSettings('panelPause');
+    _enterReadyToUnpause();
     return;
   }
   // If on a landing screen and the user closed a *different* panel (e.g. keyboard/browser
@@ -4987,6 +4971,7 @@ document.addEventListener('keydown', e => {
     const dbg = document.getElementById('debugOverlay');
     dbg.style.display = 'flex';
     document.getElementById('dbgAnswer').textContent = 'debug on — press a key during play';
+    document.getElementById('dbgQuestion').textContent = '';
     document.getElementById('dbgKey').textContent = '';
     document.getElementById('dbgMatch').textContent = '';
     dbgRefreshCtx(); dbgRefreshAccuracy();
@@ -5029,6 +5014,7 @@ function dbgBuildReport() {
   var lines = [
     (sub ? sub.textContent + '  ' : '') + (top ? top.textContent : ''),
     document.getElementById('dbgAnswer').textContent,
+    document.getElementById('dbgQuestion').textContent,
     document.getElementById('dbgKey').textContent,
     document.getElementById('dbgMatch').textContent,
   ];
@@ -5300,15 +5286,14 @@ function getBrowserConflictSet() {
 function _showWelcomeScreen() {
   _welcomeIsReturning = false;
   gameState = 'welcome';
-  titleEl.className = '';
   titleEl.textContent = 'Welcome to Keyboard Warriors';
   var tagline = document.getElementById('welcomeTagline');
   if (tagline) tagline.style.display = 'block';
+  // Default to Normal on first visit
   _diffFirst = true;
   setDiffState(0);
   _updateDiffBtnStyles('normal');
   _updateDiffSubtitle('normal');
-  RefreshGameContentVisibility();
   openSettings('panelWelcome');
 }
 
@@ -5466,7 +5451,6 @@ function _showReturningScreen() {
   _welcomeIsReturning = true;
   gameState = 'welcome';
   document.body.classList.add('returning-screen');
-  titleEl.className = '';
   titleEl.textContent = 'Thanks for coming back.';
   var tagline = document.getElementById('welcomeTagline');
   if (tagline) tagline.style.display = 'none';
@@ -5475,7 +5459,6 @@ function _showReturningScreen() {
   setDiffState(modeMap[currentDifficulty] !== undefined ? modeMap[currentDifficulty] : 0);
   _updateDiffBtnStyles(currentDifficulty);
   _updateDiffSubtitle(currentDifficulty);
-  RefreshGameContentVisibility();
   openSettings('panelReturning');
 }
 
@@ -5518,11 +5501,12 @@ function _dismissWelcome() {
 }
 
 function _startFromWelcome() {
+  // Start pressed on a landing screen without choosing an option.
+  // First-time: default to Normal. Returning: keep existing settings.
   if (!_welcomeIsReturning) {
     currentDifficulty = 'normal';
     try { localStorage.setItem('kw_difficulty', currentDifficulty); } catch(e) {}
   }
-  document.body.classList.remove('returning-screen');
   var tagline = document.getElementById('welcomeTagline');
   if (tagline) tagline.style.display = 'none';
   _welcomeIsReturning = false;
@@ -5693,27 +5677,26 @@ function loadAppShortcutsIfNeeded(appKey, onReady) {
       }
     });
 }
-function cancelCountdown(SuppressPause) {
+function cancelCountdown() {
   if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
-  OverlayCountdownNumberEl.className = '';
-  OverlayCountdownNumberEl.textContent = '';
-  titleEl.classList.remove('blur-out');
+  var numEl = document.getElementById('countdownNum');
+  if (numEl) { numEl.className = ''; numEl.textContent = ''; }
+  titleEl.style.position = '';
   mainBtn.disabled  = false;
   helpBtn.disabled  = false;
   if (_countdownMode === 'resume') {
     _countdownMode = 'start';
-    if (!SuppressPause) enterPause();
+    enterPause();
   } else {
     resetToIdle();
   }
 }
 
 function beginCountdown() {
+  // Prevent double-triggers during countdown
   if (_countdownTimer) return;
   _countdownMode    = 'start';
   gameState         = 'counting';
-  RefreshGameContentVisibility();
-  titleEl.classList.add('blur-out');
   mainBtn.textContent = 'Cancel';
   mainBtn.disabled  = true;
   helpBtn.disabled  = true;
@@ -5733,7 +5716,6 @@ function beginResumeCountdown() {
   _countdownMode = 'resume';
   _modalWasOpenOnPause = false;
   gameState = 'counting';
-  RefreshGameContentVisibility();
   mainBtn.textContent = 'Cancel';
   mainBtn.disabled = false;
   helpBtn.disabled = true;
@@ -5743,32 +5725,6 @@ function beginResumeCountdown() {
     _countdownMode = 'start';
     unpause();
   });
-}
-
-function runCountdown(OnComplete) {
-  if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
-  setKbPosition('face');
-  _closeAllModalsInstant();
-
-  var counts = [3, 2, 1];
-  var step = 0;
-
-  function tick() {
-    if (step >= counts.length) {
-      OverlayCountdownNumberEl.className = '';
-      OverlayCountdownNumberEl.textContent = '';
-      _countdownTimer = null;
-      OnComplete();
-      return;
-    }
-    SetOverlayCountdown(counts[step]);
-    OverlayCountdownNumberEl.className = '';
-    void OverlayCountdownNumberEl.offsetWidth;
-    OverlayCountdownNumberEl.className = 'pop';
-    step++;
-    _countdownTimer = setTimeout(tick, 900);
-  }
-  tick();
 }
 
 function startGame() {
@@ -5792,11 +5748,9 @@ function startGame() {
   helpBtn.textContent = 'Help';
   helpBtn.style.background = '';
   helpBtn.style.color = '';
-  titleEl.className = 'no-transition';
+  titleEl.className = '';
   titleEl.textContent = questionPool[0].display;
-  void titleEl.offsetWidth;
-  titleEl.className = 'question-pop';
-  RefreshGameContentVisibility();
+  questionCountEl.classList.remove('blurred', 'blur-instant');
   buildProgressDots();
   showProgressDots();
   resetTimerBox();
@@ -5854,9 +5808,12 @@ function advanceQuestion() {
   }
   currentAnswer = questionPool[questionIndex].shortcut;
   titleEl.className = '';
-  void titleEl.offsetWidth;
+  void titleEl.offsetWidth; // flush so animation restarts
   titleEl.textContent = questionPool[questionIndex].display;
-  if (gameState === 'playing') {
+  consecutiveExtraKeyCount = 0;
+  if (gameState === 'paused') {
+    titleEl.classList.add('blurred');
+  } else {
     titleEl.classList.add('question-pop');
   }
   mainBtn.textContent = 'Skip';
@@ -5947,9 +5904,9 @@ function endGame() {
     updateBestDisplay(newBestTime, newBestAcc);
   }
 
-  // Gold: first run, or beat/equalled both. Silver: improved one. Bronze: neither.
+  // Gold: first run, perfect accuracy, or beat/equalled both. Silver: improved one. Bronze: neither.
   let medal;
-  if (wasFirstRecord) {
+  if (wasFirstRecord || finalAccuracy >= 100) {
     medal = 'gold';
   } else {
     const beatTime = totalTime <= prevTime;
@@ -5962,7 +5919,6 @@ function endGame() {
   mainBtn.textContent = 'Try again?';
   titleEl.className = '';
   titleEl.textContent = endGameMessage(totalTime, finalAccuracy, bestRecord, wasFirstRecord);
-  RefreshGameContentVisibility();
   startEndScreenInactivityTimer();
   fillProgressDot(9);
   setTimeout(hideProgressDots, 0);
@@ -6079,9 +6035,60 @@ function playKeyClick() {
   } catch(e) {}
 }
 
+/* ══════════════════════════════════════
+   COUNTDOWN 3-2-1
+══════════════════════════════════════ */
+var _countdownTimer = null;
+function runCountdown(onComplete) {
+  // Clear any running countdown
+  if (_countdownTimer) { clearTimeout(_countdownTimer); _countdownTimer = null; }
 
+  // Start moving keyboard to face position immediately — it has the full
+  // countdown duration (~2.7s) to complete the 850ms transition.
+  setKbPosition('face');
+
+  // Close any open settings panel (including pause screen)
+  _closeAllModalsInstant();
+
+  var overlay = document.getElementById('countdownOverlay');
+  var numEl   = document.getElementById('countdownNum');
+  if (!overlay || !numEl) { onComplete(); return; }
+
+  // Prep the title area
+  titleEl.textContent = '';
+  titleEl.style.position = 'relative';
+
+  var counts = [3, 2, 1];
+  var step = 0;
+
+  function tick() {
+    if (step >= counts.length) {
+      numEl.className = '';
+      numEl.textContent = '';
+      titleEl.style.position = '';
+      _countdownTimer = null;
+      onComplete();
+      return;
+    }
+    numEl.textContent = counts[step];
+    numEl.className = '';
+    void numEl.offsetWidth; // force reflow so animation restarts
+    numEl.className = 'pop';
+    step++;
+    _countdownTimer = setTimeout(tick, 900);
+  }
+  tick();
+}
 document.addEventListener('keydown', handleKeydown);
 document.addEventListener('keyup',   handleKeyup);
+
+document.getElementById('keyboardWrap').addEventListener('click', function(e) {
+  if (gameState !== 'readyToUnpause') return;
+  // Any click in the keyboard area folds it away to the pause screen
+  _enterReadyToUnpauseCleanup();
+  gameState = 'paused'; // set before enterPause so it doesn't double-trigger
+  enterPause();
+});
 
 function showTip(index) {
   tipIndex = ((index % IMPROVEMENT_TIPS.length) + IMPROVEMENT_TIPS.length) % IMPROVEMENT_TIPS.length;
@@ -6096,6 +6103,7 @@ function handleKeydown(e) {
     const needed = shortcutToCodes(currentAnswer);
     dbgRefreshCtx();
     document.getElementById('dbgAnswer').textContent = 'answer: ' + currentAnswer;
+    document.getElementById('dbgQuestion').textContent = questionPool[questionIndex]?.display || '';
     document.getElementById('dbgKey').textContent =
       'key=' + JSON.stringify(e.key) + ' code=' + e.code +
       ' cmd=' + (currentOs==='pc'?e.ctrlKey:e.metaKey) +
@@ -6114,7 +6122,7 @@ function handleKeydown(e) {
     if (e.key === 'ArrowRight') { showTip(tipIndex + 1); e.preventDefault(); return; }
     if (e.key === 'ArrowLeft')  { showTip(tipIndex - 1); e.preventDefault(); return; }
   }
-  if (gameState === 'paused' || gameState === 'confirm-reset' || gameState === 'confirm-quit') { e.preventDefault(); return; }
+  if (gameState === 'paused' || gameState === 'readyToUnpause' || gameState === 'confirm-reset' || gameState === 'confirm-quit') { e.preventDefault(); return; }
   if (gameState !== 'playing' || transitioning) { e.preventDefault(); return; }
 
   // Check correctness: sticky mode uses accumulated toggled keys; normal uses simultaneity
@@ -6124,7 +6132,8 @@ function handleKeydown(e) {
     clearHelp();
     clearInterval(timerInterval);
     setTimerState('green', 'right');
-    titleEl.style.color = '#10b981';
+    titleEl.style.color = '#10b981'; // instant green — directs attention before hiding
+    requestAnimationFrame(() => titleEl.classList.add('hidden'));
     fillProgressDot(10 - answersLeft);
     setTimeout(() => {
       titleEl.style.color = '';
@@ -6147,6 +6156,24 @@ function handleKeydown(e) {
           if (gameState === 'playing' && timerBox.classList.contains('red')) resetTimerBox();
         }, 800);
       }
+    }
+    // Detect: all required keys satisfied AND at least one wrong key also present
+    const requiredCodes = shortcutToCodes(currentAnswer);
+    const allRequiredPresent = neededSatisfied(requiredCodes);
+    const wrongKeyPresent = stickyKeysOn
+      ? [...stickyLit.values()].includes('orange')
+      : Object.keys(keyEls).some(code =>
+          !requiredCodes.includes(code) &&
+          (keyEls[code].classList.contains('lit-orange-down') || keyEls[code].classList.contains('lit-orange-up'))
+        );
+    if (allRequiredPresent && wrongKeyPresent) {
+      consecutiveExtraKeyCount++;
+      if (consecutiveExtraKeyCount >= 2) {
+        showToast('Almost, but you are adding a wrong key in!');
+        consecutiveExtraKeyCount = 0;
+      }
+    } else {
+      consecutiveExtraKeyCount = 0;
     }
   }
   e.preventDefault();
@@ -6254,6 +6281,13 @@ function setKbPosition(pos) {
       if (_flipSeq !== seq) return;
       stage.classList.add('kb-show-base');
     }, 650);
+    // Clear sticky keys once the keyboard has fully settled at the edge
+    setTimeout(function() {
+      if (_flipSeq !== seq) return;
+      clearAllLit();
+      heldKeys.clear();
+      stickyLit.clear();
+    }, 900);
   } else {
     panel.classList.remove('kb-edges-visible');
     stage.classList.remove('kb-show-base');
