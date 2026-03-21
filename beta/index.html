@@ -1873,7 +1873,7 @@ li.conflict-dismissed .conflict-desc {
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="3"  onclick="questionTimerBtnClick(3)">3</button>
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="5"  onclick="questionTimerBtnClick(5)">5</button>
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="10" onclick="questionTimerBtnClick(10)">10</button>
-          <button class="sp-seg-btn diff-five-btn" data-timer="null" onclick="questionTimerBtnClick(null)">∞</button>
+          <button class="sp-seg-btn diff-five-btn" data-timer="null" onclick="questionTimerBtnClick(null)"><svg class="infinity-svg" viewBox="0 0 28 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14,7 C12,3.5 9.5,1.5 7,1.5 A5.5,5.5 0 0 0 7,12.5 C9.5,12.5 12,10.5 14,7 Z M14,7 C16,3.5 18.5,1.5 21,1.5 A5.5,5.5 0 0 1 21,12.5 C18.5,12.5 16,10.5 14,7 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/></svg></button>
         </div>
         <p class="sp-title" style="margin-bottom:6px;margin-top:8px;text-align:center;">Player Lives</p>
         <div class="sp-seg-pill sp-seg-pill-five" id="playerLivesPill">
@@ -1881,7 +1881,7 @@ li.conflict-dismissed .conflict-desc {
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="3"  onclick="playerLivesBtnClick(3)">3</button>
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="5"  onclick="playerLivesBtnClick(5)">5</button>
           <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="10" onclick="playerLivesBtnClick(10)">10</button>
-          <button class="sp-seg-btn diff-five-btn" data-lives="null" onclick="playerLivesBtnClick(null)">∞</button>
+          <button class="sp-seg-btn diff-five-btn" data-lives="null" onclick="playerLivesBtnClick(null)"><svg class="infinity-svg" viewBox="0 0 28 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14,7 C12,3.5 9.5,1.5 7,1.5 A5.5,5.5 0 0 0 7,12.5 C9.5,12.5 12,10.5 14,7 Z M14,7 C16,3.5 18.5,1.5 21,1.5 A5.5,5.5 0 0 1 21,12.5 C18.5,12.5 16,10.5 14,7 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/></svg></button>
         </div>
       </div>
     </div>
@@ -5538,6 +5538,7 @@ function _updateTimerLivesPills() {
 
 function questionTimerBtnClick(value) {
   if (!hasEverAchievedPerfectAccuracy && value !== null) return;
+  if (value === questionTimer) return; // already active, do nothing
   questionTimer = value;
   try { localStorage.setItem('kw_timer', String(value)); } catch(e) {}
   _updateTimerLivesPills();
@@ -5545,6 +5546,7 @@ function questionTimerBtnClick(value) {
 
 function playerLivesBtnClick(value) {
   if (!hasEverAchievedPerfectAccuracy && value !== null) return;
+  if (value === playerLives) return; // already active, do nothing
   playerLives = value;
   try { localStorage.setItem('kw_lives', String(value)); } catch(e) {}
   _updateTimerLivesPills();
@@ -6709,29 +6711,33 @@ document.addEventListener('DOMContentLoaded', function() {
 .diff-five-btn {
   flex: 1;
   text-align: center;
-  padding: 5px 4px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
   font-size: 12px;
 }
-/* Larger infinity symbol */
-.diff-five-btn[data-timer="null"],
-.diff-five-btn[data-lives="null"] {
-  font-size: 22px;
-  line-height: 1;
-  padding-bottom: 3px;
+/* SVG infinity icon — sized to sit flush with the number labels */
+.diff-five-btn .infinity-svg {
+  display: block;
+  width: 22px;
+  height: 12px;
 }
-/* Locked/unavailable: flat background-grey, looks empty */
+/* Locked/unavailable: flat background-grey, looks empty, no hover */
 .diff-five-btn.diff-five-inactive {
   background: linear-gradient(to bottom, #f0f4f8 70%, #dfe1e5 100%);
   color: #9ca3af;
   cursor: default;
+  pointer-events: none;
 }
 /* Active/selected: white fill, dark text */
 .diff-five-btn.diff-five-active {
   background: white;
   color: #374151;
 }
-/* Hover on an available (non-inactive) button */
-.diff-five-btn:not(.diff-five-inactive):hover {
+/* Hover only on available, non-active buttons */
+.diff-five-btn:not(.diff-five-inactive):not(.diff-five-active):hover {
   background: white;
   color: #374151;
 }
