@@ -1865,6 +1865,25 @@ li.conflict-dismissed .conflict-desc {
         <button class="sp-seg-btn diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')">Hardcore</button>
       </div>
       <p id="diffSubtitle" class="diff-subtitle">&nbsp;</p>
+      <div class="diff-horiz-divider"></div>
+      <div class="diff-extra-controls">
+        <p class="sp-title" style="margin-bottom:8px;">Question Timer <span id="diffTimerLockIcon" class="diff-lock-icon">🔒</span></p>
+        <div class="sp-seg-pill sp-seg-pill-five" id="questionTimerPill">
+          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="1"  onclick="questionTimerBtnClick(1)">1</button>
+          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="3"  onclick="questionTimerBtnClick(3)">3</button>
+          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="5"  onclick="questionTimerBtnClick(5)">5</button>
+          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="10" onclick="questionTimerBtnClick(10)">10</button>
+          <button class="sp-seg-btn diff-five-btn" data-timer="null" onclick="questionTimerBtnClick(null)">∞</button>
+        </div>
+        <p class="sp-title" style="margin-bottom:8px;margin-top:10px;">Player Lives <span id="diffLivesLockIcon" class="diff-lock-icon">🔒</span></p>
+        <div class="sp-seg-pill sp-seg-pill-five" id="playerLivesPill">
+          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="1"  onclick="playerLivesBtnClick(1)">1</button>
+          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="3"  onclick="playerLivesBtnClick(3)">3</button>
+          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="5"  onclick="playerLivesBtnClick(5)">5</button>
+          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="10" onclick="playerLivesBtnClick(10)">10</button>
+          <button class="sp-seg-btn diff-five-btn" data-lives="null" onclick="playerLivesBtnClick(null)">∞</button>
+        </div>
+      </div>
     </div>
 
     <!-- ── Welcome Landing ──────────────────────────────── -->
@@ -4399,6 +4418,28 @@ function onAudibleToggle() {
 var ghostModeOn = false;
 var killPunctuationOn = false;
 
+// Question Timer and Player Lives — default to infinity (null = no limit).
+// Values map to the five pill segments: 1, 3, 5, 10, null (infinity).
+var questionTimer = null;
+var playerLives   = null;
+var TIMER_VALUES = [1, 3, 5, 10, null];
+var LIVES_VALUES = [1, 3, 5, 10, null];
+
+(function() {
+  try {
+    var savedTimer = localStorage.getItem('kw_timer');
+    if (savedTimer !== null) {
+      var parsed = savedTimer === 'null' ? null : parseInt(savedTimer, 10);
+      if (parsed === null || TIMER_VALUES.includes(parsed)) questionTimer = parsed;
+    }
+    var savedLives = localStorage.getItem('kw_lives');
+    if (savedLives !== null) {
+      var parsed2 = savedLives === 'null' ? null : parseInt(savedLives, 10);
+      if (parsed2 === null || LIVES_VALUES.includes(parsed2)) playerLives = parsed2;
+    }
+  } catch(e) {}
+})();
+
 function onGhostModeToggle() {
   ghostModeOn = !ghostModeOn;
   var radio = document.getElementById('ghostRadio');
@@ -5396,6 +5437,10 @@ function diffBtnClick(mode) {
   _updateDiffSubtitle(mode);
   try { localStorage.setItem('kw_difficulty', currentDifficulty); } catch(e) {}
 
+  // Apply timer and lives presets for this difficulty level
+  _applyDifficultyPresets(mode);
+  _updateTimerLivesPills();
+
   // If we are still on the welcome screen, dismiss it into idle
   if (gameState === 'welcome') {
     _dismissWelcome();
@@ -5423,11 +5468,88 @@ function _updateDiffBtnStyles(activeMode) {
 // welcomeDiffClick is an alias used by the panel buttons (both contexts)
 function welcomeDiffClick(mode) { diffBtnClick(mode); }
 
+// Presets: fundamentals → infinite, normal → 5s/10 lives, hardcore → 3s/3 lives
+var DIFFICULTY_PRESETS = {
+  fundamentals: { timer: null, lives: null },
+  normal:       { timer: 5,    lives: 10   },
+  hardcore:     { timer: 3,    lives: 3    },
+};
+
+function _applyDifficultyPresets(mode) {
+  var preset = DIFFICULTY_PRESETS[mode];
+  if (!preset) return;
+  questionTimer = preset.timer;
+  playerLives   = preset.lives;
+  try { localStorage.setItem('kw_timer', String(questionTimer)); } catch(e) {}
+  try { localStorage.setItem('kw_lives', String(playerLives));   } catch(e) {}
+}
+
 function _refreshDifficultyPanel() {
   // Use pendingDifficulty if a confirmation is in flight, otherwise current
   var displayMode = _pendingDifficulty !== null ? _pendingDifficulty : currentDifficulty;
   _updateDiffBtnStyles(displayMode);
   _updateDiffSubtitle(displayMode);
+  _updateTimerLivesPills();
+}
+
+function _updateTimerLivesPills() {
+  var unlocked = hasEverAchievedPerfectAccuracy;
+
+  // Update lock icons
+  var timerLock = document.getElementById('diffTimerLockIcon');
+  var livesLock = document.getElementById('diffLivesLockIcon');
+  if (timerLock) timerLock.classList.toggle('unlocked', unlocked);
+  if (livesLock) livesLock.classList.toggle('unlocked', unlocked);
+
+  // Timer pill
+  var timerBtns = document.querySelectorAll('#questionTimerPill .diff-five-btn');
+  timerBtns.forEach(function(btn) {
+    var val = btn.getAttribute('data-timer');
+    var parsed = val === 'null' ? null : parseInt(val, 10);
+    var isInfinity = parsed === null;
+    var isActive   = parsed === questionTimer || (parsed === null && questionTimer === null);
+    if (!unlocked && !isInfinity) {
+      btn.classList.add('diff-five-inactive');
+      btn.classList.remove('diff-five-active');
+      btn.disabled = true;
+    } else {
+      btn.classList.remove('diff-five-inactive');
+      btn.classList.toggle('diff-five-active', isActive);
+      btn.disabled = false;
+    }
+  });
+
+  // Lives pill
+  var livesBtns = document.querySelectorAll('#playerLivesPill .diff-five-btn');
+  livesBtns.forEach(function(btn) {
+    var val = btn.getAttribute('data-lives');
+    var parsed = val === 'null' ? null : parseInt(val, 10);
+    var isInfinity = parsed === null;
+    var isActive   = parsed === playerLives || (parsed === null && playerLives === null);
+    if (!unlocked && !isInfinity) {
+      btn.classList.add('diff-five-inactive');
+      btn.classList.remove('diff-five-active');
+      btn.disabled = true;
+    } else {
+      btn.classList.remove('diff-five-inactive');
+      btn.classList.toggle('diff-five-active', isActive);
+      btn.disabled = false;
+    }
+  });
+}
+
+function questionTimerBtnClick(value) {
+  if (!hasEverAchievedPerfectAccuracy && value !== null) return;
+  questionTimer = value;
+  try { localStorage.setItem('kw_timer', String(value)); } catch(e) {}
+  _updateTimerLivesPills();
+}
+
+function playerLivesBtnClick(value) {
+  if (!hasEverAchievedPerfectAccuracy && value !== null) return;
+  playerLives = value;
+  try { localStorage.setItem('kw_lives', String(value)); } catch(e) {}
+  _updateTimerLivesPills();
 }
 
 function _updateDiffSubtitle(mode) {
@@ -5549,6 +5671,8 @@ function _returningStartOver() {
   try { localStorage.removeItem('kw_app'); } catch(e) {}
   try { localStorage.removeItem('kw_difficulty'); } catch(e) {}
   try { localStorage.removeItem('kw_perfect'); } catch(e) {}
+  try { localStorage.removeItem('kw_timer'); } catch(e) {}
+  try { localStorage.removeItem('kw_lives'); } catch(e) {}
   try { sessionStorage.removeItem('kw_welcomed'); } catch(e) {}
   bestRecord = { time: null, accuracy: null };
   hasEverAchievedPerfectAccuracy = false;
@@ -5594,7 +5718,9 @@ function _startFromWelcome() {
       hasPriorSession = localStorage.getItem('kw_best')       !== null
                      || localStorage.getItem('kw_app')        !== null
                      || localStorage.getItem('kw_difficulty') !== null
-                     || localStorage.getItem('kw_perfect')    !== null;
+                     || localStorage.getItem('kw_perfect')    !== null
+                     || localStorage.getItem('kw_timer')      !== null
+                     || localStorage.getItem('kw_lives')      !== null;
     } catch(e) {}
     setTimeout(hasPriorSession ? _showReturningScreen : _showWelcomeScreen, 80);
   }
@@ -5978,7 +6104,8 @@ function endGame() {
   if (bestRecord.accuracy === null || finalAccuracy > bestRecord.accuracy) {
     bestRecord.accuracy = finalAccuracy; newBestAcc = true;
   }
-  if (finalAccuracy >= 100 && !hasEverAchievedPerfectAccuracy) {
+  const justEarnedTrophy = finalAccuracy >= 100 && !hasEverAchievedPerfectAccuracy;
+  if (justEarnedTrophy) {
     hasEverAchievedPerfectAccuracy = true;
     try { localStorage.setItem('kw_perfect', '1'); } catch(e) {}
   }
@@ -6001,7 +6128,9 @@ function endGame() {
 
   mainBtn.textContent = 'Try again?';
   titleEl.className = '';
-  titleEl.textContent = endGameMessage(totalTime, finalAccuracy, bestRecord, wasFirstRecord);
+  titleEl.textContent = justEarnedTrophy
+    ? 'A perfect run! New game modes unlocked.'
+    : endGameMessage(totalTime, finalAccuracy, bestRecord, wasFirstRecord);
   startEndScreenInactivityTimer();
   fillProgressDot(9);
   setTimeout(hideProgressDots, 0);
@@ -6010,6 +6139,7 @@ function endGame() {
   rimTarget = 0; rimCurrent = 0; rimVelocity = 0;
   updateMedalFaceStyle(0);
   timerDiv.textContent = formatTime(Math.floor(totalTime));
+  if (justEarnedTrophy) openSettings('panelDifficulty');
 }
 
 // ── Medal lighting: mouse-driven gradient rotation ──────────────────────────
@@ -6551,6 +6681,52 @@ document.addEventListener('DOMContentLoaded', function() {
 /* Welcome panel: collapse the subtitle gap so Skill-set loaded sits flush */
 #panelWelcome .diff-subtitle {
   display: none;
+}
+
+/* Horizontal divider on difficulty panel — matches vertical divider colour */
+.diff-horiz-divider {
+  width: 100%;
+  height: 1px;
+  background: #e5e7eb;
+  margin: 4px 0 12px;
+  flex-shrink: 0;
+}
+
+/* Extra controls section below the divider */
+.diff-extra-controls {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Five-part pill */
+.sp-seg-pill-five .sp-seg-btn:first-child { border-radius: 18px 0 0 18px; }
+.sp-seg-pill-five .sp-seg-btn:last-child  { border-radius: 0 18px 18px 0; }
+
+.diff-five-btn {
+  flex: 1;
+  text-align: center;
+}
+.diff-five-inactive {
+  background: linear-gradient(to bottom, #f0f4f8 70%, #dfe1e5 100%);
+  color: #9ca3af;
+  cursor: default;
+}
+.diff-five-active {
+  background: white;
+  color: #374151;
+}
+
+/* Lock icon — small, inline, dims when unlocked */
+.diff-lock-icon {
+  font-size: 10px;
+  opacity: 0.5;
+  transition: opacity 0.3s;
+}
+.diff-lock-icon.unlocked {
+  opacity: 0;
+  pointer-events: none;
 }
 /* ── Pause panel: settings nudge rows ───────────────── */
 .sp-settings-nudge {
