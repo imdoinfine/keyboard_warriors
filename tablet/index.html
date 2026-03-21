@@ -1640,6 +1640,16 @@ li.conflict-dismissed .conflict-desc {
 #title.question-pop {
   animation: questionPop 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
+/* Trophy unlock message — pops in with gold colour at peak, settles to normal */
+@keyframes trophyMessagePop {
+  0%   { opacity: 0; transform: scale(0.88); color: #1f2937; }
+  45%  { opacity: 1; transform: scale(1.06); color: #c88810; }
+  70%  { transform: scale(0.99); color: #b8730a; }
+  100% { opacity: 1; transform: scale(1);    color: #1f2937; }
+}
+#title.trophy-pop {
+  animation: trophyMessagePop 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
 @keyframes countPop {
   0%   { transform: scale(2.2); opacity: 0; }
   20%  { transform: scale(1.0); opacity: 1; }
@@ -1872,23 +1882,37 @@ li.conflict-dismissed .conflict-desc {
         <button class="sp-seg-btn diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')">Hardcore</button>
       </div>
       <p id="diffSubtitle" class="diff-subtitle">&nbsp;</p>
-      <div class="diff-horiz-divider"></div>
-      <div class="diff-extra-controls">
-        <p class="sp-title" style="margin-bottom:6px;text-align:center;">Question Timer</p>
-        <div class="sp-seg-pill sp-seg-pill-five" id="questionTimerPill">
-          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="1"  onclick="questionTimerBtnClick(1)">1</button>
-          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="3"  onclick="questionTimerBtnClick(3)">3</button>
-          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="5"  onclick="questionTimerBtnClick(5)">5</button>
-          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-timer="10" onclick="questionTimerBtnClick(10)">10</button>
-          <button class="sp-seg-btn diff-five-btn" data-timer="null" onclick="questionTimerBtnClick(null)"><svg class="infinity-svg" viewBox="0 0 40 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20,7 C18,4.2 15,2 11,2 A5,5 0 0 0 11,12 C15,12 18,9.8 20,7 Z M20,7 C22,4.2 25,2 29,2 A5,5 0 0 1 29,12 C25,12 22,9.8 20,7 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/></svg></button>
+      <div class="diff-advanced-panel" id="diffAdvancedPanel">
+        <p class="sp-title diff-advanced-label" style="text-align:center;margin-bottom:10px;">Question Timer</p>
+        <div class="diff-slider-wrap" id="questionTimerSlider" data-slider="timer">
+          <div class="diff-slider-track"></div>
+          <div class="diff-slider-ticks">
+            <div class="diff-slider-tick" style="left:0%"></div>
+            <div class="diff-slider-tick" style="left:9.1%"></div>
+            <div class="diff-slider-tick" style="left:27.3%"></div>
+            <div class="diff-slider-tick" style="left:54.5%"></div>
+            <div class="diff-slider-tick" style="left:100%"></div>
+          </div>
+          <div class="diff-slider-knob" tabindex="0">
+            <span class="diff-knob-label diff-knob-label-a">∞</span>
+            <span class="diff-knob-label diff-knob-label-b diff-knob-label-hidden">∞</span>
+          </div>
         </div>
-        <p class="sp-title" style="margin-bottom:6px;margin-top:8px;text-align:center;">Player Lives</p>
-        <div class="sp-seg-pill sp-seg-pill-five" id="playerLivesPill">
-          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="1"  onclick="playerLivesBtnClick(1)">1</button>
-          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="3"  onclick="playerLivesBtnClick(3)">3</button>
-          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="5"  onclick="playerLivesBtnClick(5)">5</button>
-          <button class="sp-seg-btn diff-five-btn diff-five-inactive" data-lives="10" onclick="playerLivesBtnClick(10)">10</button>
-          <button class="sp-seg-btn diff-five-btn" data-lives="null" onclick="playerLivesBtnClick(null)"><svg class="infinity-svg" viewBox="0 0 40 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20,7 C18,4.2 15,2 11,2 A5,5 0 0 0 11,12 C15,12 18,9.8 20,7 Z M20,7 C22,4.2 25,2 29,2 A5,5 0 0 1 29,12 C25,12 22,9.8 20,7 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/></svg></button>
+        <div class="diff-advanced-separator"></div>
+        <p class="sp-title diff-advanced-label" style="text-align:center;margin-bottom:10px;">Player Lives</p>
+        <div class="diff-slider-wrap" id="playerLivesSlider" data-slider="lives">
+          <div class="diff-slider-track"></div>
+          <div class="diff-slider-ticks">
+            <div class="diff-slider-tick" style="left:0%"></div>
+            <div class="diff-slider-tick" style="left:9.1%"></div>
+            <div class="diff-slider-tick" style="left:27.3%"></div>
+            <div class="diff-slider-tick" style="left:54.5%"></div>
+            <div class="diff-slider-tick" style="left:100%"></div>
+          </div>
+          <div class="diff-slider-knob" tabindex="0">
+            <span class="diff-knob-label diff-knob-label-a">∞</span>
+            <span class="diff-knob-label diff-knob-label-b diff-knob-label-hidden">∞</span>
+          </div>
         </div>
       </div>
     </div>
@@ -5511,68 +5535,244 @@ function _applyDifficultyPresets(mode) {
 }
 
 function _refreshDifficultyPanel() {
-  // Use pendingDifficulty if a confirmation is in flight, otherwise current
   var displayMode = _pendingDifficulty !== null ? _pendingDifficulty : currentDifficulty;
   _updateDiffBtnStyles(displayMode);
   _updateDiffSubtitle(displayMode);
-  _updateTimerLivesPills();
+  _syncAdvancedPanelState();
+  _syncSliderToValue('timer', questionTimer);
+  _syncSliderToValue('lives', playerLives);
 }
 
 function _updateTimerLivesPills() {
-  var unlocked = hasEverAchievedPerfectAccuracy;
-
-  // Timer pill
-  var timerBtns = document.querySelectorAll('#questionTimerPill .diff-five-btn');
-  timerBtns.forEach(function(btn) {
-    var val = btn.getAttribute('data-timer');
-    var parsed = val === 'null' ? null : parseInt(val, 10);
-    var isInfinity = parsed === null;
-    var isActive   = parsed === questionTimer || (parsed === null && questionTimer === null);
-    if (!unlocked && !isInfinity) {
-      btn.classList.add('diff-five-inactive');
-      btn.classList.remove('diff-five-active');
-      btn.disabled = true;
-    } else {
-      btn.classList.remove('diff-five-inactive');
-      btn.classList.toggle('diff-five-active', isActive);
-      btn.disabled = false;
-    }
-  });
-
-  // Lives pill
-  var livesBtns = document.querySelectorAll('#playerLivesPill .diff-five-btn');
-  livesBtns.forEach(function(btn) {
-    var val = btn.getAttribute('data-lives');
-    var parsed = val === 'null' ? null : parseInt(val, 10);
-    var isInfinity = parsed === null;
-    var isActive   = parsed === playerLives || (parsed === null && playerLives === null);
-    if (!unlocked && !isInfinity) {
-      btn.classList.add('diff-five-inactive');
-      btn.classList.remove('diff-five-active');
-      btn.disabled = true;
-    } else {
-      btn.classList.remove('diff-five-inactive');
-      btn.classList.toggle('diff-five-active', isActive);
-      btn.disabled = false;
-    }
-  });
+  _syncAdvancedPanelState();
+  _syncSliderToValue('timer', questionTimer);
+  _syncSliderToValue('lives', playerLives);
 }
 
 function questionTimerBtnClick(value) {
   if (!hasEverAchievedPerfectAccuracy && value !== null) return;
-  if (value === questionTimer) return; // already active, do nothing
+  if (value === questionTimer) return;
   questionTimer = value;
   try { localStorage.setItem('kw_timer', String(value)); } catch(e) {}
-  _updateTimerLivesPills();
+  _syncSliderToValue('timer', questionTimer);
 }
 
 function playerLivesBtnClick(value) {
   if (!hasEverAchievedPerfectAccuracy && value !== null) return;
-  if (value === playerLives) return; // already active, do nothing
+  if (value === playerLives) return;
   playerLives = value;
   try { localStorage.setItem('kw_lives', String(value)); } catch(e) {}
-  _updateTimerLivesPills();
+  _syncSliderToValue('lives', playerLives);
 }
+
+/* ── Fibonacci Slider ────────────────────────────────────────────────────────
+   Stop positions as % of track width (Fibonacci gaps 1:2:3:5):
+   0%, 9.1%, 27.3%, 54.5%, 100%
+   Values at stops: 1, 3, 5, 10, null (∞)
+──────────────────────────────────────────────────────────────────────────── */
+var SLIDER_STOPS      = [0, 9.1, 27.3, 54.5, 100];
+var SLIDER_VALUES     = [1, 3, 5, 10, null];
+var SLIDER_LABELS     = ['1', '3', '5', '10', '∞'];
+
+function _valueToStopIndex(value) {
+  for (var i = 0; i < SLIDER_VALUES.length; i++) {
+    if (SLIDER_VALUES[i] === value) return i;
+  }
+  return SLIDER_VALUES.length - 1; // default to ∞
+}
+
+function _labelForValue(value) {
+  var idx = _valueToStopIndex(value);
+  return SLIDER_LABELS[idx];
+}
+
+// Spring state per slider
+var _sliderSprings = {};
+
+function _getSpring(sliderId) {
+  if (!_sliderSprings[sliderId]) {
+    _sliderSprings[sliderId] = { pos: 100, vel: 0, target: 100, raf: null };
+  }
+  return _sliderSprings[sliderId];
+}
+
+function _syncSliderToValue(sliderType, value) {
+  var el = document.getElementById(sliderType === 'timer' ? 'questionTimerSlider' : 'playerLivesSlider');
+  if (!el) return;
+  var stopIdx = _valueToStopIndex(value);
+  var spring = _getSpring(sliderType);
+  spring.target = SLIDER_STOPS[stopIdx];
+  _setKnobLabel(el, _labelForValue(value));
+  if (!spring.raf) _animateSpring(sliderType, el);
+}
+
+function _syncAdvancedPanelState() {
+  var panel = document.getElementById('diffAdvancedPanel');
+  if (!panel) return;
+  var unlocked = hasEverAchievedPerfectAccuracy;
+  panel.classList.toggle('diff-advanced-active', unlocked);
+}
+
+function _setKnobLabel(sliderEl, newLabel) {
+  var labelA = sliderEl.querySelector('.diff-knob-label-a');
+  var labelB = sliderEl.querySelector('.diff-knob-label-b');
+  if (!labelA || !labelB) return;
+  // Determine which is currently visible
+  var aVisible = !labelA.classList.contains('diff-knob-label-hidden');
+  var activeEl  = aVisible ? labelA : labelB;
+  var hiddenEl  = aVisible ? labelB : labelA;
+  if (activeEl.textContent === newLabel) return; // no change
+  hiddenEl.textContent = newLabel;
+  hiddenEl.classList.remove('diff-knob-label-hidden');
+  activeEl.classList.add('diff-knob-label-hidden');
+}
+
+function _setKnobPosition(sliderEl, pct) {
+  var knob = sliderEl.querySelector('.diff-slider-knob');
+  if (!knob) return;
+  // Clamp to knob half-width so it never overflows track edges
+  knob.style.left = pct + '%';
+}
+
+function _animateSpring(sliderType, sliderEl) {
+  var spring = _getSpring(sliderType);
+  var stiffness = 0.18;
+  var damping   = 0.72;
+  function tick() {
+    var force = (spring.target - spring.pos) * stiffness;
+    spring.vel = spring.vel * damping + force;
+    spring.pos += spring.vel;
+    _setKnobPosition(sliderEl, spring.pos);
+    if (Math.abs(spring.vel) > 0.01 || Math.abs(spring.pos - spring.target) > 0.01) {
+      spring.raf = requestAnimationFrame(tick);
+    } else {
+      spring.pos = spring.target;
+      _setKnobPosition(sliderEl, spring.pos);
+      spring.raf = null;
+    }
+  }
+  spring.raf = requestAnimationFrame(tick);
+}
+
+function _snapToNearestStop(pct) {
+  var best = 0, bestDist = Infinity;
+  for (var i = 0; i < SLIDER_STOPS.length; i++) {
+    var d = Math.abs(SLIDER_STOPS[i] - pct);
+    if (d < bestDist) { bestDist = d; best = i; }
+  }
+  return best;
+}
+
+function _initSliders() {
+  ['questionTimerSlider', 'playerLivesSlider'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var sliderType = el.getAttribute('data-slider');
+    var knob = el.querySelector('.diff-slider-knob');
+    var isDragging = false;
+    var dragStartX = 0;
+    var dragStartPct = 0;
+    var trackWidth = 0;
+
+    function getPct(clientX) {
+      var rect = el.getBoundingClientRect();
+      var pct = ((clientX - rect.left) / rect.width) * 100;
+      return Math.max(0, Math.min(100, pct));
+    }
+
+    knob.addEventListener('pointerdown', function(e) {
+      e.preventDefault();
+      knob.setPointerCapture(e.pointerId);
+      isDragging = true;
+      var spring = _getSpring(sliderType);
+      dragStartX   = e.clientX;
+      dragStartPct = spring.pos;
+      trackWidth   = el.getBoundingClientRect().width;
+    });
+
+    knob.addEventListener('pointermove', function(e) {
+      if (!isDragging) return;
+      var unlocked = hasEverAchievedPerfectAccuracy;
+      var deltaPct = ((e.clientX - dragStartX) / trackWidth) * 100;
+      var spring = _getSpring(sliderType);
+      if (unlocked) {
+        // Free drag — follow pointer directly, spring will snap on release
+        var rawPct = Math.max(0, Math.min(100, dragStartPct + deltaPct));
+        spring.pos    = rawPct;
+        spring.target = rawPct;
+        if (spring.raf) { cancelAnimationFrame(spring.raf); spring.raf = null; }
+        _setKnobPosition(el, rawPct);
+      } else {
+        // Locked — tight resistance, max 5% deflection
+        var resistance = 0.08;
+        var deflection = Math.max(-5, Math.min(5, deltaPct * resistance));
+        var lockedPct  = SLIDER_STOPS[_valueToStopIndex(sliderType === 'timer' ? questionTimer : playerLives)];
+        spring.pos    = lockedPct + deflection;
+        spring.target = lockedPct + deflection;
+        if (spring.raf) { cancelAnimationFrame(spring.raf); spring.raf = null; }
+        _setKnobPosition(el, spring.pos);
+      }
+    });
+
+    knob.addEventListener('pointerup', function(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      var unlocked = hasEverAchievedPerfectAccuracy;
+      var spring = _getSpring(sliderType);
+      if (unlocked) {
+        // Snap to nearest stop and update value
+        var stopIdx = _snapToNearestStop(spring.pos);
+        var newValue = SLIDER_VALUES[stopIdx];
+        spring.target = SLIDER_STOPS[stopIdx];
+        _animateSpring(sliderType, el);
+        // Update state
+        if (sliderType === 'timer') {
+          if (newValue !== questionTimer) {
+            questionTimer = newValue;
+            try { localStorage.setItem('kw_timer', String(newValue)); } catch(ex) {}
+          }
+        } else {
+          if (newValue !== playerLives) {
+            playerLives = newValue;
+            try { localStorage.setItem('kw_lives', String(newValue)); } catch(ex) {}
+          }
+        }
+        _setKnobLabel(el, _labelForValue(newValue));
+      } else {
+        // Snap back to locked position
+        var lockedPct = SLIDER_STOPS[_valueToStopIndex(sliderType === 'timer' ? questionTimer : playerLives)];
+        spring.target = lockedPct;
+        _animateSpring(sliderType, el);
+      }
+    });
+
+    // Click on track (not knob) to jump to nearest stop when unlocked
+    el.addEventListener('pointerdown', function(e) {
+      if (e.target === knob || knob.contains(e.target)) return;
+      if (!hasEverAchievedPerfectAccuracy) {
+        showToast('Win a trophy to access these settings.');
+        return;
+      }
+      var pct = getPct(e.clientX);
+      var stopIdx  = _snapToNearestStop(pct);
+      var newValue = SLIDER_VALUES[stopIdx];
+      var spring   = _getSpring(sliderType);
+      spring.target = SLIDER_STOPS[stopIdx];
+      _animateSpring(sliderType, el);
+      if (sliderType === 'timer') {
+        questionTimer = newValue;
+        try { localStorage.setItem('kw_timer', String(newValue)); } catch(ex) {}
+      } else {
+        playerLives = newValue;
+        try { localStorage.setItem('kw_lives', String(newValue)); } catch(ex) {}
+      }
+      _setKnobLabel(el, _labelForValue(newValue));
+    });
+  });
+}
+
+// Initialise sliders once DOM is ready
+document.addEventListener('DOMContentLoaded', _initSliders);
 
 function _updateDiffSubtitle(mode) {
   var subtitles = {
@@ -6156,6 +6356,10 @@ function endGame() {
   titleEl.textContent = justEarnedTrophy
     ? 'A perfect run! New game modes unlocked.'
     : endGameMessage(totalTime, finalAccuracy, bestRecord, wasFirstRecord);
+  if (justEarnedTrophy) {
+    void titleEl.offsetWidth;
+    titleEl.classList.add('trophy-pop');
+  }
   startEndScreenInactivityTimer();
   fillProgressDot(9);
   setTimeout(hideProgressDots, 0);
@@ -6164,7 +6368,22 @@ function endGame() {
   rimTarget = 0; rimCurrent = 0; rimVelocity = 0;
   updateMedalFaceStyle(0);
   timerDiv.textContent = formatTime(Math.floor(totalTime));
-  if (justEarnedTrophy) openSettings('panelDifficulty');
+  if (justEarnedTrophy) {
+    openSettings('panelDifficulty');
+    // Panel opens in inactive state; after a short pause animate to active
+    // (trophy flag already set so _syncAdvancedPanelState will activate it,
+    //  but we defer so the inactive→active CSS transition is visible)
+    setTimeout(function() {
+      _syncAdvancedPanelState();
+      // Animate knobs from ∞ (default) to the current difficulty preset
+      var timer = _sliderSprings['timer'];
+      var lives = _sliderSprings['lives'];
+      if (timer) { timer.target = SLIDER_STOPS[_valueToStopIndex(questionTimer)]; if (!timer.raf) _animateSpring('timer', document.getElementById('questionTimerSlider')); }
+      if (lives) { lives.target = SLIDER_STOPS[_valueToStopIndex(playerLives)];   if (!lives.raf) _animateSpring('lives', document.getElementById('playerLivesSlider')); }
+      _setKnobLabel(document.getElementById('questionTimerSlider'), _labelForValue(questionTimer));
+      _setKnobLabel(document.getElementById('playerLivesSlider'),   _labelForValue(playerLives));
+    }, 600);
+  }
 }
 
 // ── Medal lighting: mouse-driven gradient rotation ──────────────────────────
@@ -6711,72 +6930,142 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 /* Horizontal divider on difficulty panel — inset to align with pill corner radius */
-.diff-horiz-divider {
-  width: calc(100% - 40px);
-  height: 1px;
-  background: #e5e7eb;
-  margin: 4px 20px 8px;
-  flex-shrink: 0;
-}
-
-/* Extra controls section below the divider */
-.diff-extra-controls {
+/* ── Advanced settings rounded rect panel ─────────────────────────────────── */
+/* Width matches the difficulty pill (100% of column).
+   Sliders inside are narrower — capped to approximate keyboard top-edge width. */
+.diff-advanced-panel {
   width: 100%;
+  border-radius: 14px;
+  border: 1.5px solid #e5e7eb;
+  padding: 14px 16px 14px;
+  margin-top: 6px;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
+  box-sizing: border-box;
+  /* Inactive state: plain border, no fill */
+  background: transparent;
+  transition: background 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
+}
+/* Active state: slight fill + inner shadow */
+.diff-advanced-panel.diff-advanced-active {
+  background: #f7f9fb;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
+  border-color: #d1d5db;
 }
 
-/* Five-part pill — skinnier than the main difficulty pill */
-.sp-seg-pill-five {
-  border-radius: 12px;
+/* Labels inside the panel — mid-grey when inactive, darker when active */
+.diff-advanced-label {
+  color: #9ca3af;
+  transition: color 0.5s ease;
 }
-.sp-seg-pill-five .sp-seg-btn:first-child { border-radius: 11px 0 0 11px; }
-.sp-seg-pill-five .sp-seg-btn:last-child  { border-radius: 0 11px 11px 0; }
+.diff-advanced-panel.diff-advanced-active .diff-advanced-label {
+  color: #374151;
+}
 
-/* Skinnier button for the five-part pills */
-.diff-five-btn {
-  flex: 1;
-  text-align: center;
+/* Thin separator between the two sliders */
+.diff-advanced-separator {
+  width: 60%;
+  height: 1px;
+  background: #e5e7eb;
+  margin: 10px 0 12px;
+  transition: background 0.5s ease;
+}
+.diff-advanced-panel.diff-advanced-active .diff-advanced-separator {
+  background: #d1d5db;
+}
+
+/* ── Fibonacci slider ──────────────────────────────────────────────────────── */
+/* Slider width: approximate keyboard top-edge. Full keyboard ~612px, but the
+   settings panel is narrower. We use min() to cap at a tidy width. */
+.diff-slider-wrap {
+  position: relative;
+  width: min(100%, 260px);
+  height: 32px;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  touch-action: none;
+}
+
+/* Track */
+.diff-slider-track {
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%; transform: translateY(-50%);
+  height: 1.5px;
+  background: #9ca3af;
+  border-radius: 2px;
+  transition: background 0.5s ease;
+}
+.diff-advanced-panel.diff-advanced-active .diff-slider-track {
+  background: #d1d5db;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+/* Tick marks */
+.diff-slider-ticks {
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  pointer-events: none;
+}
+.diff-slider-tick {
+  position: absolute;
+  width: 1.5px;
+  height: 7px;
+  background: #9ca3af;
+  transform: translate(-50%, -50%);
+  border-radius: 1px;
+  transition: background 0.5s ease;
+}
+.diff-advanced-panel.diff-advanced-active .diff-slider-tick {
+  background: #d1d5db;
+}
+
+/* Knob */
+.diff-slider-knob {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border: 1.5px solid #d1d5db;
+  border-radius: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.10);
+  min-width: 36px;
   height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 4px;
-  font-size: 12px;
+  padding: 0 10px;
+  cursor: grab;
+  z-index: 2;
+  outline: none;
+  transition: box-shadow 0.2s ease;
 }
-/* Infinity segment takes one third of total width (flex 2 out of 6 total units) */
-.diff-five-btn[data-timer="null"],
-.diff-five-btn[data-lives="null"] {
-  flex: 2;
-}
-/* SVG infinity icon — wider to fill the larger flex share */
-.diff-five-btn .infinity-svg {
-  display: block;
-  width: 28px;
-  height: 12px;
-}
-/* Locked/unavailable: flat background-grey, looks empty, no hover */
-.diff-five-btn.diff-five-inactive {
-  background: linear-gradient(to bottom, #f0f4f8 70%, #dfe1e5 100%);
-  color: #9ca3af;
+.diff-slider-knob:active { cursor: grabbing; }
+.diff-advanced-panel:not(.diff-advanced-active) .diff-slider-knob {
   cursor: default;
+  border-color: #e5e7eb;
+  box-shadow: none;
+}
+
+/* Label crossfade */
+.diff-knob-label {
+  position: absolute;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #9ca3af;
+  line-height: 1;
+  transition: opacity 0.2s ease, color 0.5s ease;
   pointer-events: none;
+  white-space: nowrap;
 }
-/* Active/selected: white fill, dark text, instant snap */
-.diff-five-btn.diff-five-active {
-  background: white;
+.diff-advanced-panel.diff-advanced-active .diff-knob-label {
   color: #374151;
-  transition: none;
 }
-/* When the pill is hovered, ALL available buttons (active or passive) move to midpoint */
-.sp-seg-pill-five:hover .diff-five-btn:not(.diff-five-inactive) {
-  background: #eff9fe;
-  color: #6b7280;
-  transition: background 0.15s, color 0.15s;
-}
-/* The specific button being hovered pushes to the same midpoint — no further change needed */
-/* On click the JS immediately sets diff-five-active which snaps to white via transition:none */
+.diff-knob-label-hidden { opacity: 0; }
 /* ── Pause panel: settings nudge rows ───────────────── */
 .sp-settings-nudge {
   display: flex;
