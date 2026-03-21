@@ -1882,7 +1882,7 @@ li.conflict-dismissed .conflict-desc {
     <!-- ── Keyboard Settings ────────────────────────────── -->
     <div id="panelKeyboard" class="sp-page">
       <div class="sp-col sp-col-left">
-        <p class="sp-title">Keyboard Behaviour</p>
+        <p class="sp-title"><small>QWERTY</small> Keyboard Behaviour</p>
 
         <div class="modal-toggle-row" id="touchRow">
           <label onclick="onTouchToggle()">
@@ -1957,16 +1957,29 @@ li.conflict-dismissed .conflict-desc {
       </div><!-- /.sp-col-left -->
 
       <div class="sp-col sp-col-right">
-        <div class="modal-toggle-row" id="ghostRow">
-          <label onclick="onGhostModeToggle()">
-            <span class="modal-radio" id="ghostRadio">
-              <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
-                <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
-              </svg>
-            </span>
-            <span class="modal-toggle-label">Ghost Mode</span>
-          </label>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:0;">
+          <div class="modal-toggle-row" id="ghostRow" style="margin-bottom:0;">
+            <label onclick="onGhostModeToggle()">
+              <span class="modal-radio" id="ghostRadio">
+                <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
+                  <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
+                </svg>
+              </span>
+              <span class="modal-toggle-label">Ghost Mode</span>
+            </label>
+          </div>
+          <div class="modal-toggle-row" id="killPunctuationRow" style="margin-bottom:0;">
+            <label onclick="onKillPunctuationToggle()">
+              <span class="modal-radio" id="killPunctuationRadio">
+                <svg class="modal-radio-dot" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="9.5" cy="9.5" r="6.5" stroke="#374151" stroke-width="1.5" fill="none"/>
+                  <circle class="modal-radio-fill" cx="9.5" cy="9.5" r="3.5" fill="#374151"/>
+                </svg>
+              </span>
+              <span class="modal-toggle-label">Kill Punctuation</span>
+            </label>
+          </div>
         </div>
         <div class="modal-section-gap"></div>
         <div id="modalKbSizeSection">
@@ -3426,6 +3439,7 @@ function mainButtonClick() {
   }
   if (gameState === 'confirm-reset') { confirmResetYes(); return; }
   if (gameState === 'confirm-quit')  { confirmQuitYes();  return; }
+  if (gameState === 'confirm-kill-punctuation') { confirmKillPunctuationYes(); return; }
   if (gameState === 'confirm-diff-change') { confirmDiffChangeYes(); return; }
   if (gameState === 'confirm-trophy') { confirmTrophyYes(); return; }
 }
@@ -3465,9 +3479,10 @@ function helpButtonClick() {
   if (gameState === 'playing')        { toggleHelp(); return; }
   if (gameState === 'readyToUnpause') { _enterReadyToUnpauseCleanup(); enterPause(); enterConfirmQuit(); return; }
   if (gameState === 'paused')         { enterConfirmQuit(); return; }
-  if (gameState === 'confirm-reset')       { confirmResetNo(); return; }
-  if (gameState === 'confirm-quit')        { confirmQuitNo();  return; }
-  if (gameState === 'confirm-diff-change') { confirmDiffChangeNo(); return; }
+  if (gameState === 'confirm-reset')           { confirmResetNo(); return; }
+  if (gameState === 'confirm-quit')            { confirmQuitNo();  return; }
+  if (gameState === 'confirm-kill-punctuation') { confirmKillPunctuationNo(); return; }
+  if (gameState === 'confirm-diff-change')     { confirmDiffChangeNo(); return; }
   if (gameState === 'confirm-trophy')      { confirmTrophyNo(); return; }
   if (gameState === 'finished')       { showTip(tipIndex + 1); tipIndex++; return; }
 }
@@ -4382,6 +4397,7 @@ function onAudibleToggle() {
 }
 
 var ghostModeOn = false;
+var killPunctuationOn = false;
 
 function onGhostModeToggle() {
   ghostModeOn = !ghostModeOn;
@@ -4395,6 +4411,57 @@ function onGhostModeToggle() {
     if (touchRadio) touchRadio.classList.remove('on');
   }
   showModeToast(ghostModeOn ? 'Ghost Mode on' : 'Ghost Mode off');
+}
+
+function onKillPunctuationToggle() {
+  if (killPunctuationOn) {
+    // Toggling off requires no confirmation
+    setKillPunctuation(false);
+    return;
+  }
+  // Toggling on is a destructive action — use the established confirm flow
+  _closeAllModalsInstant();
+  gameState = 'confirm-kill-punctuation';
+  titleEl.className = '';
+  titleEl.classList.remove('blurred');
+  questionCountEl.classList.remove('blurred');
+  titleEl.textContent = 'Are you sure? Use mitigations only as needed.';
+  mainBtn.textContent = 'Yes';
+  mainBtn.style.background = '#10b981';
+  helpBtn.textContent = 'No';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+  if (lockKeyEl) lockKeyEl.classList.add('active');
+}
+
+function confirmKillPunctuationYes() {
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  setKillPunctuation(true);
+  _returnAfterKillPunctuationConfirm();
+}
+
+function confirmKillPunctuationNo() {
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  _returnAfterKillPunctuationConfirm();
+}
+
+function _returnAfterKillPunctuationConfirm() {
+  if (_wasPlaying && answersLeft > 0) {
+    _returnToPauseScreen(null);
+  } else {
+    resetToIdle();
+    openSettings('panelKeyboard');
+  }
+}
+
+function setKillPunctuation(on) {
+  killPunctuationOn = on;
+  var radio = document.getElementById('killPunctuationRadio');
+  if (radio) radio.classList.toggle('on', on);
+  // Rebuild pool immediately so the change takes effect mid-session if needed
+  if (gameState === 'playing') {
+    questionPool = shuffleArray(buildPool());
+  }
 }
 
 function onStickyKeysToggle() {
@@ -5623,6 +5690,20 @@ var currentDifficulty = 'normal';
 // Max difficulty value included per mode
 var DIFF_MAX = { fundamentals: 1, normal: 3, hardcore: 5 };
 
+// Shortcut tokens that are unreliable across international QWERTY variants.
+// These involve keys whose physical position or character output differs
+// between layouts (e.g. UK, French, German, Nordic, Spanish keyboards).
+// Letters (KeyA-Z), digits (Digit0-9), modifiers, arrows, and function keys
+// are all stable and are never included here.
+const UNSTABLE_PUNCTUATION_TOKENS = new Set([
+  ';', "CMD+;", "CMD+OPTION+;", "CMD+SHIFT+;", "CMD+SHIFT+OPTION+;",
+  "'", "CMD+'",
+  '/', "CMD+/", "CMD+OPTION+/",
+  '\\', "BACKSLASH", "CMD+BACKSLASH", "CMD+SHIFT+BACKSLASH", "CMD+OPTION+BACKSLASH",
+  '`', "GRAVE", "CMD+GRAVE", "CMD+OPTION+GRAVE", "CMD+SHIFT+GRAVE",
+  '~', "SHIFT+~", "SHIFT+GRAVE",
+]);
+
 function buildPool() {
   var maxDiff = DIFF_MAX[currentDifficulty] || 3;
   const browserSkip   = getBrowserConflictSet();
@@ -5632,6 +5713,7 @@ function buildPool() {
     if (s.difficulty > maxDiff) return false;
     if ((touchEnabled || !hasFullKeyboard) && requiresExtKey(s.shortcut)) return false;
     if (browserSkip.has(s.shortcut)) return false;
+    if (killPunctuationOn && UNSTABLE_PUNCTUATION_TOKENS.has(s.shortcut)) return false;
     return true;
   });
 }
