@@ -463,7 +463,7 @@ body {
 /* Nudge credit and difficulty icon up into the keyboard shadow when face-down */
 #keyboardWrap.kb-at-face ~ #credit,
 #keyboardWrap.kb-at-face ~ #diffIconWrap {
-  transform: translateY(-44px);
+  transform: translateY(-22px);
 }
 
 /* Extended key ghost pill — appears in statsRow when a key not on the
@@ -6762,20 +6762,23 @@ document.addEventListener('DOMContentLoaded', function() {
   cursor: default;
   pointer-events: none;
 }
-/* Active/selected: white fill, dark text */
+/* Active/selected: white fill, dark text, inset dark stroke, instant snap */
 .diff-five-btn.diff-five-active {
   background: white;
   color: #374151;
+  box-shadow: inset 0 0 0 1.5px #374151;
+  transition: none;
 }
 /* Hover only on available, non-active buttons */
 .diff-five-btn:not(.diff-five-inactive):not(.diff-five-active):hover {
   background: white;
   color: #374151;
 }
-/* While a sibling is hovered, dim the current active segment */
+/* While a sibling is hovered, dim the current active segment — but keep its stroke */
 .sp-seg-pill[data-hovering] .diff-five-btn.diff-five-active {
   background: #e0f2fe;
   color: #9ca3af;
+  box-shadow: inset 0 0 0 1.5px #374151;
 }
 /* ── Pause panel: settings nudge rows ───────────────── */
 .sp-settings-nudge {
