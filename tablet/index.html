@@ -159,7 +159,7 @@ body {
 /* ══════════════════════════════════════
    TIMER
 ══════════════════════════════════════ */
-.timerBox {
+.scoreDisc {
   background: #1f2937;
   color: white;
   border-radius: 50%;
@@ -177,8 +177,8 @@ body {
   flex-shrink: 0;
 }
 /* Each half occupies exactly 50% so the divider always lands at centre */
-.timerBox .timer-top,
-.timerBox .timer-bottom {
+.scoreDisc .timer-top,
+.scoreDisc .timer-bottom {
   flex: 1;
   width: 100%;
   display: flex;
@@ -187,20 +187,20 @@ body {
   gap: 2px;
 }
 /* Top: number sits closest to divider (flex-end), icon floats up */
-.timerBox .timer-top    { justify-content: flex-end;   padding-bottom: 2px; }
+.scoreDisc .timer-top    { justify-content: flex-end;   padding-bottom: 2px; }
 /* Bottom: number sits closest to divider (flex-start), icon floats down */
-.timerBox .timer-bottom { justify-content: flex-start;  padding-top: 8px; }
-.timerBox .timer-icon {
+.scoreDisc .timer-bottom { justify-content: flex-start;  padding-top: 8px; }
+.scoreDisc .timer-icon {
   width: 14px;
   height: 14px;
   opacity: 0.55;
 }
-.timerBox .accuracy-icon {
+.scoreDisc .accuracy-icon {
   width: 14px;
   height: 14px;
   opacity: 0.55;
 }
-.timerBox .timer-time {
+.scoreDisc .timer-time {
   font-size: 26px;
   font-weight: 700;
   font-family: 'Courier New', monospace;
@@ -208,34 +208,34 @@ body {
   line-height: 1;
 }
 /* SVG dashed divider — zero flex-shrink so it never collapses */
-.timerBox .timer-divider {
+.scoreDisc .timer-divider {
   display: block;
   width: 100%;
   flex-shrink: 0;
   overflow: visible;
 }
 /* Groove lines hidden during normal play */
-.timerBox .div-groove-dark,
-.timerBox .div-groove-light { display: none; }
+.scoreDisc .div-groove-dark,
+.scoreDisc .div-groove-light { display: none; }
 /* On medals: hide dashed, show solid groove */
-.timerBox.medal-gold   .div-dashed,
-.timerBox.medal-silver .div-dashed,
-.timerBox.medal-bronze .div-dashed { display: none; }
-.timerBox.medal-gold   .div-groove-dark,
-.timerBox.medal-gold   .div-groove-light,
-.timerBox.medal-silver .div-groove-dark,
-.timerBox.medal-silver .div-groove-light,
-.timerBox.medal-bronze .div-groove-dark,
-.timerBox.medal-bronze .div-groove-light { display: block; }
+.scoreDisc.medal-gold   .div-dashed,
+.scoreDisc.medal-silver .div-dashed,
+.scoreDisc.medal-bronze .div-dashed { display: none; }
+.scoreDisc.medal-gold   .div-groove-dark,
+.scoreDisc.medal-gold   .div-groove-light,
+.scoreDisc.medal-silver .div-groove-dark,
+.scoreDisc.medal-silver .div-groove-light,
+.scoreDisc.medal-bronze .div-groove-dark,
+.scoreDisc.medal-bronze .div-groove-light { display: block; }
 /* Per-medal groove colours */
-.timerBox.medal-gold   .div-groove-dark  { stroke: rgba(50,20,0,0.80); }
-.timerBox.medal-gold   .div-groove-light { stroke: rgba(255,225,80,0.70); }
-.timerBox.medal-silver .div-groove-dark  { stroke: rgba(15,30,50,0.75); }
-.timerBox.medal-silver .div-groove-light { stroke: rgba(245,255,255,0.85); }
-.timerBox.medal-bronze .div-groove-dark  { stroke: rgba(30,8,0,0.80); }
-.timerBox.medal-bronze .div-groove-light { stroke: rgba(255,180,90,0.65); }
+.scoreDisc.medal-gold   .div-groove-dark  { stroke: rgba(50,20,0,0.80); }
+.scoreDisc.medal-gold   .div-groove-light { stroke: rgba(255,225,80,0.70); }
+.scoreDisc.medal-silver .div-groove-dark  { stroke: rgba(15,30,50,0.75); }
+.scoreDisc.medal-silver .div-groove-light { stroke: rgba(245,255,255,0.85); }
+.scoreDisc.medal-bronze .div-groove-dark  { stroke: rgba(30,8,0,0.80); }
+.scoreDisc.medal-bronze .div-groove-light { stroke: rgba(255,180,90,0.65); }
 /* Accuracy number */
-.timerBox .timer-accuracy {
+.scoreDisc .timer-accuracy {
   font-size: 26px;
   font-weight: 700;
   font-family: 'Courier New', monospace;
@@ -244,17 +244,17 @@ body {
 }
 
 /* CHANGE 5: paused timer is clickable to unpause */
-.timerBox.paused        { background: #4b5563; cursor: pointer; }
-.timerBox.green         { background: #10b981; }
-.timerBox.finished      { background: #1f2937; }
+.scoreDisc.paused        { background: #4b5563; cursor: pointer; }
+.scoreDisc.green         { background: #10b981; }
+.scoreDisc.finished      { background: #1f2937; }
 
 /* ── Medal states ───────────────────────────────────────────────────────────
    Outer rim = chiselled conic gradient. ::before = metal face disc (3px inset).
    Drop shadow soft + translucent, offset bottom-right (light source top-left).
 ──────────────────────────────────────────────────────────────────────────── */
-.timerBox.medal-gold,
-.timerBox.medal-silver,
-.timerBox.medal-bronze {
+.scoreDisc.medal-gold,
+.scoreDisc.medal-silver,
+.scoreDisc.medal-bronze {
   position: relative;
   overflow: visible;
   transition: background 0.6s ease, box-shadow 0.6s ease;
@@ -262,9 +262,9 @@ body {
     4px 8px 20px rgba(0,0,0,0.28),
     2px 3px  8px rgba(0,0,0,0.15);
 }
-.timerBox.medal-gold::before,
-.timerBox.medal-silver::before,
-.timerBox.medal-bronze::before {
+.scoreDisc.medal-gold::before,
+.scoreDisc.medal-silver::before,
+.scoreDisc.medal-bronze::before {
   content: '';
   position: absolute;
   inset: 3px;
@@ -274,12 +274,12 @@ body {
     inset  1px  1px 1px rgba(255,255,255,0.55),
     inset -1px -1px 1px rgba(0,0,0,0.55);
 }
-.timerBox.medal-gold   > *,
-.timerBox.medal-silver > *,
-.timerBox.medal-bronze > * { position: relative; z-index: 2; }
+.scoreDisc.medal-gold   > *,
+.scoreDisc.medal-silver > *,
+.scoreDisc.medal-bronze > * { position: relative; z-index: 2; }
 
 /* GOLD */
-.timerBox.medal-gold {
+.scoreDisc.medal-gold {
   background: conic-gradient(
     from 225deg,
     #b8730a 0deg, #b8730a 1deg,
@@ -292,7 +292,7 @@ body {
   color: #3b1a00;
   text-shadow: 0 1px 0 rgba(255,230,80,0.8);
 }
-.timerBox.medal-gold::before {
+.scoreDisc.medal-gold::before {
   background: conic-gradient(
     #c8860a 0deg, #fde68a 40deg, #f6c547 70deg, #b8730a 110deg,
     #7c4d04 140deg, #e8b84b 175deg, #fef08a 200deg, #d4a017 230deg,
@@ -304,7 +304,7 @@ body {
 }
 
 /* SILVER */
-.timerBox.medal-silver {
+.scoreDisc.medal-silver {
   background: conic-gradient(
     from 225deg,
     #6a8090 0deg, #6a8090 1deg,
@@ -317,7 +317,7 @@ body {
   color: #1a2530;
   text-shadow: 0 1px 0 rgba(230,245,255,0.9);
 }
-.timerBox.medal-silver::before {
+.scoreDisc.medal-silver::before {
   background: conic-gradient(
     #7a8fa6 0deg, #dce8f0 40deg, #f4f8fb 70deg, #8fa8bf 110deg,
     #4a6070 140deg, #c8d8e8 175deg, #f4f8fb 200deg, #90a8be 230deg,
@@ -329,7 +329,7 @@ body {
 }
 
 /* BRONZE */
-.timerBox.medal-bronze {
+.scoreDisc.medal-bronze {
   background: conic-gradient(
     from 225deg,
     #6a3010 0deg, #6a3010 1deg,
@@ -342,7 +342,7 @@ body {
   color: #2a0e00;
   text-shadow: 0 1px 0 rgba(255,175,80,0.7);
 }
-.timerBox.medal-bronze::before {
+.scoreDisc.medal-bronze::before {
   background: conic-gradient(
     #7a3e10 0deg, #e8915a 40deg, #c8703a 70deg, #8b4515 110deg,
     #4a2008 140deg, #d4814a 175deg, #f0a060 200deg, #a05820 230deg,
@@ -354,23 +354,23 @@ body {
 }
 
 /* Divider and icons on medal faces */
-.timerBox.medal-gold   .timer-divider line { stroke: rgba(50,20,0,0.55); }
-.timerBox.medal-silver .timer-divider line { stroke: rgba(15,30,50,0.50); }
-.timerBox.medal-bronze .timer-divider line { stroke: rgba(30,8,0,0.55); }
+.scoreDisc.medal-gold   .timer-divider line { stroke: rgba(50,20,0,0.55); }
+.scoreDisc.medal-silver .timer-divider line { stroke: rgba(15,30,50,0.50); }
+.scoreDisc.medal-bronze .timer-divider line { stroke: rgba(30,8,0,0.55); }
 /* Timer icon — bevel drop-shadow */
-.timerBox.medal-gold   .timer-icon { opacity:0.85; filter: drop-shadow(0 1px 0 rgba(255,230,80,0.7))  drop-shadow(0 -1px 0 rgba(50,20,0,0.5)); }
-.timerBox.medal-silver .timer-icon { opacity:0.85; filter: drop-shadow(0 1px 0 rgba(230,245,255,0.8)) drop-shadow(0 -1px 0 rgba(15,30,50,0.5)); }
-.timerBox.medal-bronze .timer-icon { opacity:0.85; filter: drop-shadow(0 1px 0 rgba(255,175,80,0.65)) drop-shadow(0 -1px 0 rgba(30,8,0,0.55)); }
+.scoreDisc.medal-gold   .timer-icon { opacity:0.85; filter: drop-shadow(0 1px 0 rgba(255,230,80,0.7))  drop-shadow(0 -1px 0 rgba(50,20,0,0.5)); }
+.scoreDisc.medal-silver .timer-icon { opacity:0.85; filter: drop-shadow(0 1px 0 rgba(230,245,255,0.8)) drop-shadow(0 -1px 0 rgba(15,30,50,0.5)); }
+.scoreDisc.medal-bronze .timer-icon { opacity:0.85; filter: drop-shadow(0 1px 0 rgba(255,175,80,0.65)) drop-shadow(0 -1px 0 rgba(30,8,0,0.55)); }
 /* Accuracy icon — plain dark shadow colour only, no extra effects */
-.timerBox.medal-gold   .accuracy-icon { opacity:0.75; color: rgba(50,20,0,0.85);   filter: none; }
-.timerBox.medal-silver .accuracy-icon { opacity:0.75; color: rgba(15,30,50,0.85);  filter: none; }
-.timerBox.medal-bronze .accuracy-icon { opacity:0.75; color: rgba(30,8,0,0.85);    filter: none; }
+.scoreDisc.medal-gold   .accuracy-icon { opacity:0.75; color: rgba(50,20,0,0.85);   filter: none; }
+.scoreDisc.medal-silver .accuracy-icon { opacity:0.75; color: rgba(15,30,50,0.85);  filter: none; }
+.scoreDisc.medal-bronze .accuracy-icon { opacity:0.75; color: rgba(30,8,0,0.85);    filter: none; }
 /* Penalty gradients — sharp split at 50%, rapid transition in */
-.timerBox.penalty-time  {
+.scoreDisc.penalty-time  {
   background: linear-gradient(to bottom, #ef4444 0%, #ef4444 50%, #1f2937 50%, #1f2937 100%);
   transition: background 0.08s ease;
 }
-.timerBox.penalty-acc   {
+.scoreDisc.penalty-acc   {
   background: linear-gradient(to bottom, #1f2937 0%, #1f2937 50%, #f59e0b 50%, #f59e0b 100%);
   transition: background 0.08s ease;
 }
@@ -392,9 +392,29 @@ body {
 #title.hidden  { opacity: 0; }
 #title.strike  { text-decoration: line-through; opacity: 0.45; }
 #title.blurred { filter: blur(6px); opacity: 0.6; user-select: none; }
+#confirmHeading {
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
+  color: #1f2937;
+  white-space: pre-line;
+  position: absolute;
+  left: -20px; right: -20px;
+  z-index: 2;
+  pointer-events: none;
+  padding: 16px 20px;
+  border-radius: 10px;
+  background: transparent;
+  transition: background 0.2s ease;
+}
+#confirmHeading:not(:empty) {
+  background: rgba(224, 242, 254, 0.33);
+  backdrop-filter: blur(2px);
+}
 #title.blur-instant,
 #questionRow.blur-instant { transition: none !important; }
-#questionRow.blurred { filter: blur(3px); opacity: 0.6; user-select: none; }
+#questionRow.blurred { filter: blur(3px); opacity: 0.75; user-select: none; }
 
 /* ══════════════════════════════════════
    INFO ROWS (question count + best record)
@@ -534,6 +554,10 @@ body.pc-mode #extKeyPill {
   opacity: 0.38;
   pointer-events: none;
 }
+.modal-inline-row.disabled .modal-left-label,
+.modal-inline-row.disabled .modal-right-label {
+  text-decoration: line-through;
+}
 /* Column 1: left label — right-aligned so it butts up against the switch */
 .modal-left-label {
   display: table-cell;
@@ -542,7 +566,7 @@ body.pc-mode #extKeyPill {
   padding-right: 5px;
   white-space: nowrap;
   font-size: 12px;
-  color: #6b7280;
+  color: #374151;
 }
 /* Column 2: the toggle switch itself */
 .modal-switch-wrap {
@@ -635,6 +659,9 @@ body.pc-mode #extKeyPill {
 .modal-toggle-row.disabled {
   opacity: 0.4;
   pointer-events: none;
+}
+.modal-toggle-row.disabled .modal-toggle-label {
+  text-decoration: line-through;
 }
 .modal-toggle-label {
   font-size: 13px;
@@ -786,25 +813,12 @@ body.pc-mode #extKeyPill {
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
-  background: white;
+  color: #9ca3af;
+  background: #f7f9fb;
   border: 1.5px solid #d1d5db;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s;
   line-height: 1.2;
-}
-.diff-btn:hover:not(.diff-btn-inactive) {
-  background: #e0f2fe;
-}
-.diff-btn-inactive {
-  color: #374151;
-  background: transparent;
-  cursor: default;
-}
-.diff-btn-active {
-  color: #374151;
-  background: white;
 }
 .sp-key-chip {
   display: inline-block;
@@ -1399,13 +1413,13 @@ li.conflict-dismissed .conflict-desc {
 
   .rightPanel { width: 90px; }
 
-  .timerBox { width: 90px; height: 90px; }
-  .timerBox .timer-time,
-  .timerBox .timer-accuracy { font-size: 18px; }
-  .timerBox .timer-icon,
-  .timerBox .accuracy-icon  { width: 11px; height: 11px; }
-  .timerBox .timer-top    { padding-bottom: 3px; }
-  .timerBox .timer-bottom { padding-top: 3px; }
+  .scoreDisc { width: 90px; height: 90px; }
+  .scoreDisc .timer-time,
+  .scoreDisc .timer-accuracy { font-size: 18px; }
+  .scoreDisc .timer-icon,
+  .scoreDisc .accuracy-icon  { width: 11px; height: 11px; }
+  .scoreDisc .timer-top    { padding-bottom: 3px; }
+  .scoreDisc .timer-bottom { padding-top: 3px; }
 
   #title { font-size: 18px; }
 
@@ -1726,6 +1740,7 @@ li.conflict-dismissed .conflict-desc {
     </div>
     <div class="middlePanel">
       <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;">
+          <h2 id="confirmHeading" style="display:none;"></h2>
           <h2 id="title">Play Keyboard Warriors</h2>
           <p id="welcomeTagline"><em>Your keyboard shortcuts coach &amp; personal trainer.</em></p>
           <div id="countdownOverlay"><span id="countdownNum"></span></div>
@@ -1733,7 +1748,7 @@ li.conflict-dismissed .conflict-desc {
     </div>
     <div class="rightPanel">
       <!-- CHANGE 5: timer click unpauses -->
-      <div class="timerBox" id="timerBox" onclick="timerBoxClick()">
+      <div class="scoreDisc" id="scoreDisc" onclick="scoreDiscClick()">
         <div class="timer-top">
           <svg class="timer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="13" r="8"/>
@@ -1812,7 +1827,7 @@ li.conflict-dismissed .conflict-desc {
           <span class="sp-nudge-text">We can't simulate all shortcuts because your <small>OS</small> &amp; browser own some. Fine-tune here.</span>
           <svg class="sp-nudge-icon" viewBox="0 0 86 64.1" xmlns="http://www.w3.org/2000/svg"><g><path d="M7,11.7v42c0,2.2,1.8,4,4,4h63c2.2,0,4-1.8,4-4V11.7c0-2.2-1.8-4-4-4H11c-2.2,0-4,1.8-4,4ZM9,19.7h67v34c0,1.1-.9,2-2,2H11c-1.1,0-2-.9-2-2V19.7ZM9,11.7c0-1.1.9-2,2-2h63c1.1,0,2,.9,2,2v6H9v-6Z"/><circle cx="19.3" cy="13.7" r="2"/><circle cx="13.3" cy="13.7" r="2"/><circle cx="25.3" cy="13.7" r="2"/></g><path d="M42.5,23.4c-6,0-11.4,2.1-14.9,5.4h0c0,0-.1.1-.2.2-2.4,2.3-3.8,5.2-3.8,8.4s1.4,6,3.8,8.4c0,0,0,.1.2.2,3.4,3.3,8.8,5.4,14.9,5.4s11.4-2.1,14.9-5.4h0c0,0,.1-.1.2-.2,0,0,0,0,0,0,2.4-2.3,3.8-5.2,3.8-8.4s-1.4-6-3.8-8.4c0,0-.1-.1-.2-.2-3.4-3.3-8.8-5.4-14.9-5.4h0ZM41.3,25.3v5.4c-1.9,0-3.7-.2-5.4-.4.3-.6.7-1.2,1-1.7,1.3-1.7,2.8-2.8,4.4-3.2h0ZM43.7,25.3c1.6.4,3.1,1.5,4.4,3.2.4.5.7,1.1,1.1,1.7-1.7.2-3.5.4-5.4.4v-5.3ZM49,26.2c2.1.7,4,1.7,5.5,2.9-.9.3-1.9.5-2.9.8-.4-.8-.8-1.5-1.3-2.2-.4-.5-.8-1-1.3-1.5h0ZM36,26.2c-.5.4-.9.9-1.2,1.5-.5.7-.9,1.4-1.3,2.2-1.1-.2-2.1-.5-2.9-.8,1.5-1.2,3.4-2.2,5.5-2.9h0ZM28.9,30.6c1.1.4,2.4.8,3.8,1-.5,1.5-.8,3.1-.9,4.8h-5.6c.2-2.1,1.2-4.1,2.7-5.8h0ZM56.1,30.6c1.5,1.7,2.5,3.7,2.7,5.8h-5.6c0-1.7-.4-3.3-.9-4.8,1.4-.3,2.7-.6,3.8-1h0ZM35.1,32c1.9.3,4,.4,6.1.5v3.9h-7c0-1.5.4-3,.8-4.3h0ZM49.9,32c.4,1.3.7,2.8.8,4.3h-7v-3.9c2.2,0,4.2-.2,6.1-.5h0ZM26.2,38.2h5.6c0,1.7.4,3.3.9,4.8-1.4.3-2.7.6-3.8,1-1.5-1.7-2.5-3.7-2.7-5.8h0ZM34.3,38.2h7v3.9c-2.2,0-4.2.2-6.1.5-.4-1.3-.7-2.8-.8-4.3h0ZM43.7,38.2h7c0,1.5-.4,3-.8,4.3-1.9-.3-4-.4-6.1-.5v-3.9ZM53.2,38.2h5.6c-.2,2.1-1.2,4.1-2.7,5.8-1.1-.4-2.4-.8-3.8-1,.5-1.5.8-3.1.9-4.8h0ZM41.3,43.9v5.4c-1.6-.4-3.1-1.4-4.4-3.2-.4-.5-.7-1.1-1.1-1.7,1.7-.2,3.5-.4,5.4-.4h0ZM43.7,43.9c1.9,0,3.7.2,5.4.4-.3.6-.7,1.2-1.1,1.7-1.3,1.7-2.8,2.8-4.4,3.2v-5.3ZM33.4,44.7c.4.8.8,1.5,1.3,2.2.4.5.8,1,1.2,1.5-2.1-.7-4-1.7-5.5-2.9.9-.3,1.9-.5,2.9-.8h0ZM51.6,44.7c1.1.2,2.1.5,2.9.8-1.5,1.2-3.4,2.2-5.5,2.9.5-.4.9-.9,1.3-1.5.5-.7.9-1.4,1.3-2.2h0Z"/></svg>
         </a>
-        <span class="sp-settings-nudge sp-nudge-inactive" onclick="_pauseDifficultyNudgeClick()">
+        <span id="pauseDiffNudge" class="sp-settings-nudge sp-nudge-inactive" onclick="_pauseDifficultyNudgeClick()">
           <span class="sp-nudge-text">We are adding knowledge and training your muscle memory.<br><em>As you level up, raise the bar.</em></span>
           <svg class="sp-nudge-icon" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
             <style>.pn-stroke{fill:none;stroke:currentColor;stroke-width:2px;stroke-linecap:round;stroke-miterlimit:10;}</style>
@@ -1846,17 +1861,17 @@ li.conflict-dismissed .conflict-desc {
         <p class="sp-body sp-clear-label" id="spClearLabel">Clear high score record?</p>
         <div class="score-clear-pill">
           <button id="clearTimeBtn" class="score-pill-seg score-pill-quarter" onclick="_pauseClearClick('time')" title="Clear best time">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6"/><path d="M12 3v2"/></svg>
+            <span class="diff-btn-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6"/><path d="M12 3v2"/></svg></span>
           </button>
-          <button id="clearBothBtn" class="score-pill-seg score-pill-half" onclick="_pauseClearClick('both')">both</button>
+          <button id="clearBothBtn" class="score-pill-seg score-pill-half" onclick="_pauseClearClick('both')"><span class="diff-btn-text">both</span></button>
           <button id="clearAccBtn" class="score-pill-seg score-pill-quarter" onclick="_pauseClearClick('accuracy')" title="Clear best accuracy">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/></svg>
+            <span class="diff-btn-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/></svg></span>
           </button>
         </div>
         <p class="sp-body sp-clear-label" style="margin-top:8px;"><strong>Report impossible question:</strong></p>
         <div class="score-clear-pill">
           <button class="score-pill-seg score-pill-full" onclick="_reportImpossibleQuestion()" title="Report an impossible question">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+            <span class="diff-btn-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg></span>
           </button>
         </div>
       </div>
@@ -1867,8 +1882,8 @@ li.conflict-dismissed .conflict-desc {
       <p class="sp-title" style="margin-bottom:10px;text-align:center;"><em>Would you like to?</em></p>
       <div class="sp-returning-inner">
         <div class="sp-seg-pill sp-seg-pill-two">
-          <button class="sp-seg-btn sp-seg-btn-left" onclick="_returningContinue()">Continue your last session</button>
-          <button class="sp-seg-btn sp-seg-btn-right" onclick="_returningStartOver()">Forget and start over fresh</button>
+          <button class="sp-seg-btn sp-seg-btn-left" onclick="_returningContinue()"><span class="diff-btn-text">Continue your last session</span></button>
+          <button class="sp-seg-btn sp-seg-btn-right" onclick="_returningStartOver()"><span class="diff-btn-text">Forget and start over fresh</span></button>
         </div>
         <p class="sp-body sp-returning-privacy" style="text-align:center;"><strong><em>Made for you, and stored with you.</em></strong><br><strong>Keyboard Warriors</strong> runs entirely on your device using local memory.<br><em class="sp-returning-tagline">No clouds, no crumbs.</em></p>
       </div>
@@ -1878,9 +1893,9 @@ li.conflict-dismissed .conflict-desc {
     <div id="panelDifficulty" class="sp-page">
       <p class="sp-title" style="margin-bottom:10px;">Question Difficulty</p>
       <div class="sp-seg-pill sp-seg-pill-three" id="difficultyPill">
-        <button class="sp-seg-btn diff-btn" data-mode="fundamentals" onclick="diffBtnClick('fundamentals')">Fundamentals</button>
-        <button class="sp-seg-btn diff-btn" data-mode="normal" onclick="diffBtnClick('normal')">Normal</button>
-        <button class="sp-seg-btn diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')">Hardcore</button>
+        <button class="sp-seg-btn diff-btn" data-mode="fundamentals" onclick="diffBtnClick('fundamentals')"><span class="diff-btn-text">Fundamentals</span></button>
+        <button class="sp-seg-btn diff-btn" data-mode="normal" onclick="diffBtnClick('normal')"><span class="diff-btn-text">Normal</span></button>
+        <button class="sp-seg-btn diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')"><span class="diff-btn-text">Hardcore</span></button>
       </div>
       <p id="diffSubtitle" class="diff-subtitle">&nbsp;</p>
       <div class="diff-advanced-panel" id="diffAdvancedPanel">
@@ -1896,8 +1911,8 @@ li.conflict-dismissed .conflict-desc {
               <div class="diff-slider-tick" style="left:100%"></div>
             </div>
             <div class="diff-slider-knob" tabindex="0">
-              <span class="diff-knob-label diff-knob-label-a diff-knob-infinity">∞</span>
-              <span class="diff-knob-label diff-knob-label-b diff-knob-label-hidden diff-knob-infinity">∞</span>
+              <span class="diff-knob-label diff-knob-label-a diff-knob-infinity"><svg width="28" height="12" viewBox="0 0 515 212" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M407.61,16.84c48.83,1.86,86.06,42.58,85.87,89.9s-37.87,87.63-86.39,89.22c-21.05.69-41.59-4.39-61.27-11.73-32.39-12.09-63.19-33.84-91.01-54.92-26.68,20.05-55.36,40.62-86.44,53.11-18.16,7.29-36.97,12.62-56.58,13.43-50.03,2.07-91.29-38.6-92.28-87.62-1-49.32,38.85-91.77,89.43-91.35,21.7.18,42.7,6.51,62.63,14.8,29.41,12.24,57.82,32.66,83.26,51.76,27.43-20.82,58.38-42.64,90.32-54.65,19.88-7.47,40.51-12.79,62.47-11.95ZM224.88,106.33c-13.7-10.61-26.08-19.62-39.46-28.55-12.28-7.96-24.33-14.74-37.72-20.85-12.89-4.65-25.61-10.03-39.69-10.06-32.92-.07-58.71,27.86-58.52,59.86.19,31.69,25.87,59.21,58.52,59.15,13.85-.02,26.38-5.3,39.11-9.81,28.75-12.95,52.41-30.11,77.75-49.74ZM363.28,156.38c13.28,5.04,26.45,9.63,40.94,9.66,33.23.07,59.46-27.61,59.27-60.02-.19-32.12-26.29-59.4-59.28-59.31-14.51.04-27.72,4.62-41,9.69-29.18,12.8-52.86,30.36-78.6,49.95,25.67,19.67,49.53,37.23,78.67,50.03Z"/></svg></span>
+              <span class="diff-knob-label diff-knob-label-b diff-knob-label-hidden diff-knob-infinity"><svg width="28" height="12" viewBox="0 0 515 212" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M407.61,16.84c48.83,1.86,86.06,42.58,85.87,89.9s-37.87,87.63-86.39,89.22c-21.05.69-41.59-4.39-61.27-11.73-32.39-12.09-63.19-33.84-91.01-54.92-26.68,20.05-55.36,40.62-86.44,53.11-18.16,7.29-36.97,12.62-56.58,13.43-50.03,2.07-91.29-38.6-92.28-87.62-1-49.32,38.85-91.77,89.43-91.35,21.7.18,42.7,6.51,62.63,14.8,29.41,12.24,57.82,32.66,83.26,51.76,27.43-20.82,58.38-42.64,90.32-54.65,19.88-7.47,40.51-12.79,62.47-11.95ZM224.88,106.33c-13.7-10.61-26.08-19.62-39.46-28.55-12.28-7.96-24.33-14.74-37.72-20.85-12.89-4.65-25.61-10.03-39.69-10.06-32.92-.07-58.71,27.86-58.52,59.86.19,31.69,25.87,59.21,58.52,59.15,13.85-.02,26.38-5.3,39.11-9.81,28.75-12.95,52.41-30.11,77.75-49.74ZM363.28,156.38c13.28,5.04,26.45,9.63,40.94,9.66,33.23.07,59.46-27.61,59.27-60.02-.19-32.12-26.29-59.4-59.28-59.31-14.51.04-27.72,4.62-41,9.69-29.18,12.8-52.86,30.36-78.6,49.95,25.67,19.67,49.53,37.23,78.67,50.03Z"/></svg></span>
             </div>
           </div>
         </div>
@@ -1914,21 +1929,22 @@ li.conflict-dismissed .conflict-desc {
               <div class="diff-slider-tick" style="left:100%"></div>
             </div>
             <div class="diff-slider-knob" tabindex="0">
-              <span class="diff-knob-label diff-knob-label-a diff-knob-infinity">∞</span>
-              <span class="diff-knob-label diff-knob-label-b diff-knob-label-hidden diff-knob-infinity">∞</span>
+              <span class="diff-knob-label diff-knob-label-a diff-knob-infinity"><svg width="28" height="12" viewBox="0 0 515 212" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M407.61,16.84c48.83,1.86,86.06,42.58,85.87,89.9s-37.87,87.63-86.39,89.22c-21.05.69-41.59-4.39-61.27-11.73-32.39-12.09-63.19-33.84-91.01-54.92-26.68,20.05-55.36,40.62-86.44,53.11-18.16,7.29-36.97,12.62-56.58,13.43-50.03,2.07-91.29-38.6-92.28-87.62-1-49.32,38.85-91.77,89.43-91.35,21.7.18,42.7,6.51,62.63,14.8,29.41,12.24,57.82,32.66,83.26,51.76,27.43-20.82,58.38-42.64,90.32-54.65,19.88-7.47,40.51-12.79,62.47-11.95ZM224.88,106.33c-13.7-10.61-26.08-19.62-39.46-28.55-12.28-7.96-24.33-14.74-37.72-20.85-12.89-4.65-25.61-10.03-39.69-10.06-32.92-.07-58.71,27.86-58.52,59.86.19,31.69,25.87,59.21,58.52,59.15,13.85-.02,26.38-5.3,39.11-9.81,28.75-12.95,52.41-30.11,77.75-49.74ZM363.28,156.38c13.28,5.04,26.45,9.63,40.94,9.66,33.23.07,59.46-27.61,59.27-60.02-.19-32.12-26.29-59.4-59.28-59.31-14.51.04-27.72,4.62-41,9.69-29.18,12.8-52.86,30.36-78.6,49.95,25.67,19.67,49.53,37.23,78.67,50.03Z"/></svg></span>
+              <span class="diff-knob-label diff-knob-label-b diff-knob-label-hidden diff-knob-infinity"><svg width="28" height="12" viewBox="0 0 515 212" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M407.61,16.84c48.83,1.86,86.06,42.58,85.87,89.9s-37.87,87.63-86.39,89.22c-21.05.69-41.59-4.39-61.27-11.73-32.39-12.09-63.19-33.84-91.01-54.92-26.68,20.05-55.36,40.62-86.44,53.11-18.16,7.29-36.97,12.62-56.58,13.43-50.03,2.07-91.29-38.6-92.28-87.62-1-49.32,38.85-91.77,89.43-91.35,21.7.18,42.7,6.51,62.63,14.8,29.41,12.24,57.82,32.66,83.26,51.76,27.43-20.82,58.38-42.64,90.32-54.65,19.88-7.47,40.51-12.79,62.47-11.95ZM224.88,106.33c-13.7-10.61-26.08-19.62-39.46-28.55-12.28-7.96-24.33-14.74-37.72-20.85-12.89-4.65-25.61-10.03-39.69-10.06-32.92-.07-58.71,27.86-58.52,59.86.19,31.69,25.87,59.21,58.52,59.15,13.85-.02,26.38-5.3,39.11-9.81,28.75-12.95,52.41-30.11,77.75-49.74ZM363.28,156.38c13.28,5.04,26.45,9.63,40.94,9.66,33.23.07,59.46-27.61,59.27-60.02-.19-32.12-26.29-59.4-59.28-59.31-14.51.04-27.72,4.62-41,9.69-29.18,12.8-52.86,30.36-78.6,49.95,25.67,19.67,49.53,37.23,78.67,50.03Z"/></svg></span>
             </div>
           </div>
         </div>
       </div>
+      <p id="diffAdvancedFooter" class="diff-advanced-footer">Changing 'Question Difficulty' will suggest settings here, but you have complete control over these features.</p>
     </div>
 
     <!-- ── Welcome Landing ──────────────────────────────── -->
     <div id="panelWelcome" class="sp-page">
       <p class="sp-title" style="margin-bottom:10px;">Question Difficulty</p>
       <div class="sp-seg-pill sp-seg-pill-three" id="welcomeDifficultyPill">
-        <button class="sp-seg-btn diff-btn" data-mode="fundamentals" onclick="diffBtnClick('fundamentals')">Fundamentals</button>
-        <button class="sp-seg-btn diff-btn" data-mode="normal" onclick="diffBtnClick('normal')">Normal</button>
-        <button class="sp-seg-btn diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')">Hardcore</button>
+        <button class="sp-seg-btn diff-btn" data-mode="fundamentals" onclick="diffBtnClick('fundamentals')"><span class="diff-btn-text">Fundamentals</span></button>
+        <button class="sp-seg-btn diff-btn" data-mode="normal" onclick="diffBtnClick('normal')"><span class="diff-btn-text">Normal</span></button>
+        <button class="sp-seg-btn diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')"><span class="diff-btn-text">Hardcore</span></button>
       </div>
       <p id="welcomeDiffSubtitle" class="diff-subtitle">&nbsp;</p>
       <p class="sp-returning-privacy" style="text-align:center;"><strong>Skill-set loaded:</strong><br>You are currently training with <strong>Graphic Design</strong> applications.<br><em class="sp-returning-tagline">Other skill-sets coming soon.</em></p>
@@ -1986,8 +2002,8 @@ li.conflict-dismissed .conflict-desc {
               <label class="os-switch" title="Keys left of space" style="cursor:pointer;">
                 <input type="checkbox" id="modalOsToggle" onchange="onModalOsToggle()">
                 <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect id="modalOsTrackRect" x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
-                  <circle id="modalOsKnobEl" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
+                  <rect id="modalOsTrackRect" x="1" y="1" width="34" height="12" rx="6" stroke="#374151" stroke-width="1.25" fill="none"/>
+                  <circle id="modalOsKnobEl" cx="7" cy="7" r="3.5" stroke="#374151" stroke-width="1.25" fill="white"
                           style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
                 </svg>
               </label>
@@ -2000,8 +2016,8 @@ li.conflict-dismissed .conflict-desc {
               <label class="os-switch" title="Leftmost key" style="cursor:pointer;">
                 <input type="checkbox" id="modalFnToggle" onchange="onModalFnToggle()">
                 <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
-                  <circle id="modalFnKnobEl" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
+                  <rect x="1" y="1" width="34" height="12" rx="6" stroke="#374151" stroke-width="1.25" fill="none"/>
+                  <circle id="modalFnKnobEl" cx="7" cy="7" r="3.5" stroke="#374151" stroke-width="1.25" fill="white"
                           style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
                 </svg>
               </label>
@@ -2046,8 +2062,8 @@ li.conflict-dismissed .conflict-desc {
               <label class="os-switch" title="Keyboard size" style="cursor:pointer;">
                 <input type="checkbox" id="modalKbSizeToggle" onchange="onKbSizeToggle()">
                 <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="1" y="1" width="34" height="12" rx="6" stroke="#374151" stroke-width="1.5" fill="none"/>
-                  <circle id="modalKbSizeKnob" cx="7" cy="7" r="4" stroke="#374151" stroke-width="1.5" fill="white"
+                  <rect x="1" y="1" width="34" height="12" rx="6" stroke="#374151" stroke-width="1.25" fill="none"/>
+                  <circle id="modalKbSizeKnob" cx="7" cy="7" r="3.5" stroke="#374151" stroke-width="1.25" fill="white"
                           style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
                 </svg>
               </label>
@@ -2512,7 +2528,7 @@ function _kbPanelRect() {
 }
 
 function showToast(msg, duration) {
-  var readingDuration = Math.min(6000, 1800 + msg.length * 65);
+  var readingDuration = Math.min(5000, 1400 + msg.length * 40);
   duration = duration || readingDuration;
   var el = document.getElementById('kwToast');
   if (!el) return;
@@ -2638,7 +2654,7 @@ document.head.appendChild(medalFaceStyleEl);
 function updateMedalFaceStyle(angle) {
   if (!currentMedal) return;
   medalFaceStyleEl.textContent =
-    '.timerBox.medal-' + currentMedal + '::before { background: ' + MEDAL_FACE[currentMedal](angle) + ' !important; }';
+    '.scoreDisc.medal-' + currentMedal + '::before { background: ' + MEDAL_FACE[currentMedal](angle) + ' !important; }';
 }
 
 const osToggleEl     = document.getElementById('osToggle');
@@ -2831,25 +2847,7 @@ updateMismatchPill();
 // Apply rounded style if starting in PC mode
 document.getElementById('keyboardPanel').classList.toggle('pc-keys', currentOs === 'pc');
 
-// Wire data-hovering on segmented pills so CSS can fade the active segment
-// when the user hovers over a sibling (signalling a potential state change).
-// Five-part pills use a pure CSS :hover approach instead and are excluded here.
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.sp-seg-pill:not(.sp-seg-pill-five)').forEach(function(pill) {
-    pill.querySelectorAll('.sp-seg-btn').forEach(function(btn) {
-      btn.addEventListener('mouseenter', function() {
-        var isActive   = btn.classList.contains('diff-btn-active');
-        var isInactive = btn.classList.contains('diff-btn-inactive');
-        if (!isActive && !isInactive) {
-          pill.setAttribute('data-hovering', '');
-        }
-      });
-      btn.addEventListener('mouseleave', function() {
-        pill.removeAttribute('data-hovering');
-      });
-    });
-  });
-});
+// Hover states removed from pills -- no longer part of the design.
 
 /* ══════════════════════════════════════
    SHORTCUT → KEY CODES
@@ -3318,10 +3316,12 @@ let partialShortcutNudgeTimer    = null;
 let partialShortcutFollowUpTimer = null;
 let partialShortcutNudgeArmed    = false;
 let consecutiveExtraKeyCount     = 0;  // increments when correct keys + a wrong key are all present
-let endScreenInactivityTimer     = null;
+let endScreenInactivityTimer      = null;
 let readyToUnpauseInactivityTimer = null;
+let pauseInactivityTimer          = null;
+let readyPromptTimer              = null;
 let bestRecord    = { time: null, accuracy: null };  // independent bests
-let hasEverAchievedPerfectAccuracy = false;           // never cleared, gates Hardcore and trophy
+let hasTrophy = false;           // never cleared, gates Hardcore and trophy
 let greenHits       = 0;
 let totalHits       = 0;
 let hintPenaltyPct  = 0;  // decaying hint penalty in percentage points
@@ -3343,14 +3343,14 @@ try {
 } catch(e) {}
 
 try {
-  if (localStorage.getItem('kw_perfect') === '1') hasEverAchievedPerfectAccuracy = true;
+  if (localStorage.getItem('kw_perfect') === '1') hasTrophy = true;
 } catch(e) {}
 
 const mainBtn         = document.getElementById('mainBtn');
 const helpBtn         = document.getElementById('helpBtn');
 const titleEl         = document.getElementById('title');
 const timerDiv        = document.getElementById('timer');
-const timerBox        = document.getElementById('timerBox');
+const scoreDisc        = document.getElementById('scoreDisc');
 const questionCountEl = document.getElementById('questionRow');
 
 // ── Progress dots ─────────────────────────────────────────────────────────────
@@ -3441,9 +3441,9 @@ function updateBestDisplay(pulseTime, pulseAcc) {
     statLeftEl.innerHTML = '';
   }
   if (bestRecord.accuracy !== null) {
-    const trophy = hasEverAchievedPerfectAccuracy ? ' 🏆' : '';
+    const trophy = hasTrophy ? ' 🏆' : '';
     statRightEl.innerHTML = 'best ' + BULLSEYE_SVG_STR + '= ' + bestRecord.accuracy + '%' + trophy;
-  } else if (hasEverAchievedPerfectAccuracy) {
+  } else if (hasTrophy) {
     statRightEl.innerHTML = '🏆';
   } else {
     statRightEl.textContent = '';
@@ -3483,16 +3483,16 @@ function updateTimer() {
   timerDiv.textContent = formatTime(Math.floor(totalTime));
 }
 
-function resetTimerBox() {
-  timerBox.style.background = '';
-  timerBox.style.removeProperty('--face-rot');
+function resetscoreDisc() {
+  scoreDisc.style.background = '';
+  scoreDisc.style.removeProperty('--face-rot');
   currentMedal = null;
-  timerBox.className = 'timerBox';
+  scoreDisc.className = 'scoreDisc';
   timerDiv.textContent = formatTime(Math.floor(totalTime));
 }
 
 function setTimerState(state, text) {
-  timerBox.className = 'timerBox' + (state ? ' '+state : '');
+  scoreDisc.className = 'scoreDisc' + (state ? ' '+state : '');
   if (text !== undefined) timerDiv.textContent = text;
 }
 
@@ -3571,10 +3571,14 @@ function helpButtonClick() {
 }
 
 /* CHANGE 5: clicking the ⏸ timer unpauses */
-function timerBoxClick() {
+function scoreDiscClick() {
   if (gameState === 'counting')  { cancelCountdown(); return; }
   if (gameState === 'playing') { enterPause(); return; }
   if (gameState === 'readyToUnpause') { _enterReadyToUnpauseCleanup(); enterPause(); return; }
+  if (gameState === 'idle' || gameState === 'welcome') {
+    if (activeSettings === 'panelPause') { closeSettings(); } else { openSettings('panelPause'); }
+    return;
+  }
   if (gameState === 'finished') {
     if (activeSettings === 'panelPause') { closeSettings(); } else { openSettings('panelPause'); }
     return;
@@ -3662,10 +3666,10 @@ function toggleHelp() {
     dbgRefreshCtx(); dbgRefreshAccuracy();
     // Flash bottom half orange to show the penalty
     clearTimeout(accuracyPenaltyTimeout);
-    timerBox.classList.add('penalty-acc');
+    scoreDisc.classList.add('penalty-acc');
     accuracyEl.textContent = '-10%';
     accuracyPenaltyTimeout = setTimeout(() => {
-      timerBox.classList.remove('penalty-acc');
+      scoreDisc.classList.remove('penalty-acc');
       updateAccuracyDisplay();
     }, 2000);
     helpFadeTimer = setTimeout(() => {
@@ -3693,18 +3697,23 @@ function togglePause() {
   if (gameState === 'playing')   { enterPause(); return; }
   if (gameState === 'readyToUnpause') { _enterReadyToUnpauseCleanup(); enterPause(); return; }
   if (gameState === 'paused')    {
-    // Only offer reset if there's actually a score to reset
-    if (bestRecord.time !== null) { enterConfirmReset(); return; }
-    return; // no score — do nothing
+    if (bestRecord.time === null && bestRecord.accuracy === null) return; // nothing to reset
+    // Ensure the pause panel is visible, then trigger the overlay confirm pattern.
+    // This keeps the screen content intact -- only the inactive treatment is applied.
+    if (activeSettings !== 'panelPause') openSettings('panelPause');
+    _pauseClearClick('both', 'First confirm if you want to reset or not.');
+    return;
   }
   if (gameState === 'confirm-reset') { confirmResetNo(); return; }
   if (gameState === 'idle' || gameState === 'finished') {
-    if (bestRecord.time !== null) { enterConfirmReset(); return; }
+    var hasAnyRecord = bestRecord.time !== null || bestRecord.accuracy !== null;
+    if (hasAnyRecord) { enterConfirmReset('both'); return; }
   }
 }
 
 function _enterReadyToUnpause() {
   gameState = 'readyToUnpause';
+  _stopPauseInactivityTimer();
   setKbPosition('face');
   mainBtn.textContent = 'Unpause';
   helpBtn.textContent = 'Quit';
@@ -3717,6 +3726,7 @@ function _enterReadyToUnpause() {
   // Pulse the unpause button once the keyboard has returned to face position,
   // then keep pulsing on a repeat timer as a persistent CTA.
   _startReadyToUnpauseInactivityTimer(1000);
+  _startReadyPromptTimer();
 }
 
 function _startReadyToUnpauseInactivityTimer(initialDelay) {
@@ -3733,6 +3743,37 @@ function _enterReadyToUnpauseCleanup() {
   readyToUnpauseInactivityTimer = null;
 }
 
+function _startPauseInactivityTimer() {
+  clearTimeout(pauseInactivityTimer);
+  pauseInactivityTimer = setTimeout(function pulseAndReschedule() {
+    if (gameState !== 'paused') { pauseInactivityTimer = null; return; }
+    pulseBtn(mainBtn);
+    pauseInactivityTimer = setTimeout(pulseAndReschedule, 6000);
+  }, 6000);
+  _startReadyPromptTimer();
+}
+
+function _stopPauseInactivityTimer() {
+  clearTimeout(pauseInactivityTimer);
+  pauseInactivityTimer = null;
+  _stopReadyPromptTimer();
+}
+
+function _startReadyPromptTimer() {
+  clearTimeout(readyPromptTimer);
+  readyPromptTimer = setTimeout(function() {
+    var awaitingAction = (gameState === 'idle' || gameState === 'paused' ||
+                          gameState === 'finished' || gameState === 'readyToUnpause');
+    if (!awaitingAction) { readyPromptTimer = null; return; }
+    showConfirmHeading('Ready?');
+  }, 10000);
+}
+
+function _stopReadyPromptTimer() {
+  clearTimeout(readyPromptTimer);
+  readyPromptTimer = null;
+}
+
 function enterPause(instantBlur) {
   gameState = 'paused';
   clearInterval(timerInterval);
@@ -3740,6 +3781,8 @@ function enterPause(instantBlur) {
   transitioning = false; // clear skip-in-progress if pause interrupts it
   clearHelp();
   resetPartialShortcutNudgeTimers();
+  _exitScoreClearConfirm();
+  _exitDiffConfirm();
   // Settings panel sets its own position before calling enterPause; only move
   // to edge if no settings screen is already driving a different position.
   if (activeSettings === null) {
@@ -3764,34 +3807,59 @@ function enterPause(instantBlur) {
   helpBtn.style.color = 'white';
   if (lockKeyEl) lockKeyEl.classList.add('active');
   _modalWasOpenOnPause = (activeSettings !== null);
+  _startPauseInactivityTimer();
 }
 
 function enterConfirmQuit() {
-  _closeAllModalsInstant();
+  // Overlay on pause panel -- title stays blurred, question shown as toast.
   gameState = 'confirm-quit';
-  titleEl.className = '';
-  titleEl.classList.remove('blurred');
-  questionCountEl.classList.remove('blurred');
-  titleEl.textContent = 'Are you sure you want to abandon this game?';
+  _stopPauseInactivityTimer();
+  titleEl.classList.add('blurred');
+  questionCountEl.classList.add('blurred');
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
   helpBtn.textContent = 'No';
   helpBtn.style.background = '#6b7280';
   helpBtn.style.color = 'white';
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.setAttribute('data-quit-confirm', '');
+  showConfirmHeading('Are you sure you want to abandon this game?');
+  document.addEventListener('click', _quitConfirmGuard, true);
+}
+
+function _quitConfirmGuard(e) {
+  var mainB = document.getElementById('mainBtn');
+  var helpB = document.getElementById('helpBtn');
+  if ((mainB && (e.target === mainB || mainB.contains(e.target))) ||
+      (helpB && (e.target === helpB || helpB.contains(e.target)))) return;
+  e.stopPropagation();
+  e.preventDefault();
+  showToast('Confirm above, or press No to go back.');
+}
+
+function _exitQuitConfirm() {
+  document.removeEventListener('click', _quitConfirmGuard, true);
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.removeAttribute('data-quit-confirm');
+  hideConfirmHeading();
 }
 
 function confirmQuitYes() {
+  _exitQuitConfirm();
+  _stopPauseInactivityTimer();
   mainBtn.style.background = '';
   if (lockKeyEl) lockKeyEl.classList.remove('active');
   resetToIdle();
 }
 
 function confirmQuitNo() {
-  _returnToPauseScreen(null);
+  _exitQuitConfirm();
+  _returnToPauseScreen('Game still paused.');
 }
 
 function unpause() {
   gameState = 'playing';
+  _stopPauseInactivityTimer();
   clearAllLit();
   heldKeys.clear();
   // Restore question title — may have been blanked by the resume countdown
@@ -3804,7 +3872,7 @@ function unpause() {
   questionCountEl.classList.remove('blurred');
   helpBtn.style.background = '';
   helpBtn.style.color = '';
-  resetTimerBox();
+  resetscoreDisc();
   mainBtn.textContent = 'Skip';
   helpBtn.textContent = 'Help';
   if (lockKeyEl) lockKeyEl.classList.remove('active');
@@ -3813,29 +3881,44 @@ function unpause() {
 
 
 function enterConfirmReset(target) {
-  // target: 'time' | 'accuracy' | 'both' (default 'both' for legacy lock-key call)
   _clearTarget = target || 'both';
   _confirmFromFinished = (gameState === 'finished');
   _confirmFromPause    = _wasPlaying && answersLeft > 0 && gameState !== 'finished';
-  _closeAllModalsInstant();
-  gameState = 'confirm-reset';
-  if (currentMedal && !_confirmFromFinished) resetTimerBox();
-  titleEl.classList.remove('blurred');
-  questionCountEl.classList.remove('blurred');
-  titleEl.className = '';
-  var msg;
-  if (_confirmAfterUpgrade) {
-    msg = 'You ramped up difficulty. Shall I reset your high scores then?';
-  } else if (_clearTarget === 'time') {
-    msg = 'Do you really want to wipe your best time record?';
-  } else if (_clearTarget === 'accuracy') {
-    msg = 'Do you really want to wipe your highest accuracy record?';
-  } else {
-    msg = _confirmFromFinished
-      ? 'Are you sure you want to clear your high scores?'
-      : 'Are you sure you want to clear your high scores?';
+
+  // Always use the overlay pattern -- open panelPause if not already showing.
+  if (activeSettings !== 'panelPause') {
+    openSettings('panelPause');
   }
-  titleEl.textContent = msg;
+  _stopPauseInactivityTimer();
+
+  // Blur the title so the end-game message or question doesn't compete with the confirm heading
+  titleEl.classList.add('blurred');
+  questionCountEl.classList.add('blurred');
+
+  // Ensure panel overlay dimming is active (may not have come through _pauseClearClick)
+  if (_scoreClearConfirmTarget === null) {
+    var pill = _scoreClearPillForTarget(target);
+    if (pill) pill.classList.add('score-confirm-source');
+    var btn = _scoreClearBtnForTarget(target);
+    if (btn) { btn.classList.add('score-pill-active'); _popScorePillLabel(btn); }
+    _scoreClearConfirmTarget = target;
+    document.addEventListener('click', _scoreClearConfirmGuard, true);
+  }
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.setAttribute('data-score-confirm', target);
+
+  gameState = 'confirm-reset';
+  var resetMsg;
+  if (_confirmAfterUpgrade) {
+    resetMsg = 'You ramped up difficulty. Reset your high scores too?';
+  } else if (_clearTarget === 'time') {
+    resetMsg = 'Wipe your best time record?';
+  } else if (_clearTarget === 'accuracy') {
+    resetMsg = 'Wipe your highest accuracy record?';
+  } else {
+    resetMsg = 'Clear all your high scores?';
+  }
+  showConfirmHeading(resetMsg);
   if (_confirmFromFinished) setAppSelectorGameActive(false);
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
@@ -3845,17 +3928,8 @@ function enterConfirmReset(target) {
   if (lockKeyEl) lockKeyEl.classList.add('active');
 }
 
-function _returnToPauseScreen(titleMessage) {
+function _returnToPauseScreen(message) {
   gameState = 'paused';
-  titleEl.className = '';
-  if (titleMessage) {
-    titleEl.textContent = titleMessage;
-    titleEl.classList.remove('blurred');
-  } else {
-    titleEl.classList.add('blurred');
-    titleEl.textContent = questionPool[questionIndex]?.display || '';
-  }
-  questionCountEl.classList.add('blurred');
   mainBtn.textContent = 'Unpause';
   mainBtn.style.background = '';
   helpBtn.textContent = 'Quit';
@@ -3863,10 +3937,25 @@ function _returnToPauseScreen(titleMessage) {
   helpBtn.style.color = 'white';
   if (lockKeyEl) lockKeyEl.classList.remove('active');
   _refreshPausePanel();
-  openSettings('panelPause');
+  if (activeSettings !== 'panelPause') openSettings('panelPause');
+
+  titleEl.className = '';
+  titleEl.textContent = questionPool[questionIndex]?.display || '';
+  titleEl.classList.add('blurred');
+  questionCountEl.classList.add('blurred');
+
+  // Show confirmation message permanently in the floating heading
+  if (message) {
+    showConfirmHeading(message);
+  } else {
+    hideConfirmHeading();
+  }
+
+  _startPauseInactivityTimer();
 }
 
 function confirmResetYes() {
+  _exitScoreClearConfirm();
   var fromFinished  = _confirmFromFinished;
   var fromPause     = _confirmFromPause;
   var afterUpgrade  = _confirmAfterUpgrade;
@@ -3874,7 +3963,7 @@ function confirmResetYes() {
 
   // If accuracy is being cleared and a trophy exists, ask about the trophy first
   var clearingAccuracy = (target === 'accuracy' || target === 'both');
-  if (clearingAccuracy && hasEverAchievedPerfectAccuracy && !afterUpgrade) {
+  if (clearingAccuracy && hasTrophy && !afterUpgrade) {
     // Clear the accuracy portion now; trophy decision comes next
     if (target === 'both') {
       bestRecord.time = null;
@@ -3915,24 +4004,53 @@ function confirmResetYes() {
 
   if (afterUpgrade) {
     resetToIdle();
-    titleEl.textContent = afterUpgrade + ' mode ready.';
+    showToast(afterUpgrade + ' mode ready.');
     return;
   }
 
   if (fromPause) {
-    var clearedMsg = target === 'time'     ? 'Time record cleared.'
-                   : target === 'accuracy' ? 'Accuracy record cleared.'
-                   : 'Both records have been cleared.';
+    var clearedMsg = target === 'time'     ? 'Best time record has been cleared.'
+                   : target === 'accuracy' ? 'Best accuracy record has been cleared.'
+                   : 'All high score records have been cleared.';
     _returnToPauseScreen(clearedMsg);
     return;
   }
 
-  resetToIdle();
   if (fromFinished) {
-    var cleared = target === 'time'     ? 'Time record cleared.'
-                : target === 'accuracy' ? 'Accuracy record cleared.'
-                : 'Both records have been cleared.';
-    titleEl.textContent = cleared;
+    var clearedFinMsg = target === 'time'     ? 'Best time record has been cleared.'
+                      : target === 'accuracy' ? 'Best accuracy record has been cleared.'
+                      : 'All high score records have been cleared.';
+    _restoreFinishedState(clearedFinMsg);
+    return;
+  }
+
+  resetToIdle();
+}
+
+function _restoreFinishedState(confirmationMessage) {
+  gameState = 'finished';
+  if (currentMedal) {
+    scoreDisc.className = 'scoreDisc medal-' + currentMedal;
+    scoreDisc.style.background = MEDAL_RIM[currentMedal](rimCurrent);
+  }
+  mainBtn.textContent = 'Try again?';
+  mainBtn.style.background = '';
+  helpBtn.textContent = 'Help';
+  helpBtn.style.background = '';
+  helpBtn.style.color = '';
+  mainBtn.disabled = false;
+  helpBtn.disabled = false;
+  titleEl.className = '';
+  setAppSelectorGameActive(false);
+  _refreshPausePanel();
+  if (activeSettings !== 'panelPause') openSettings('panelPause');
+  startEndScreenInactivityTimer();
+  if (confirmationMessage) {
+    showConfirmHeading(confirmationMessage);
+    showTip(tipIndex);
+  } else {
+    hideConfirmHeading();
+    showTip(tipIndex);
   }
 }
 
@@ -3944,11 +4062,11 @@ function enterConfirmTrophy(fromFinished, fromPause) {
   _trophyFromFinished = fromFinished || false;
   _trophyFromPause    = fromPause    || false;
   gameState = 'confirm-trophy';
+  _stopPauseInactivityTimer();
+  titleEl.classList.add('blurred');
+  questionCountEl.classList.add('blurred');
 
-  titleEl.className = '';
-  titleEl.classList.remove('blurred');
-  questionCountEl.classList.remove('blurred');
-  titleEl.innerHTML = 'Do you want to return your trophy too?<br><small style="font-size:13px;font-weight:400;color:#6b7280;">(the highest difficulty modes require a trophy)</small>';
+  showConfirmHeading('Return your trophy too? (Hardcore mode requires it)');
 
   // Blank buttons immediately, disable interaction
   mainBtn.textContent = '';
@@ -3967,17 +4085,15 @@ function enterConfirmTrophy(fromFinished, fromPause) {
 }
 
 function confirmTrophyYes() {
-  // Return the trophy: wipe hasEverAchievedPerfectAccuracy
-  hasEverAchievedPerfectAccuracy = false;
+  hasTrophy = false;
   try { localStorage.removeItem('kw_perfect'); } catch(e) {}
   updateBestDisplay();
-  _finishAfterTrophy('Accuracy record and trophy cleared.');
+  _finishAfterTrophy('Accuracy & trophy records have been reset.');
 }
 
 function confirmTrophyNo() {
-  // Keep the trophy: accuracy already cleared, trophy remains
   updateBestDisplay();
-  _finishAfterTrophy('Accuracy record cleared.');
+  _finishAfterTrophy('Accuracy record cleared. Trophy kept.');
 }
 
 function _finishAfterTrophy(message) {
@@ -3991,15 +4107,20 @@ function _finishAfterTrophy(message) {
   mainBtn.disabled = false;
   helpBtn.disabled = false;
   if (lockKeyEl) lockKeyEl.classList.remove('active');
+  hideConfirmHeading();
   if (fromPause) {
     _returnToPauseScreen(message);
     return;
   }
+  if (fromFinished) {
+    _restoreFinishedState(message);
+    return;
+  }
   resetToIdle();
-  if (fromFinished) titleEl.textContent = message;
 }
 
 function confirmResetNo() {
+  _exitScoreClearConfirm();
   var afterUpgrade = _confirmAfterUpgrade;
   _confirmAfterUpgrade = null;
   _clearTarget = null;
@@ -4008,53 +4129,89 @@ function confirmResetNo() {
     _confirmFromFinished = false;
     _confirmFromPause    = false;
     resetToIdle();
-    titleEl.textContent = afterUpgrade + ' mode ready.';
+    showToast(afterUpgrade + ' mode ready.');
     return;
   }
 
   if (_confirmFromFinished) {
     _confirmFromFinished = false;
-    gameState = 'finished';
-    if (currentMedal) {
-      timerBox.className = 'timerBox medal-' + currentMedal;
-      timerBox.style.background = MEDAL_RIM[currentMedal](rimCurrent);
-    }
-    mainBtn.textContent = 'Try again?';
-    mainBtn.style.background = '';
-    helpBtn.textContent = 'Help';
-    helpBtn.style.background = '';
-    helpBtn.style.color = '';
-    titleEl.className = '';
-    setAppSelectorGameActive(false);
-    showTip(tipIndex);
+    _restoreFinishedState(null);
     return;
   }
 
   if (_wasPlaying && questionPool.length > 0 && answersLeft > 0) {
     _confirmFromPause = false;
-    _returnToPauseScreen(null);
+    _returnToPauseScreen('No changes made.');
   } else {
     resetToIdle();
   }
 }
 
+// Tracks which difficulty button triggered the confirm overlay
+var _diffConfirmActiveBtn = null;
+
 function enterConfirmDiffChange() {
-  _closeAllModalsInstant();
+  // Keep the difficulty panel visible -- dim everything except the active button.
   gameState = 'confirm-diff-change';
-  titleEl.classList.remove('blurred');
-  questionCountEl.classList.remove('blurred');
-  titleEl.className = '';
-  titleEl.textContent = 'Changing difficulty will cancel your paused game. Proceed?';
+
+  // Mark the pending button as active in the pill
+  var pendingBtn = document.querySelector(
+    '#difficultyPill .diff-btn[data-mode="' + _pendingDifficulty + '"]'
+  );
+  _diffConfirmActiveBtn = pendingBtn || null;
+
+  // Overlay the panel content, exposing only the active pill button
+  if (pendingBtn) pendingBtn.closest('.sp-seg-pill').classList.add('diff-confirm-source');
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.setAttribute('data-diff-confirm', '');
+
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
   helpBtn.textContent = 'No';
   helpBtn.style.background = '#6b7280';
   helpBtn.style.color = 'white';
   if (lockKeyEl) lockKeyEl.classList.add('active');
+
+  showConfirmHeading('Changing difficulty will quit your current game. Proceed?');
+
+  document.addEventListener('click', _diffConfirmGuard, true);
+  // No toast here -- the guard toasts if they click elsewhere
+}
+
+function _diffConfirmGuard(e) {
+  // Allow main/help buttons
+  var mainB = document.getElementById('mainBtn');
+  var helpB = document.getElementById('helpBtn');
+  if ((mainB && (e.target === mainB || mainB.contains(e.target))) ||
+      (helpB && (e.target === helpB || helpB.contains(e.target)))) return;
+  // Allow the active pill button (pressing it again = cancel)
+  if (_diffConfirmActiveBtn &&
+      (e.target === _diffConfirmActiveBtn || _diffConfirmActiveBtn.contains(e.target))) {
+    // Toggle-cancel
+    confirmDiffChangeNo();
+    e.stopPropagation();
+    e.preventDefault();
+    return;
+  }
+  // Block and toast
+  e.stopPropagation();
+  e.preventDefault();
+  showToast('Stay at your current difficulty to continue or choose to quit this round now.');
+}
+
+function _exitDiffConfirm() {
+  document.removeEventListener('click', _diffConfirmGuard, true);
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.removeAttribute('data-diff-confirm');
+  var pill = document.querySelector('#difficultyPill');
+  if (pill) pill.classList.remove('diff-confirm-source');
+  _diffConfirmActiveBtn = null;
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  hideConfirmHeading();
 }
 
 function confirmDiffChangeYes() {
-  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  _exitDiffConfirm();
   var prevDiff = _prevDifficulty;
   currentDifficulty = _pendingDifficulty;
   _pendingDifficulty = null;
@@ -4075,11 +4232,11 @@ function confirmDiffChangeYes() {
   }
 
   resetToIdle();
-  titleEl.textContent = label + ' mode ready.';
+  showToast(label + ' mode ready.');
 }
 
 function confirmDiffChangeNo() {
-  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  _exitDiffConfirm();
   // Restore difficulty and needle to the game that is still active
   var modeMap = { fundamentals: -1, normal: 0, hardcore: 1 };
   currentDifficulty  = _prevDifficulty;
@@ -4090,16 +4247,42 @@ function confirmDiffChangeNo() {
   _pendingDifficulty = null;
   _prevDifficulty    = null;
   // Resume the paused game directly
-  _returnToPauseScreen(null);
+  _returnToPauseScreen('Difficulty unchanged. Game still paused.');
+}
+
+function showConfirmHeading(text) {
+  var el = document.getElementById('confirmHeading');
+  if (!el) return;
+  el.textContent = text;
+  el.style.display = 'block';
+  titleEl.classList.add('blurred');
+  questionCountEl.classList.add('blurred');
+}
+
+function hideConfirmHeading() {
+  var el = document.getElementById('confirmHeading');
+  if (!el) return;
+  el.style.display = 'none';
+  el.textContent = '';
 }
 
 function resetToIdle() {
   gameState = 'idle';
   _wasPlaying = false;
+  // Clean up any lingering confirm overlay listeners so they cannot fire
+  // after the state has been reset (e.g. stale guard from a cancelled confirm)
+  _exitScoreClearConfirm();
+  _exitDiffConfirm();
+  _exitQuitConfirm();
+  _stopPauseInactivityTimer();
+  _stopReadyPromptTimer();
+  hideConfirmHeading();
   // Hide welcome-screen elements if visible
   var _wTag = document.getElementById('welcomeTagline');
   if (_wTag) _wTag.style.display = 'none';
   setAppSelectorGameActive(false);
+  // Close any open settings panel before moving the keyboard
+  _closeAllModalsInstant();
   setKbPosition('face');
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
@@ -4119,12 +4302,19 @@ function resetToIdle() {
   titleEl.textContent = 'Play Keyboard Warriors';
   questionCountEl.classList.remove('blurred', 'blur-instant');
   questionCountEl.innerHTML = ''; dotEls = [];
-  timerBox.style.background = '';
-  timerBox.style.removeProperty('--face-rot');
+  scoreDisc.style.background = '';
+  scoreDisc.style.removeProperty('--face-rot');
   currentMedal = null;
-  timerBox.className = 'timerBox';
+  scoreDisc.className = 'scoreDisc';
   timerDiv.textContent = '0:00';
   greenHits = 0; totalHits = 0; hintPenaltyPct = 0; updateAccuracyDisplay(); dbgRefreshCtx(); dbgRefreshAccuracy();
+  // Pulse Start once keyboard has returned to face position, then every 6 seconds
+  setTimeout(function pulseAndReschedule() {
+    if (gameState !== 'idle') return;
+    pulseBtn(mainBtn);
+    setTimeout(pulseAndReschedule, 6000);
+  }, 900);
+  _startReadyPromptTimer();
 }
 
 /* ══════════════════════════════════════
@@ -4451,7 +4641,7 @@ function updateKbSizeToggle() {
   if (!knob) return;
   var isCompact = !hasFullKeyboard;
   knob.style.transform = isCompact ? 'translateX(22px)' : 'translateX(0)';
-  knob.setAttribute('fill', isCompact ? '#9ca3af' : 'white');
+  knob.setAttribute('fill', isCompact ? '#374151' : 'white');
   if (tog) tog.checked = isCompact;
 
   // Active side = dark grey; inactive side = mid-grey
@@ -4464,10 +4654,10 @@ function updateKbSizeToggle() {
   var extLabel = document.getElementById('kbSizeExtendedLabel');
   var cmpIcon  = document.getElementById('kbSizeCompactIcon');
   var cmpLabel = document.getElementById('kbSizeCompactLabel');
-  if (extIcon)  extIcon.style.fill  = extendedColour;
-  if (extLabel) extLabel.style.color = extendedColour;
-  if (cmpIcon)  cmpIcon.style.fill  = compactColour;
-  if (cmpLabel) cmpLabel.style.color = compactColour;
+  if (extIcon)  extIcon.style.fill           = extendedColour;
+  if (extLabel) { extLabel.style.color = extendedColour; extLabel.style.textDecoration = isCompact ? 'line-through' : ''; }
+  if (cmpIcon)  cmpIcon.style.fill           = compactColour;
+  if (cmpLabel) { cmpLabel.style.color = compactColour; cmpLabel.style.textDecoration = isCompact ? '' : 'line-through'; }
 
   // Grey out and lock to compact when touch is enabled
   if (row) row.classList.toggle('disabled', touchEnabled);
@@ -4492,6 +4682,9 @@ function setTouchEnabled(on) {
   // Audible row: enabled only when touch is on
   var audibleRow = document.getElementById('audibleRow');
   if (audibleRow) audibleRow.classList.toggle('disabled', !on);
+  // Ghost mode requires a physical keyboard -- disable it when touch is on
+  var ghostRow = document.getElementById('ghostRow');
+  if (ghostRow) ghostRow.classList.toggle('disabled', on);
 }
 
 function setSoundEnabled(on) {
@@ -4532,16 +4725,15 @@ var LIVES_VALUES = [1, 3, 5, 10, null];
 })();
 
 function onGhostModeToggle() {
+  var ghostRow = document.getElementById('ghostRow');
+  if (ghostRow && ghostRow.classList.contains('disabled')) {
+    showToast('Ghost Mode requires a physical keyboard.');
+    return;
+  }
   ghostModeOn = !ghostModeOn;
   var radio = document.getElementById('ghostRadio');
   if (radio) radio.classList.toggle('on', ghostModeOn);
   document.getElementById('keyboardPanel').classList.toggle('ghost-mode', ghostModeOn);
-  if (ghostModeOn && touchEnabled) {
-    setTouchEnabled(false);
-    document.getElementById('stickyRow').classList.remove('disabled');
-    var touchRadio = document.getElementById('touchRadio');
-    if (touchRadio) touchRadio.classList.remove('on');
-  }
   showModeToast(ghostModeOn ? 'Ghost Mode on' : 'Ghost Mode off');
 }
 
@@ -4551,13 +4743,20 @@ function onKillPunctuationToggle() {
     setKillPunctuation(false);
     return;
   }
-  // Toggling on is a destructive action — use the established confirm flow
-  _closeAllModalsInstant();
+  // If already in the confirm state, treat a second click as No
+  if (gameState === 'confirm-kill-punctuation') {
+    confirmKillPunctuationNo();
+    return;
+  }
+  // Toggling on is a destructive action — use toast, keep keyboard settings panel visible behind.
   gameState = 'confirm-kill-punctuation';
-  titleEl.className = '';
-  titleEl.classList.remove('blurred');
-  questionCountEl.classList.remove('blurred');
-  titleEl.textContent = 'Are you sure? Use mitigations only as needed.';
+  // Show radio as selected (preview of what Yes would do)
+  var radio = document.getElementById('killPunctuationRadio');
+  if (radio) radio.classList.add('on');
+  // Block all settings panel interactions except the Kill Punctuation radio
+  var sp = document.getElementById('settingsPanelInner');
+  if (sp) sp.setAttribute('data-kill-punctuation-confirming', '');
+  showConfirmHeading('Are you sure? Use mitigations only as needed.');
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
   helpBtn.textContent = 'No';
@@ -4566,23 +4765,46 @@ function onKillPunctuationToggle() {
   if (lockKeyEl) lockKeyEl.classList.add('active');
 }
 
-function confirmKillPunctuationYes() {
+function _clearKillPunctuationConfirmState() {
+  var sp = document.getElementById('settingsPanelInner');
+  if (sp) sp.removeAttribute('data-kill-punctuation-confirming');
   if (lockKeyEl) lockKeyEl.classList.remove('active');
+  hideConfirmHeading();
+}
+
+function confirmKillPunctuationYes() {
+  _clearKillPunctuationConfirmState();
   setKillPunctuation(true);
-  _returnAfterKillPunctuationConfirm();
+  _returnAfterKillPunctuationConfirm('Shortcuts requiring punctuation removed to improve compatibility with your keyboard.');
 }
 
 function confirmKillPunctuationNo() {
-  if (lockKeyEl) lockKeyEl.classList.remove('active');
-  _returnAfterKillPunctuationConfirm();
+  _clearKillPunctuationConfirmState();
+  var radio = document.getElementById('killPunctuationRadio');
+  if (radio) radio.classList.remove('on');
+  _returnAfterKillPunctuationConfirm('No changes made.');
 }
 
-function _returnAfterKillPunctuationConfirm() {
+function _returnAfterKillPunctuationConfirm(message) {
   if (_wasPlaying && answersLeft > 0) {
-    _returnToPauseScreen(null);
+    _returnToPauseScreen(message || '');
   } else {
-    resetToIdle();
-    openSettings('panelKeyboard');
+    gameState = 'idle';
+    mainBtn.textContent = 'Start';
+    mainBtn.style.background = '';
+    helpBtn.textContent = 'Help';
+    helpBtn.style.background = '';
+    helpBtn.style.color = '';
+    titleEl.className = '';
+    titleEl.textContent = 'Play Keyboard Warriors';
+    if (message) {
+      showConfirmHeading(message);
+    } else {
+      hideConfirmHeading();
+    }
+    if (activeSettings !== 'panelKeyboard') {
+      openSettings('panelKeyboard');
+    }
   }
 }
 
@@ -4686,7 +4908,7 @@ function updateModalToggles() {
   if (knob3) {
     var is4 = kbLeftCount === 4;
     knob3.style.transform = is4 ? 'translateX(22px)' : 'translateX(0)';
-    knob3.setAttribute('fill', is4 ? '#9ca3af' : 'white');
+    knob3.setAttribute('fill', is4 ? '#374151' : 'white');
     if (tog3) tog3.checked = is4;
   }
   // Fn/Ctrl knob — label depends on OS
@@ -4707,7 +4929,7 @@ function updateModalToggles() {
     // checked = fn at far left
     var fnAtLeft = kbFnLeft;
     knobFn.style.transform = fnAtLeft ? 'translateX(22px)' : 'translateX(0)';
-    knobFn.setAttribute('fill', fnAtLeft ? '#9ca3af' : 'white');
+    knobFn.setAttribute('fill', fnAtLeft ? '#374151' : 'white');
     if (togFn) togFn.checked = fnAtLeft;
   }
   // Show the Fn-position row only when 4 keys is selected (both Mac and PC).
@@ -4764,9 +4986,6 @@ function _spPageEl(page) {
 }
 
 function _spAlignPanel() {
-  // keyboardPanel's offsetParent is kbFlipStage (position:relative).
-  // settingsPanelInner's offsetParent is settingsPanel → keyboardWrap.
-  // We need panel's left offset relative to keyboardWrap, so add stage.offsetLeft too.
   var panel = document.getElementById('keyboardPanel');
   var stage = document.getElementById('kbFlipStage');
   var inner = document.getElementById('settingsPanelInner');
@@ -4776,11 +4995,20 @@ function _spAlignPanel() {
   var width = panel.offsetWidth;
   inner.style.left  = left + 'px';
   inner.style.width = width + 'px';
-  // Adapt wrap height to fit content — rAF so browser lays out content first
+  // Grow the wrap so the tilted keyboard sits below the settings content.
+  // Two rAFs: first lets the browser lay out the content at its new width,
+  // second reads the settled scrollHeight after reflow.
   requestAnimationFrame(function() {
-    var contentH = inner.scrollHeight;
-    var needed = contentH + 50;
-    wrap.style.minHeight = Math.max(needed, 320) + 'px';
+    requestAnimationFrame(function() {
+      var contentH = inner.scrollHeight;
+      var stageH   = stage.offsetHeight;
+      // On larger screens contentH is comfortably less than stageH -- just add a small buffer.
+      // On small screens contentH exceeds stageH, so we need room for both stacked.
+      var needed = contentH > stageH
+        ? contentH + stageH + 24
+        : contentH + 16;
+      wrap.style.minHeight = Math.max(needed, 320) + 'px';
+    });
   });
 }
 
@@ -4809,6 +5037,12 @@ function _unpinTooltip() {
 }
 
 function openSettings(page) {
+  // Block switching panels during any confirmation overlay or countdown
+  var confirmStates = ['confirm-reset', 'confirm-quit', 'confirm-trophy', 'confirm-diff-change', 'confirm-kill-punctuation', 'counting'];
+  if (confirmStates.indexOf(gameState) !== -1 && page !== 'panelPause') {
+    showToast('Resolve the current prompt first.');
+    return;
+  }
   var wasOpen  = activeSettings !== null;
   var prevPage = activeSettings;
   activeSettings = page;
@@ -4877,6 +5111,9 @@ function closeSettings() {
   activeSettings = null;
   kbModalOpen    = false;
   browserModalOpen = false;
+  // Closing the panel always cancels any active confirm overlay
+  _exitScoreClearConfirm();
+  _exitDiffConfirm();
 
   var sp = document.getElementById('settingsPanel');
   if (sp) sp.classList.remove('sp-open');
@@ -4929,6 +5166,9 @@ function _closeAllModalsInstant() {
   activeSettings = null;
   kbModalOpen    = false;
   browserModalOpen = false;
+  _exitScoreClearConfirm();
+  _exitDiffConfirm();
+  _exitQuitConfirm();
   var sp = document.getElementById('settingsPanel');
   if (sp) sp.classList.remove('sp-open');
   SP_PAGE_ORDER.forEach(function(p) {
@@ -5138,7 +5378,12 @@ document.getElementById('gameContainer').addEventListener('click', function(e) {
   // Don't intercept clicks on actual buttons/interactive elements
   var tag = e.target.tagName;
   if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'LABEL' || tag === 'A') return;
-  if (e.target.closest('button, input, label, a, #timerBox, #kbIcon, #browserIcon, #appPill, #appDropdown, #debugOverlay, #settingsPanel')) return;
+  if (e.target.closest('button, input, label, a, #scoreDisc, #kbIcon, #browserIcon, #appPill, #appDropdown, #debugOverlay, #settingsPanel')) return;
+
+  if (gameState === 'confirm-kill-punctuation') {
+    showToast('You must confirm if you really want no punctuation keys or not.');
+    return;
+  }
 
   if (gameState === 'paused') {
     pulseBtn(document.getElementById('mainBtn'));
@@ -5502,7 +5747,7 @@ function _showWelcomeScreen() {
 
 // Shared handler for both the welcome panel and the difficulty settings panel
 function diffBtnClick(mode) {
-  var hardcoreUnlocked = hasEverAchievedPerfectAccuracy;
+  var hardcoreUnlocked = hasTrophy;
   if (mode === 'hardcore' && !hardcoreUnlocked) {
     showToast('To unlock Hardcore you must achieve 100% accuracy.');
     return;
@@ -5529,11 +5774,17 @@ function diffBtnClick(mode) {
   setDiffState(modeMap[mode]);
   _updateDiffBtnStyles(mode);
   _updateDiffSubtitle(mode);
+  // Pop the newly active button label so the change is visually confirmed
+  var activeBtn = document.querySelector('#difficultyPill .diff-btn[data-mode="' + mode + '"], #welcomeDifficultyPill .diff-btn[data-mode="' + mode + '"]');
+  _popDiffLabel(activeBtn);
   try { localStorage.setItem('kw_difficulty', currentDifficulty); } catch(e) {}
 
-  // Apply timer and lives presets for this difficulty level
-  _applyDifficultyPresets(mode);
-  _updateTimerLivesPills();
+  // Only apply timer/lives presets once the trophy has been earned.
+  // Before that the sliders are locked at ∞ and should not change.
+  if (hasTrophy) {
+    _applyDifficultyPresets(mode);
+    _updateTimerLivesPills();
+  }
 
   // If we are still on the welcome screen, dismiss it into idle
   if (gameState === 'welcome') {
@@ -5541,21 +5792,29 @@ function diffBtnClick(mode) {
   }
 }
 
-// Updates the active/inactive classes on the difficulty buttons immediately,
-// using the supplied mode rather than reading currentDifficulty (which may
-// lag during the confirm-diff-change pending state).
+// Updates the active/inactive classes on the difficulty buttons.
+// Exactly one button will always carry diff-btn-active.
+// Pops the label text of a difficulty pill button with a brief scale animation.
+function _popDiffLabel(btnEl) {
+  if (!btnEl) return;
+  var spanEl = btnEl.querySelector('.diff-btn-text') || btnEl;
+  spanEl.classList.remove('diff-btn-label-pop');
+  void spanEl.offsetWidth;
+  spanEl.classList.add('diff-btn-label-pop');
+  spanEl.addEventListener('animationend', function handler() {
+    spanEl.classList.remove('diff-btn-label-pop');
+    spanEl.removeEventListener('animationend', handler);
+  });
+}
+
 function _updateDiffBtnStyles(activeMode) {
-  var hardcoreUnlocked = hasEverAchievedPerfectAccuracy;
+  var hardcoreUnlocked = hasTrophy;
   var btns = document.querySelectorAll('#panelDifficulty .diff-btn, #panelWelcome .diff-btn');
   btns.forEach(function(btn) {
     var m = btn.getAttribute('data-mode');
-    if (m === 'hardcore' && !hardcoreUnlocked) {
-      btn.classList.add('diff-btn-inactive');
-      btn.classList.remove('diff-btn-active');
-    } else {
-      btn.classList.remove('diff-btn-inactive');
-      btn.classList.toggle('diff-btn-active', m === activeMode);
-    }
+    var isLocked = (m === 'hardcore' && !hardcoreUnlocked);
+    btn.classList.toggle('diff-btn-inactive', isLocked);
+    btn.classList.toggle('diff-btn-active', !isLocked && m === activeMode);
   });
 }
 
@@ -5586,8 +5845,10 @@ function _refreshDifficultyPanel() {
   _updateDiffBtnStyles(displayMode);
   _updateDiffSubtitle(displayMode);
   _syncAdvancedPanelState();
-  _syncSliderToValue('timer', questionTimer);
-  _syncSliderToValue('lives', playerLives);
+  // Locked panel always shows ∞ -- the advanced settings are not yet available
+  var showAsInfinity = !hasTrophy;
+  _syncSliderToValue('timer', showAsInfinity ? null : questionTimer);
+  _syncSliderToValue('lives', showAsInfinity ? null : playerLives);
 }
 
 function _updateTimerLivesPills() {
@@ -5597,7 +5858,7 @@ function _updateTimerLivesPills() {
 }
 
 function questionTimerBtnClick(value) {
-  if (!hasEverAchievedPerfectAccuracy && value !== null) return;
+  if (!hasTrophy && value !== null) return;
   if (value === questionTimer) return;
   questionTimer = value;
   try { localStorage.setItem('kw_timer', String(value)); } catch(e) {}
@@ -5605,7 +5866,7 @@ function questionTimerBtnClick(value) {
 }
 
 function playerLivesBtnClick(value) {
-  if (!hasEverAchievedPerfectAccuracy && value !== null) return;
+  if (!hasTrophy && value !== null) return;
   if (value === playerLives) return;
   playerLives = value;
   try { localStorage.setItem('kw_lives', String(value)); } catch(e) {}
@@ -5651,7 +5912,7 @@ function _syncSliderToValue(sliderType, value) {
   spring.target = SLIDER_STOPS[stopIdx];
   _setKnobLabel(el, _labelForValue(value));
   _updateSliderSideLabel(sliderType, value);
-  if (!spring.raf) _animateSpring(sliderType, el);
+  _animateSpring(sliderType, el, 'firm');
 }
 
 // Updates the "Question Timer" / "Player Lives" side label colour based on
@@ -5665,37 +5926,71 @@ function _updateSliderSideLabel(sliderType, value) {
   if (!row) return;
   var labelEl = row.querySelector('.diff-slider-side-label');
   if (!labelEl) return;
-  var unlocked  = hasEverAchievedPerfectAccuracy;
+  var unlocked   = hasTrophy;
   var isInfinity = (value === null);
-  labelEl.style.color = (unlocked && !isInfinity) ? '#374151' : '#9ca3af';
+  // Colour: dark when unlocked and a real value is set, grey otherwise
+labelEl.style.color          = (unlocked && !isInfinity) ? '#374151' : '#d1d5db';
+  // Strikethrough whenever the slider is at ∞ -- locked or unlocked
+  labelEl.style.textDecoration = isInfinity ? 'line-through' : '';
 }
+
+// Set to true during the trophy award sequence so _syncAdvancedPanelState
+// does not prematurely reveal the footer.
+var _trophySequenceActive = false;
 
 function _syncAdvancedPanelState() {
   var panel = document.getElementById('diffAdvancedPanel');
   if (!panel) return;
-  var unlocked = hasEverAchievedPerfectAccuracy;
+  var unlocked = hasTrophy;
   panel.classList.toggle('diff-advanced-active', unlocked);
-  // Re-evaluate side label colours now that unlock state has changed
   _updateSliderSideLabel('timer', questionTimer);
   _updateSliderSideLabel('lives', playerLives);
+  // Footer: skip during the trophy sequence -- step 5 handles it
+  if (_trophySequenceActive) return;
+  var footer = document.getElementById('diffAdvancedFooter');
+  if (footer) {
+    if (unlocked) {
+      footer.style.animation = 'none';
+      footer.style.opacity   = '1';
+      footer.style.clipPath  = 'inset(0 0% 0 0)';
+      footer.style.display   = 'block';
+      footer.classList.add('diff-advanced-footer-visible');
+    } else {
+      footer.style.animation = '';
+      footer.style.opacity   = '';
+      footer.style.clipPath  = '';
+      footer.style.display   = '';
+      footer.classList.remove('diff-advanced-footer-visible');
+    }
+  }
 }
+
+// SVG markup used for the infinity symbol in slider knobs.
+// Defined once here so _setKnobLabel can insert it without repeating the path.
+var INFINITY_KNOB_SVG = '<svg width="28" height="12" viewBox="0 0 515 212" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M407.61,16.84c48.83,1.86,86.06,42.58,85.87,89.9s-37.87,87.63-86.39,89.22c-21.05.69-41.59-4.39-61.27-11.73-32.39-12.09-63.19-33.84-91.01-54.92-26.68,20.05-55.36,40.62-86.44,53.11-18.16,7.29-36.97,12.62-56.58,13.43-50.03,2.07-91.29-38.6-92.28-87.62-1-49.32,38.85-91.77,89.43-91.35,21.7.18,42.7,6.51,62.63,14.8,29.41,12.24,57.82,32.66,83.26,51.76,27.43-20.82,58.38-42.64,90.32-54.65,19.88-7.47,40.51-12.79,62.47-11.95ZM224.88,106.33c-13.7-10.61-26.08-19.62-39.46-28.55-12.28-7.96-24.33-14.74-37.72-20.85-12.89-4.65-25.61-10.03-39.69-10.06-32.92-.07-58.71,27.86-58.52,59.86.19,31.69,25.87,59.21,58.52,59.15,13.85-.02,26.38-5.3,39.11-9.81,28.75-12.95,52.41-30.11,77.75-49.74ZM363.28,156.38c13.28,5.04,26.45,9.63,40.94,9.66,33.23.07,59.46-27.61,59.27-60.02-.19-32.12-26.29-59.4-59.28-59.31-14.51.04-27.72,4.62-41,9.69-29.18,12.8-52.86,30.36-78.6,49.95,25.67,19.67,49.53,37.23,78.67,50.03Z"/></svg>';
 
 function _setKnobLabel(sliderEl, newLabel) {
   var labelA = sliderEl.querySelector('.diff-knob-label-a');
   var labelB = sliderEl.querySelector('.diff-knob-label-b');
   if (!labelA || !labelB) return;
-  var aVisible = !labelA.classList.contains('diff-knob-label-hidden');
+  var aVisible  = !labelA.classList.contains('diff-knob-label-hidden');
   var visibleEl = aVisible ? labelA : labelB;
   var hiddenEl  = aVisible ? labelB : labelA;
-  // Always update the infinity class on both, then crossfade if the label changed
   var newIsInfinity = (newLabel === '∞');
-  if (visibleEl.textContent === newLabel) {
-    // No text change -- but still fix the infinity class in case it drifted
-    visibleEl.classList.toggle('diff-knob-infinity', newIsInfinity);
-    return;
+  // Determine current content for change detection
+  var currentContent = newIsInfinity
+    ? visibleEl.innerHTML  // SVG -- compare by class instead
+    : visibleEl.textContent;
+  var noChange = newIsInfinity
+    ? visibleEl.classList.contains('diff-knob-infinity')
+    : (visibleEl.textContent === newLabel && !visibleEl.classList.contains('diff-knob-infinity'));
+  if (noChange) return;
+  // Write new content into the hidden span
+  if (newIsInfinity) {
+    hiddenEl.innerHTML = INFINITY_KNOB_SVG;
+  } else {
+    hiddenEl.textContent = newLabel;
   }
-  // Prepare the hidden span with the new content and correct class
-  hiddenEl.textContent = newLabel;
   hiddenEl.classList.toggle('diff-knob-infinity', newIsInfinity);
   // Crossfade
   hiddenEl.classList.remove('diff-knob-label-hidden');
@@ -5705,59 +6000,31 @@ function _setKnobLabel(sliderEl, newLabel) {
 function _setKnobPosition(sliderEl, pct) {
   var knob = sliderEl.querySelector('.diff-slider-knob');
   if (!knob) return;
-  // Clamp to knob half-width so it never overflows track edges
   knob.style.left = pct + '%';
 }
 
-function _animateSpring(sliderType, sliderEl, criticallyDamped) {
+// Sets the knob position with a CSS transition for smooth animated movement.
+// During drag, CSS transition is disabled so the knob tracks the pointer exactly.
+function _animateToTarget(sliderType, sliderEl, transitionStyle) {
   var spring = _getSpring(sliderType);
   spring.vel = 0;
   if (spring.raf) { cancelAnimationFrame(spring.raf); spring.raf = null; }
+  spring.pos = spring.target;
+  var knob = sliderEl.querySelector('.diff-slider-knob');
+  if (!knob) return;
+  knob.style.transition = transitionStyle || 'left 0.28s cubic-bezier(0.34, 1.3, 0.64, 1)';
+  knob.style.left = spring.target + '%';
+}
 
-  if (criticallyDamped) {
-    // Simple ease-out tween -- no spring, no bounce
-    var startPos  = spring.pos;
-    var endPos    = spring.target;
-    var startTime = null;
-    var duration  = 180; // ms
-    function tweenTick(now) {
-      if (!startTime) startTime = now;
-      var elapsed = now - startTime;
-      var t = Math.min(elapsed / duration, 1);
-      // Ease-out cubic
-      var eased = 1 - Math.pow(1 - t, 3);
-      spring.pos = startPos + (endPos - startPos) * eased;
-      _setKnobPosition(sliderEl, spring.pos);
-      if (t < 1) {
-        spring.raf = requestAnimationFrame(tweenTick);
-      } else {
-        spring.pos = endPos;
-        _setKnobPosition(sliderEl, endPos);
-        spring.raf = null;
-      }
-    }
-    spring.raf = requestAnimationFrame(tweenTick);
-    return;
-  }
-
-  // Drag-release spring -- gentle bounce for natural feel
-  var travelDistance = Math.abs(spring.target - spring.pos);
-  var stiffness = 0.14;
-  var damping   = travelDistance > 30 ? 0.82 : 0.72;
-  function tick() {
-    var force = (spring.target - spring.pos) * stiffness;
-    spring.vel = spring.vel * damping + force;
-    spring.pos += spring.vel;
-    _setKnobPosition(sliderEl, spring.pos);
-    if (Math.abs(spring.vel) > 0.01 || Math.abs(spring.pos - spring.target) > 0.01) {
-      spring.raf = requestAnimationFrame(tick);
-    } else {
-      spring.pos = spring.target;
-      _setKnobPosition(sliderEl, spring.pos);
-      spring.raf = null;
-    }
-  }
-  spring.raf = requestAnimationFrame(tick);
+// Legacy alias so existing call sites that pass a mode string still work.
+// All modes now use CSS transitions; the mode string only affects duration/easing.
+function _animateSpring(sliderType, sliderEl, mode) {
+  var transitions = {
+    'smooth': 'left 0.32s cubic-bezier(0.4, 0, 0.2, 1)',   // ease-in-out, no bounce
+    'firm':   'left 0.28s cubic-bezier(0.4, 0, 0.2, 1)',   // ease-in-out, no bounce
+    'gentle': 'left 0.28s cubic-bezier(0.34, 1.3, 0.64, 1)', // slight overshoot
+  };
+  _animateToTarget(sliderType, sliderEl, transitions[mode] || transitions['gentle']);
 }
 
 function _snapToNearestStop(pct) {
@@ -5792,57 +6059,61 @@ function _initSliders() {
       return Math.max(0, Math.min(100, pct));
     }
 
+    // The resting position of the knob when a drag begins.
+    // For locked sliders this is always wherever the knob visually sits (spring.pos),
+    // NOT recalculated from the saved value -- they may differ when displayed as ∞.
+    var dragRestPct = 100;
+
     knob.addEventListener('pointerdown', function(e) {
       e.preventDefault();
       knob.setPointerCapture(e.pointerId);
       isDragging = true;
+      knob.style.transition = 'none';
       var spring = _getSpring(sliderType);
+      if (spring.raf) { cancelAnimationFrame(spring.raf); spring.raf = null; }
       dragStartX   = e.clientX;
       dragStartPct = spring.pos;
+      dragRestPct  = spring.pos; // anchor for locked resistance
       trackWidth   = el.getBoundingClientRect().width;
     });
 
     knob.addEventListener('pointermove', function(e) {
       if (!isDragging) return;
-      var unlocked = hasEverAchievedPerfectAccuracy;
+      var unlocked = hasTrophy;
       var deltaPct = ((e.clientX - dragStartX) / trackWidth) * 100;
       var spring = _getSpring(sliderType);
       if (unlocked) {
-        // Free drag — follow pointer directly, spring will snap on release
+        // Free drag -- follow pointer directly, spring snaps on release
         var panel = document.getElementById('diffAdvancedPanel');
         var panelRect = panel ? panel.getBoundingClientRect() : el.getBoundingClientRect();
         var rawPct;
-        if (e.clientX <= panelRect.left)  rawPct = 0;
+        if (e.clientX <= panelRect.left)       rawPct = 0;
         else if (e.clientX >= panelRect.right) rawPct = 100;
         else rawPct = Math.max(0, Math.min(100, dragStartPct + deltaPct));
         spring.pos    = rawPct;
         spring.target = rawPct;
-        if (spring.raf) { cancelAnimationFrame(spring.raf); spring.raf = null; }
         _setKnobPosition(el, rawPct);
       } else {
-        // Locked — tight resistance, max 5% deflection
+        // Locked -- slight resistance anchored to the knob's resting position
         var resistance = 0.08;
         var deflection = Math.max(-5, Math.min(5, deltaPct * resistance));
-        var lockedPct  = SLIDER_STOPS[_valueToStopIndex(sliderType === 'timer' ? questionTimer : playerLives)];
-        spring.pos    = lockedPct + deflection;
-        spring.target = lockedPct + deflection;
-        if (spring.raf) { cancelAnimationFrame(spring.raf); spring.raf = null; }
-        _setKnobPosition(el, spring.pos);
+        var deflectedPct = Math.max(0, Math.min(100, dragRestPct + deflection));
+        spring.pos    = deflectedPct;
+        spring.target = deflectedPct;
+        _setKnobPosition(el, deflectedPct);
       }
     });
 
     knob.addEventListener('pointerup', function(e) {
       if (!isDragging) return;
       isDragging = false;
-      var unlocked = hasEverAchievedPerfectAccuracy;
+      var unlocked = hasTrophy;
       var spring = _getSpring(sliderType);
       if (unlocked) {
-        // Snap to nearest stop and update value
-        var stopIdx = _snapToNearestStop(spring.pos);
+        var stopIdx  = _snapToNearestStop(spring.pos);
         var newValue = SLIDER_VALUES[stopIdx];
         spring.target = SLIDER_STOPS[stopIdx];
-        _animateSpring(sliderType, el);
-        // Update state
+        _animateSpring(sliderType, el, 'gentle');
         if (sliderType === 'timer') {
           if (newValue !== questionTimer) {
             questionTimer = newValue;
@@ -5857,17 +6128,22 @@ function _initSliders() {
         _setKnobLabel(el, _labelForValue(newValue));
         _updateSliderSideLabel(sliderType, newValue);
       } else {
-        // Snap back to locked position
-        var lockedPct = SLIDER_STOPS[_valueToStopIndex(sliderType === 'timer' ? questionTimer : playerLives)];
-        spring.target = lockedPct;
-        _animateSpring(sliderType, el);
+        // Snap back to the resting position.
+        // Force a reflow so the browser commits the dragged position before we
+        // set the return transition -- without this, transition:none (set on
+        // pointerdown) and the new transition collapse into one paint and the
+        // knob jumps rather than animating back.
+        void knob.offsetWidth;
+        spring.pos    = dragRestPct;
+        spring.target = dragRestPct;
+        _animateSpring(sliderType, el, 'gentle');
       }
     });
 
     // Click on track (not knob) to jump to nearest stop when unlocked
     el.addEventListener('pointerdown', function(e) {
       if (e.target === knob || knob.contains(e.target)) return;
-      if (!hasEverAchievedPerfectAccuracy) {
+      if (!hasTrophy) {
         showToast('Keep training to unlock more features.');
         return;
       }
@@ -5876,7 +6152,7 @@ function _initSliders() {
       var newValue = SLIDER_VALUES[stopIdx];
       var spring   = _getSpring(sliderType);
       spring.target = SLIDER_STOPS[stopIdx];
-      _animateSpring(sliderType, el, true);
+      _animateSpring(sliderType, el, 'gentle');
       if (sliderType === 'timer') {
         questionTimer = newValue;
         try { localStorage.setItem('kw_timer', String(newValue)); } catch(ex) {}
@@ -5896,7 +6172,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var advancedPanel = document.getElementById('diffAdvancedPanel');
   if (advancedPanel) {
     advancedPanel.addEventListener('pointerdown', function(e) {
-      if (!hasEverAchievedPerfectAccuracy) {
+      if (!hasTrophy) {
         if (!e.target.closest('.diff-slider-knob')) {
           showToast('Keep training to unlock more features.');
         }
@@ -5930,7 +6206,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var newValue = SLIDER_VALUES[stopIdx];
       var spring   = _getSpring(sliderType);
       spring.target = SLIDER_STOPS[stopIdx];
-      _animateSpring(sliderType, sliderWrap, true);
+      _animateSpring(sliderType, sliderWrap, 'gentle');
       if (sliderType === 'timer') {
         questionTimer = newValue;
         try { localStorage.setItem('kw_timer', String(newValue)); } catch(ex) {}
@@ -5961,15 +6237,35 @@ function _updateDiffSubtitle(mode) {
 function _refreshPausePanel() {
   var headingEl = document.getElementById('pausePanelHeading');
   if (headingEl) {
-    var headingText = gameState === 'finished'
-      ? 'The game round has ended.'
-      : 'Your game is paused.';
+    var headingText;
+    if (gameState === 'finished') {
+      headingText = 'The game round has ended.';
+    } else if (gameState === 'idle' || gameState === 'welcome') {
+      headingText = 'Are you ready to start a game?';
+    } else {
+      headingText = 'Your game is paused.';
+    }
     headingEl.innerHTML = '<strong>' + headingText + '</strong>';
   }
-  var hasTime = bestRecord.time !== null;
-  var hasAcc  = bestRecord.accuracy !== null;
-  var bothActive = hasTime && hasAcc;
-  var noneActive = !hasTime && !hasAcc;
+
+  // Difficulty nudge: linked when not mid-game, dimmed toast when paused
+  var isGameActive = (gameState === 'paused' || gameState === 'playing' || gameState === 'readyToUnpause');
+  var nudgeEl = document.getElementById('pauseDiffNudge');
+  if (nudgeEl) {
+    if (isGameActive) {
+      nudgeEl.classList.add('sp-nudge-inactive');
+      nudgeEl.onclick = function() { showToast('Change difficulty between game rounds.'); };
+    } else {
+      nudgeEl.classList.remove('sp-nudge-inactive');
+      nudgeEl.onclick = function(e) { e.preventDefault(); openSettings('panelDifficulty'); };
+    }
+  }
+
+  var hasTime      = bestRecord.time !== null;
+  var hasAcc       = bestRecord.accuracy !== null;
+  var hasTrophyOnly = !hasAcc && hasTrophy;
+  var bothActive   = hasTime && (hasAcc || hasTrophyOnly);
+  var noneActive   = !hasTime && !hasAcc && !hasTrophy;
   var timeBtn  = document.getElementById('clearTimeBtn');
   var bothBtn  = document.getElementById('clearBothBtn');
   var accBtn   = document.getElementById('clearAccBtn');
@@ -5984,13 +6280,25 @@ function _refreshPausePanel() {
     bothBtn.style.borderRadius = '';
   }
   if (accBtn) {
-    accBtn.classList.toggle('score-pill-inactive', !hasAcc);
+    accBtn.classList.toggle('score-pill-inactive', !hasAcc && !hasTrophyOnly);
     accBtn.style.borderRadius = '';
+    if (hasTrophyOnly) {
+      accBtn.onclick = function() { enterConfirmTrophy(_trophyFromFinished, _trophyFromPause); };
+      accBtn.title = 'Return trophy';
+      accBtn.querySelector('.diff-btn-text').innerHTML = '🏆';
+    } else {
+      accBtn.onclick = function() { _pauseClearClick('accuracy'); };
+      accBtn.title = 'Clear best accuracy';
+      accBtn.querySelector('.diff-btn-text').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/></svg>';
+    }
   }
   if (clearLbl) clearLbl.style.color = noneActive ? '#9ca3af' : '';
 }
 
-function _pauseClearClick(target) {
+// Tracks which clear button is currently in the active/confirm state
+var _scoreClearConfirmTarget = null;
+
+function _pauseClearClick(target, initialToast) {
   var hasTime = bestRecord.time !== null;
   var hasAcc  = bestRecord.accuracy !== null;
   var isInactive =
@@ -5998,10 +6306,119 @@ function _pauseClearClick(target) {
     (target === 'accuracy' && !hasAcc)  ||
     (target === 'both'     && !hasTime && !hasAcc);
   if (isInactive) { showToast('Nothing to clear.'); return; }
+
+  // Pressing the already-active button cancels
+  if (_scoreClearConfirmTarget === target) {
+    _exitScoreClearConfirm();
+    return;
+  }
+
+  // Switching to a different clear button: cancel previous and go straight into the new one.
+  // No toast -- the new question heading pops into the title area.
+  if (_scoreClearConfirmTarget !== null) {
+    _exitScoreClearConfirm();
+    // Slight pause so the previous active state clears visually before the new one sets
+    setTimeout(function() { _pauseClearClick(target, initialToast); }, 30);
+    return;
+  }
+
+  _scoreClearConfirmTarget = target;
+
+  // Mark the source pill so the overlay CSS exposes only it
+  var pill = _scoreClearPillForTarget(target);
+  if (pill) pill.classList.add('score-confirm-source');
+
+  // Light up the pressed button
+  var btn = _scoreClearBtnForTarget(target);
+  if (btn) {
+    btn.classList.add('score-pill-active');
+    _popScorePillLabel(btn);
+  }
+
+  // Overlay the rest of the panel
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.setAttribute('data-score-confirm', target);
+
+  // Install capture-phase guard on click only.
+  // pointerdown would fire on the same press that opened the confirm, so we
+  // use click -- this still blocks all subsequent interactions reliably.
+  document.addEventListener('click', _scoreClearConfirmGuard, true);
+
+  // Wire the Yes/No buttons and update game state
   enterConfirmReset(target);
+
+  // No opening toast -- the question is in the title div.
+  // The guard toasts if the player clicks something they shouldn't.
+  // initialToast is still used by the lock-key path which has no visible trigger button.
+  if (initialToast) showToast(initialToast);
+}
+
+function _scoreClearPillForTarget(target) {
+  // The clear-score pill (first .score-clear-pill in the pause panel right col)
+  return document.querySelector('#panelPause .sp-col-right .score-clear-pill');
+}
+
+function _scoreClearBtnForTarget(target) {
+  if (target === 'time')     return document.getElementById('clearTimeBtn');
+  if (target === 'both')     return document.getElementById('clearBothBtn');
+  if (target === 'accuracy') return document.getElementById('clearAccBtn');
+  return null;
+}
+
+function _popScorePillLabel(btnEl) {
+  if (!btnEl) return;
+  // Score pill buttons may contain an SVG or a text node -- animate the button itself
+  // via a wrapper span if present, otherwise the button directly
+  var target = btnEl.querySelector('.diff-btn-text') || btnEl;
+  target.classList.remove('diff-btn-label-pop');
+  void target.offsetWidth;
+  target.classList.add('diff-btn-label-pop');
+  target.addEventListener('animationend', function handler() {
+    target.classList.remove('diff-btn-label-pop');
+    target.removeEventListener('animationend', handler);
+  });
+}
+
+function _scoreClearConfirmGuard(e) {
+  var activeBtn = _scoreClearBtnForTarget(_scoreClearConfirmTarget);
+  // Allow clicks on the active button (toggle-cancel)
+  if (activeBtn && (e.target === activeBtn || activeBtn.contains(e.target))) return;
+  // Allow main/help buttons (Yes/No)
+  var mainB = document.getElementById('mainBtn');
+  var helpB = document.getElementById('helpBtn');
+  if ((mainB && (e.target === mainB || mainB.contains(e.target))) ||
+      (helpB && (e.target === helpB || helpB.contains(e.target)))) return;
+  // Block everything else and toast
+  e.stopPropagation();
+  e.preventDefault();
+  showToast('You need to decide if you are keeping or clearing your score record.');
+}
+
+function _exitScoreClearConfirm() {
+  if (_scoreClearConfirmTarget === null) return;
+  var btn  = _scoreClearBtnForTarget(_scoreClearConfirmTarget);
+  var pill = _scoreClearPillForTarget(_scoreClearConfirmTarget);
+  _scoreClearConfirmTarget = null;
+  document.removeEventListener('click', _scoreClearConfirmGuard, true);
+  if (btn)  btn.classList.remove('score-pill-active');
+  if (pill) pill.classList.remove('score-confirm-source');
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.removeAttribute('data-score-confirm');
+  hideConfirmHeading();
 }
 
 function _reportImpossibleQuestion() {
+  // Briefly activate the button so the interaction is visually confirmed,
+  // then slowly transition back to the available state.
+  var reportBtn = document.querySelector('#panelPause .score-pill-full');
+  if (reportBtn) {
+    reportBtn.classList.add('score-pill-active');
+    _popScorePillLabel(reportBtn);
+    setTimeout(function() {
+      reportBtn.classList.remove('score-pill-active');
+      // Transition is already 1.5s ease from CSS -- returns slowly to available
+    }, 3000);
+  }
   // Build the same report dbgBuildReport() produces, but directly from live
   // state so it is always current regardless of debug overlay visibility.
   var appEntry = APPS.find(function(a) { return a.key === currentApp; });
@@ -6053,6 +6470,8 @@ function _showReturningScreen() {
 }
 
 function _returningContinue() {
+  var clickedBtn = document.querySelector('#panelReturning .sp-seg-btn-left .diff-btn-text');
+  if (clickedBtn) _popDiffLabel(clickedBtn);
   _welcomeIsReturning = false;
   document.body.classList.remove('returning-screen');
   var tagline = document.getElementById('welcomeTagline');
@@ -6066,45 +6485,78 @@ function _returningContinue() {
 }
 
 function _returningStartOver() {
-  document.body.classList.remove('returning-screen');
-  try { localStorage.removeItem('kw_best'); } catch(e) {}
-  try { localStorage.removeItem('kw_app'); } catch(e) {}
-  try { localStorage.removeItem('kw_difficulty'); } catch(e) {}
-  try { localStorage.removeItem('kw_perfect'); } catch(e) {}
-  try { localStorage.removeItem('kw_timer'); } catch(e) {}
-  try { localStorage.removeItem('kw_lives'); } catch(e) {}
-  try { sessionStorage.removeItem('kw_welcomed'); } catch(e) {}
-  bestRecord = { time: null, accuracy: null };
-  hasEverAchievedPerfectAccuracy = false;
-  currentDifficulty = 'normal';
-  _diffFirst = true;
-  setDiffState(0);
-  updateBestDisplay();
-  closeSettings();
-  _showWelcomeScreen();
+  // Pop the clicked label, hold briefly, then crossfade to the welcome screen.
+  var clickedBtn = document.querySelector('#panelReturning .sp-seg-btn-right .diff-btn-text');
+  if (clickedBtn) _popDiffLabel(clickedBtn);
+  var panelInner = document.getElementById('settingsPanelInner');
+  setTimeout(function() {
+    // Fade out the returning screen content
+    if (panelInner) { panelInner.style.transition = 'opacity 0.3s ease'; panelInner.style.opacity = '0'; }
+    setTimeout(function() {
+      // Reset storage and state, then show the welcome screen
+      document.body.classList.remove('returning-screen');
+      try { localStorage.removeItem('kw_best'); } catch(e) {}
+      try { localStorage.removeItem('kw_app'); } catch(e) {}
+      try { localStorage.removeItem('kw_difficulty'); } catch(e) {}
+      try { localStorage.removeItem('kw_perfect'); } catch(e) {}
+      try { localStorage.removeItem('kw_timer'); } catch(e) {}
+      try { localStorage.removeItem('kw_lives'); } catch(e) {}
+      try { sessionStorage.removeItem('kw_welcomed'); } catch(e) {}
+      bestRecord = { time: null, accuracy: null };
+      hasTrophy = false;
+      currentDifficulty = 'normal';
+      _diffFirst = true;
+      setDiffState(0);
+      updateBestDisplay();
+      if (panelInner) { panelInner.style.transition = ''; panelInner.style.opacity = ''; }
+      closeSettings();
+      _showWelcomeScreen();
+    }, 320);
+  }, 500); // hold after pop before fading
 }
 
 function _dismissWelcome() {
-  var tagline = document.getElementById('welcomeTagline');
-  if (tagline) tagline.style.display = 'none';
+  // Pop the active label, then hold on the welcome screen for 1750ms
+  // so the player sees their choice before the keyboard moves.
+  var activeBtn = document.querySelector('#welcomeDifficultyPill .diff-btn-active');
+  if (activeBtn) _popDiffLabel(activeBtn);
   _welcomeIsReturning = false;
-  closeSettings();
-  resetToIdle();
+  setTimeout(function() {
+    var tagline = document.getElementById('welcomeTagline');
+    if (tagline) tagline.style.display = 'none';
+    closeSettings();
+    resetToIdle();
+    // Pulse Start once the keyboard has fully risen (850ms), then every 5s
+    setTimeout(function pulseAndReschedule() {
+      if (gameState !== 'idle') return;
+      pulseBtn(mainBtn);
+      setTimeout(pulseAndReschedule, 5000);
+    }, 900);
+  }, 1750);
 }
 
 function _startFromWelcome() {
-  // Start pressed on a landing screen without choosing an option.
-  // First-time: default to Normal. Returning: keep existing settings.
+  // Start pressed without choosing a difficulty -- default to Normal.
   if (!_welcomeIsReturning) {
     currentDifficulty = 'normal';
     try { localStorage.setItem('kw_difficulty', currentDifficulty); } catch(e) {}
   }
-  var tagline = document.getElementById('welcomeTagline');
-  if (tagline) tagline.style.display = 'none';
+  var panelInner = document.getElementById('settingsPanelInner');
+  var tagline    = document.getElementById('welcomeTagline');
+  if (panelInner) {
+    setTimeout(function() { panelInner.style.transition = 'opacity 0.4s ease'; panelInner.style.opacity = '0'; }, 50);
+  }
+  if (tagline) {
+    setTimeout(function() { tagline.style.transition = 'opacity 0.4s ease'; tagline.style.opacity = '0'; }, 50);
+  }
   _welcomeIsReturning = false;
-  closeSettings();
-  resetToIdle();
-  beginCountdown();
+  setTimeout(function() {
+    if (panelInner) { panelInner.style.transition = ''; panelInner.style.opacity = ''; }
+    if (tagline)    { tagline.style.transition = ''; tagline.style.opacity = ''; tagline.style.display = 'none'; }
+    closeSettings();
+    resetToIdle();
+    beginCountdown();
+  }, 480);
 }
 
 // On load: show appropriate landing screen every fresh session (sessionStorage resets on tab close)
@@ -6302,8 +6754,9 @@ function cancelCountdown() {
 }
 
 function beginCountdown() {
-  // Prevent double-triggers during countdown
   if (_countdownTimer) return;
+  _stopReadyPromptTimer();
+  hideConfirmHeading();
   _countdownMode    = 'start';
   gameState         = 'counting';
   mainBtn.textContent = 'Cancel';
@@ -6362,7 +6815,7 @@ function startGame() {
   questionCountEl.classList.remove('blurred', 'blur-instant');
   buildProgressDots();
   showProgressDots();
-  resetTimerBox();
+  resetscoreDisc();
   clearAllLit();
   heldKeys.clear();
   greenHeld.clear();
@@ -6371,7 +6824,7 @@ function startGame() {
   hintPenaltyPct = 0;
   dbgRefreshCtx(); dbgRefreshAccuracy();
   clearTimeout(accuracyPenaltyTimeout);
-  timerBox.classList.remove('penalty-time', 'penalty-acc');
+  scoreDisc.classList.remove('penalty-time', 'penalty-acc');
   updateAccuracyDisplay();
   if (lockKeyEl) lockKeyEl.classList.remove('active');
 
@@ -6387,15 +6840,15 @@ function skipShortcut() {
   clearHelp();
   titleEl.classList.add('strike');
   clearInterval(timerInterval);
-  timerBox.classList.add('penalty-time');
+  scoreDisc.classList.add('penalty-time');
   timerDiv.textContent = '+5';
 
   penaltyTimeout = setTimeout(() => {
-    timerBox.classList.remove('penalty-time');
+    scoreDisc.classList.remove('penalty-time');
     totalTime += 5;
     advanceQuestion();
     if (gameState === 'playing') {
-      resetTimerBox();
+      resetscoreDisc();
       timerInterval = setInterval(updateTimer, 100);
     }
   }, 2000);
@@ -6474,6 +6927,7 @@ function startEndScreenInactivityTimer() {
     pulseBtn(document.getElementById('mainBtn'));
     endScreenInactivityTimer = setTimeout(pulseAndReschedule, 5000);
   }, 5000);
+  _startReadyPromptTimer();
 }
 
 function resetEndScreenInactivityTimer() {
@@ -6506,11 +6960,9 @@ function endGame() {
   if (bestRecord.accuracy === null || finalAccuracy > bestRecord.accuracy) {
     bestRecord.accuracy = finalAccuracy; newBestAcc = true;
   }
-  const justEarnedTrophy = finalAccuracy >= 100 && !hasEverAchievedPerfectAccuracy;
-  if (justEarnedTrophy) {
-    hasEverAchievedPerfectAccuracy = true;
-    try { localStorage.setItem('kw_perfect', '1'); } catch(e) {}
-  }
+  const justEarnedTrophy = finalAccuracy >= 100 && !hasTrophy;
+  // Note: hasTrophy and localStorage are set during the
+  // animation sequence so the difficulty panel opens in its pre-trophy state.
   if (newBestTime || newBestAcc) {
     try { localStorage.setItem('kw_best', JSON.stringify(bestRecord)); } catch(e) {}
     updateBestDisplay(newBestTime, newBestAcc);
@@ -6538,76 +6990,162 @@ function endGame() {
     void titleEl.offsetWidth;
     titleEl.classList.add('trophy-pop');
   }
-  startEndScreenInactivityTimer();
+  if (justEarnedTrophy) {
+    // Delay the first pulse until after the full award sequence + 3s of peace.
+    // The sequence runs for roughly 10-11s; 14s gives comfortable clearance.
+    clearTimeout(endScreenInactivityTimer);
+    endScreenInactivityTimer = setTimeout(function pulseAndReschedule() {
+      if (gameState !== 'finished') { endScreenInactivityTimer = null; return; }
+      pulseBtn(document.getElementById('mainBtn'));
+      endScreenInactivityTimer = setTimeout(pulseAndReschedule, 5000);
+    }, 14000);
+  } else {
+    startEndScreenInactivityTimer();
+  }
   fillProgressDot(9);
   setTimeout(hideProgressDots, 0);
-  timerBox.className = 'timerBox medal-' + medal;
+  scoreDisc.className = 'scoreDisc medal-' + medal;
   currentMedal = medal;
   rimTarget = 0; rimCurrent = 0; rimVelocity = 0;
   updateMedalFaceStyle(0);
   timerDiv.textContent = formatTime(Math.floor(totalTime));
   if (justEarnedTrophy) {
-    // Upgrade to Normal and apply its presets. Memory and localStorage are
-    // written immediately; the UI changes are revealed through timed animation
-    // below so the player can watch each step happen.
     var previousDifficulty = currentDifficulty;
-    currentDifficulty = 'normal';
-    questionTimer     = 5;
-    playerLives       = 10;
-    try { localStorage.setItem('kw_difficulty', 'normal'); } catch(e) {}
-    try { localStorage.setItem('kw_timer', '5'); } catch(e) {}
-    try { localStorage.setItem('kw_lives', '10'); } catch(e) {}
+    _trophySequenceActive = true; // suppress footer in _syncAdvancedPanelState
 
-    // Step 1 (1200ms): open the difficulty settings panel so the player can
-    // read the trophy heading before the keyboard begins to move.
-    // The keyboard flip takes ~850ms and the panel fades in over 550ms after
-    // that, so content is fully visible ~1400ms after openSettings is called.
-    // We add a further 1500ms reading pause before anything animates.
-    var panelReadyDelay  = 1200 + 1400; // when panel is fully visible
-    var readingPause     = 1500;         // breathing room before first animation
+    // All delays are relative to t0 (endGame call).
+    // The keyboard flip takes 850ms, panel inner fades in after 250ms delay + 300ms = 550ms.
+    // So panel is fully visible at t0 + openDelay + 850 + 550.
+    var openDelay      = 800;  // ms after t0 to call openSettings
+    var panelVisible   = openDelay + 850 + 550; // ~2200ms: panel fully readable
 
+    // Toast fires immediately so the player reads it while the keyboard moves
+    showToast('Ramping difficulty as you progress.');
+
+    // Step 1: open the panel (still in pre-trophy locked state)
     setTimeout(function() {
       openSettings('panelDifficulty');
-    }, 1200);
+    }, openDelay);
 
-    // Step 2: if they were on Fundamentals, animate pill + needle to Normal.
+    // Step 2: once panel is visible, change difficulty pill if from Fundamentals
+    var pillDone = panelVisible;
     if (previousDifficulty === 'fundamentals') {
       setTimeout(function() {
+        currentDifficulty = 'normal';
+        try { localStorage.setItem('kw_difficulty', 'normal'); } catch(e) {}
+        var pillBtns = document.querySelectorAll('#difficultyPill .diff-btn');
+        pillBtns.forEach(function(b) { b.classList.add('diff-btn-transitioning'); });
         _diffFirst = true;
         setDiffState(0);
         _updateDiffBtnStyles('normal');
         _updateDiffSubtitle('normal');
-      }, panelReadyDelay + readingPause);
+        // Pop the newly active label
+        var normalBtn = document.querySelector('#difficultyPill .diff-btn[data-mode="normal"]');
+        if (normalBtn) _popDiffLabel(normalBtn);
+        setTimeout(function() {
+          pillBtns.forEach(function(b) { b.classList.remove('diff-btn-transitioning'); });
+        }, 700);
+      }, panelVisible);
+      pillDone = panelVisible + 700; // pill transition duration
+    } else {
+      // Already on Normal/Hardcore — still pop the active pill label to draw attention
+      currentDifficulty = 'normal';
+      try { localStorage.setItem('kw_difficulty', 'normal'); } catch(e) {}
+      setTimeout(function() {
+        var activeBtn = document.querySelector('#difficultyPill .diff-btn[data-mode="normal"]');
+        if (activeBtn) _popDiffLabel(activeBtn);
+      }, panelVisible);
     }
 
-    // Step 3: activate the advanced panel, then animate the Question Timer slider.
-    // If coming from Fundamentals, add extra time for the pill animation (800ms) + pause.
-    var sliderBaseDelay = panelReadyDelay + readingPause
-      + (previousDifficulty === 'fundamentals' ? 800 + 1000 : 0);
-
+    // Step 3: award trophy + unlock panel.
+    // Sliders MUST start from ∞ (that was the only available state until now).
+    // Reset springs to 100% (∞ position) before animating, regardless of
+    // any prior state they may be in.
+    var timerDelay = pillDone;
     setTimeout(function() {
+      hasTrophy = true;
+      try { localStorage.setItem('kw_perfect', '1'); } catch(e) {}
       _syncAdvancedPanelState();
-      var timerEl = document.getElementById('questionTimerSlider');
-      var timerSpring = _sliderSprings['timer'];
-      if (timerEl && timerSpring) {
-        timerSpring.target = SLIDER_STOPS[_valueToStopIndex(questionTimer)];
-        _animateSpring('timer', timerEl, true);
-        _setKnobLabel(timerEl, _labelForValue(questionTimer));
-        _updateSliderSideLabel('timer', questionTimer);
-      }
-    }, sliderBaseDelay);
+      _updateDiffBtnStyles(currentDifficulty);
+      updateBestDisplay();
 
-    // Step 4: animate the Player Lives slider 2000ms after the timer slider.
-    setTimeout(function() {
-      var livesEl = document.getElementById('playerLivesSlider');
+      // Force both sliders to ∞ visually before the tween begins.
+      // We use two rAF frames: first commits left:100% with transition:none,
+      // second re-enables the transition so the animation can begin cleanly.
+      var timerEl    = document.getElementById('questionTimerSlider');
+      var livesEl    = document.getElementById('playerLivesSlider');
+      var timerSpring = _sliderSprings['timer'];
       var livesSpring = _sliderSprings['lives'];
-      if (livesEl && livesSpring) {
-        livesSpring.target = SLIDER_STOPS[_valueToStopIndex(playerLives)];
-        _animateSpring('lives', livesEl, true);
-        _setKnobLabel(livesEl, _labelForValue(playerLives));
-        _updateSliderSideLabel('lives', playerLives);
+
+      function resetKnobToInfinity(sliderEl, spring) {
+        if (!spring || !sliderEl) return;
+        spring.pos = 100; spring.vel = 0; spring.target = 100;
+        if (spring.raf) { cancelAnimationFrame(spring.raf); spring.raf = null; }
+        var knob = sliderEl.querySelector('.diff-slider-knob');
+        if (knob) { knob.style.transition = 'none'; knob.style.left = '100%'; }
+        _setKnobLabel(sliderEl, '∞');
       }
-    }, sliderBaseDelay + 2000);
+
+      resetKnobToInfinity(timerEl, timerSpring);
+      resetKnobToInfinity(livesEl, livesSpring);
+
+      // Two rAFs: first ensures left:100% is committed, second starts the animation
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          // Animate Question Timer from ∞ to its target
+          questionTimer = 5;
+          try { localStorage.setItem('kw_timer', '5'); } catch(e) {}
+          if (timerEl && timerSpring) {
+            timerSpring.target = SLIDER_STOPS[_valueToStopIndex(questionTimer)];
+            _animateSpring('timer', timerEl, 'smooth');
+            _setKnobLabel(timerEl, _labelForValue(questionTimer));
+            _updateSliderSideLabel('timer', questionTimer);
+            // Pop knob value label once tween settles (320ms)
+            setTimeout(function() {
+              var visibleKnob = timerEl.querySelector('.diff-knob-label:not(.diff-knob-label-hidden)');
+              if (visibleKnob) _popDiffLabel(visibleKnob);
+            }, 340);
+          }
+        });
+      });
+    }, timerDelay);
+
+    // Step 4: animate Player Lives slider after timer tween + pop complete
+    var livesDelay = timerDelay + 340 + 350;
+    setTimeout(function() {
+      playerLives = 10;
+      try { localStorage.setItem('kw_lives', '10'); } catch(e) {}
+      var livesEl2    = document.getElementById('playerLivesSlider');
+      var livesSpring2 = _sliderSprings['lives'];
+      if (livesEl2 && livesSpring2) {
+        livesSpring2.target = SLIDER_STOPS[_valueToStopIndex(playerLives)];
+        _animateSpring('lives', livesEl2, 'smooth');
+        _setKnobLabel(livesEl2, _labelForValue(playerLives));
+        _updateSliderSideLabel('lives', playerLives);
+        // Pop only the knob value label once the tween settles (320ms)
+        setTimeout(function() {
+          var visibleKnob = livesEl2.querySelector('.diff-knob-label:not(.diff-knob-label-hidden)');
+          if (visibleKnob) _popDiffLabel(visibleKnob);
+        }, 340);
+      }
+    }, livesDelay);
+
+    // Step 5: reveal footer with colour-in effect after lives pop completes
+    setTimeout(function() {
+      _trophySequenceActive = false;
+      var footer = document.getElementById('diffAdvancedFooter');
+      if (footer) {
+        footer.style.color = '#f0f4f8'; // page background colour -- invisible
+        footer.style.display = 'block';
+        footer.classList.add('diff-advanced-footer-visible');
+        // Transition colour in over 1 second
+        setTimeout(function() {
+          footer.style.transition = 'color 1s ease';
+          footer.style.color = '#9ca3af';
+          setTimeout(function() { footer.style.transition = ''; }, 1050);
+        }, 50);
+      }
+    }, livesDelay + 340 + 350);
   }
 }
 
@@ -6639,7 +7177,7 @@ function rimTick() {
   rimVelocity    = rimVelocity * RIM_DAMPING + force;
   rimCurrent    += rimVelocity;
   const faceAngle = Math.round((rimTarget / 15) * 5); // ±5° face, keyed off target
-  timerBox.style.background = MEDAL_RIM[currentMedal](rimCurrent);
+  scoreDisc.style.background = MEDAL_RIM[currentMedal](rimCurrent);
   updateMedalFaceStyle(faceAngle);
   // Keep ticking until settled
   if (Math.abs(rimVelocity) > 0.01 || Math.abs(rimCurrent - rimTarget) > 0.01) {
@@ -6653,7 +7191,7 @@ function rimTick() {
 // Medal tilt on press/release
 function medalPressDown(clientX) {
   if (!currentMedal) return;
-  var rect = timerBox.getBoundingClientRect();
+  var rect = scoreDisc.getBoundingClientRect();
   var side = (clientX - rect.left) / rect.width < 0.5 ? -1 : 1;
   rimTarget = side * 28; // kick it hard to one side
   if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
@@ -6672,13 +7210,28 @@ document.addEventListener('mousemove', e => {
   if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
 });
 
-timerBox.addEventListener('mousedown', e => { medalPressDown(e.clientX); });
-timerBox.addEventListener('mouseup',   () => { medalPressUp(); });
-timerBox.addEventListener('mouseleave',() => { medalPressUp(); });
-timerBox.addEventListener('touchstart', e => { if (e.touches.length) medalPressDown(e.touches[0].clientX); }, { passive: true });
-timerBox.addEventListener('touchend',   () => { medalPressUp(); }, { passive: true });
+scoreDisc.addEventListener('mousedown', e => { medalPressDown(e.clientX); });
+scoreDisc.addEventListener('mouseup',   () => { medalPressUp(); });
+scoreDisc.addEventListener('mouseleave',() => { medalPressUp(); });
+scoreDisc.addEventListener('touchstart', e => { if (e.touches.length) medalPressDown(e.touches[0].clientX); }, { passive: true });
+scoreDisc.addEventListener('touchend',   () => { medalPressUp(); }, { passive: true });
 
-// Key lighting active at all times, not just during play
+// Reset the "Ready?" prompt on any user interaction while awaiting Start/Unpause
+function _onUserActivity() {
+  var awaitingAction = (gameState === 'idle' || gameState === 'paused' ||
+                        gameState === 'finished' || gameState === 'readyToUnpause');
+  if (!awaitingAction) return;
+  var headingEl = document.getElementById('confirmHeading');
+  if (headingEl && headingEl.textContent === 'Ready?') {
+    headingEl.style.display = 'none';
+    headingEl.textContent = '';
+  }
+  _startReadyPromptTimer();
+}
+document.addEventListener('keydown',   _onUserActivity, { passive: true });
+document.addEventListener('mousemove', _onUserActivity, { passive: true });
+document.addEventListener('click',     _onUserActivity, { passive: true });
+document.addEventListener('touchstart',_onUserActivity, { passive: true });
 
 /* ══════════════════════════════════════
    MECHANICAL KEY CLICK SOUND
@@ -6761,6 +7314,20 @@ function runCountdown(onComplete) {
   }
   tick();
 }
+// ── Kill punctuation confirm: block any click/pointerdown outside the three valid targets
+function _killPunctuationConfirmGuard(e) {
+  if (gameState !== 'confirm-kill-punctuation') return;
+  var allowed = e.target.closest('#mainBtn, #helpBtn, #killPunctuationRow');
+  if (allowed) return;
+  e.stopPropagation();
+  e.preventDefault();
+  if (e.type === 'click') {
+    showToast('You must confirm if you really want no punctuation keys or not.');
+  }
+}
+document.addEventListener('click',       _killPunctuationConfirmGuard, true);
+document.addEventListener('pointerdown', _killPunctuationConfirmGuard, true);
+
 document.addEventListener('keydown', handleKeydown);
 document.addEventListener('keyup',   handleKeyup);
 
@@ -6803,6 +7370,10 @@ function handleKeydown(e) {
   if (gameState === 'finished') {
     if (e.key === 'ArrowRight') { showTip(tipIndex + 1); e.preventDefault(); return; }
     if (e.key === 'ArrowLeft')  { showTip(tipIndex - 1); e.preventDefault(); return; }
+    if (e.key === 'Enter') { e.preventDefault(); _closeAllModals(); beginCountdown(); return; }
+  }
+  if (gameState === 'idle') {
+    if (e.key === 'Enter') { e.preventDefault(); _closeAllModals(); beginCountdown(); return; }
   }
   if (gameState === 'paused' || gameState === 'readyToUnpause' || gameState === 'confirm-reset' || gameState === 'confirm-quit') { e.preventDefault(); return; }
   if (gameState !== 'playing' || transitioning) { e.preventDefault(); return; }
@@ -6824,18 +7395,18 @@ function handleKeydown(e) {
       stickyLit.clear();
       recordAnswer();
       if (gameState === 'playing') {
-        resetTimerBox();
+        resetscoreDisc();
         timerInterval = setInterval(updateTimer, 100);
       }
     }, 1500);
   } else {
-    if (!timerBox.classList.contains('red') && !timerBox.classList.contains('green')) {
+    if (!scoreDisc.classList.contains('red') && !scoreDisc.classList.contains('green')) {
       // In sticky mode only flash red if an orange key is currently lit
       const showRed = stickyKeysOn ? [...stickyLit.values()].includes('orange') : true;
       if (showRed) {
         setTimerState('red');
         setTimeout(() => {
-          if (gameState === 'playing' && timerBox.classList.contains('red')) resetTimerBox();
+          if (gameState === 'playing' && scoreDisc.classList.contains('red')) resetscoreDisc();
         }, 800);
       }
     }
@@ -7007,7 +7578,7 @@ function showDiffToast(msg) {
   clearTimeout(_diffToastTimer);
   el.textContent = msg;
   el.classList.add('visible');
-  var readingDuration = Math.min(6000, 1800 + msg.length * 65);
+  var readingDuration = Math.min(5000, 1400 + msg.length * 40);
   _diffToastTimer = setTimeout(function() {
     el.classList.remove('visible');
   }, readingDuration);
@@ -7080,7 +7651,23 @@ document.addEventListener('DOMContentLoaded', function() {
   opacity: 0.38;
   pointer-events: none;
 }
-/* "full" and "extended" word labels beside the keyboard size SVGs */
+/* During kill punctuation confirm: block all panel interactions except
+   the Kill Punctuation radio itself, which acts as the No button. */
+#settingsPanelInner[data-kill-punctuation-confirming] {
+  pointer-events: none;
+}
+#settingsPanelInner[data-kill-punctuation-confirming] #killPunctuationRow {
+  pointer-events: auto;
+  cursor: pointer;
+}
+/* Nudge opacity down on everything except the kill punctuation row */
+#settingsPanelInner[data-kill-punctuation-confirming] .sp-col,
+#settingsPanelInner[data-kill-punctuation-confirming] .sp-page > *:not(#killPunctuationRow) {
+  opacity: 0.35;
+}
+#settingsPanelInner[data-kill-punctuation-confirming] #killPunctuationRow {
+  opacity: 1;
+}
 .kb-size-word-label {
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 11px;
@@ -7106,8 +7693,8 @@ document.addEventListener('DOMContentLoaded', function() {
   width: 100%;
   border: 1.5px solid #d1d5db;
   border-radius: 20px;
-  background: transparent;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+  background: #f0f4f8;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
 }
 .score-clear-pill .score-pill-seg:first-child { border-radius: 18px 0 0 18px; }
 .score-clear-pill .score-pill-seg:last-child  { border-radius: 0 18px 18px 0; }
@@ -7120,13 +7707,13 @@ document.addEventListener('DOMContentLoaded', function() {
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 600;
-  color: #9ca3af; /* passive: grey label */
-  background: #e0f2fe;
+  color: #9ca3af;
+  background: #f7f9fb;
   border: none;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
   outline: none;
   -webkit-appearance: none;
+  transition: background 1.5s ease, color 1.5s ease;
 }
 .score-pill-seg + .score-pill-seg {
   border-left: 1.5px solid #d1d5db;
@@ -7134,27 +7721,57 @@ document.addEventListener('DOMContentLoaded', function() {
 .score-pill-quarter { flex: 1; }
 .score-pill-half    { flex: 2; }
 .score-pill-full    { flex: 1; width: 100%; }
-.score-pill-seg svg { pointer-events: none; stroke: #9ca3af; transition: stroke 0.15s; }
-.score-pill-seg:hover:not(.score-pill-inactive) {
+.score-pill-seg svg { pointer-events: none; stroke: #9ca3af; }
+.score-pill-seg.score-pill-active {
   background: white;
   color: #374151;
+  transition: background 0s, color 0s;
 }
-.score-pill-seg:hover:not(.score-pill-inactive) svg {
-  stroke: #374151;
-}
+.score-pill-seg.score-pill-active svg { stroke: #374151;  }
 .score-pill-inactive {
-  background: linear-gradient(to bottom, #f0f4f8 70%, #dfe1e5 100%);
+  background: #f0f4f8;
   cursor: default;
-  color: #9ca3af;
+  color: #d1d5db;
+  text-decoration: line-through;
+  pointer-events: none;
 }
-.score-pill-inactive svg {
-  stroke: #9ca3af;
-}
+.score-pill-inactive svg { stroke: #d1d5db; }
 .sp-clear-label-inactive {
   color: #d1d5db !important;
 }
 .sp-clear-label-inactive strong {
   color: inherit;
+}
+/* Score confirm overlay: everything in the pause col fades except the active pill */
+#settingsPanelInner[data-score-confirm] .sp-col-right > *:not(.score-confirm-source) {
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+#settingsPanelInner[data-score-confirm] .sp-col-left {
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+#settingsPanelInner[data-score-confirm] .score-confirm-source {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* Diff-change confirm overlay: dims everything in the difficulty panel except the pill */
+#settingsPanelInner[data-diff-confirm] > * {
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+#settingsPanelInner[data-diff-confirm] .diff-confirm-source {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* Quit-confirm overlay: dims all panel content */
+#settingsPanelInner[data-quit-confirm] > * {
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
 }
 .diff-subtitle {
   font-size: 12px;
@@ -7167,6 +7784,50 @@ document.addEventListener('DOMContentLoaded', function() {
 /* Welcome panel: collapse the subtitle gap so Skill-set loaded sits flush */
 #panelWelcome .diff-subtitle {
   display: none;
+}
+
+/* Temporary transition class applied to pill buttons during the trophy reveal
+   so the active state change is slow enough for the eye to follow. */
+.diff-btn.diff-btn-transitioning {
+  transition: background 0.7s ease, color 0.7s ease;
+}
+
+/* Pop animation for the newly selected difficulty label */
+@keyframes diffLabelPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  70%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+.diff-btn-text.diff-btn-label-pop,
+.score-pill-seg.diff-btn-label-pop,
+.diff-slider-side-label.diff-btn-label-pop,
+.diff-knob-label.diff-btn-label-pop,
+.diff-advanced-footer.diff-btn-label-pop {
+  display: inline-block; /* required for transform on inline/block elements */
+  animation: diffLabelPop 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+/* Footer hint below the advanced panel — hidden until trophy is awarded.
+   Revealed with a left-to-right clip wipe. */
+@keyframes diffFooterWipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0% 0 0); }
+}
+.diff-advanced-footer {
+  font-size: 12px;
+  font-style: italic;
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 8px;
+  line-height: 1.6;
+  display: none;
+  pointer-events: none;
+}
+.diff-advanced-footer.diff-advanced-footer-visible {
+  display: block;
+  pointer-events: auto;
+  /* colour is set by JS -- starts as page bg colour, transitions to #9ca3af */
 }
 
 /* Horizontal divider on difficulty panel — inset to align with pill corner radius */
@@ -7187,8 +7848,8 @@ document.addEventListener('DOMContentLoaded', function() {
 /* Active state: slight fill + inner shadow */
 .diff-advanced-panel.diff-advanced-active {
   background: #f7f9fb;
-  box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
-  border-color: #d1d5db;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.07);
+  border-color: #c8cdd4;
 }
 
 /* Inactive panel: intercept pointer to show toast, except on the knobs */
@@ -7246,7 +7907,7 @@ document.addEventListener('DOMContentLoaded', function() {
   margin-right: 18px;
 }
 
-/* Track — inactive uses the border colour; active uses a slightly darker mid-tone */
+/* Track — inactive: border colour; active: slightly darker mid-tone */
 .diff-slider-track {
   position: absolute;
   left: 0; right: 0;
@@ -7318,12 +7979,19 @@ document.addEventListener('DOMContentLoaded', function() {
   transition: opacity 0.2s ease, color 0.5s ease;
   pointer-events: none;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.diff-knob-label svg {
+  display: block;
+  fill: currentColor;
 }
 .diff-advanced-panel.diff-advanced-active .diff-knob-label:not(.diff-knob-infinity) {
   color: #374151;
 }
 .diff-knob-label.diff-knob-infinity {
-  color: #9ca3af;
+  color: #374151;
 }
 .diff-knob-label-hidden { opacity: 0; }
 /* ── Pause panel: settings nudge rows ───────────────── */
@@ -7373,14 +8041,14 @@ document.addEventListener('DOMContentLoaded', function() {
   border-radius: 0;
   max-width: none;
 }
-/* ── Segmented control pill (returning + difficulty screens) ── */
+/* ── Segmented control pill ── */
 .sp-seg-pill {
   display: flex;
   width: 100%;
   border: 1.5px solid #d1d5db;
   border-radius: 20px;
-  background: transparent;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+  background: #f0f4f8;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
 }
 .sp-seg-pill .sp-seg-btn:first-child,
 .sp-seg-pill .diff-btn:first-child { border-radius: 18px 0 0 18px; }
@@ -7392,54 +8060,42 @@ document.addEventListener('DOMContentLoaded', function() {
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: #9ca3af; /* passive: grey label */
-  background: #e0f2fe;
+  color: #9ca3af;
+  background: #f7f9fb;
   border: none;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
   line-height: 1.2;
   outline: none;
   -webkit-appearance: none;
   appearance: none;
 }
 .sp-seg-btn:focus { outline: none; }
-/* Divider: always light grey */
-.sp-seg-btn + .sp-seg-btn {
+/* Divider */
+.sp-seg-btn + .sp-seg-btn,
+.sp-seg-pill .diff-btn + .diff-btn {
   border-left: 1.5px solid #d1d5db;
 }
-/* Hover on available: white background, dark label — preview of active state */
-.sp-seg-btn:hover:not(.diff-btn-inactive) {
-  background: white;
-  color: #374151;
-}
-/* Left/right alignment for two-part pill */
+/* Alignment */
 .sp-seg-btn.sp-seg-btn-left  { text-align: right; }
 .sp-seg-btn.sp-seg-btn-right { text-align: left; }
-/* Three-part pill: all labels centred */
 .sp-seg-pill-three .sp-seg-btn { text-align: center; }
-/* Unavailable: flat page grey with subtle shadow hint at the very bottom */
+/* Unavailable */
 .sp-seg-btn.diff-btn-inactive,
 .sp-seg-pill .diff-btn.diff-btn-inactive {
-  background: linear-gradient(to bottom, #f0f4f8 70%, #dfe1e5 100%);
-  color: #9ca3af;
+  background: #f0f4f8;
+  color: #d1d5db;
+  text-decoration: line-through;
   cursor: default;
+  pointer-events: none;
 }
-/* Hardcore is always the last segment — restore its pill corner radii */
 .sp-seg-pill .diff-btn.diff-btn-inactive:last-child {
   border-radius: 0 18px 18px 0;
 }
-/* Active/selected: white fill, dark label */
+/* Selected */
 .sp-seg-btn.diff-btn-active,
 .sp-seg-pill .diff-btn.diff-btn-active {
   background: white;
   color: #374151;
-}
-/* While a sibling is hovered, fade active back to blue and grey label —
-   signals "you are about to leave this setting". */
-.sp-seg-pill[data-hovering] .sp-seg-btn.diff-btn-active,
-.sp-seg-pill[data-hovering] .diff-btn.diff-btn-active {
-  background: #e0f2fe;
-  color: #9ca3af;
 }
 /* ── Returning screen layout ─────────────────────────── */
 .sp-returning-inner {
