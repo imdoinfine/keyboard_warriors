@@ -93,6 +93,7 @@ body {
   border-radius: 16px;
   padding: 6px 60px 24px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1.5px solid white;
 }
 .topRow {
   display: flex;
@@ -1802,7 +1803,7 @@ li.conflict-dismissed .conflict-desc {
     <!-- ── Pause Screen ──────────────────────────────── -->
     <div id="panelPause" class="sp-page">
       <div class="sp-col sp-col-left">
-        <p class="sp-body sp-paused-heading"><strong>Your game is paused.</strong></p>
+        <p class="sp-body sp-paused-heading" id="pausePanelHeading"><strong>Your game is paused.</strong></p>
         <a class="sp-settings-nudge" onclick="event.preventDefault();openSettings('panelKeyboard');" href="#">
           <span class="sp-nudge-text">Adjust the keyboard layout so the one on the screen matches your actual device.</span>
           <svg class="sp-nudge-icon" viewBox="0 0 110 101.8" xmlns="http://www.w3.org/2000/svg"><path d="M98.6,32.4H11.4c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h87.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM99.9,65.9c0,.7-.6,1.3-1.3,1.3H11.4c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h87.2c.7,0,1.3.6,1.3,1.3v29.6ZM15.2,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM15.2,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM95.9,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM15.2,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM65.8,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM95.9,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM24.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM33,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.1,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM49.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM57.4,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM65.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM73.7,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM27.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM40.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM44.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM57.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM66.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM74.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM83.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM36.3,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM44.3,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM53.1,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM56.7,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.7,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.5,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM81.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.9,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM35.4,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM28.3,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM21.2,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM73.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM81,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM88.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM95.9,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/></svg>
@@ -1883,35 +1884,39 @@ li.conflict-dismissed .conflict-desc {
       </div>
       <p id="diffSubtitle" class="diff-subtitle">&nbsp;</p>
       <div class="diff-advanced-panel" id="diffAdvancedPanel">
-        <p class="sp-title diff-advanced-label" style="text-align:center;margin-bottom:10px;">Question Timer</p>
-        <div class="diff-slider-wrap" id="questionTimerSlider" data-slider="timer">
-          <div class="diff-slider-track"></div>
-          <div class="diff-slider-ticks">
-            <div class="diff-slider-tick" style="left:0%"></div>
-            <div class="diff-slider-tick" style="left:9.1%"></div>
-            <div class="diff-slider-tick" style="left:27.3%"></div>
-            <div class="diff-slider-tick" style="left:54.5%"></div>
-            <div class="diff-slider-tick" style="left:100%"></div>
-          </div>
-          <div class="diff-slider-knob" tabindex="0">
-            <span class="diff-knob-label diff-knob-label-a">∞</span>
-            <span class="diff-knob-label diff-knob-label-b diff-knob-label-hidden">∞</span>
+        <div class="diff-slider-row">
+          <span class="diff-slider-side-label diff-advanced-label" style="text-align:right;">Question Timer</span>
+          <div class="diff-slider-wrap" id="questionTimerSlider" data-slider="timer">
+            <div class="diff-slider-track"></div>
+            <div class="diff-slider-ticks">
+              <div class="diff-slider-tick" style="left:0%"></div>
+              <div class="diff-slider-tick" style="left:9.1%"></div>
+              <div class="diff-slider-tick" style="left:27.3%"></div>
+              <div class="diff-slider-tick" style="left:54.5%"></div>
+              <div class="diff-slider-tick" style="left:100%"></div>
+            </div>
+            <div class="diff-slider-knob" tabindex="0">
+              <span class="diff-knob-label diff-knob-label-a diff-knob-infinity">∞</span>
+              <span class="diff-knob-label diff-knob-label-b diff-knob-label-hidden diff-knob-infinity">∞</span>
+            </div>
           </div>
         </div>
         <div class="diff-advanced-separator"></div>
-        <p class="sp-title diff-advanced-label" style="text-align:center;margin-bottom:10px;">Player Lives</p>
-        <div class="diff-slider-wrap" id="playerLivesSlider" data-slider="lives">
-          <div class="diff-slider-track"></div>
-          <div class="diff-slider-ticks">
-            <div class="diff-slider-tick" style="left:0%"></div>
-            <div class="diff-slider-tick" style="left:9.1%"></div>
-            <div class="diff-slider-tick" style="left:27.3%"></div>
-            <div class="diff-slider-tick" style="left:54.5%"></div>
-            <div class="diff-slider-tick" style="left:100%"></div>
-          </div>
-          <div class="diff-slider-knob" tabindex="0">
-            <span class="diff-knob-label diff-knob-label-a">∞</span>
-            <span class="diff-knob-label diff-knob-label-b diff-knob-label-hidden">∞</span>
+        <div class="diff-slider-row">
+          <span class="diff-slider-side-label diff-advanced-label" style="text-align:right;">Player Lives</span>
+          <div class="diff-slider-wrap" id="playerLivesSlider" data-slider="lives">
+            <div class="diff-slider-track"></div>
+            <div class="diff-slider-ticks">
+              <div class="diff-slider-tick" style="left:0%"></div>
+              <div class="diff-slider-tick" style="left:9.1%"></div>
+              <div class="diff-slider-tick" style="left:27.3%"></div>
+              <div class="diff-slider-tick" style="left:54.5%"></div>
+              <div class="diff-slider-tick" style="left:100%"></div>
+            </div>
+            <div class="diff-slider-knob" tabindex="0">
+              <span class="diff-knob-label diff-knob-label-a diff-knob-infinity">∞</span>
+              <span class="diff-knob-label diff-knob-label-b diff-knob-label-hidden diff-knob-infinity">∞</span>
+            </div>
           </div>
         </div>
       </div>
@@ -2036,18 +2041,18 @@ li.conflict-dismissed .conflict-desc {
           <p class="sp-body">The on-screen display shows a compact keyboard, but the game also accepts input from full-sized keyboards with their extended keys.</p>
           <p class="sp-body">Don&#8217;t have a full-sized keyboard? Let us know so we won&#8217;t ask you any impossible questions:</p>
           <div class="modal-kbsize-row" id="modalKbSizeRow">
-            <div class="modal-left-label"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 167 101.8" style="width:66px;height:auto;fill:#9ca3af;flex-shrink:0;"><path d="M142.1,32.4H24.9c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h117.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM143.4,65.9c0,.7-.6,1.3-1.3,1.3H24.9c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h117.2c.7,0,1.3.6,1.3,1.3v29.6ZM28.7,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM28.7,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM109.4,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM28.7,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM79.3,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM109.4,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM38.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM46.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM54.6,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM62.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.9,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM79,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM87.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.3,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM54.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM58.3,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM71.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM88.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM96.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM49.8,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM57.8,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM66.6,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM70.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM84.2,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM93,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM118.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM109.4,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM118.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM118.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM118.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM48.9,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM41.8,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM34.7,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM87,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM94.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM102,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM109.4,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/></svg></div>
+            <div id="kbSizeExtendedSide" class="modal-left-label" style="display:flex;flex-direction:row;align-items:center;gap:5px;justify-content:flex-end;"><small id="kbSizeExtendedLabel" class="kb-size-word-label">extended</small><svg id="kbSizeExtendedIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 167 101.8" style="width:66px;height:auto;flex-shrink:0;"><path d="M142.1,32.4H24.9c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h117.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM143.4,65.9c0,.7-.6,1.3-1.3,1.3H24.9c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h117.2c.7,0,1.3.6,1.3,1.3v29.6ZM28.7,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM28.7,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM109.4,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM28.7,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM79.3,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM109.4,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM38.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM46.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM54.6,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM62.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.9,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM79,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM87.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.3,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM54.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM58.3,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM71.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM88.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM96.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM49.8,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM57.8,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM66.6,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM70.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM84.2,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM93,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM118.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM109.4,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM118.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM118.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM118.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM126.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,49.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM134.2,62.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM48.9,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM41.8,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM34.7,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM87,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM94.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM102,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM109.4,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/></svg></div>
             <div class="modal-switch-wrap">
               <label class="os-switch" title="Keyboard size" style="cursor:pointer;">
                 <input type="checkbox" id="modalKbSizeToggle" onchange="onKbSizeToggle()">
                 <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="1" y="1" width="34" height="12" rx="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
-                  <circle id="modalKbSizeKnob" cx="7" cy="7" r="4" stroke="#9ca3af" stroke-width="1.5" fill="white"
+                  <rect x="1" y="1" width="34" height="12" rx="6" stroke="#374151" stroke-width="1.5" fill="none"/>
+                  <circle id="modalKbSizeKnob" cx="7" cy="7" r="4" stroke="#374151" stroke-width="1.5" fill="white"
                           style="transition:transform 0.18s ease,fill 0.18s ease;transform-origin:7px 7px;transform-box:fill-box;"/>
                 </svg>
               </label>
             </div>
-            <div class="modal-right-label"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;fill:#9ca3af;"><path d="M98.6,32.4H11.4c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h87.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM99.9,65.9c0,.7-.6,1.3-1.3,1.3H11.4c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h87.2c.7,0,1.3.6,1.3,1.3v29.6ZM15.2,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM15.2,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM95.9,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM15.2,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM65.8,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM95.9,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM24.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM33,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.1,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM49.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM57.4,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM65.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM73.7,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM27.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM40.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM44.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM57.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM66.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM74.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM83.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM36.3,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM44.3,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM53.1,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM56.7,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.7,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.5,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM81.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.9,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM35.4,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM28.3,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM21.2,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM73.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM81,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM88.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM95.9,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/></svg></div>
+            <div id="kbSizeCompactSide" class="modal-right-label" style="display:flex;flex-direction:row;align-items:center;gap:5px;"><svg id="kbSizeCompactIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 101.8" style="width:44px;height:auto;"><path d="M98.6,32.4H11.4c-2.1,0-3.9,1.7-3.9,3.9v29.6c0,2.1,1.7,3.9,3.9,3.9h87.2c2.1,0,3.9-1.7,3.9-3.9v-29.6c0-2.1-1.7-3.9-3.9-3.9ZM99.9,65.9c0,.7-.6,1.3-1.3,1.3H11.4c-.7,0-1.3-.6-1.3-1.3v-29.6c0-.7.6-1.3,1.3-1.3h87.2c.7,0,1.3.6,1.3,1.3v29.6ZM15.2,42.1v-2.6c0-.5.4-.9.9-.9h5.9c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-5.9c-.5,0-.9-.4-.9-.9ZM15.2,48.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9ZM95.9,46.4v2.6c0,.5-.4.9-.9.9h-7.4c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h7.4c.5,0,.9.4.9.9ZM15.2,55.7v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9ZM65.8,59.9v2.6c0,.5-.4.9-.9.9h-26.9c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h26.9c.5,0,.9.4.9.9ZM95.9,53.2v2.6c0,.5-.4.9-.9.9h-10.8c-.5,0-.9-.4-.9-.9v-2.6c0-.5.4-.9.9-.9h10.8c.5,0,.9.4.9.9h0ZM24.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM33,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM41.1,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM49.3,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM57.4,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM65.5,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM73.7,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM27.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM40.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM44.8,45.5h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8ZM57.7,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM66.2,49.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM74.7,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM83.2,45.5c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM36.3,53.1v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM44.3,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM53.1,52.3c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4ZM56.7,55.9v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM70.7,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM79.5,56.6h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8ZM81.8,42.2v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8ZM95.9,39.5v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM35.4,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM28.3,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM21.2,59.8v2.8c0,.4-.3.8-.8.8h-4.4c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.4c.4,0,.8.3.8.8ZM73.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM81,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM88.5,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8ZM95.9,59.8v2.8c0,.4-.3.8-.8.8h-4.3c-.4,0-.8-.3-.8-.8v-2.8c0-.4.3-.8.8-.8h4.3c.4,0,.8.3.8.8Z"/></svg><small id="kbSizeCompactLabel" class="kb-size-word-label">compact</small></div>
           </div>
         </div><!-- /#modalKbSizeSection -->
       </div><!-- /.sp-col-right -->
@@ -2511,10 +2516,29 @@ function showToast(msg, duration) {
   duration = duration || readingDuration;
   var el = document.getElementById('kwToast');
   if (!el) return;
-  var r = _kbPanelRect();
-  if (r) {
-    el.style.left = Math.round(r.left + window.scrollX + r.width / 2) + 'px';
-    el.style.top  = Math.round(r.top  + window.scrollY + r.height / 2) + 'px';
+  // When the keyboard is folded away, the settings panel content is what the
+  // user sees. Target its centre. When keyboard is at face, target the keyboard.
+  var left, top;
+  if (_kbPos !== 'face') {
+    var inner = document.getElementById('settingsPanelInner');
+    if (inner) {
+      var r = inner.getBoundingClientRect();
+      left = Math.round(r.left + window.scrollX + r.width / 2);
+      top  = Math.round(r.top  + window.scrollY + r.height / 2);
+    }
+  }
+  if (!left) {
+    var r = _kbPanelRect();
+    if (r) {
+      left = Math.round(r.left + window.scrollX + r.width / 2);
+      top  = Math.round(r.top  + window.scrollY + r.height / 2);
+    } else {
+      left = null;
+    }
+  }
+  if (left) {
+    el.style.left = left + 'px';
+    el.style.top  = top  + 'px';
   } else {
     el.style.left = '50%';
     el.style.top  = '50%';
@@ -3551,6 +3575,10 @@ function timerBoxClick() {
   if (gameState === 'counting')  { cancelCountdown(); return; }
   if (gameState === 'playing') { enterPause(); return; }
   if (gameState === 'readyToUnpause') { _enterReadyToUnpauseCleanup(); enterPause(); return; }
+  if (gameState === 'finished') {
+    if (activeSettings === 'panelPause') { closeSettings(); } else { openSettings('panelPause'); }
+    return;
+  }
   if (gameState === 'paused') {
     _closeAllModals();
     beginResumeCountdown();
@@ -4417,14 +4445,30 @@ function setKbSizeToggle(full) {
 }
 
 function updateKbSizeToggle() {
-  var row  = document.getElementById('modalKbSizeRow');
-  var knob = document.getElementById('modalKbSizeKnob');
-  var tog  = document.getElementById('modalKbSizeToggle');
+  var row     = document.getElementById('modalKbSizeRow');
+  var knob    = document.getElementById('modalKbSizeKnob');
+  var tog     = document.getElementById('modalKbSizeToggle');
   if (!knob) return;
   var isCompact = !hasFullKeyboard;
   knob.style.transform = isCompact ? 'translateX(22px)' : 'translateX(0)';
   knob.setAttribute('fill', isCompact ? '#9ca3af' : 'white');
   if (tog) tog.checked = isCompact;
+
+  // Active side = dark grey; inactive side = mid-grey
+  var activeColour   = '#374151';
+  var inactiveColour = '#9ca3af';
+  var extendedColour = isCompact ? inactiveColour : activeColour;
+  var compactColour  = isCompact ? activeColour   : inactiveColour;
+
+  var extIcon  = document.getElementById('kbSizeExtendedIcon');
+  var extLabel = document.getElementById('kbSizeExtendedLabel');
+  var cmpIcon  = document.getElementById('kbSizeCompactIcon');
+  var cmpLabel = document.getElementById('kbSizeCompactLabel');
+  if (extIcon)  extIcon.style.fill  = extendedColour;
+  if (extLabel) extLabel.style.color = extendedColour;
+  if (cmpIcon)  cmpIcon.style.fill  = compactColour;
+  if (cmpLabel) cmpLabel.style.color = compactColour;
+
   // Grey out and lock to compact when touch is enabled
   if (row) row.classList.toggle('disabled', touchEnabled);
 }
@@ -5536,6 +5580,9 @@ function _applyDifficultyPresets(mode) {
 
 function _refreshDifficultyPanel() {
   var displayMode = _pendingDifficulty !== null ? _pendingDifficulty : currentDifficulty;
+  var modeToState = { fundamentals: -1, normal: 0, hardcore: 1 };
+  _diffFirst = true;
+  setDiffState(modeToState[displayMode] !== undefined ? modeToState[displayMode] : 0);
   _updateDiffBtnStyles(displayMode);
   _updateDiffSubtitle(displayMode);
   _syncAdvancedPanelState();
@@ -5603,7 +5650,24 @@ function _syncSliderToValue(sliderType, value) {
   var spring = _getSpring(sliderType);
   spring.target = SLIDER_STOPS[stopIdx];
   _setKnobLabel(el, _labelForValue(value));
+  _updateSliderSideLabel(sliderType, value);
   if (!spring.raf) _animateSpring(sliderType, el);
+}
+
+// Updates the "Question Timer" / "Player Lives" side label colour based on
+// whether the panel is unlocked and whether the slider is at ∞.
+// Dark grey when unlocked and set to an integer; mid-grey otherwise.
+function _updateSliderSideLabel(sliderType, value) {
+  var id = sliderType === 'timer' ? 'questionTimerSlider' : 'playerLivesSlider';
+  var el = document.getElementById(id);
+  if (!el) return;
+  var row = el.closest('.diff-slider-row');
+  if (!row) return;
+  var labelEl = row.querySelector('.diff-slider-side-label');
+  if (!labelEl) return;
+  var unlocked  = hasEverAchievedPerfectAccuracy;
+  var isInfinity = (value === null);
+  labelEl.style.color = (unlocked && !isInfinity) ? '#374151' : '#9ca3af';
 }
 
 function _syncAdvancedPanelState() {
@@ -5611,20 +5675,31 @@ function _syncAdvancedPanelState() {
   if (!panel) return;
   var unlocked = hasEverAchievedPerfectAccuracy;
   panel.classList.toggle('diff-advanced-active', unlocked);
+  // Re-evaluate side label colours now that unlock state has changed
+  _updateSliderSideLabel('timer', questionTimer);
+  _updateSliderSideLabel('lives', playerLives);
 }
 
 function _setKnobLabel(sliderEl, newLabel) {
   var labelA = sliderEl.querySelector('.diff-knob-label-a');
   var labelB = sliderEl.querySelector('.diff-knob-label-b');
   if (!labelA || !labelB) return;
-  // Determine which is currently visible
   var aVisible = !labelA.classList.contains('diff-knob-label-hidden');
-  var activeEl  = aVisible ? labelA : labelB;
+  var visibleEl = aVisible ? labelA : labelB;
   var hiddenEl  = aVisible ? labelB : labelA;
-  if (activeEl.textContent === newLabel) return; // no change
+  // Always update the infinity class on both, then crossfade if the label changed
+  var newIsInfinity = (newLabel === '∞');
+  if (visibleEl.textContent === newLabel) {
+    // No text change -- but still fix the infinity class in case it drifted
+    visibleEl.classList.toggle('diff-knob-infinity', newIsInfinity);
+    return;
+  }
+  // Prepare the hidden span with the new content and correct class
   hiddenEl.textContent = newLabel;
+  hiddenEl.classList.toggle('diff-knob-infinity', newIsInfinity);
+  // Crossfade
   hiddenEl.classList.remove('diff-knob-label-hidden');
-  activeEl.classList.add('diff-knob-label-hidden');
+  visibleEl.classList.add('diff-knob-label-hidden');
 }
 
 function _setKnobPosition(sliderEl, pct) {
@@ -5634,10 +5709,41 @@ function _setKnobPosition(sliderEl, pct) {
   knob.style.left = pct + '%';
 }
 
-function _animateSpring(sliderType, sliderEl) {
+function _animateSpring(sliderType, sliderEl, criticallyDamped) {
   var spring = _getSpring(sliderType);
-  var stiffness = 0.18;
-  var damping   = 0.72;
+  spring.vel = 0;
+  if (spring.raf) { cancelAnimationFrame(spring.raf); spring.raf = null; }
+
+  if (criticallyDamped) {
+    // Simple ease-out tween -- no spring, no bounce
+    var startPos  = spring.pos;
+    var endPos    = spring.target;
+    var startTime = null;
+    var duration  = 180; // ms
+    function tweenTick(now) {
+      if (!startTime) startTime = now;
+      var elapsed = now - startTime;
+      var t = Math.min(elapsed / duration, 1);
+      // Ease-out cubic
+      var eased = 1 - Math.pow(1 - t, 3);
+      spring.pos = startPos + (endPos - startPos) * eased;
+      _setKnobPosition(sliderEl, spring.pos);
+      if (t < 1) {
+        spring.raf = requestAnimationFrame(tweenTick);
+      } else {
+        spring.pos = endPos;
+        _setKnobPosition(sliderEl, endPos);
+        spring.raf = null;
+      }
+    }
+    spring.raf = requestAnimationFrame(tweenTick);
+    return;
+  }
+
+  // Drag-release spring -- gentle bounce for natural feel
+  var travelDistance = Math.abs(spring.target - spring.pos);
+  var stiffness = 0.14;
+  var damping   = travelDistance > 30 ? 0.82 : 0.72;
   function tick() {
     var force = (spring.target - spring.pos) * stiffness;
     spring.vel = spring.vel * damping + force;
@@ -5676,6 +5782,12 @@ function _initSliders() {
 
     function getPct(clientX) {
       var rect = el.getBoundingClientRect();
+      // Extend the effective range to the panel border so dragging to the edge
+      // of the rounded rect always commits to the extreme stop (0 or ∞).
+      var panel = document.getElementById('diffAdvancedPanel');
+      var panelRect = panel ? panel.getBoundingClientRect() : rect;
+      if (clientX <= panelRect.left)  return 0;
+      if (clientX >= panelRect.right) return 100;
       var pct = ((clientX - rect.left) / rect.width) * 100;
       return Math.max(0, Math.min(100, pct));
     }
@@ -5697,7 +5809,12 @@ function _initSliders() {
       var spring = _getSpring(sliderType);
       if (unlocked) {
         // Free drag — follow pointer directly, spring will snap on release
-        var rawPct = Math.max(0, Math.min(100, dragStartPct + deltaPct));
+        var panel = document.getElementById('diffAdvancedPanel');
+        var panelRect = panel ? panel.getBoundingClientRect() : el.getBoundingClientRect();
+        var rawPct;
+        if (e.clientX <= panelRect.left)  rawPct = 0;
+        else if (e.clientX >= panelRect.right) rawPct = 100;
+        else rawPct = Math.max(0, Math.min(100, dragStartPct + deltaPct));
         spring.pos    = rawPct;
         spring.target = rawPct;
         if (spring.raf) { cancelAnimationFrame(spring.raf); spring.raf = null; }
@@ -5738,6 +5855,7 @@ function _initSliders() {
           }
         }
         _setKnobLabel(el, _labelForValue(newValue));
+        _updateSliderSideLabel(sliderType, newValue);
       } else {
         // Snap back to locked position
         var lockedPct = SLIDER_STOPS[_valueToStopIndex(sliderType === 'timer' ? questionTimer : playerLives)];
@@ -5750,7 +5868,7 @@ function _initSliders() {
     el.addEventListener('pointerdown', function(e) {
       if (e.target === knob || knob.contains(e.target)) return;
       if (!hasEverAchievedPerfectAccuracy) {
-        showToast('Win a trophy to access these settings.');
+        showToast('Keep training to unlock more features.');
         return;
       }
       var pct = getPct(e.clientX);
@@ -5758,7 +5876,7 @@ function _initSliders() {
       var newValue = SLIDER_VALUES[stopIdx];
       var spring   = _getSpring(sliderType);
       spring.target = SLIDER_STOPS[stopIdx];
-      _animateSpring(sliderType, el);
+      _animateSpring(sliderType, el, true);
       if (sliderType === 'timer') {
         questionTimer = newValue;
         try { localStorage.setItem('kw_timer', String(newValue)); } catch(ex) {}
@@ -5767,12 +5885,65 @@ function _initSliders() {
         try { localStorage.setItem('kw_lives', String(newValue)); } catch(ex) {}
       }
       _setKnobLabel(el, _labelForValue(newValue));
+      _updateSliderSideLabel(sliderType, newValue);
     });
   });
 }
 
-// Initialise sliders once DOM is ready
-document.addEventListener('DOMContentLoaded', _initSliders);
+// ── Advanced panel: clicks anywhere inside snap to nearest stop (when unlocked)
+//    or show the locked toast (when locked) ───────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  var advancedPanel = document.getElementById('diffAdvancedPanel');
+  if (advancedPanel) {
+    advancedPanel.addEventListener('pointerdown', function(e) {
+      if (!hasEverAchievedPerfectAccuracy) {
+        if (!e.target.closest('.diff-slider-knob')) {
+          showToast('Keep training to unlock more features.');
+        }
+        return;
+      }
+      // Unlocked: if the click is on or near a slider track, snap that slider
+      var sliderRows = advancedPanel.querySelectorAll('.diff-slider-row');
+      // Find the nearest slider row by vertical proximity
+      var bestRow = null, bestDist = Infinity;
+      sliderRows.forEach(function(row) {
+        var rect = row.getBoundingClientRect();
+        var mid  = rect.top + rect.height / 2;
+        var dist = Math.abs(e.clientY - mid);
+        if (dist < bestDist) { bestDist = dist; bestRow = row; }
+      });
+      if (!bestRow) return;
+      var sliderWrap = bestRow.querySelector('.diff-slider-wrap');
+      if (!sliderWrap) return;
+      // If the click is directly on the knob, let the knob's own handler take it
+      var knob = sliderWrap.querySelector('.diff-slider-knob');
+      if (knob && (e.target === knob || knob.contains(e.target))) return;
+      var sliderType = sliderWrap.getAttribute('data-slider');
+      // Compute pct with panel-bounds extension
+      var panelRect = advancedPanel.getBoundingClientRect();
+      var trackRect = sliderWrap.getBoundingClientRect();
+      var pct;
+      if (e.clientX <= panelRect.left)  pct = 0;
+      else if (e.clientX >= panelRect.right) pct = 100;
+      else pct = Math.max(0, Math.min(100, ((e.clientX - trackRect.left) / trackRect.width) * 100));
+      var stopIdx  = _snapToNearestStop(pct);
+      var newValue = SLIDER_VALUES[stopIdx];
+      var spring   = _getSpring(sliderType);
+      spring.target = SLIDER_STOPS[stopIdx];
+      _animateSpring(sliderType, sliderWrap, true);
+      if (sliderType === 'timer') {
+        questionTimer = newValue;
+        try { localStorage.setItem('kw_timer', String(newValue)); } catch(ex) {}
+      } else {
+        playerLives = newValue;
+        try { localStorage.setItem('kw_lives', String(newValue)); } catch(ex) {}
+      }
+      _setKnobLabel(sliderWrap, _labelForValue(newValue));
+      _updateSliderSideLabel(sliderType, newValue);
+    });
+  }
+  _initSliders();
+});
 
 function _updateDiffSubtitle(mode) {
   var subtitles = {
@@ -5788,6 +5959,13 @@ function _updateDiffSubtitle(mode) {
 }
 
 function _refreshPausePanel() {
+  var headingEl = document.getElementById('pausePanelHeading');
+  if (headingEl) {
+    var headingText = gameState === 'finished'
+      ? 'The game round has ended.'
+      : 'Your game is paused.';
+    headingEl.innerHTML = '<strong>' + headingText + '</strong>';
+  }
   var hasTime = bestRecord.time !== null;
   var hasAcc  = bestRecord.accuracy !== null;
   var bothActive = hasTime && hasAcc;
@@ -6369,20 +6547,67 @@ function endGame() {
   updateMedalFaceStyle(0);
   timerDiv.textContent = formatTime(Math.floor(totalTime));
   if (justEarnedTrophy) {
-    openSettings('panelDifficulty');
-    // Panel opens in inactive state; after a short pause animate to active
-    // (trophy flag already set so _syncAdvancedPanelState will activate it,
-    //  but we defer so the inactive→active CSS transition is visible)
+    // Upgrade to Normal and apply its presets. Memory and localStorage are
+    // written immediately; the UI changes are revealed through timed animation
+    // below so the player can watch each step happen.
+    var previousDifficulty = currentDifficulty;
+    currentDifficulty = 'normal';
+    questionTimer     = 5;
+    playerLives       = 10;
+    try { localStorage.setItem('kw_difficulty', 'normal'); } catch(e) {}
+    try { localStorage.setItem('kw_timer', '5'); } catch(e) {}
+    try { localStorage.setItem('kw_lives', '10'); } catch(e) {}
+
+    // Step 1 (1200ms): open the difficulty settings panel so the player can
+    // read the trophy heading before the keyboard begins to move.
+    // The keyboard flip takes ~850ms and the panel fades in over 550ms after
+    // that, so content is fully visible ~1400ms after openSettings is called.
+    // We add a further 1500ms reading pause before anything animates.
+    var panelReadyDelay  = 1200 + 1400; // when panel is fully visible
+    var readingPause     = 1500;         // breathing room before first animation
+
+    setTimeout(function() {
+      openSettings('panelDifficulty');
+    }, 1200);
+
+    // Step 2: if they were on Fundamentals, animate pill + needle to Normal.
+    if (previousDifficulty === 'fundamentals') {
+      setTimeout(function() {
+        _diffFirst = true;
+        setDiffState(0);
+        _updateDiffBtnStyles('normal');
+        _updateDiffSubtitle('normal');
+      }, panelReadyDelay + readingPause);
+    }
+
+    // Step 3: activate the advanced panel, then animate the Question Timer slider.
+    // If coming from Fundamentals, add extra time for the pill animation (800ms) + pause.
+    var sliderBaseDelay = panelReadyDelay + readingPause
+      + (previousDifficulty === 'fundamentals' ? 800 + 1000 : 0);
+
     setTimeout(function() {
       _syncAdvancedPanelState();
-      // Animate knobs from ∞ (default) to the current difficulty preset
-      var timer = _sliderSprings['timer'];
-      var lives = _sliderSprings['lives'];
-      if (timer) { timer.target = SLIDER_STOPS[_valueToStopIndex(questionTimer)]; if (!timer.raf) _animateSpring('timer', document.getElementById('questionTimerSlider')); }
-      if (lives) { lives.target = SLIDER_STOPS[_valueToStopIndex(playerLives)];   if (!lives.raf) _animateSpring('lives', document.getElementById('playerLivesSlider')); }
-      _setKnobLabel(document.getElementById('questionTimerSlider'), _labelForValue(questionTimer));
-      _setKnobLabel(document.getElementById('playerLivesSlider'),   _labelForValue(playerLives));
-    }, 600);
+      var timerEl = document.getElementById('questionTimerSlider');
+      var timerSpring = _sliderSprings['timer'];
+      if (timerEl && timerSpring) {
+        timerSpring.target = SLIDER_STOPS[_valueToStopIndex(questionTimer)];
+        _animateSpring('timer', timerEl, true);
+        _setKnobLabel(timerEl, _labelForValue(questionTimer));
+        _updateSliderSideLabel('timer', questionTimer);
+      }
+    }, sliderBaseDelay);
+
+    // Step 4: animate the Player Lives slider 2000ms after the timer slider.
+    setTimeout(function() {
+      var livesEl = document.getElementById('playerLivesSlider');
+      var livesSpring = _sliderSprings['lives'];
+      if (livesEl && livesSpring) {
+        livesSpring.target = SLIDER_STOPS[_valueToStopIndex(playerLives)];
+        _animateSpring('lives', livesEl, true);
+        _setKnobLabel(livesEl, _labelForValue(playerLives));
+        _updateSliderSideLabel('lives', playerLives);
+      }
+    }, sliderBaseDelay + 2000);
   }
 }
 
@@ -6843,14 +7068,29 @@ document.addEventListener('DOMContentLoaded', function() {
   line-height: 1.55;
   margin: 0 0 5px 0;
 }
+#modalKbSizeSection p:last-of-type {
+  margin-bottom: 2px;
+}
 .modal-kbsize-row {
   display: flex;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 .modal-kbsize-row.disabled {
   opacity: 0.38;
   pointer-events: none;
+}
+/* "full" and "extended" word labels beside the keyboard size SVGs */
+.kb-size-word-label {
+  font-family: 'Lato', system-ui, sans-serif;
+  font-size: 11px;
+  color: #374151;
+  line-height: 1;
+}
+/* Nudge the size toggle switch down so the knob aligns with label x-height */
+.modal-kbsize-row .os-switch {
+  position: relative;
+  top: 2px;
 }
 
 /* ── Pause panel additions ───────────────────────── */
@@ -6931,19 +7171,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* Horizontal divider on difficulty panel — inset to align with pill corner radius */
 /* ── Advanced settings rounded rect panel ─────────────────────────────────── */
-/* Width matches the difficulty pill (100% of column).
-   Sliders inside are narrower — capped to approximate keyboard top-edge width. */
 .diff-advanced-panel {
   width: 100%;
   border-radius: 14px;
   border: 1.5px solid #e5e7eb;
-  padding: 14px 16px 14px;
+  padding: 10px 16px 12px;
   margin-top: 6px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   box-sizing: border-box;
-  /* Inactive state: plain border, no fill */
   background: transparent;
   transition: background 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
 }
@@ -6954,56 +7191,77 @@ document.addEventListener('DOMContentLoaded', function() {
   border-color: #d1d5db;
 }
 
-/* Labels inside the panel — mid-grey when inactive, darker when active */
+/* Inactive panel: intercept pointer to show toast, except on the knobs */
+.diff-advanced-panel:not(.diff-advanced-active) {
+  cursor: pointer;
+}
+.diff-advanced-panel:not(.diff-advanced-active) .diff-slider-knob {
+  cursor: default;
+  pointer-events: auto;
+}
+
+/* Labels inside the panel — mid-grey by default; JS updates colour per slider value */
 .diff-advanced-label {
   color: #9ca3af;
   transition: color 0.5s ease;
-}
-.diff-advanced-panel.diff-advanced-active .diff-advanced-label {
-  color: #374151;
+  font-size: 11px;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
+  width: 90px;
 }
 
-/* Thin separator between the two sliders */
+/* Each slider row: label on left, slider fills remaining space */
+.diff-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Thin separator between the two slider rows */
 .diff-advanced-separator {
-  width: 60%;
+  width: 100%;
   height: 1px;
   background: #e5e7eb;
-  margin: 10px 0 12px;
+  margin: 8px 0;
   transition: background 0.5s ease;
 }
 .diff-advanced-panel.diff-advanced-active .diff-advanced-separator {
-  background: #d1d5db;
+  background: #d0d5db;
 }
 
 /* ── Fibonacci slider ──────────────────────────────────────────────────────── */
-/* Slider width: approximate keyboard top-edge. Full keyboard ~612px, but the
-   settings panel is narrower. We use min() to cap at a tidy width. */
 .diff-slider-wrap {
   position: relative;
-  width: min(100%, 260px);
+  flex: 1;
   height: 32px;
   display: flex;
   align-items: center;
   user-select: none;
   touch-action: none;
+  /* Right inset so the knob at 100% stays visually inside the panel border */
+  margin-right: 18px;
 }
 
-/* Track */
+/* Track — inactive uses the border colour; active uses a slightly darker mid-tone */
 .diff-slider-track {
   position: absolute;
   left: 0; right: 0;
   top: 50%; transform: translateY(-50%);
   height: 1.5px;
-  background: #9ca3af;
+  background: #e5e7eb;
   border-radius: 2px;
   transition: background 0.5s ease;
 }
 .diff-advanced-panel.diff-advanced-active .diff-slider-track {
-  background: #d1d5db;
+  background: #c4cad2;
   box-shadow: 0 1px 2px rgba(0,0,0,0.06);
 }
 
-/* Tick marks */
+/* Tick marks — match track colours */
 .diff-slider-ticks {
   position: absolute;
   left: 0; right: 0;
@@ -7014,13 +7272,13 @@ document.addEventListener('DOMContentLoaded', function() {
   position: absolute;
   width: 1.5px;
   height: 7px;
-  background: #9ca3af;
+  background: #e5e7eb;
   transform: translate(-50%, -50%);
   border-radius: 1px;
   transition: background 0.5s ease;
 }
 .diff-advanced-panel.diff-advanced-active .diff-slider-tick {
-  background: #d1d5db;
+  background: #c4cad2;
 }
 
 /* Knob */
@@ -7045,12 +7303,11 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 .diff-slider-knob:active { cursor: grabbing; }
 .diff-advanced-panel:not(.diff-advanced-active) .diff-slider-knob {
-  cursor: default;
   border-color: #e5e7eb;
   box-shadow: none;
 }
 
-/* Label crossfade */
+/* Label crossfade — ∞ stays mid-grey (signals no limit); integers darken when active */
 .diff-knob-label {
   position: absolute;
   font-family: 'Lato', system-ui, sans-serif;
@@ -7062,8 +7319,11 @@ document.addEventListener('DOMContentLoaded', function() {
   pointer-events: none;
   white-space: nowrap;
 }
-.diff-advanced-panel.diff-advanced-active .diff-knob-label {
+.diff-advanced-panel.diff-advanced-active .diff-knob-label:not(.diff-knob-infinity) {
   color: #374151;
+}
+.diff-knob-label.diff-knob-infinity {
+  color: #9ca3af;
 }
 .diff-knob-label-hidden { opacity: 0; }
 /* ── Pause panel: settings nudge rows ───────────────── */
