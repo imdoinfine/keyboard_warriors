@@ -534,6 +534,10 @@ body.pc-mode #extKeyPill {
   opacity: 0.38;
   pointer-events: none;
 }
+.modal-inline-row.disabled .modal-left-label,
+.modal-inline-row.disabled .modal-right-label {
+  text-decoration: line-through;
+}
 /* Column 1: left label — right-aligned so it butts up against the switch */
 .modal-left-label {
   display: table-cell;
@@ -635,6 +639,9 @@ body.pc-mode #extKeyPill {
 .modal-toggle-row.disabled {
   opacity: 0.4;
   pointer-events: none;
+}
+.modal-toggle-row.disabled .modal-toggle-label {
+  text-decoration: line-through;
 }
 .modal-toggle-label {
   font-size: 13px;
@@ -787,24 +794,11 @@ body.pc-mode #extKeyPill {
   font-size: 13px;
   font-weight: 600;
   color: #374151;
-  background: white;
+  background: #e0f2fe;
   border: 1.5px solid #d1d5db;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s;
   line-height: 1.2;
-}
-.diff-btn:hover:not(.diff-btn-inactive) {
-  background: #e0f2fe;
-}
-.diff-btn-inactive {
-  color: #374151;
-  background: transparent;
-  cursor: default;
-}
-.diff-btn-active {
-  color: #374151;
-  background: white;
 }
 .sp-key-chip {
   display: inline-block;
@@ -1846,17 +1840,17 @@ li.conflict-dismissed .conflict-desc {
         <p class="sp-body sp-clear-label" id="spClearLabel">Clear high score record?</p>
         <div class="score-clear-pill">
           <button id="clearTimeBtn" class="score-pill-seg score-pill-quarter" onclick="_pauseClearClick('time')" title="Clear best time">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6"/><path d="M12 3v2"/></svg>
+            <span class="diff-btn-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6"/><path d="M12 3v2"/></svg></span>
           </button>
-          <button id="clearBothBtn" class="score-pill-seg score-pill-half" onclick="_pauseClearClick('both')">both</button>
+          <button id="clearBothBtn" class="score-pill-seg score-pill-half" onclick="_pauseClearClick('both')"><span class="diff-btn-text">both</span></button>
           <button id="clearAccBtn" class="score-pill-seg score-pill-quarter" onclick="_pauseClearClick('accuracy')" title="Clear best accuracy">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/></svg>
+            <span class="diff-btn-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/></svg></span>
           </button>
         </div>
         <p class="sp-body sp-clear-label" style="margin-top:8px;"><strong>Report impossible question:</strong></p>
         <div class="score-clear-pill">
           <button class="score-pill-seg score-pill-full" onclick="_reportImpossibleQuestion()" title="Report an impossible question">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+            <span class="diff-btn-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg></span>
           </button>
         </div>
       </div>
@@ -1867,8 +1861,8 @@ li.conflict-dismissed .conflict-desc {
       <p class="sp-title" style="margin-bottom:10px;text-align:center;"><em>Would you like to?</em></p>
       <div class="sp-returning-inner">
         <div class="sp-seg-pill sp-seg-pill-two">
-          <button class="sp-seg-btn sp-seg-btn-left" onclick="_returningContinue()">Continue your last session</button>
-          <button class="sp-seg-btn sp-seg-btn-right" onclick="_returningStartOver()">Forget and start over fresh</button>
+          <button class="sp-seg-btn sp-seg-btn-left" onclick="_returningContinue()"><span class="diff-btn-text">Continue your last session</span></button>
+          <button class="sp-seg-btn sp-seg-btn-right" onclick="_returningStartOver()"><span class="diff-btn-text">Forget and start over fresh</span></button>
         </div>
         <p class="sp-body sp-returning-privacy" style="text-align:center;"><strong><em>Made for you, and stored with you.</em></strong><br><strong>Keyboard Warriors</strong> runs entirely on your device using local memory.<br><em class="sp-returning-tagline">No clouds, no crumbs.</em></p>
       </div>
@@ -1878,9 +1872,9 @@ li.conflict-dismissed .conflict-desc {
     <div id="panelDifficulty" class="sp-page">
       <p class="sp-title" style="margin-bottom:10px;">Question Difficulty</p>
       <div class="sp-seg-pill sp-seg-pill-three" id="difficultyPill">
-        <button class="sp-seg-btn diff-btn" data-mode="fundamentals" onclick="diffBtnClick('fundamentals')">Fundamentals</button>
-        <button class="sp-seg-btn diff-btn" data-mode="normal" onclick="diffBtnClick('normal')">Normal</button>
-        <button class="sp-seg-btn diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')">Hardcore</button>
+        <button class="sp-seg-btn diff-btn" data-mode="fundamentals" onclick="diffBtnClick('fundamentals')"><span class="diff-btn-text">Fundamentals</span></button>
+        <button class="sp-seg-btn diff-btn" data-mode="normal" onclick="diffBtnClick('normal')"><span class="diff-btn-text">Normal</span></button>
+        <button class="sp-seg-btn diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')"><span class="diff-btn-text">Hardcore</span></button>
       </div>
       <p id="diffSubtitle" class="diff-subtitle">&nbsp;</p>
       <div class="diff-advanced-panel" id="diffAdvancedPanel">
@@ -1896,8 +1890,8 @@ li.conflict-dismissed .conflict-desc {
               <div class="diff-slider-tick" style="left:100%"></div>
             </div>
             <div class="diff-slider-knob" tabindex="0">
-              <span class="diff-knob-label diff-knob-label-a diff-knob-infinity">∞</span>
-              <span class="diff-knob-label diff-knob-label-b diff-knob-label-hidden diff-knob-infinity">∞</span>
+              <span class="diff-knob-label diff-knob-label-a diff-knob-infinity"><svg width="28" height="12" viewBox="0 0 515 212" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M407.61,16.84c48.83,1.86,86.06,42.58,85.87,89.9s-37.87,87.63-86.39,89.22c-21.05.69-41.59-4.39-61.27-11.73-32.39-12.09-63.19-33.84-91.01-54.92-26.68,20.05-55.36,40.62-86.44,53.11-18.16,7.29-36.97,12.62-56.58,13.43-50.03,2.07-91.29-38.6-92.28-87.62-1-49.32,38.85-91.77,89.43-91.35,21.7.18,42.7,6.51,62.63,14.8,29.41,12.24,57.82,32.66,83.26,51.76,27.43-20.82,58.38-42.64,90.32-54.65,19.88-7.47,40.51-12.79,62.47-11.95ZM224.88,106.33c-13.7-10.61-26.08-19.62-39.46-28.55-12.28-7.96-24.33-14.74-37.72-20.85-12.89-4.65-25.61-10.03-39.69-10.06-32.92-.07-58.71,27.86-58.52,59.86.19,31.69,25.87,59.21,58.52,59.15,13.85-.02,26.38-5.3,39.11-9.81,28.75-12.95,52.41-30.11,77.75-49.74ZM363.28,156.38c13.28,5.04,26.45,9.63,40.94,9.66,33.23.07,59.46-27.61,59.27-60.02-.19-32.12-26.29-59.4-59.28-59.31-14.51.04-27.72,4.62-41,9.69-29.18,12.8-52.86,30.36-78.6,49.95,25.67,19.67,49.53,37.23,78.67,50.03Z"/></svg></span>
+              <span class="diff-knob-label diff-knob-label-b diff-knob-label-hidden diff-knob-infinity"><svg width="28" height="12" viewBox="0 0 515 212" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M407.61,16.84c48.83,1.86,86.06,42.58,85.87,89.9s-37.87,87.63-86.39,89.22c-21.05.69-41.59-4.39-61.27-11.73-32.39-12.09-63.19-33.84-91.01-54.92-26.68,20.05-55.36,40.62-86.44,53.11-18.16,7.29-36.97,12.62-56.58,13.43-50.03,2.07-91.29-38.6-92.28-87.62-1-49.32,38.85-91.77,89.43-91.35,21.7.18,42.7,6.51,62.63,14.8,29.41,12.24,57.82,32.66,83.26,51.76,27.43-20.82,58.38-42.64,90.32-54.65,19.88-7.47,40.51-12.79,62.47-11.95ZM224.88,106.33c-13.7-10.61-26.08-19.62-39.46-28.55-12.28-7.96-24.33-14.74-37.72-20.85-12.89-4.65-25.61-10.03-39.69-10.06-32.92-.07-58.71,27.86-58.52,59.86.19,31.69,25.87,59.21,58.52,59.15,13.85-.02,26.38-5.3,39.11-9.81,28.75-12.95,52.41-30.11,77.75-49.74ZM363.28,156.38c13.28,5.04,26.45,9.63,40.94,9.66,33.23.07,59.46-27.61,59.27-60.02-.19-32.12-26.29-59.4-59.28-59.31-14.51.04-27.72,4.62-41,9.69-29.18,12.8-52.86,30.36-78.6,49.95,25.67,19.67,49.53,37.23,78.67,50.03Z"/></svg></span>
             </div>
           </div>
         </div>
@@ -1914,21 +1908,22 @@ li.conflict-dismissed .conflict-desc {
               <div class="diff-slider-tick" style="left:100%"></div>
             </div>
             <div class="diff-slider-knob" tabindex="0">
-              <span class="diff-knob-label diff-knob-label-a diff-knob-infinity">∞</span>
-              <span class="diff-knob-label diff-knob-label-b diff-knob-label-hidden diff-knob-infinity">∞</span>
+              <span class="diff-knob-label diff-knob-label-a diff-knob-infinity"><svg width="28" height="12" viewBox="0 0 515 212" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M407.61,16.84c48.83,1.86,86.06,42.58,85.87,89.9s-37.87,87.63-86.39,89.22c-21.05.69-41.59-4.39-61.27-11.73-32.39-12.09-63.19-33.84-91.01-54.92-26.68,20.05-55.36,40.62-86.44,53.11-18.16,7.29-36.97,12.62-56.58,13.43-50.03,2.07-91.29-38.6-92.28-87.62-1-49.32,38.85-91.77,89.43-91.35,21.7.18,42.7,6.51,62.63,14.8,29.41,12.24,57.82,32.66,83.26,51.76,27.43-20.82,58.38-42.64,90.32-54.65,19.88-7.47,40.51-12.79,62.47-11.95ZM224.88,106.33c-13.7-10.61-26.08-19.62-39.46-28.55-12.28-7.96-24.33-14.74-37.72-20.85-12.89-4.65-25.61-10.03-39.69-10.06-32.92-.07-58.71,27.86-58.52,59.86.19,31.69,25.87,59.21,58.52,59.15,13.85-.02,26.38-5.3,39.11-9.81,28.75-12.95,52.41-30.11,77.75-49.74ZM363.28,156.38c13.28,5.04,26.45,9.63,40.94,9.66,33.23.07,59.46-27.61,59.27-60.02-.19-32.12-26.29-59.4-59.28-59.31-14.51.04-27.72,4.62-41,9.69-29.18,12.8-52.86,30.36-78.6,49.95,25.67,19.67,49.53,37.23,78.67,50.03Z"/></svg></span>
+              <span class="diff-knob-label diff-knob-label-b diff-knob-label-hidden diff-knob-infinity"><svg width="28" height="12" viewBox="0 0 515 212" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M407.61,16.84c48.83,1.86,86.06,42.58,85.87,89.9s-37.87,87.63-86.39,89.22c-21.05.69-41.59-4.39-61.27-11.73-32.39-12.09-63.19-33.84-91.01-54.92-26.68,20.05-55.36,40.62-86.44,53.11-18.16,7.29-36.97,12.62-56.58,13.43-50.03,2.07-91.29-38.6-92.28-87.62-1-49.32,38.85-91.77,89.43-91.35,21.7.18,42.7,6.51,62.63,14.8,29.41,12.24,57.82,32.66,83.26,51.76,27.43-20.82,58.38-42.64,90.32-54.65,19.88-7.47,40.51-12.79,62.47-11.95ZM224.88,106.33c-13.7-10.61-26.08-19.62-39.46-28.55-12.28-7.96-24.33-14.74-37.72-20.85-12.89-4.65-25.61-10.03-39.69-10.06-32.92-.07-58.71,27.86-58.52,59.86.19,31.69,25.87,59.21,58.52,59.15,13.85-.02,26.38-5.3,39.11-9.81,28.75-12.95,52.41-30.11,77.75-49.74ZM363.28,156.38c13.28,5.04,26.45,9.63,40.94,9.66,33.23.07,59.46-27.61,59.27-60.02-.19-32.12-26.29-59.4-59.28-59.31-14.51.04-27.72,4.62-41,9.69-29.18,12.8-52.86,30.36-78.6,49.95,25.67,19.67,49.53,37.23,78.67,50.03Z"/></svg></span>
             </div>
           </div>
         </div>
       </div>
+      <p id="diffAdvancedFooter" class="diff-advanced-footer">Changing 'Question Difficulty' will suggest settings here, but you have complete control over these features.</p>
     </div>
 
     <!-- ── Welcome Landing ──────────────────────────────── -->
     <div id="panelWelcome" class="sp-page">
       <p class="sp-title" style="margin-bottom:10px;">Question Difficulty</p>
       <div class="sp-seg-pill sp-seg-pill-three" id="welcomeDifficultyPill">
-        <button class="sp-seg-btn diff-btn" data-mode="fundamentals" onclick="diffBtnClick('fundamentals')">Fundamentals</button>
-        <button class="sp-seg-btn diff-btn" data-mode="normal" onclick="diffBtnClick('normal')">Normal</button>
-        <button class="sp-seg-btn diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')">Hardcore</button>
+        <button class="sp-seg-btn diff-btn" data-mode="fundamentals" onclick="diffBtnClick('fundamentals')"><span class="diff-btn-text">Fundamentals</span></button>
+        <button class="sp-seg-btn diff-btn" data-mode="normal" onclick="diffBtnClick('normal')"><span class="diff-btn-text">Normal</span></button>
+        <button class="sp-seg-btn diff-btn diff-btn-inactive" data-mode="hardcore" onclick="diffBtnClick('hardcore')"><span class="diff-btn-text">Hardcore</span></button>
       </div>
       <p id="welcomeDiffSubtitle" class="diff-subtitle">&nbsp;</p>
       <p class="sp-returning-privacy" style="text-align:center;"><strong>Skill-set loaded:</strong><br>You are currently training with <strong>Graphic Design</strong> applications.<br><em class="sp-returning-tagline">Other skill-sets coming soon.</em></p>
@@ -2831,25 +2826,7 @@ updateMismatchPill();
 // Apply rounded style if starting in PC mode
 document.getElementById('keyboardPanel').classList.toggle('pc-keys', currentOs === 'pc');
 
-// Wire data-hovering on segmented pills so CSS can fade the active segment
-// when the user hovers over a sibling (signalling a potential state change).
-// Five-part pills use a pure CSS :hover approach instead and are excluded here.
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.sp-seg-pill:not(.sp-seg-pill-five)').forEach(function(pill) {
-    pill.querySelectorAll('.sp-seg-btn').forEach(function(btn) {
-      btn.addEventListener('mouseenter', function() {
-        var isActive   = btn.classList.contains('diff-btn-active');
-        var isInactive = btn.classList.contains('diff-btn-inactive');
-        if (!isActive && !isInactive) {
-          pill.setAttribute('data-hovering', '');
-        }
-      });
-      btn.addEventListener('mouseleave', function() {
-        pill.removeAttribute('data-hovering');
-      });
-    });
-  });
-});
+// Hover states removed from pills -- no longer part of the design.
 
 /* ══════════════════════════════════════
    SHORTCUT → KEY CODES
@@ -3693,9 +3670,12 @@ function togglePause() {
   if (gameState === 'playing')   { enterPause(); return; }
   if (gameState === 'readyToUnpause') { _enterReadyToUnpauseCleanup(); enterPause(); return; }
   if (gameState === 'paused')    {
-    // Only offer reset if there's actually a score to reset
-    if (bestRecord.time !== null) { enterConfirmReset(); return; }
-    return; // no score — do nothing
+    if (bestRecord.time === null && bestRecord.accuracy === null) return; // nothing to reset
+    // Ensure the pause panel is visible, then trigger the overlay confirm pattern.
+    // This keeps the screen content intact -- only the inactive treatment is applied.
+    if (activeSettings !== 'panelPause') openSettings('panelPause');
+    _pauseClearClick('both', 'First confirm if you want to reset or not.');
+    return;
   }
   if (gameState === 'confirm-reset') { confirmResetNo(); return; }
   if (gameState === 'idle' || gameState === 'finished') {
@@ -3817,6 +3797,21 @@ function enterConfirmReset(target) {
   _clearTarget = target || 'both';
   _confirmFromFinished = (gameState === 'finished');
   _confirmFromPause    = _wasPlaying && answersLeft > 0 && gameState !== 'finished';
+
+  // When the pause panel is open, the overlay pattern handles the confirm UI.
+  // The _pauseClearClick function has already set up the overlay;
+  // we only need to wire Yes/No buttons and update gameState.
+  if (activeSettings === 'panelPause' && !_confirmAfterUpgrade) {
+    gameState = 'confirm-reset';
+    mainBtn.textContent = 'Yes';
+    mainBtn.style.background = '#10b981';
+    helpBtn.textContent = 'No';
+    helpBtn.style.background = '#6b7280';
+    helpBtn.style.color = 'white';
+    if (lockKeyEl) lockKeyEl.classList.add('active');
+    return;
+  }
+
   _closeAllModalsInstant();
   gameState = 'confirm-reset';
   if (currentMedal && !_confirmFromFinished) resetTimerBox();
@@ -3867,6 +3862,7 @@ function _returnToPauseScreen(titleMessage) {
 }
 
 function confirmResetYes() {
+  _exitScoreClearConfirm();
   var fromFinished  = _confirmFromFinished;
   var fromPause     = _confirmFromPause;
   var afterUpgrade  = _confirmAfterUpgrade;
@@ -4000,6 +3996,7 @@ function _finishAfterTrophy(message) {
 }
 
 function confirmResetNo() {
+  _exitScoreClearConfirm();
   var afterUpgrade = _confirmAfterUpgrade;
   _confirmAfterUpgrade = null;
   _clearTarget = null;
@@ -4038,23 +4035,71 @@ function confirmResetNo() {
   }
 }
 
+// Tracks which difficulty button triggered the confirm overlay
+var _diffConfirmActiveBtn = null;
+
 function enterConfirmDiffChange() {
-  _closeAllModalsInstant();
+  // Keep the difficulty panel visible -- dim everything except the active button.
   gameState = 'confirm-diff-change';
-  titleEl.classList.remove('blurred');
-  questionCountEl.classList.remove('blurred');
-  titleEl.className = '';
-  titleEl.textContent = 'Changing difficulty will cancel your paused game. Proceed?';
+
+  // Mark the pending button as active in the pill
+  var pendingBtn = document.querySelector(
+    '#difficultyPill .diff-btn[data-mode="' + _pendingDifficulty + '"]'
+  );
+  _diffConfirmActiveBtn = pendingBtn || null;
+
+  // Overlay the panel content, exposing only the active pill button
+  if (pendingBtn) pendingBtn.closest('.sp-seg-pill').classList.add('diff-confirm-source');
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.setAttribute('data-diff-confirm', '');
+
   mainBtn.textContent = 'Yes';
   mainBtn.style.background = '#10b981';
   helpBtn.textContent = 'No';
   helpBtn.style.background = '#6b7280';
   helpBtn.style.color = 'white';
   if (lockKeyEl) lockKeyEl.classList.add('active');
+
+  document.addEventListener('click',       _diffConfirmGuard, true);
+  document.addEventListener('pointerdown', _diffConfirmGuard, true);
+
+  showToast('Stay at your current difficulty to continue or choose to quit this round now.');
+}
+
+function _diffConfirmGuard(e) {
+  // Allow main/help buttons
+  var mainB = document.getElementById('mainBtn');
+  var helpB = document.getElementById('helpBtn');
+  if ((mainB && (e.target === mainB || mainB.contains(e.target))) ||
+      (helpB && (e.target === helpB || helpB.contains(e.target)))) return;
+  // Allow the active pill button (pressing it again = cancel)
+  if (_diffConfirmActiveBtn &&
+      (e.target === _diffConfirmActiveBtn || _diffConfirmActiveBtn.contains(e.target))) {
+    // Toggle-cancel
+    confirmDiffChangeNo();
+    e.stopPropagation();
+    e.preventDefault();
+    return;
+  }
+  // Block and toast
+  e.stopPropagation();
+  e.preventDefault();
+  showToast('Stay at your current difficulty to continue or choose to quit this round now.');
+}
+
+function _exitDiffConfirm() {
+  document.removeEventListener('click',       _diffConfirmGuard, true);
+  document.removeEventListener('pointerdown', _diffConfirmGuard, true);
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.removeAttribute('data-diff-confirm');
+  var pill = document.querySelector('#difficultyPill');
+  if (pill) pill.classList.remove('diff-confirm-source');
+  _diffConfirmActiveBtn = null;
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
 }
 
 function confirmDiffChangeYes() {
-  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  _exitDiffConfirm();
   var prevDiff = _prevDifficulty;
   currentDifficulty = _pendingDifficulty;
   _pendingDifficulty = null;
@@ -4079,7 +4124,7 @@ function confirmDiffChangeYes() {
 }
 
 function confirmDiffChangeNo() {
-  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  _exitDiffConfirm();
   // Restore difficulty and needle to the game that is still active
   var modeMap = { fundamentals: -1, normal: 0, hardcore: 1 };
   currentDifficulty  = _prevDifficulty;
@@ -4464,10 +4509,10 @@ function updateKbSizeToggle() {
   var extLabel = document.getElementById('kbSizeExtendedLabel');
   var cmpIcon  = document.getElementById('kbSizeCompactIcon');
   var cmpLabel = document.getElementById('kbSizeCompactLabel');
-  if (extIcon)  extIcon.style.fill  = extendedColour;
-  if (extLabel) extLabel.style.color = extendedColour;
-  if (cmpIcon)  cmpIcon.style.fill  = compactColour;
-  if (cmpLabel) cmpLabel.style.color = compactColour;
+  if (extIcon)  extIcon.style.fill           = extendedColour;
+  if (extLabel) { extLabel.style.color = extendedColour; extLabel.style.textDecoration = isCompact ? 'line-through' : ''; }
+  if (cmpIcon)  cmpIcon.style.fill           = compactColour;
+  if (cmpLabel) { cmpLabel.style.color = compactColour; cmpLabel.style.textDecoration = isCompact ? '' : 'line-through'; }
 
   // Grey out and lock to compact when touch is enabled
   if (row) row.classList.toggle('disabled', touchEnabled);
@@ -4492,6 +4537,9 @@ function setTouchEnabled(on) {
   // Audible row: enabled only when touch is on
   var audibleRow = document.getElementById('audibleRow');
   if (audibleRow) audibleRow.classList.toggle('disabled', !on);
+  // Ghost mode requires a physical keyboard -- disable it when touch is on
+  var ghostRow = document.getElementById('ghostRow');
+  if (ghostRow) ghostRow.classList.toggle('disabled', on);
 }
 
 function setSoundEnabled(on) {
@@ -4532,16 +4580,15 @@ var LIVES_VALUES = [1, 3, 5, 10, null];
 })();
 
 function onGhostModeToggle() {
+  var ghostRow = document.getElementById('ghostRow');
+  if (ghostRow && ghostRow.classList.contains('disabled')) {
+    showToast('Ghost Mode requires a physical keyboard.');
+    return;
+  }
   ghostModeOn = !ghostModeOn;
   var radio = document.getElementById('ghostRadio');
   if (radio) radio.classList.toggle('on', ghostModeOn);
   document.getElementById('keyboardPanel').classList.toggle('ghost-mode', ghostModeOn);
-  if (ghostModeOn && touchEnabled) {
-    setTouchEnabled(false);
-    document.getElementById('stickyRow').classList.remove('disabled');
-    var touchRadio = document.getElementById('touchRadio');
-    if (touchRadio) touchRadio.classList.remove('on');
-  }
   showModeToast(ghostModeOn ? 'Ghost Mode on' : 'Ghost Mode off');
 }
 
@@ -4551,9 +4598,20 @@ function onKillPunctuationToggle() {
     setKillPunctuation(false);
     return;
   }
-  // Toggling on is a destructive action — use the established confirm flow
-  _closeAllModalsInstant();
+  // If already in the confirm state, treat a second click as No
+  if (gameState === 'confirm-kill-punctuation') {
+    confirmKillPunctuationNo();
+    return;
+  }
+  // Toggling on is a destructive action — show confirm in the title area
+  // but keep the keyboard settings panel open behind it.
   gameState = 'confirm-kill-punctuation';
+  // Show radio as selected (preview of what Yes would do)
+  var radio = document.getElementById('killPunctuationRadio');
+  if (radio) radio.classList.add('on');
+  // Block all settings panel interactions except the Kill Punctuation radio
+  var sp = document.getElementById('settingsPanelInner');
+  if (sp) sp.setAttribute('data-kill-punctuation-confirming', '');
   titleEl.className = '';
   titleEl.classList.remove('blurred');
   questionCountEl.classList.remove('blurred');
@@ -4566,14 +4624,27 @@ function onKillPunctuationToggle() {
   if (lockKeyEl) lockKeyEl.classList.add('active');
 }
 
-function confirmKillPunctuationYes() {
+function _clearKillPunctuationConfirmState() {
+  var sp = document.getElementById('settingsPanelInner');
+  if (sp) sp.removeAttribute('data-kill-punctuation-confirming');
   if (lockKeyEl) lockKeyEl.classList.remove('active');
+  // Dismiss any toast that was shown while the confirm was pending
+  clearTimeout(_kwToastTimer);
+  var toastEl = document.getElementById('kwToast');
+  if (toastEl) toastEl.classList.remove('visible');
+}
+
+function confirmKillPunctuationYes() {
+  _clearKillPunctuationConfirmState();
   setKillPunctuation(true);
   _returnAfterKillPunctuationConfirm();
 }
 
 function confirmKillPunctuationNo() {
-  if (lockKeyEl) lockKeyEl.classList.remove('active');
+  _clearKillPunctuationConfirmState();
+  // Reset radio to off since the user declined
+  var radio = document.getElementById('killPunctuationRadio');
+  if (radio) radio.classList.remove('on');
   _returnAfterKillPunctuationConfirm();
 }
 
@@ -4581,8 +4652,19 @@ function _returnAfterKillPunctuationConfirm() {
   if (_wasPlaying && answersLeft > 0) {
     _returnToPauseScreen(null);
   } else {
-    resetToIdle();
-    openSettings('panelKeyboard');
+    // Restore idle state but keep the keyboard settings panel open
+    gameState = 'idle';
+    mainBtn.textContent = 'Start';
+    mainBtn.style.background = '';
+    helpBtn.textContent = 'Help';
+    helpBtn.style.background = '';
+    helpBtn.style.color = '';
+    titleEl.className = '';
+    titleEl.textContent = 'Play Keyboard Warriors';
+    // Re-open only if the panel was closed (it stays open in the normal flow)
+    if (activeSettings !== 'panelKeyboard') {
+      openSettings('panelKeyboard');
+    }
   }
 }
 
@@ -5140,6 +5222,11 @@ document.getElementById('gameContainer').addEventListener('click', function(e) {
   if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'LABEL' || tag === 'A') return;
   if (e.target.closest('button, input, label, a, #timerBox, #kbIcon, #browserIcon, #appPill, #appDropdown, #debugOverlay, #settingsPanel')) return;
 
+  if (gameState === 'confirm-kill-punctuation') {
+    showToast('You must confirm if you really want no punctuation keys or not.');
+    return;
+  }
+
   if (gameState === 'paused') {
     pulseBtn(document.getElementById('mainBtn'));
     return;
@@ -5529,11 +5616,17 @@ function diffBtnClick(mode) {
   setDiffState(modeMap[mode]);
   _updateDiffBtnStyles(mode);
   _updateDiffSubtitle(mode);
+  // Pop the newly active button label so the change is visually confirmed
+  var activeBtn = document.querySelector('#difficultyPill .diff-btn[data-mode="' + mode + '"], #welcomeDifficultyPill .diff-btn[data-mode="' + mode + '"]');
+  _popDiffLabel(activeBtn);
   try { localStorage.setItem('kw_difficulty', currentDifficulty); } catch(e) {}
 
-  // Apply timer and lives presets for this difficulty level
-  _applyDifficultyPresets(mode);
-  _updateTimerLivesPills();
+  // Only apply timer/lives presets once the trophy has been earned.
+  // Before that the sliders are locked at ∞ and should not change.
+  if (hasEverAchievedPerfectAccuracy) {
+    _applyDifficultyPresets(mode);
+    _updateTimerLivesPills();
+  }
 
   // If we are still on the welcome screen, dismiss it into idle
   if (gameState === 'welcome') {
@@ -5541,21 +5634,29 @@ function diffBtnClick(mode) {
   }
 }
 
-// Updates the active/inactive classes on the difficulty buttons immediately,
-// using the supplied mode rather than reading currentDifficulty (which may
-// lag during the confirm-diff-change pending state).
+// Updates the active/inactive classes on the difficulty buttons.
+// Exactly one button will always carry diff-btn-active.
+// Pops the label text of a difficulty pill button with a brief scale animation.
+function _popDiffLabel(btnEl) {
+  if (!btnEl) return;
+  var spanEl = btnEl.querySelector('.diff-btn-text') || btnEl;
+  spanEl.classList.remove('diff-btn-label-pop');
+  void spanEl.offsetWidth;
+  spanEl.classList.add('diff-btn-label-pop');
+  spanEl.addEventListener('animationend', function handler() {
+    spanEl.classList.remove('diff-btn-label-pop');
+    spanEl.removeEventListener('animationend', handler);
+  });
+}
+
 function _updateDiffBtnStyles(activeMode) {
   var hardcoreUnlocked = hasEverAchievedPerfectAccuracy;
   var btns = document.querySelectorAll('#panelDifficulty .diff-btn, #panelWelcome .diff-btn');
   btns.forEach(function(btn) {
     var m = btn.getAttribute('data-mode');
-    if (m === 'hardcore' && !hardcoreUnlocked) {
-      btn.classList.add('diff-btn-inactive');
-      btn.classList.remove('diff-btn-active');
-    } else {
-      btn.classList.remove('diff-btn-inactive');
-      btn.classList.toggle('diff-btn-active', m === activeMode);
-    }
+    var isLocked = (m === 'hardcore' && !hardcoreUnlocked);
+    btn.classList.toggle('diff-btn-inactive', isLocked);
+    btn.classList.toggle('diff-btn-active', !isLocked && m === activeMode);
   });
 }
 
@@ -5586,8 +5687,10 @@ function _refreshDifficultyPanel() {
   _updateDiffBtnStyles(displayMode);
   _updateDiffSubtitle(displayMode);
   _syncAdvancedPanelState();
-  _syncSliderToValue('timer', questionTimer);
-  _syncSliderToValue('lives', playerLives);
+  // Locked panel always shows ∞ -- the advanced settings are not yet available
+  var showAsInfinity = !hasEverAchievedPerfectAccuracy;
+  _syncSliderToValue('timer', showAsInfinity ? null : questionTimer);
+  _syncSliderToValue('lives', showAsInfinity ? null : playerLives);
 }
 
 function _updateTimerLivesPills() {
@@ -5651,7 +5754,7 @@ function _syncSliderToValue(sliderType, value) {
   spring.target = SLIDER_STOPS[stopIdx];
   _setKnobLabel(el, _labelForValue(value));
   _updateSliderSideLabel(sliderType, value);
-  if (!spring.raf) _animateSpring(sliderType, el);
+  _animateSpring(sliderType, el, 'firm');
 }
 
 // Updates the "Question Timer" / "Player Lives" side label colour based on
@@ -5665,37 +5768,71 @@ function _updateSliderSideLabel(sliderType, value) {
   if (!row) return;
   var labelEl = row.querySelector('.diff-slider-side-label');
   if (!labelEl) return;
-  var unlocked  = hasEverAchievedPerfectAccuracy;
+  var unlocked   = hasEverAchievedPerfectAccuracy;
   var isInfinity = (value === null);
-  labelEl.style.color = (unlocked && !isInfinity) ? '#374151' : '#9ca3af';
+  // Colour: dark when unlocked and a real value is set, grey otherwise
+  labelEl.style.color          = (unlocked && !isInfinity) ? '#374151' : '#9ca3af';
+  // Strikethrough whenever the slider is at ∞ -- locked or unlocked
+  labelEl.style.textDecoration = isInfinity ? 'line-through' : '';
 }
+
+// Set to true during the trophy award sequence so _syncAdvancedPanelState
+// does not prematurely reveal the footer.
+var _trophySequenceActive = false;
 
 function _syncAdvancedPanelState() {
   var panel = document.getElementById('diffAdvancedPanel');
   if (!panel) return;
   var unlocked = hasEverAchievedPerfectAccuracy;
   panel.classList.toggle('diff-advanced-active', unlocked);
-  // Re-evaluate side label colours now that unlock state has changed
   _updateSliderSideLabel('timer', questionTimer);
   _updateSliderSideLabel('lives', playerLives);
+  // Footer: skip during the trophy sequence -- step 5 handles it
+  if (_trophySequenceActive) return;
+  var footer = document.getElementById('diffAdvancedFooter');
+  if (footer) {
+    if (unlocked) {
+      footer.style.animation = 'none';
+      footer.style.opacity   = '1';
+      footer.style.clipPath  = 'inset(0 0% 0 0)';
+      footer.style.display   = 'block';
+      footer.classList.add('diff-advanced-footer-visible');
+    } else {
+      footer.style.animation = '';
+      footer.style.opacity   = '';
+      footer.style.clipPath  = '';
+      footer.style.display   = '';
+      footer.classList.remove('diff-advanced-footer-visible');
+    }
+  }
 }
+
+// SVG markup used for the infinity symbol in slider knobs.
+// Defined once here so _setKnobLabel can insert it without repeating the path.
+var INFINITY_KNOB_SVG = '<svg width="28" height="12" viewBox="0 0 515 212" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M407.61,16.84c48.83,1.86,86.06,42.58,85.87,89.9s-37.87,87.63-86.39,89.22c-21.05.69-41.59-4.39-61.27-11.73-32.39-12.09-63.19-33.84-91.01-54.92-26.68,20.05-55.36,40.62-86.44,53.11-18.16,7.29-36.97,12.62-56.58,13.43-50.03,2.07-91.29-38.6-92.28-87.62-1-49.32,38.85-91.77,89.43-91.35,21.7.18,42.7,6.51,62.63,14.8,29.41,12.24,57.82,32.66,83.26,51.76,27.43-20.82,58.38-42.64,90.32-54.65,19.88-7.47,40.51-12.79,62.47-11.95ZM224.88,106.33c-13.7-10.61-26.08-19.62-39.46-28.55-12.28-7.96-24.33-14.74-37.72-20.85-12.89-4.65-25.61-10.03-39.69-10.06-32.92-.07-58.71,27.86-58.52,59.86.19,31.69,25.87,59.21,58.52,59.15,13.85-.02,26.38-5.3,39.11-9.81,28.75-12.95,52.41-30.11,77.75-49.74ZM363.28,156.38c13.28,5.04,26.45,9.63,40.94,9.66,33.23.07,59.46-27.61,59.27-60.02-.19-32.12-26.29-59.4-59.28-59.31-14.51.04-27.72,4.62-41,9.69-29.18,12.8-52.86,30.36-78.6,49.95,25.67,19.67,49.53,37.23,78.67,50.03Z"/></svg>';
 
 function _setKnobLabel(sliderEl, newLabel) {
   var labelA = sliderEl.querySelector('.diff-knob-label-a');
   var labelB = sliderEl.querySelector('.diff-knob-label-b');
   if (!labelA || !labelB) return;
-  var aVisible = !labelA.classList.contains('diff-knob-label-hidden');
+  var aVisible  = !labelA.classList.contains('diff-knob-label-hidden');
   var visibleEl = aVisible ? labelA : labelB;
   var hiddenEl  = aVisible ? labelB : labelA;
-  // Always update the infinity class on both, then crossfade if the label changed
   var newIsInfinity = (newLabel === '∞');
-  if (visibleEl.textContent === newLabel) {
-    // No text change -- but still fix the infinity class in case it drifted
-    visibleEl.classList.toggle('diff-knob-infinity', newIsInfinity);
-    return;
+  // Determine current content for change detection
+  var currentContent = newIsInfinity
+    ? visibleEl.innerHTML  // SVG -- compare by class instead
+    : visibleEl.textContent;
+  var noChange = newIsInfinity
+    ? visibleEl.classList.contains('diff-knob-infinity')
+    : (visibleEl.textContent === newLabel && !visibleEl.classList.contains('diff-knob-infinity'));
+  if (noChange) return;
+  // Write new content into the hidden span
+  if (newIsInfinity) {
+    hiddenEl.innerHTML = INFINITY_KNOB_SVG;
+  } else {
+    hiddenEl.textContent = newLabel;
   }
-  // Prepare the hidden span with the new content and correct class
-  hiddenEl.textContent = newLabel;
   hiddenEl.classList.toggle('diff-knob-infinity', newIsInfinity);
   // Crossfade
   hiddenEl.classList.remove('diff-knob-label-hidden');
@@ -5705,59 +5842,31 @@ function _setKnobLabel(sliderEl, newLabel) {
 function _setKnobPosition(sliderEl, pct) {
   var knob = sliderEl.querySelector('.diff-slider-knob');
   if (!knob) return;
-  // Clamp to knob half-width so it never overflows track edges
   knob.style.left = pct + '%';
 }
 
-function _animateSpring(sliderType, sliderEl, criticallyDamped) {
+// Sets the knob position with a CSS transition for smooth animated movement.
+// During drag, CSS transition is disabled so the knob tracks the pointer exactly.
+function _animateToTarget(sliderType, sliderEl, transitionStyle) {
   var spring = _getSpring(sliderType);
   spring.vel = 0;
   if (spring.raf) { cancelAnimationFrame(spring.raf); spring.raf = null; }
+  spring.pos = spring.target;
+  var knob = sliderEl.querySelector('.diff-slider-knob');
+  if (!knob) return;
+  knob.style.transition = transitionStyle || 'left 0.28s cubic-bezier(0.34, 1.3, 0.64, 1)';
+  knob.style.left = spring.target + '%';
+}
 
-  if (criticallyDamped) {
-    // Simple ease-out tween -- no spring, no bounce
-    var startPos  = spring.pos;
-    var endPos    = spring.target;
-    var startTime = null;
-    var duration  = 180; // ms
-    function tweenTick(now) {
-      if (!startTime) startTime = now;
-      var elapsed = now - startTime;
-      var t = Math.min(elapsed / duration, 1);
-      // Ease-out cubic
-      var eased = 1 - Math.pow(1 - t, 3);
-      spring.pos = startPos + (endPos - startPos) * eased;
-      _setKnobPosition(sliderEl, spring.pos);
-      if (t < 1) {
-        spring.raf = requestAnimationFrame(tweenTick);
-      } else {
-        spring.pos = endPos;
-        _setKnobPosition(sliderEl, endPos);
-        spring.raf = null;
-      }
-    }
-    spring.raf = requestAnimationFrame(tweenTick);
-    return;
-  }
-
-  // Drag-release spring -- gentle bounce for natural feel
-  var travelDistance = Math.abs(spring.target - spring.pos);
-  var stiffness = 0.14;
-  var damping   = travelDistance > 30 ? 0.82 : 0.72;
-  function tick() {
-    var force = (spring.target - spring.pos) * stiffness;
-    spring.vel = spring.vel * damping + force;
-    spring.pos += spring.vel;
-    _setKnobPosition(sliderEl, spring.pos);
-    if (Math.abs(spring.vel) > 0.01 || Math.abs(spring.pos - spring.target) > 0.01) {
-      spring.raf = requestAnimationFrame(tick);
-    } else {
-      spring.pos = spring.target;
-      _setKnobPosition(sliderEl, spring.pos);
-      spring.raf = null;
-    }
-  }
-  spring.raf = requestAnimationFrame(tick);
+// Legacy alias so existing call sites that pass a mode string still work.
+// All modes now use CSS transitions; the mode string only affects duration/easing.
+function _animateSpring(sliderType, sliderEl, mode) {
+  var transitions = {
+    'smooth': 'left 0.32s cubic-bezier(0.4, 0, 0.2, 1)',   // ease-in-out, no bounce
+    'firm':   'left 0.28s cubic-bezier(0.4, 0, 0.2, 1)',   // ease-in-out, no bounce
+    'gentle': 'left 0.28s cubic-bezier(0.34, 1.3, 0.64, 1)', // slight overshoot
+  };
+  _animateToTarget(sliderType, sliderEl, transitions[mode] || transitions['gentle']);
 }
 
 function _snapToNearestStop(pct) {
@@ -5792,13 +5901,21 @@ function _initSliders() {
       return Math.max(0, Math.min(100, pct));
     }
 
+    // The resting position of the knob when a drag begins.
+    // For locked sliders this is always wherever the knob visually sits (spring.pos),
+    // NOT recalculated from the saved value -- they may differ when displayed as ∞.
+    var dragRestPct = 100;
+
     knob.addEventListener('pointerdown', function(e) {
       e.preventDefault();
       knob.setPointerCapture(e.pointerId);
       isDragging = true;
+      knob.style.transition = 'none';
       var spring = _getSpring(sliderType);
+      if (spring.raf) { cancelAnimationFrame(spring.raf); spring.raf = null; }
       dragStartX   = e.clientX;
       dragStartPct = spring.pos;
+      dragRestPct  = spring.pos; // anchor for locked resistance
       trackWidth   = el.getBoundingClientRect().width;
     });
 
@@ -5808,26 +5925,24 @@ function _initSliders() {
       var deltaPct = ((e.clientX - dragStartX) / trackWidth) * 100;
       var spring = _getSpring(sliderType);
       if (unlocked) {
-        // Free drag — follow pointer directly, spring will snap on release
+        // Free drag -- follow pointer directly, spring snaps on release
         var panel = document.getElementById('diffAdvancedPanel');
         var panelRect = panel ? panel.getBoundingClientRect() : el.getBoundingClientRect();
         var rawPct;
-        if (e.clientX <= panelRect.left)  rawPct = 0;
+        if (e.clientX <= panelRect.left)       rawPct = 0;
         else if (e.clientX >= panelRect.right) rawPct = 100;
         else rawPct = Math.max(0, Math.min(100, dragStartPct + deltaPct));
         spring.pos    = rawPct;
         spring.target = rawPct;
-        if (spring.raf) { cancelAnimationFrame(spring.raf); spring.raf = null; }
         _setKnobPosition(el, rawPct);
       } else {
-        // Locked — tight resistance, max 5% deflection
+        // Locked -- slight resistance anchored to the knob's resting position
         var resistance = 0.08;
         var deflection = Math.max(-5, Math.min(5, deltaPct * resistance));
-        var lockedPct  = SLIDER_STOPS[_valueToStopIndex(sliderType === 'timer' ? questionTimer : playerLives)];
-        spring.pos    = lockedPct + deflection;
-        spring.target = lockedPct + deflection;
-        if (spring.raf) { cancelAnimationFrame(spring.raf); spring.raf = null; }
-        _setKnobPosition(el, spring.pos);
+        var deflectedPct = Math.max(0, Math.min(100, dragRestPct + deflection));
+        spring.pos    = deflectedPct;
+        spring.target = deflectedPct;
+        _setKnobPosition(el, deflectedPct);
       }
     });
 
@@ -5837,12 +5952,10 @@ function _initSliders() {
       var unlocked = hasEverAchievedPerfectAccuracy;
       var spring = _getSpring(sliderType);
       if (unlocked) {
-        // Snap to nearest stop and update value
-        var stopIdx = _snapToNearestStop(spring.pos);
+        var stopIdx  = _snapToNearestStop(spring.pos);
         var newValue = SLIDER_VALUES[stopIdx];
         spring.target = SLIDER_STOPS[stopIdx];
-        _animateSpring(sliderType, el);
-        // Update state
+        _animateSpring(sliderType, el, 'gentle');
         if (sliderType === 'timer') {
           if (newValue !== questionTimer) {
             questionTimer = newValue;
@@ -5857,10 +5970,15 @@ function _initSliders() {
         _setKnobLabel(el, _labelForValue(newValue));
         _updateSliderSideLabel(sliderType, newValue);
       } else {
-        // Snap back to locked position
-        var lockedPct = SLIDER_STOPS[_valueToStopIndex(sliderType === 'timer' ? questionTimer : playerLives)];
-        spring.target = lockedPct;
-        _animateSpring(sliderType, el);
+        // Snap back to the resting position.
+        // Force a reflow so the browser commits the dragged position before we
+        // set the return transition -- without this, transition:none (set on
+        // pointerdown) and the new transition collapse into one paint and the
+        // knob jumps rather than animating back.
+        void knob.offsetWidth;
+        spring.pos    = dragRestPct;
+        spring.target = dragRestPct;
+        _animateSpring(sliderType, el, 'gentle');
       }
     });
 
@@ -5876,7 +5994,7 @@ function _initSliders() {
       var newValue = SLIDER_VALUES[stopIdx];
       var spring   = _getSpring(sliderType);
       spring.target = SLIDER_STOPS[stopIdx];
-      _animateSpring(sliderType, el, true);
+      _animateSpring(sliderType, el, 'gentle');
       if (sliderType === 'timer') {
         questionTimer = newValue;
         try { localStorage.setItem('kw_timer', String(newValue)); } catch(ex) {}
@@ -5930,7 +6048,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var newValue = SLIDER_VALUES[stopIdx];
       var spring   = _getSpring(sliderType);
       spring.target = SLIDER_STOPS[stopIdx];
-      _animateSpring(sliderType, sliderWrap, true);
+      _animateSpring(sliderType, sliderWrap, 'gentle');
       if (sliderType === 'timer') {
         questionTimer = newValue;
         try { localStorage.setItem('kw_timer', String(newValue)); } catch(ex) {}
@@ -5990,7 +6108,10 @@ function _refreshPausePanel() {
   if (clearLbl) clearLbl.style.color = noneActive ? '#9ca3af' : '';
 }
 
-function _pauseClearClick(target) {
+// Tracks which clear button is currently in the active/confirm state
+var _scoreClearConfirmTarget = null;
+
+function _pauseClearClick(target, initialToast) {
   var hasTime = bestRecord.time !== null;
   var hasAcc  = bestRecord.accuracy !== null;
   var isInactive =
@@ -5998,10 +6119,112 @@ function _pauseClearClick(target) {
     (target === 'accuracy' && !hasAcc)  ||
     (target === 'both'     && !hasTime && !hasAcc);
   if (isInactive) { showToast('Nothing to clear.'); return; }
-  enterConfirmReset(target);
+
+  // Pressing the already-active button cancels
+  if (_scoreClearConfirmTarget === target) {
+    _exitScoreClearConfirm();
+    return;
+  }
+
+  // Switching to a different clear button: cancel previous and go straight into the new one.
+  // No toast -- the new question heading pops into the title area.
+  if (_scoreClearConfirmTarget !== null) {
+    _exitScoreClearConfirm();
+    // Slight pause so the previous active state clears visually before the new one sets
+    setTimeout(function() { _pauseClearClick(target, initialToast); }, 30);
+    return;
+  }
+
+  _scoreClearConfirmTarget = target;
+
+  // Mark the source pill so the overlay CSS exposes only it
+  var pill = _scoreClearPillForTarget(target);
+  if (pill) pill.classList.add('score-confirm-source');
+
+  // Light up the pressed button
+  var btn = _scoreClearBtnForTarget(target);
+  if (btn) {
+    btn.classList.add('score-pill-active');
+    _popScorePillLabel(btn);
+  }
+
+  // Overlay the rest of the panel
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.setAttribute('data-score-confirm', target);
+
+  // Install capture-phase guard
+  document.addEventListener('click',       _scoreClearConfirmGuard, true);
+  document.addEventListener('pointerdown', _scoreClearConfirmGuard, true);
+
+  showToast(initialToast || 'You need to decide if you are keeping or clearing your score record.');
+}
+
+function _scoreClearPillForTarget(target) {
+  // The clear-score pill (first .score-clear-pill in the pause panel right col)
+  return document.querySelector('#panelPause .sp-col-right .score-clear-pill');
+}
+
+function _scoreClearBtnForTarget(target) {
+  if (target === 'time')     return document.getElementById('clearTimeBtn');
+  if (target === 'both')     return document.getElementById('clearBothBtn');
+  if (target === 'accuracy') return document.getElementById('clearAccBtn');
+  return null;
+}
+
+function _popScorePillLabel(btnEl) {
+  if (!btnEl) return;
+  // Score pill buttons may contain an SVG or a text node -- animate the button itself
+  // via a wrapper span if present, otherwise the button directly
+  var target = btnEl.querySelector('.diff-btn-text') || btnEl;
+  target.classList.remove('diff-btn-label-pop');
+  void target.offsetWidth;
+  target.classList.add('diff-btn-label-pop');
+  target.addEventListener('animationend', function handler() {
+    target.classList.remove('diff-btn-label-pop');
+    target.removeEventListener('animationend', handler);
+  });
+}
+
+function _scoreClearConfirmGuard(e) {
+  var activeBtn = _scoreClearBtnForTarget(_scoreClearConfirmTarget);
+  // Allow clicks on the active button (toggle-cancel)
+  if (activeBtn && (e.target === activeBtn || activeBtn.contains(e.target))) return;
+  // Allow main/help buttons (Yes/No)
+  var mainB = document.getElementById('mainBtn');
+  var helpB = document.getElementById('helpBtn');
+  if ((mainB && (e.target === mainB || mainB.contains(e.target))) ||
+      (helpB && (e.target === helpB || helpB.contains(e.target)))) return;
+  // Block everything else and toast
+  e.stopPropagation();
+  e.preventDefault();
+  showToast('You need to decide if you are keeping or clearing your score record.');
+}
+
+function _exitScoreClearConfirm() {
+  if (_scoreClearConfirmTarget === null) return;
+  var btn  = _scoreClearBtnForTarget(_scoreClearConfirmTarget);
+  var pill = _scoreClearPillForTarget(_scoreClearConfirmTarget);
+  _scoreClearConfirmTarget = null;
+  document.removeEventListener('click',       _scoreClearConfirmGuard, true);
+  document.removeEventListener('pointerdown', _scoreClearConfirmGuard, true);
+  if (btn)  btn.classList.remove('score-pill-active');
+  if (pill) pill.classList.remove('score-confirm-source');
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.removeAttribute('data-score-confirm');
 }
 
 function _reportImpossibleQuestion() {
+  // Briefly activate the button so the interaction is visually confirmed,
+  // then slowly transition back to the available state.
+  var reportBtn = document.querySelector('#panelPause .score-pill-full');
+  if (reportBtn) {
+    reportBtn.classList.add('score-pill-active');
+    _popScorePillLabel(reportBtn);
+    setTimeout(function() {
+      reportBtn.classList.remove('score-pill-active');
+      // Transition is already 1.5s ease from CSS -- returns slowly to available
+    }, 3000);
+  }
   // Build the same report dbgBuildReport() produces, but directly from live
   // state so it is always current regardless of debug overlay visibility.
   var appEntry = APPS.find(function(a) { return a.key === currentApp; });
@@ -6053,6 +6276,8 @@ function _showReturningScreen() {
 }
 
 function _returningContinue() {
+  var clickedBtn = document.querySelector('#panelReturning .sp-seg-btn-left .diff-btn-text');
+  if (clickedBtn) _popDiffLabel(clickedBtn);
   _welcomeIsReturning = false;
   document.body.classList.remove('returning-screen');
   var tagline = document.getElementById('welcomeTagline');
@@ -6066,45 +6291,72 @@ function _returningContinue() {
 }
 
 function _returningStartOver() {
-  document.body.classList.remove('returning-screen');
-  try { localStorage.removeItem('kw_best'); } catch(e) {}
-  try { localStorage.removeItem('kw_app'); } catch(e) {}
-  try { localStorage.removeItem('kw_difficulty'); } catch(e) {}
-  try { localStorage.removeItem('kw_perfect'); } catch(e) {}
-  try { localStorage.removeItem('kw_timer'); } catch(e) {}
-  try { localStorage.removeItem('kw_lives'); } catch(e) {}
-  try { sessionStorage.removeItem('kw_welcomed'); } catch(e) {}
-  bestRecord = { time: null, accuracy: null };
-  hasEverAchievedPerfectAccuracy = false;
-  currentDifficulty = 'normal';
-  _diffFirst = true;
-  setDiffState(0);
-  updateBestDisplay();
-  closeSettings();
-  _showWelcomeScreen();
+  // Pop the clicked label, hold briefly, then crossfade to the welcome screen.
+  var clickedBtn = document.querySelector('#panelReturning .sp-seg-btn-right .diff-btn-text');
+  if (clickedBtn) _popDiffLabel(clickedBtn);
+  var panelInner = document.getElementById('settingsPanelInner');
+  setTimeout(function() {
+    // Fade out the returning screen content
+    if (panelInner) { panelInner.style.transition = 'opacity 0.3s ease'; panelInner.style.opacity = '0'; }
+    setTimeout(function() {
+      // Reset storage and state, then show the welcome screen
+      document.body.classList.remove('returning-screen');
+      try { localStorage.removeItem('kw_best'); } catch(e) {}
+      try { localStorage.removeItem('kw_app'); } catch(e) {}
+      try { localStorage.removeItem('kw_difficulty'); } catch(e) {}
+      try { localStorage.removeItem('kw_perfect'); } catch(e) {}
+      try { localStorage.removeItem('kw_timer'); } catch(e) {}
+      try { localStorage.removeItem('kw_lives'); } catch(e) {}
+      try { sessionStorage.removeItem('kw_welcomed'); } catch(e) {}
+      bestRecord = { time: null, accuracy: null };
+      hasEverAchievedPerfectAccuracy = false;
+      currentDifficulty = 'normal';
+      _diffFirst = true;
+      setDiffState(0);
+      updateBestDisplay();
+      if (panelInner) { panelInner.style.transition = ''; panelInner.style.opacity = ''; }
+      closeSettings();
+      _showWelcomeScreen();
+    }, 320);
+  }, 500); // hold after pop before fading
 }
 
 function _dismissWelcome() {
-  var tagline = document.getElementById('welcomeTagline');
-  if (tagline) tagline.style.display = 'none';
+  // Pop the active label, then hold on the welcome screen for 1750ms
+  // so the player sees their choice before the keyboard moves.
+  var activeBtn = document.querySelector('#welcomeDifficultyPill .diff-btn-active');
+  if (activeBtn) _popDiffLabel(activeBtn);
   _welcomeIsReturning = false;
-  closeSettings();
-  resetToIdle();
+  setTimeout(function() {
+    var tagline = document.getElementById('welcomeTagline');
+    if (tagline) tagline.style.display = 'none';
+    closeSettings();
+    resetToIdle();
+  }, 1750);
 }
 
 function _startFromWelcome() {
-  // Start pressed on a landing screen without choosing an option.
-  // First-time: default to Normal. Returning: keep existing settings.
+  // Start pressed without choosing a difficulty -- default to Normal.
   if (!_welcomeIsReturning) {
     currentDifficulty = 'normal';
     try { localStorage.setItem('kw_difficulty', currentDifficulty); } catch(e) {}
   }
-  var tagline = document.getElementById('welcomeTagline');
-  if (tagline) tagline.style.display = 'none';
+  var panelInner = document.getElementById('settingsPanelInner');
+  var tagline    = document.getElementById('welcomeTagline');
+  if (panelInner) {
+    setTimeout(function() { panelInner.style.transition = 'opacity 0.4s ease'; panelInner.style.opacity = '0'; }, 50);
+  }
+  if (tagline) {
+    setTimeout(function() { tagline.style.transition = 'opacity 0.4s ease'; tagline.style.opacity = '0'; }, 50);
+  }
   _welcomeIsReturning = false;
-  closeSettings();
-  resetToIdle();
-  beginCountdown();
+  setTimeout(function() {
+    if (panelInner) { panelInner.style.transition = ''; panelInner.style.opacity = ''; }
+    if (tagline)    { tagline.style.transition = ''; tagline.style.opacity = ''; tagline.style.display = 'none'; }
+    closeSettings();
+    resetToIdle();
+    beginCountdown();
+  }, 480);
 }
 
 // On load: show appropriate landing screen every fresh session (sessionStorage resets on tab close)
@@ -6507,10 +6759,8 @@ function endGame() {
     bestRecord.accuracy = finalAccuracy; newBestAcc = true;
   }
   const justEarnedTrophy = finalAccuracy >= 100 && !hasEverAchievedPerfectAccuracy;
-  if (justEarnedTrophy) {
-    hasEverAchievedPerfectAccuracy = true;
-    try { localStorage.setItem('kw_perfect', '1'); } catch(e) {}
-  }
+  // Note: hasEverAchievedPerfectAccuracy and localStorage are set during the
+  // animation sequence so the difficulty panel opens in its pre-trophy state.
   if (newBestTime || newBestAcc) {
     try { localStorage.setItem('kw_best', JSON.stringify(bestRecord)); } catch(e) {}
     updateBestDisplay(newBestTime, newBestAcc);
@@ -6538,7 +6788,18 @@ function endGame() {
     void titleEl.offsetWidth;
     titleEl.classList.add('trophy-pop');
   }
-  startEndScreenInactivityTimer();
+  if (justEarnedTrophy) {
+    // Delay the first pulse until after the full award sequence + 3s of peace.
+    // The sequence runs for roughly 10-11s; 14s gives comfortable clearance.
+    clearTimeout(endScreenInactivityTimer);
+    endScreenInactivityTimer = setTimeout(function pulseAndReschedule() {
+      if (gameState !== 'finished') { endScreenInactivityTimer = null; return; }
+      pulseBtn(document.getElementById('mainBtn'));
+      endScreenInactivityTimer = setTimeout(pulseAndReschedule, 5000);
+    }, 14000);
+  } else {
+    startEndScreenInactivityTimer();
+  }
   fillProgressDot(9);
   setTimeout(hideProgressDots, 0);
   timerBox.className = 'timerBox medal-' + medal;
@@ -6547,67 +6808,141 @@ function endGame() {
   updateMedalFaceStyle(0);
   timerDiv.textContent = formatTime(Math.floor(totalTime));
   if (justEarnedTrophy) {
-    // Upgrade to Normal and apply its presets. Memory and localStorage are
-    // written immediately; the UI changes are revealed through timed animation
-    // below so the player can watch each step happen.
     var previousDifficulty = currentDifficulty;
-    currentDifficulty = 'normal';
-    questionTimer     = 5;
-    playerLives       = 10;
-    try { localStorage.setItem('kw_difficulty', 'normal'); } catch(e) {}
-    try { localStorage.setItem('kw_timer', '5'); } catch(e) {}
-    try { localStorage.setItem('kw_lives', '10'); } catch(e) {}
+    _trophySequenceActive = true; // suppress footer in _syncAdvancedPanelState
 
-    // Step 1 (1200ms): open the difficulty settings panel so the player can
-    // read the trophy heading before the keyboard begins to move.
-    // The keyboard flip takes ~850ms and the panel fades in over 550ms after
-    // that, so content is fully visible ~1400ms after openSettings is called.
-    // We add a further 1500ms reading pause before anything animates.
-    var panelReadyDelay  = 1200 + 1400; // when panel is fully visible
-    var readingPause     = 1500;         // breathing room before first animation
+    // All delays are relative to t0 (endGame call).
+    // The keyboard flip takes 850ms, panel inner fades in after 250ms delay + 300ms = 550ms.
+    // So panel is fully visible at t0 + openDelay + 850 + 550.
+    var openDelay      = 800;  // ms after t0 to call openSettings
+    var panelVisible   = openDelay + 850 + 550; // ~2200ms: panel fully readable
 
+    // Toast fires immediately so the player reads it while the keyboard moves
+    showToast('New features unlocked.');
+
+    // Step 1: open the panel (still in pre-trophy locked state)
     setTimeout(function() {
       openSettings('panelDifficulty');
-    }, 1200);
+    }, openDelay);
 
-    // Step 2: if they were on Fundamentals, animate pill + needle to Normal.
+    // Step 2: once panel is visible, change difficulty pill if from Fundamentals
+    var pillDone = panelVisible;
     if (previousDifficulty === 'fundamentals') {
       setTimeout(function() {
+        currentDifficulty = 'normal';
+        try { localStorage.setItem('kw_difficulty', 'normal'); } catch(e) {}
+        var pillBtns = document.querySelectorAll('#difficultyPill .diff-btn');
+        pillBtns.forEach(function(b) { b.classList.add('diff-btn-transitioning'); });
         _diffFirst = true;
         setDiffState(0);
         _updateDiffBtnStyles('normal');
         _updateDiffSubtitle('normal');
-      }, panelReadyDelay + readingPause);
+        // Pop the newly active label
+        var normalBtn = document.querySelector('#difficultyPill .diff-btn[data-mode="normal"]');
+        if (normalBtn) _popDiffLabel(normalBtn);
+        setTimeout(function() {
+          pillBtns.forEach(function(b) { b.classList.remove('diff-btn-transitioning'); });
+        }, 700);
+      }, panelVisible);
+      pillDone = panelVisible + 700; // pill transition duration
+    } else {
+      // Already on Normal/Hardcore — still pop the active pill label to draw attention
+      currentDifficulty = 'normal';
+      try { localStorage.setItem('kw_difficulty', 'normal'); } catch(e) {}
+      setTimeout(function() {
+        var activeBtn = document.querySelector('#difficultyPill .diff-btn[data-mode="normal"]');
+        if (activeBtn) _popDiffLabel(activeBtn);
+      }, panelVisible);
     }
 
-    // Step 3: activate the advanced panel, then animate the Question Timer slider.
-    // If coming from Fundamentals, add extra time for the pill animation (800ms) + pause.
-    var sliderBaseDelay = panelReadyDelay + readingPause
-      + (previousDifficulty === 'fundamentals' ? 800 + 1000 : 0);
-
+    // Step 3: award trophy + unlock panel.
+    // Sliders MUST start from ∞ (that was the only available state until now).
+    // Reset springs to 100% (∞ position) before animating, regardless of
+    // any prior state they may be in.
+    var timerDelay = pillDone;
     setTimeout(function() {
+      hasEverAchievedPerfectAccuracy = true;
+      try { localStorage.setItem('kw_perfect', '1'); } catch(e) {}
       _syncAdvancedPanelState();
-      var timerEl = document.getElementById('questionTimerSlider');
-      var timerSpring = _sliderSprings['timer'];
-      if (timerEl && timerSpring) {
-        timerSpring.target = SLIDER_STOPS[_valueToStopIndex(questionTimer)];
-        _animateSpring('timer', timerEl, true);
-        _setKnobLabel(timerEl, _labelForValue(questionTimer));
-        _updateSliderSideLabel('timer', questionTimer);
-      }
-    }, sliderBaseDelay);
+      updateBestDisplay();
 
-    // Step 4: animate the Player Lives slider 2000ms after the timer slider.
-    setTimeout(function() {
-      var livesEl = document.getElementById('playerLivesSlider');
+      // Force both sliders to ∞ visually before the tween begins.
+      // We use two rAF frames: first commits left:100% with transition:none,
+      // second re-enables the transition so the animation can begin cleanly.
+      var timerEl    = document.getElementById('questionTimerSlider');
+      var livesEl    = document.getElementById('playerLivesSlider');
+      var timerSpring = _sliderSprings['timer'];
       var livesSpring = _sliderSprings['lives'];
-      if (livesEl && livesSpring) {
-        livesSpring.target = SLIDER_STOPS[_valueToStopIndex(playerLives)];
-        _animateSpring('lives', livesEl, true);
-        _setKnobLabel(livesEl, _labelForValue(playerLives));
-        _updateSliderSideLabel('lives', playerLives);
+
+      function resetKnobToInfinity(sliderEl, spring) {
+        if (!spring || !sliderEl) return;
+        spring.pos = 100; spring.vel = 0; spring.target = 100;
+        if (spring.raf) { cancelAnimationFrame(spring.raf); spring.raf = null; }
+        var knob = sliderEl.querySelector('.diff-slider-knob');
+        if (knob) { knob.style.transition = 'none'; knob.style.left = '100%'; }
+        _setKnobLabel(sliderEl, '∞');
       }
-    }, sliderBaseDelay + 2000);
+
+      resetKnobToInfinity(timerEl, timerSpring);
+      resetKnobToInfinity(livesEl, livesSpring);
+
+      // Two rAFs: first ensures left:100% is committed, second starts the animation
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          // Animate Question Timer from ∞ to its target
+          questionTimer = 5;
+          try { localStorage.setItem('kw_timer', '5'); } catch(e) {}
+          if (timerEl && timerSpring) {
+            timerSpring.target = SLIDER_STOPS[_valueToStopIndex(questionTimer)];
+            _animateSpring('timer', timerEl, 'smooth');
+            _setKnobLabel(timerEl, _labelForValue(questionTimer));
+            _updateSliderSideLabel('timer', questionTimer);
+            // Pop knob value label once tween settles (320ms)
+            setTimeout(function() {
+              var visibleKnob = timerEl.querySelector('.diff-knob-label:not(.diff-knob-label-hidden)');
+              if (visibleKnob) _popDiffLabel(visibleKnob);
+            }, 340);
+          }
+        });
+      });
+    }, timerDelay);
+
+    // Step 4: animate Player Lives slider after timer tween + pop complete
+    var livesDelay = timerDelay + 340 + 350;
+    setTimeout(function() {
+      playerLives = 10;
+      try { localStorage.setItem('kw_lives', '10'); } catch(e) {}
+      var livesEl2    = document.getElementById('playerLivesSlider');
+      var livesSpring2 = _sliderSprings['lives'];
+      if (livesEl2 && livesSpring2) {
+        livesSpring2.target = SLIDER_STOPS[_valueToStopIndex(playerLives)];
+        _animateSpring('lives', livesEl2, 'smooth');
+        _setKnobLabel(livesEl2, _labelForValue(playerLives));
+        _updateSliderSideLabel('lives', playerLives);
+        // Pop only the knob value label once the tween settles (320ms)
+        setTimeout(function() {
+          var visibleKnob = livesEl2.querySelector('.diff-knob-label:not(.diff-knob-label-hidden)');
+          if (visibleKnob) _popDiffLabel(visibleKnob);
+        }, 340);
+      }
+    }, livesDelay);
+
+    // Step 5: reveal footer with colour-in effect after lives pop completes
+    setTimeout(function() {
+      _trophySequenceActive = false;
+      var footer = document.getElementById('diffAdvancedFooter');
+      if (footer) {
+        footer.style.color = '#f0f4f8'; // page background colour -- invisible
+        footer.style.display = 'block';
+        footer.classList.add('diff-advanced-footer-visible');
+        // Transition colour in over 1 second
+        setTimeout(function() {
+          footer.style.transition = 'color 1s ease';
+          footer.style.color = '#9ca3af';
+          setTimeout(function() { footer.style.transition = ''; }, 1050);
+        }, 50);
+      }
+    }, livesDelay + 340 + 350);
   }
 }
 
@@ -6761,6 +7096,20 @@ function runCountdown(onComplete) {
   }
   tick();
 }
+// ── Kill punctuation confirm: block any click/pointerdown outside the three valid targets
+function _killPunctuationConfirmGuard(e) {
+  if (gameState !== 'confirm-kill-punctuation') return;
+  var allowed = e.target.closest('#mainBtn, #helpBtn, #killPunctuationRow');
+  if (allowed) return;
+  e.stopPropagation();
+  e.preventDefault();
+  if (e.type === 'click') {
+    showToast('You must confirm if you really want no punctuation keys or not.');
+  }
+}
+document.addEventListener('click',       _killPunctuationConfirmGuard, true);
+document.addEventListener('pointerdown', _killPunctuationConfirmGuard, true);
+
 document.addEventListener('keydown', handleKeydown);
 document.addEventListener('keyup',   handleKeyup);
 
@@ -6803,6 +7152,10 @@ function handleKeydown(e) {
   if (gameState === 'finished') {
     if (e.key === 'ArrowRight') { showTip(tipIndex + 1); e.preventDefault(); return; }
     if (e.key === 'ArrowLeft')  { showTip(tipIndex - 1); e.preventDefault(); return; }
+    if (e.key === 'Enter') { e.preventDefault(); _closeAllModals(); beginCountdown(); return; }
+  }
+  if (gameState === 'idle') {
+    if (e.key === 'Enter') { e.preventDefault(); _closeAllModals(); beginCountdown(); return; }
   }
   if (gameState === 'paused' || gameState === 'readyToUnpause' || gameState === 'confirm-reset' || gameState === 'confirm-quit') { e.preventDefault(); return; }
   if (gameState !== 'playing' || transitioning) { e.preventDefault(); return; }
@@ -7080,7 +7433,23 @@ document.addEventListener('DOMContentLoaded', function() {
   opacity: 0.38;
   pointer-events: none;
 }
-/* "full" and "extended" word labels beside the keyboard size SVGs */
+/* During kill punctuation confirm: block all panel interactions except
+   the Kill Punctuation radio itself, which acts as the No button. */
+#settingsPanelInner[data-kill-punctuation-confirming] {
+  pointer-events: none;
+}
+#settingsPanelInner[data-kill-punctuation-confirming] #killPunctuationRow {
+  pointer-events: auto;
+  cursor: pointer;
+}
+/* Nudge opacity down on everything except the kill punctuation row */
+#settingsPanelInner[data-kill-punctuation-confirming] .sp-col,
+#settingsPanelInner[data-kill-punctuation-confirming] .sp-page > *:not(#killPunctuationRow) {
+  opacity: 0.35;
+}
+#settingsPanelInner[data-kill-punctuation-confirming] #killPunctuationRow {
+  opacity: 1;
+}
 .kb-size-word-label {
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 11px;
@@ -7107,7 +7476,7 @@ document.addEventListener('DOMContentLoaded', function() {
   border: 1.5px solid #d1d5db;
   border-radius: 20px;
   background: transparent;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
 }
 .score-clear-pill .score-pill-seg:first-child { border-radius: 18px 0 0 18px; }
 .score-clear-pill .score-pill-seg:last-child  { border-radius: 0 18px 18px 0; }
@@ -7120,13 +7489,13 @@ document.addEventListener('DOMContentLoaded', function() {
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 600;
-  color: #9ca3af; /* passive: grey label */
-  background: #e0f2fe;
+  color: #9ca3af;
+  background: #f7f9fb;
   border: none;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
   outline: none;
   -webkit-appearance: none;
+  transition: background 1.5s ease, color 1.5s ease;
 }
 .score-pill-seg + .score-pill-seg {
   border-left: 1.5px solid #d1d5db;
@@ -7134,27 +7503,50 @@ document.addEventListener('DOMContentLoaded', function() {
 .score-pill-quarter { flex: 1; }
 .score-pill-half    { flex: 2; }
 .score-pill-full    { flex: 1; width: 100%; }
-.score-pill-seg svg { pointer-events: none; stroke: #9ca3af; transition: stroke 0.15s; }
-.score-pill-seg:hover:not(.score-pill-inactive) {
+.score-pill-seg svg { pointer-events: none; stroke: #9ca3af; }
+.score-pill-seg.score-pill-active {
   background: white;
   color: #374151;
+  transition: background 0s, color 0s;
 }
-.score-pill-seg:hover:not(.score-pill-inactive) svg {
-  stroke: #374151;
-}
+.score-pill-seg.score-pill-active svg { stroke: #374151; }
 .score-pill-inactive {
-  background: linear-gradient(to bottom, #f0f4f8 70%, #dfe1e5 100%);
+  background: #f0f4f8;
   cursor: default;
   color: #9ca3af;
+  pointer-events: none;
 }
-.score-pill-inactive svg {
-  stroke: #9ca3af;
-}
+.score-pill-inactive svg { stroke: #9ca3af; }
 .sp-clear-label-inactive {
   color: #d1d5db !important;
 }
 .sp-clear-label-inactive strong {
   color: inherit;
+}
+/* Score confirm overlay: everything in the pause col fades except the active pill */
+#settingsPanelInner[data-score-confirm] .sp-col-right > *:not(.score-confirm-source) {
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+#settingsPanelInner[data-score-confirm] .sp-col-left {
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+#settingsPanelInner[data-score-confirm] .score-confirm-source {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* Diff-change confirm overlay: dims everything in the difficulty panel except the pill */
+#settingsPanelInner[data-diff-confirm] > * {
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+#settingsPanelInner[data-diff-confirm] .diff-confirm-source {
+  opacity: 1;
+  pointer-events: auto;
 }
 .diff-subtitle {
   font-size: 12px;
@@ -7167,6 +7559,50 @@ document.addEventListener('DOMContentLoaded', function() {
 /* Welcome panel: collapse the subtitle gap so Skill-set loaded sits flush */
 #panelWelcome .diff-subtitle {
   display: none;
+}
+
+/* Temporary transition class applied to pill buttons during the trophy reveal
+   so the active state change is slow enough for the eye to follow. */
+.diff-btn.diff-btn-transitioning {
+  transition: background 0.7s ease, color 0.7s ease;
+}
+
+/* Pop animation for the newly selected difficulty label */
+@keyframes diffLabelPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  70%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+.diff-btn-text.diff-btn-label-pop,
+.score-pill-seg.diff-btn-label-pop,
+.diff-slider-side-label.diff-btn-label-pop,
+.diff-knob-label.diff-btn-label-pop,
+.diff-advanced-footer.diff-btn-label-pop {
+  display: inline-block; /* required for transform on inline/block elements */
+  animation: diffLabelPop 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+/* Footer hint below the advanced panel — hidden until trophy is awarded.
+   Revealed with a left-to-right clip wipe. */
+@keyframes diffFooterWipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0% 0 0); }
+}
+.diff-advanced-footer {
+  font-size: 12px;
+  font-style: italic;
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 8px;
+  line-height: 1.6;
+  display: none;
+  pointer-events: none;
+}
+.diff-advanced-footer.diff-advanced-footer-visible {
+  display: block;
+  pointer-events: auto;
+  /* colour is set by JS -- starts as page bg colour, transitions to #9ca3af */
 }
 
 /* Horizontal divider on difficulty panel — inset to align with pill corner radius */
@@ -7246,7 +7682,7 @@ document.addEventListener('DOMContentLoaded', function() {
   margin-right: 18px;
 }
 
-/* Track — inactive uses the border colour; active uses a slightly darker mid-tone */
+/* Track — inactive: border colour; active: slightly darker mid-tone */
 .diff-slider-track {
   position: absolute;
   left: 0; right: 0;
@@ -7318,12 +7754,19 @@ document.addEventListener('DOMContentLoaded', function() {
   transition: opacity 0.2s ease, color 0.5s ease;
   pointer-events: none;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.diff-knob-label svg {
+  display: block;
+  fill: currentColor;
 }
 .diff-advanced-panel.diff-advanced-active .diff-knob-label:not(.diff-knob-infinity) {
   color: #374151;
 }
 .diff-knob-label.diff-knob-infinity {
-  color: #9ca3af;
+  color: #374151;
 }
 .diff-knob-label-hidden { opacity: 0; }
 /* ── Pause panel: settings nudge rows ───────────────── */
@@ -7373,14 +7816,14 @@ document.addEventListener('DOMContentLoaded', function() {
   border-radius: 0;
   max-width: none;
 }
-/* ── Segmented control pill (returning + difficulty screens) ── */
+/* ── Segmented control pill ── */
 .sp-seg-pill {
   display: flex;
   width: 100%;
   border: 1.5px solid #d1d5db;
   border-radius: 20px;
   background: transparent;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
 }
 .sp-seg-pill .sp-seg-btn:first-child,
 .sp-seg-pill .diff-btn:first-child { border-radius: 18px 0 0 18px; }
@@ -7392,54 +7835,41 @@ document.addEventListener('DOMContentLoaded', function() {
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: #9ca3af; /* passive: grey label */
-  background: #e0f2fe;
+  color: #9ca3af;
+  background: #f7f9fb;
   border: none;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
   line-height: 1.2;
   outline: none;
   -webkit-appearance: none;
   appearance: none;
 }
 .sp-seg-btn:focus { outline: none; }
-/* Divider: always light grey */
-.sp-seg-btn + .sp-seg-btn {
+/* Divider */
+.sp-seg-btn + .sp-seg-btn,
+.sp-seg-pill .diff-btn + .diff-btn {
   border-left: 1.5px solid #d1d5db;
 }
-/* Hover on available: white background, dark label — preview of active state */
-.sp-seg-btn:hover:not(.diff-btn-inactive) {
-  background: white;
-  color: #374151;
-}
-/* Left/right alignment for two-part pill */
+/* Alignment */
 .sp-seg-btn.sp-seg-btn-left  { text-align: right; }
 .sp-seg-btn.sp-seg-btn-right { text-align: left; }
-/* Three-part pill: all labels centred */
 .sp-seg-pill-three .sp-seg-btn { text-align: center; }
-/* Unavailable: flat page grey with subtle shadow hint at the very bottom */
+/* Unavailable */
 .sp-seg-btn.diff-btn-inactive,
 .sp-seg-pill .diff-btn.diff-btn-inactive {
-  background: linear-gradient(to bottom, #f0f4f8 70%, #dfe1e5 100%);
+  background: #f0f4f8;
   color: #9ca3af;
   cursor: default;
+  pointer-events: none;
 }
-/* Hardcore is always the last segment — restore its pill corner radii */
 .sp-seg-pill .diff-btn.diff-btn-inactive:last-child {
   border-radius: 0 18px 18px 0;
 }
-/* Active/selected: white fill, dark label */
+/* Selected */
 .sp-seg-btn.diff-btn-active,
 .sp-seg-pill .diff-btn.diff-btn-active {
   background: white;
   color: #374151;
-}
-/* While a sibling is hovered, fade active back to blue and grey label —
-   signals "you are about to leave this setting". */
-.sp-seg-pill[data-hovering] .sp-seg-btn.diff-btn-active,
-.sp-seg-pill[data-hovering] .diff-btn.diff-btn-active {
-  background: #e0f2fe;
-  color: #9ca3af;
 }
 /* ── Returning screen layout ─────────────────────────── */
 .sp-returning-inner {
