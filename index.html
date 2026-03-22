@@ -793,8 +793,8 @@ body.pc-mode #extKeyPill {
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
-  background: #e0f2fe;
+  color: #9ca3af;
+  background: #f7f9fb;
   border: 1.5px solid #d1d5db;
   border-radius: 8px;
   cursor: pointer;
@@ -3720,6 +3720,8 @@ function enterPause(instantBlur) {
   transitioning = false; // clear skip-in-progress if pause interrupts it
   clearHelp();
   resetPartialShortcutNudgeTimers();
+  _exitScoreClearConfirm();
+  _exitDiffConfirm();
   // Settings panel sets its own position before calling enterPause; only move
   // to edge if no settings screen is already driving a different position.
   if (activeSettings === null) {
@@ -3747,7 +3749,7 @@ function enterPause(instantBlur) {
 }
 
 function enterConfirmQuit() {
-  _closeAllModalsInstant();
+  // Keep the pause panel visible -- dim everything, no exempt element.
   gameState = 'confirm-quit';
   titleEl.className = '';
   titleEl.classList.remove('blurred');
@@ -3758,15 +3760,36 @@ function enterConfirmQuit() {
   helpBtn.textContent = 'No';
   helpBtn.style.background = '#6b7280';
   helpBtn.style.color = 'white';
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.setAttribute('data-quit-confirm', '');
+  document.addEventListener('click', _quitConfirmGuard, true);
+}
+
+function _quitConfirmGuard(e) {
+  var mainB = document.getElementById('mainBtn');
+  var helpB = document.getElementById('helpBtn');
+  if ((mainB && (e.target === mainB || mainB.contains(e.target))) ||
+      (helpB && (e.target === helpB || helpB.contains(e.target)))) return;
+  e.stopPropagation();
+  e.preventDefault();
+  showToast('Confirm above, or press No to go back.');
+}
+
+function _exitQuitConfirm() {
+  document.removeEventListener('click', _quitConfirmGuard, true);
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.removeAttribute('data-quit-confirm');
 }
 
 function confirmQuitYes() {
+  _exitQuitConfirm();
   mainBtn.style.background = '';
   if (lockKeyEl) lockKeyEl.classList.remove('active');
   resetToIdle();
 }
 
 function confirmQuitNo() {
+  _exitQuitConfirm();
   _returnToPauseScreen(null);
 }
 
@@ -3798,11 +3821,23 @@ function enterConfirmReset(target) {
   _confirmFromFinished = (gameState === 'finished');
   _confirmFromPause    = _wasPlaying && answersLeft > 0 && gameState !== 'finished';
 
-  // When the pause panel is open, the overlay pattern handles the confirm UI.
-  // The _pauseClearClick function has already set up the overlay;
-  // we only need to wire Yes/No buttons and update gameState.
+  // When the pause panel is open mid-game (not the end screen), the overlay
+  // pattern handles the confirm UI -- _pauseClearClick has already set it up.
+  // The finished-state medal path also opens panelPause, but there is no blurred
+  // game content underneath to preserve, so it uses the old title-rewrite path.
   if (activeSettings === 'panelPause' && !_confirmAfterUpgrade) {
+    // Overlay pattern: pause panel stays visible, content dims.
+    // Works for both mid-game pause and end-screen medal press.
     gameState = 'confirm-reset';
+    // Put the question in the title area so the player can see what they are confirming
+    var resetMsg;
+    if (_clearTarget === 'time')     { resetMsg = 'Do you really want to wipe your best time record?'; }
+    else if (_clearTarget === 'accuracy') { resetMsg = 'Do you really want to wipe your highest accuracy record?'; }
+    else { resetMsg = 'Are you sure you want to clear your high scores?'; }
+    titleEl.className = '';
+    titleEl.classList.remove('blurred');
+    questionCountEl.classList.remove('blurred');
+    titleEl.textContent = resetMsg;
     mainBtn.textContent = 'Yes';
     mainBtn.style.background = '#10b981';
     helpBtn.textContent = 'No';
@@ -3811,6 +3846,9 @@ function enterConfirmReset(target) {
     if (lockKeyEl) lockKeyEl.classList.add('active');
     return;
   }
+
+  // Non-overlay path (no panel open): clean up any stale overlay state first
+  _exitScoreClearConfirm();
 
   _closeAllModalsInstant();
   gameState = 'confirm-reset';
@@ -3847,6 +3885,7 @@ function _returnToPauseScreen(titleMessage) {
     titleEl.textContent = titleMessage;
     titleEl.classList.remove('blurred');
   } else {
+    // Restore the blurred question title that was shown before any confirm state
     titleEl.classList.add('blurred');
     titleEl.textContent = questionPool[questionIndex]?.display || '';
   }
@@ -3858,7 +3897,7 @@ function _returnToPauseScreen(titleMessage) {
   helpBtn.style.color = 'white';
   if (lockKeyEl) lockKeyEl.classList.remove('active');
   _refreshPausePanel();
-  openSettings('panelPause');
+  if (activeSettings !== 'panelPause') openSettings('panelPause');
 }
 
 function confirmResetYes() {
@@ -4060,10 +4099,14 @@ function enterConfirmDiffChange() {
   helpBtn.style.color = 'white';
   if (lockKeyEl) lockKeyEl.classList.add('active');
 
-  document.addEventListener('click',       _diffConfirmGuard, true);
-  document.addEventListener('pointerdown', _diffConfirmGuard, true);
+  // Put the question in the title area
+  titleEl.className = '';
+  titleEl.classList.remove('blurred');
+  questionCountEl.classList.remove('blurred');
+  titleEl.textContent = 'Changing difficulty will quit your current game. Proceed?';
 
-  showToast('Stay at your current difficulty to continue or choose to quit this round now.');
+  document.addEventListener('click', _diffConfirmGuard, true);
+  // No toast here -- the guard toasts if they click elsewhere
 }
 
 function _diffConfirmGuard(e) {
@@ -4088,8 +4131,7 @@ function _diffConfirmGuard(e) {
 }
 
 function _exitDiffConfirm() {
-  document.removeEventListener('click',       _diffConfirmGuard, true);
-  document.removeEventListener('pointerdown', _diffConfirmGuard, true);
+  document.removeEventListener('click', _diffConfirmGuard, true);
   var inner = document.getElementById('settingsPanelInner');
   if (inner) inner.removeAttribute('data-diff-confirm');
   var pill = document.querySelector('#difficultyPill');
@@ -4141,6 +4183,11 @@ function confirmDiffChangeNo() {
 function resetToIdle() {
   gameState = 'idle';
   _wasPlaying = false;
+  // Clean up any lingering confirm overlay listeners so they cannot fire
+  // after the state has been reset (e.g. stale guard from a cancelled confirm)
+  _exitScoreClearConfirm();
+  _exitDiffConfirm();
+  _exitQuitConfirm();
   // Hide welcome-screen elements if visible
   var _wTag = document.getElementById('welcomeTagline');
   if (_wTag) _wTag.style.display = 'none';
@@ -4959,6 +5006,9 @@ function closeSettings() {
   activeSettings = null;
   kbModalOpen    = false;
   browserModalOpen = false;
+  // Closing the panel always cancels any active confirm overlay
+  _exitScoreClearConfirm();
+  _exitDiffConfirm();
 
   var sp = document.getElementById('settingsPanel');
   if (sp) sp.classList.remove('sp-open');
@@ -5011,6 +5061,9 @@ function _closeAllModalsInstant() {
   activeSettings = null;
   kbModalOpen    = false;
   browserModalOpen = false;
+  _exitScoreClearConfirm();
+  _exitDiffConfirm();
+  _exitQuitConfirm();
   var sp = document.getElementById('settingsPanel');
   if (sp) sp.classList.remove('sp-open');
   SP_PAGE_ORDER.forEach(function(p) {
@@ -6152,11 +6205,18 @@ function _pauseClearClick(target, initialToast) {
   var inner = document.getElementById('settingsPanelInner');
   if (inner) inner.setAttribute('data-score-confirm', target);
 
-  // Install capture-phase guard
-  document.addEventListener('click',       _scoreClearConfirmGuard, true);
-  document.addEventListener('pointerdown', _scoreClearConfirmGuard, true);
+  // Install capture-phase guard on click only.
+  // pointerdown would fire on the same press that opened the confirm, so we
+  // use click -- this still blocks all subsequent interactions reliably.
+  document.addEventListener('click', _scoreClearConfirmGuard, true);
 
-  showToast(initialToast || 'You need to decide if you are keeping or clearing your score record.');
+  // Wire the Yes/No buttons and update game state
+  enterConfirmReset(target);
+
+  // No opening toast -- the question is in the title div.
+  // The guard toasts if the player clicks something they shouldn't.
+  // initialToast is still used by the lock-key path which has no visible trigger button.
+  if (initialToast) showToast(initialToast);
 }
 
 function _scoreClearPillForTarget(target) {
@@ -6205,8 +6265,7 @@ function _exitScoreClearConfirm() {
   var btn  = _scoreClearBtnForTarget(_scoreClearConfirmTarget);
   var pill = _scoreClearPillForTarget(_scoreClearConfirmTarget);
   _scoreClearConfirmTarget = null;
-  document.removeEventListener('click',       _scoreClearConfirmGuard, true);
-  document.removeEventListener('pointerdown', _scoreClearConfirmGuard, true);
+  document.removeEventListener('click', _scoreClearConfirmGuard, true);
   if (btn)  btn.classList.remove('score-pill-active');
   if (pill) pill.classList.remove('score-confirm-source');
   var inner = document.getElementById('settingsPanelInner');
@@ -6332,6 +6391,12 @@ function _dismissWelcome() {
     if (tagline) tagline.style.display = 'none';
     closeSettings();
     resetToIdle();
+    // Pulse Start once the keyboard has fully risen (850ms), then every 5s
+    setTimeout(function pulseAndReschedule() {
+      if (gameState !== 'idle') return;
+      pulseBtn(mainBtn);
+      setTimeout(pulseAndReschedule, 5000);
+    }, 900);
   }, 1750);
 }
 
@@ -7547,6 +7612,12 @@ document.addEventListener('DOMContentLoaded', function() {
 #settingsPanelInner[data-diff-confirm] .diff-confirm-source {
   opacity: 1;
   pointer-events: auto;
+}
+/* Quit-confirm overlay: dims all panel content */
+#settingsPanelInner[data-quit-confirm] > * {
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
 }
 .diff-subtitle {
   font-size: 12px;
