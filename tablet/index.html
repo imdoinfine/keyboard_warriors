@@ -8,7 +8,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>tablet</title>
+<title>Keyboard Warriors</title>
 <script>
   const DefaultTitle = 'Keyboard Warriors';
   const BuildLabel   = 'March26_tablet';
@@ -1793,6 +1793,22 @@ li.conflict-dismissed .conflict-desc {
    desktop index.html.
 ══════════════════════════════════════ */
 
+/* ── Suppress text selection and tap callout on key labels (iOS WebKit) ───── */
+.key,
+.key .letter-lbl,
+.key .sym-main,
+.key .sym-sub,
+.key .util-lbl,
+.key .util-sym-only,
+.key .mod-sym,
+.key .mod-sym-only,
+.key .mod-word,
+.key .fn-lbl {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 /* ── Landing state: game panel and osRow hidden until modals are dismissed ── */
 body.landing-state #osRow,
 body.landing-state #gameContainer,
@@ -1835,17 +1851,16 @@ body.landing-state #keyboardWrap {
 }
 
 /* ── Shared modal shell ───────────────────────────────────────────────────
-   Backdrop + centred card, matching the settings panel aesthetic.
-   Used for both the gyro permission modal and the keyboard recommendation
-   modal. Individual modals add their own content. ── */
+   Styled to match #gameContainer: blue fill, white border, same radius
+   and shadow. Lato, dark grey text. Buttons match the game buttons. ── */
 .tablet-modal-backdrop {
   display: none;
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(0, 0, 0, 0.32);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
 }
 .tablet-modal-backdrop.visible {
   display: block;
@@ -1853,75 +1868,82 @@ body.landing-state #keyboardWrap {
 .tablet-modal-card {
   position: fixed;
   z-index: 1001;
-  background: white;
+  background: #e0f2fe;
   border-radius: 16px;
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.12),
-    0 16px 40px rgba(0, 0, 0, 0.18);
-  width: 300px;
-  padding: 28px 26px 22px;
+  border: 1.5px solid white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 320px;
+  padding: 28px 28px 22px;
   box-sizing: border-box;
   font-family: 'Lato', system-ui, sans-serif;
-  /* Start off-screen — JS positions before making visible */
   top: -9999px;
   left: -9999px;
   transform-origin: top center;
   display: none;
 }
 @keyframes TabletModalUnfurl {
-  from { opacity: 0; transform: scale(0.92) translateY(-8px); }
+  from { opacity: 0; transform: scale(0.94) translateY(-6px); }
   to   { opacity: 1; transform: scale(1)    translateY(0);    }
 }
 .tablet-modal-card.visible {
   display: block;
-  animation: TabletModalUnfurl 0.38s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  animation: TabletModalUnfurl 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
-
 .tablet-modal-heading {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
-  color: #1e3a5f;
-  margin: 0 0 12px;
+  color: #1f2937;
+  margin: 0 0 10px;
   line-height: 1.3;
 }
 .tablet-modal-body {
-  font-size: 13px;
-  color: #374151;
+  font-size: 14px;
+  color: #1f2937;
   line-height: 1.65;
-  margin: 0 0 10px;
+  margin: 0 0 8px;
 }
 .tablet-modal-body:last-of-type {
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 .tablet-modal-buttons {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 .tablet-modal-btn-primary {
-  background: #1e3a5f;
-  color: white;
+  width: 100%;
+  height: 36px;
   border: none;
-  border-radius: 20px;
-  padding: 11px 0;
-  font-size: 14px;
+  outline: none;
+  border-radius: 18px;
   font-family: 'Lato', system-ui, sans-serif;
   font-weight: 600;
+  font-size: 14px;
+  text-align: center;
   cursor: pointer;
-  width: 100%;
   -webkit-appearance: none;
+  appearance: none;
+  background: #10b981;
+  color: white;
 }
+.tablet-modal-btn-primary:active { background: #059669; }
 .tablet-modal-btn-secondary {
-  background: none;
-  color: #6b7280;
-  border: none;
-  padding: 6px 0;
-  font-size: 13px;
-  font-family: 'Lato', system-ui, sans-serif;
-  cursor: pointer;
   width: 100%;
+  height: 36px;
+  border: none;
+  outline: none;
+  border-radius: 18px;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
   -webkit-appearance: none;
+  appearance: none;
+  background: #6b7280;
+  color: white;
 }
+.tablet-modal-btn-secondary:active { background: #9ca3af; }
 </style>
 </head>
 <body class="landing-state">
@@ -5388,18 +5410,35 @@ function _spAlignPanel() {
   var width = panel.offsetWidth;
   inner.style.left  = left + 'px';
   inner.style.width = width + 'px';
-  // Grow the wrap so the tilted keyboard sits below the settings content.
-  // Two rAFs: first lets the browser lay out the content at its new width,
-  // second reads the settled scrollHeight after reflow.
+
+  // Tablet: compute the available vertical gap between the bottom of
+  // #statsRow and the top of the tilted keyboard stage, then vertically
+  // centre the settings content within that gap.
   requestAnimationFrame(function() {
     requestAnimationFrame(function() {
-      var contentH = inner.scrollHeight;
-      var stageH   = stage.offsetHeight;
-      // On larger screens contentH is comfortably less than stageH -- just add a small buffer.
-      // On small screens contentH exceeds stageH, so we need room for both stacked.
-      var needed = contentH > stageH
-        ? contentH + stageH + 24
-        : contentH + 16;
+      var statsRow = document.getElementById('statsRow');
+      var statsBottom = statsRow ? (statsRow.getBoundingClientRect().bottom + window.scrollY) : 0;
+      var wrapTop     = wrap.getBoundingClientRect().top + window.scrollY;
+
+      // The keyboard stage has been translated downward by KB_POS — read the
+      // actual rendered top of the stage to find where the keyboard sits.
+      var stageRect   = stage.getBoundingClientRect();
+      var stageTop    = stageRect.top + window.scrollY;
+
+      // Available gap = from bottom of stats row to top of tilted keyboard
+      var availableGap = stageTop - statsBottom;
+      var contentH     = inner.scrollHeight;
+
+      // Centre the content: top offset within the wrap
+      var wrapRelativeStatsBottom = statsBottom - wrapTop;
+      var centredTop = wrapRelativeStatsBottom + Math.max(0, (availableGap - contentH) / 2);
+      inner.style.top = Math.round(centredTop) + 'px';
+
+      // Grow wrap to accommodate both content and tilted keyboard stage
+      var needed = Math.max(
+        wrapRelativeStatsBottom + contentH + 24,
+        wrapRelativeStatsBottom + stage.offsetHeight + 24
+      );
       wrap.style.minHeight = Math.max(needed, 320) + 'px';
     });
   });
@@ -8467,7 +8506,27 @@ function setKbPosition(pos) {
   }
 
   // Apply the CSS transform — transition handles smooth interpolation from any position
-  stage.style.transform = KB_POS[pos].stage;
+  // Tablet: when opening to 'edge' or 'partial', compute a translateY large enough to
+  // push the keyboard to sit just above the credit line at the bottom of the viewport.
+  var stageTransform = KB_POS[pos].stage;
+  if (pos !== 'face') {
+    var wrapRect   = wrap.getBoundingClientRect();
+    var creditEl   = document.getElementById('credit');
+    var creditTop  = creditEl
+      ? creditEl.getBoundingClientRect().top
+      : window.innerHeight - 32;
+    // Target: bottom of the zoomed stage lands just above credit
+    // stage.offsetHeight is the unscaled height; CSS scale is applied via kbFlipStage
+    var scaleValue = parseFloat(getComputedStyle(stage).scale) || 1;
+    var scaledStageH = stage.offsetHeight * scaleValue;
+    var targetBottom = creditTop - 8;
+    var targetTop    = targetBottom - scaledStageH;
+    var neededTranslate = targetTop - wrapRect.top;
+    if (neededTranslate > 0) {
+      stageTransform = 'translateY(' + Math.round(neededTranslate) + 'px)';
+    }
+  }
+  stage.style.transform = stageTransform;
   panel.style.transform = KB_POS[pos].panel;
   panel.classList.toggle('kb-partial', pos === 'partial');
   // Drive credit/diffIcon nudge — class applied immediately so CSS transition runs in sync
@@ -9458,10 +9517,13 @@ function revealGameAfterLanding() {
   line-height: 1.25;
   text-align: center;
   white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.18s ease;
+  /* Tablet: tips always visible — no hover state exists.
+     pointer-events: auto so the tip label itself is also tappable. */
+  pointer-events: auto;
+  opacity: 1;
+  transition: opacity 0.18s ease, color 0.18s ease;
   z-index: 9990;
+  cursor: pointer;
 }
 
 /* For kb/browser wraps: wrap is sized to the icon, tip sits directly below */
@@ -9470,22 +9532,14 @@ function revealGameAfterLanding() {
 /* diffIconWrap is normal flow — tip sits below the svg */
 #diffIconWrap .icon-tip { top: calc(100% + 4px); }
 
-/* Show on hover */
-#kbIconWrap:hover  .icon-tip,
-#brIconWrap:hover  .icon-tip,
-#diffIconWrap:hover .icon-tip { opacity: 1; }
-
-/* Keep visible and darken when that settings page is active */
+/* Active state: darken tip and icon when that panel is open */
 #kbIconWrap.sp-icon-active  .icon-tip,
 #brIconWrap.sp-icon-active  .icon-tip,
 #diffIconWrap.sp-icon-active .icon-tip {
-  opacity: 1;
   color: #374151;
-  pointer-events: auto;
-  cursor: pointer;
 }
 
-/* Returning screen: all settings icons passive, no hover, no interaction */
+/* Returning screen: all settings icons passive */
 body.returning-screen #kbIconWrap,
 body.returning-screen #brIconWrap,
 body.returning-screen #diffIconWrap {
