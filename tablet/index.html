@@ -1,33 +1,26 @@
 <!-- ═══════════════════════════════════════════════════
-    BUILD March 2026 
+    BUILD March 2026 — TABLET BRANCH
+    Forked from main index. iPad/touch optimised.
+    Do not deploy main branch over this file.
      ═══════════════════════════════════════════════════ -->
-<script>
-  const DefaultTitle = 'Keyboard Warriors';
-  const BuildLabel   = 'March26';
-  const TitlePrefix  = document.title !== DefaultTitle ? document.title.trim() + '_' : '';
-  const DBG_DEVICE   = TitlePrefix + BuildLabel;
-</script>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Keyboard Warriors</title>
-<link rel="icon" type="image/png" href="/keyboard_warriors_favicon.png">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>tablet</title>
 <script>
-  // Redirect iPad users to the optimised iPad build
+  const DefaultTitle = 'Keyboard Warriors';
+  const BuildLabel   = 'March26_tablet';
+  const TitlePrefix  = document.title !== DefaultTitle ? document.title.trim() + '_' : '';
+  const DBG_DEVICE   = TitlePrefix + BuildLabel;
+</script>
+<link rel="icon" type="image/png" href="/keyboard_warriors/keyboard_warriors_favicon.png">
+<script>
+  // Phones get the "screen too small" message — tablets stay here.
   (function() {
     var ua = navigator.userAgent || '';
     var isPhone = /iPhone|iPod/.test(ua) || (/Android/.test(ua) && /Mobile/.test(ua));
-    var isTablet = !isPhone && (
-      /iPad/.test(ua) ||
-      (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ||
-      (/Android/.test(ua) && !/Mobile/.test(ua)) ||
-      (navigator.maxTouchPoints > 1 && window.screen.width >= 768)
-    );
-    if (isTablet && window.location.pathname.indexOf('tablet') === -1) {
-      window.location.replace('tablet/index.html');
-    }
     if (isPhone) {
       document.addEventListener('DOMContentLoaded', function() {
         var el = document.getElementById('phonePrompt');
@@ -168,9 +161,7 @@ body {
 }
 .leftPanel.showing-confirm #confirmBracket { opacity: 1; }
 #mainBtn { background: #10b981; color: white; }
-#mainBtn:hover { background: #059669; }
 #helpBtn { background: #6b7280; color: white; font-size: 12px; transition: background 0.8s ease; }
-#helpBtn:hover { background: #4b5563; }
 #helpBtn:active { background: #9ca3af; transition: background 0s; }
 #mainBtn:disabled, #helpBtn:disabled {
   opacity: 0.45;
@@ -721,7 +712,7 @@ body.pc-mode #extKeyPill {
   border: 1.5px solid transparent;
   transition: border-color 0.15s;
 }
-.kb-variant-option:hover { border-color: #d1d5db; }
+.kb-variant-option.selected { border-color: #374151; }
 .kb-variant-option.selected { border-color: #374151; }
 .kb-variant-keys {
   display: flex;
@@ -1082,10 +1073,6 @@ body.pc-mode #extKeyPill {
 #kbIcon.pulse {
   animation: kbIconPulse 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
-#kbIcon:hover {
-  transform: scale(1.12);
-  transition: transform 0.18s ease;
-}
 #kbIcon.pulse:hover {
   transform: none;
   transition: none;
@@ -1106,10 +1093,6 @@ body.pc-mode #extKeyPill {
 }
 #browserIcon.pulse {
   animation: browserIconPulse 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-#browserIcon:hover {
-  transform: scale(1.12);
-  transition: transform 0.18s ease;
 }
 #browserIcon.pulse:hover {
   transform: none;
@@ -1289,7 +1272,6 @@ li.conflict-dismissed .conflict-desc {
 /* Lock key
    CHANGE 2: .active stays white — no yellow highlight */
 .key.lock-key { cursor: pointer; }
-.key.lock-key:hover  { background: #e8e8ea; }
 .key.lock-key.active { background: #f5f5f7; }
 .key .lock-svg { width: 14px; height: 14px; opacity: 0.55; }
 
@@ -1721,10 +1703,7 @@ li.conflict-dismissed .conflict-desc {
   opacity: 1;
   pointer-events: auto;
 }
-.app-option:hover {
-  background: #f0f9ff;
-  color: #374151;
-}
+/* tablet: no hover states on touch UI */
 /* Selected row always visible — scrollTop brings it into the 22px window */
 .app-option.selected {
   opacity: 1;
@@ -1799,11 +1778,134 @@ li.conflict-dismissed .conflict-desc {
 #countdownNum.pop {
   animation: countPop 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
+
+/* ══════════════════════════════════════
+   TABLET-SPECIFIC OVERRIDES
+   Everything below is unique to this
+   branch and does not exist in the
+   desktop index.html.
+══════════════════════════════════════ */
+
+/* ── Landing state: game panel and osRow hidden until modals are dismissed ── */
+body.landing-state #osRow,
+body.landing-state #gameContainer,
+body.landing-state #statsRow {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.55s ease;
+}
+body.landing-state #keyboardWrap {
+  /* Keyboard is visible and touch-responsive during landing,
+     but sits at the bottom of the viewport, face-up */
+}
+
+/* ── Keyboard wrapper zoom scale ──────────────────────────────────────────
+   zoom scales the element without affecting its 3D child transforms,
+   so the flip/rotateX system on keyboardPanel remains intact.
+   Margin-bottom compensates for the space the zoom adds below the wrap.
+   Values tuned per iPad model in landscape. ── */
+#keyboardWrap { zoom: 1.25; margin-bottom: 72px; }
+
+@media (max-width: 1140px) {
+  /* iPad mini 6 landscape: ~1133px */
+  #keyboardWrap { zoom: 1.15; margin-bottom: 44px; }
+}
+@media (min-width: 1340px) {
+  /* iPad Pro 12.9" landscape: ~1366px */
+  #keyboardWrap { zoom: 1.40; margin-bottom: 112px; }
+}
+
+/* ── Shared modal shell ───────────────────────────────────────────────────
+   Backdrop + centred card, matching the settings panel aesthetic.
+   Used for both the gyro permission modal and the keyboard recommendation
+   modal. Individual modals add their own content. ── */
+.tablet-modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.tablet-modal-backdrop.visible {
+  display: block;
+}
+.tablet-modal-card {
+  position: fixed;
+  z-index: 1001;
+  background: white;
+  border-radius: 16px;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 16px 40px rgba(0, 0, 0, 0.18);
+  width: 300px;
+  padding: 28px 26px 22px;
+  box-sizing: border-box;
+  font-family: 'Lato', system-ui, sans-serif;
+  /* Centred via JS on show; transform-origin for the unfurl animation */
+  transform-origin: top center;
+  display: none;
+}
+@keyframes TabletModalUnfurl {
+  from { opacity: 0; transform: scale(0.92) translateY(-8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+}
+.tablet-modal-card.visible {
+  display: block;
+  animation: TabletModalUnfurl 0.38s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+.tablet-modal-heading {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e3a5f;
+  margin: 0 0 12px;
+  line-height: 1.3;
+}
+.tablet-modal-body {
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.65;
+  margin: 0 0 10px;
+}
+.tablet-modal-body:last-of-type {
+  margin-bottom: 22px;
+}
+.tablet-modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tablet-modal-btn-primary {
+  background: #1e3a5f;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 11px 0;
+  font-size: 14px;
+  font-family: 'Lato', system-ui, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  -webkit-appearance: none;
+}
+.tablet-modal-btn-secondary {
+  background: none;
+  color: #6b7280;
+  border: none;
+  padding: 6px 0;
+  font-size: 13px;
+  font-family: 'Lato', system-ui, sans-serif;
+  cursor: pointer;
+  width: 100%;
+  -webkit-appearance: none;
+}
 </style>
 </head>
-<body>
+<body class="landing-state">
 
-<!-- OS toggle row: sits above the game panel -->
+<!-- ── Phone prompt: shown immediately on small phones ── -->
 <div id="phonePrompt">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 60" width="72" height="90" fill="white">
     <path d="M31.3,9h-14.6c-2.6,0-4.7,2.1-4.7,4.7v34.6c0,2.6,2.1,4.7,4.7,4.7h14.6c2.6,0,4.7-2.1,4.7-4.7V13.7c0-2.6-2.1-4.7-4.7-4.7ZM31.3,51h-14.6c-1.5,0-2.7-1.2-2.7-2.7v-16.9c.7,1,1.9,1.7,3.2,1.7,2.2,0,3.9-1.8,3.9-3.9s-1.8-3.9-3.9-3.9-2.5.7-3.2,1.7v-13.3c0-1.5,1.2-2.7,2.7-2.7h14.6c1.5,0,2.7,1.2,2.7,2.7v13.3c-.7-1-1.9-1.7-3.2-1.7-2.2,0-3.9,1.8-3.9,3.9s1.8,3.9,3.9,3.9,2.5-.7,3.2-1.7v16.9c0,1.5-1.2,2.7-2.7,2.7Z"/>
@@ -1814,6 +1916,42 @@ li.conflict-dismissed .conflict-desc {
   <p class="prompt-info">For the best training experience, we recommend a device with a physical keyboard attached.</p>
 </div>
 
+<!-- ══════════════════════════════════════
+     GYRO PERMISSION MODAL
+     Shown once ever (localStorage).
+     iOS 13+ requires a user-gesture before
+     DeviceOrientationEvent.requestPermission
+     can be called — this button provides it.
+══════════════════════════════════════ -->
+<div id="gyroBackdrop" class="tablet-modal-backdrop"></div>
+<div id="gyroModal" class="tablet-modal-card" role="dialog" aria-modal="true">
+  <p class="tablet-modal-heading">One quick thing</p>
+  <p class="tablet-modal-body">When you earn a medal, tilting your device brings the shine to life.</p>
+  <p class="tablet-modal-body">May we use your device's motion sensor for this?</p>
+  <div class="tablet-modal-buttons">
+    <button class="tablet-modal-btn-primary" onclick="onGyroAllow()">Yes, allow motion</button>
+    <button class="tablet-modal-btn-secondary" onclick="onGyroDeny()">No thanks</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     KEYBOARD RECOMMENDATION MODAL
+     Shown every page load (no memory).
+     Sets touch/sticky defaults based on
+     the player's answer.
+══════════════════════════════════════ -->
+<div id="keyboardRecommendBackdrop" class="tablet-modal-backdrop"></div>
+<div id="keyboardRecommendModal" class="tablet-modal-card" role="dialog" aria-modal="true">
+  <p class="tablet-modal-heading">Training tip</p>
+  <p class="tablet-modal-body">Keyboard Warriors is designed for use with a physical keyboard. Connecting a mechanical keyboard to your iPad will give you the most realistic training experience.</p>
+  <p class="tablet-modal-body">Are you using a physical keyboard right now?</p>
+  <div class="tablet-modal-buttons">
+    <button class="tablet-modal-btn-primary" onclick="onKeyboardRecommendHaveOne()">Yes, I have one</button>
+    <button class="tablet-modal-btn-secondary" onclick="onKeyboardRecommendTouchOnly()">I'll use touch for now</button>
+  </div>
+</div>
+
+<!-- OS toggle row: sits above the game panel -->
 <div id="osRow">
   <div id="osToggleWrap">
     <span class="os-label" id="osLabelLeft"></span>
@@ -2019,6 +2157,18 @@ li.conflict-dismissed .conflict-desc {
             <span class="diff-btn-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg></span>
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- ── Padlock Panel ────────────────────────────────── -->
+    <div id="panelPadlock" class="sp-page">
+      <div class="sp-col sp-col-left">
+        <p class="sp-title"><strong>Easter Eggs.</strong></p>
+      </div>
+      <div class="sp-col sp-col-right">
+        <p class="sp-body sp-hint">If you encounter an error, hold down
+          <span class="sp-key-chip">Esc</span>
+          to open the debug window and send a report.</p>
       </div>
     </div>
 
@@ -2391,7 +2541,7 @@ function buildKey(cfg, isMini) {
       el.style.display = 'flex';
       el.style.alignItems = 'center';
       el.style.justifyContent = 'center';
-      el.addEventListener('mousedown', function(ev) { ev.preventDefault(); togglePause(); });
+      el.addEventListener('mousedown', function(ev) { ev.preventDefault(); openPadlockPanel(); });
       lockKeyEl = el;
       break;
     case 'letter':
@@ -2914,23 +3064,10 @@ function applyOsMode(os) {
 }
 
 function updateMismatchPill() {
+  // Tablet branch: we cannot detect what type of keyboard is connected,
+  // so the cross-OS mismatch alert is never shown. The OS toggle row remains
+  // fully functional — Mac/PC practice is equally valid on a touch device.
   if (detectedOs === 'mobile') {
-    osMismatchEl.textContent = 'We recommend training with a real mechanical keyboard.';
-    osMismatchEl.classList.add('show');
-    return;
-  }
-  if (detectedOs === 'other') {
-    osMismatchEl.classList.remove('show');
-    return;
-  }
-  const mismatch = (detectedOs === 'mac' && currentOs === 'pc') ||
-                   (detectedOs === 'pc'  && currentOs === 'mac');
-  if (mismatch) {
-    const playing = currentOs === 'pc' ? 'PC' : 'Mac';
-    const machine = detectedOs === 'mac' ? 'a Mac' : 'a PC';
-    osMismatchEl.textContent = `Playing ${playing} mode on ${machine}`;
-    osMismatchEl.classList.add('show');
-  } else {
     osMismatchEl.classList.remove('show');
   }
 }
@@ -2944,14 +3081,8 @@ function onOsToggle() {
   if (activeSettings === 'panelBrowser')  _refreshBrowserContent();
 }
 
-// On mobile: auto-enable sticky + touch modes, show updated message
-if (detectedOs === 'mobile') {
-  setStickyKeys(true);
-  setTouchEnabled(true);
-  document.getElementById('stickyRow').classList.add('disabled');
-  osMismatchEl.textContent = 'We recommend training with a real mechanical keyboard.';
-  osMismatchEl.classList.add('show');
-}
+// Tablet branch: touch/sticky defaults are set by the keyboard recommendation
+// modal on every page load. No unconditional enable here.
 
 // Set the initial toggle position to match the detected OS
 // (defaults to PC for unknown/other systems)
@@ -3874,24 +4005,16 @@ function clearHelp() {
 /* ══════════════════════════════════════
    PAUSE / EASTER EGG
 ══════════════════════════════════════ */
-function togglePause() {
-  if (gameState === 'counting')  { cancelCountdown(); return; }
-  if (gameState === 'playing')   { enterPause(); return; }
-  if (gameState === 'readyToUnpause') { _enterReadyToUnpauseCleanup(); enterPause(); return; }
-  if (gameState === 'paused')    {
-    if (bestRecord.time === null && bestRecord.accuracy === null) return; // nothing to reset
-    // Ensure the pause panel is visible, then trigger the overlay confirm pattern.
-    // This keeps the screen content intact -- only the inactive treatment is applied.
-    if (activeSettings !== 'panelPause') openSettings('panelPause');
-    _pauseClearClick('both', 'First confirm if you want to reset or not.');
-    return;
+function openPadlockPanel() {
+  // If the padlock panel is already open, close it.
+  if (activeSettings === 'panelPadlock') { closeSettings(); return; }
+  // Open the panel first so enterPause does not auto-open panelPause on top.
+  openSettings('panelPadlock');
+  // Now suspend play if a game is active.
+  if (gameState === 'counting')        { cancelCountdown(); }
+  else if (gameState === 'readyToUnpause') { _enterReadyToUnpauseCleanup(); enterPause(); }
+  else if (gameState === 'playing')    { enterPause(); }
   }
-  if (gameState === 'confirm-reset') { confirmResetNo(); return; }
-  if (gameState === 'idle' || gameState === 'finished') {
-    var hasAnyRecord = bestRecord.time !== null || bestRecord.accuracy !== null;
-    if (hasAnyRecord) { enterConfirmReset('both'); return; }
-  }
-}
 
 function _enterReadyToUnpause() {
   gameState = 'readyToUnpause';
@@ -4973,6 +5096,10 @@ var LIVES_VALUES = [1, 3, 5, 10, null];
 
 function onGhostModeToggle() {
   var ghostRow = document.getElementById('ghostRow');
+  if (touchEnabled) {
+    showToast('Ghost Mode is incompatible with Touch Enabled.');
+    return;
+  }
   if (ghostRow && ghostRow.classList.contains('disabled')) {
     showToast('Ghost Mode requires a physical keyboard.');
     return;
@@ -5218,7 +5345,7 @@ var activeSettings = null;
 var kbModalOpen = false;
 var browserModalOpen = false;
 
-var SP_PAGE_ORDER = ['panelKeyboard', 'panelBrowser', 'panelDifficulty', 'panelPause', 'panelReturning', 'panelWelcome'];
+var SP_PAGE_ORDER = ['panelKeyboard', 'panelBrowser', 'panelDifficulty', 'panelPause', 'panelPadlock', 'panelReturning', 'panelWelcome'];
 
 function _spPageEl(page) {
   var ids = {
@@ -5226,6 +5353,7 @@ function _spPageEl(page) {
     panelBrowser:    'panelBrowser',
     panelDifficulty: 'panelDifficulty',
     panelPause:      'panelPause',
+    panelPadlock:    'panelPadlock',
     panelReturning:  'panelReturning',
     panelWelcome:    'panelWelcome',
   };
@@ -5295,7 +5423,7 @@ function openSettings(page) {
   activeSettings = page;
 
   // Update kbPos — partial for most panels; edge for browser and pause
-  var pos = (page === 'panelBrowser' || page === 'panelPause' || page === 'panelDifficulty') ? 'edge' : 'partial';
+  var pos = (page === 'panelBrowser' || page === 'panelPause' || page === 'panelPadlock' || page === 'panelDifficulty') ? 'edge' : 'partial';
   setKbPosition(pos);
 
   // Pause game if needed (not for pause panel or when on welcome screen)
@@ -5819,146 +5947,22 @@ function dbgNextQuestion() {
 
 /* ══════════════════════════════════════
    BROWSER + OS CONFLICT DATA
-   Evaluated lazily so currentOs is known.
+   Tablet branch: simplified to iPad
+   platform conflicts only.
 ══════════════════════════════════════ */
 function getBrowserConflicts() {
-  var ua      = navigator.userAgent || '';
-  // Use the real detected OS, not the UI toggle — browser shortcuts are a physical
-  // fact about the machine, unaffected by which platform the user is practising.
-  var isMacOs = (detectedOs === 'mac' || detectedOs === 'mobile');
-
-  // Detect browser
-  var browser;
-  if      (/Edg\//.test(ua))                              browser = 'Edge';
-  else if (/Firefox\//.test(ua))                          browser = 'Firefox';
-  else if (/Safari\//.test(ua) && !/Chrome\//.test(ua))  browser = 'Safari';
-  else if (/OPR\//.test(ua))                              browser = 'Opera';
-  else if (/Chrome\//.test(ua))                           browser = 'Chrome';
-  else                                                     browser = null;
-
-  // Conflict tables — Mac shortcuts use Cmd, PC use Ctrl (same token in our shortcut strings)
-  // Values are the canonical shortcut strings used in SHORTCUTS[].shortcut
-  var mac = {
-    Edge:    ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Firefox: ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Safari:  ['CMD+T','CMD+GRAVE','CMD+OPTION+U','CMD+OPTION+I','CMD+OPTION+C','CMD+SHIFT+H','CMD+SHIFT+I','CMD+SHIFT+L'],
-    Opera:   ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Chrome:  ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+OPTION+J','CMD+SHIFT+C','CMD+SHIFT+N'],
-  };
-  var pc = {
-    Edge:    ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+C','CMD+SHIFT+J','CMD+SHIFT+H','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Firefox: ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+A','CMD+SHIFT+H','CMD+SHIFT+U','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Opera:   ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+D','CMD+SHIFT+N'],
-    Chrome:  ['CMD+T','CMD+SHIFT+I','CMD+SHIFT+J','CMD+SHIFT+C','CMD+SHIFT+N'],
-  };
-
-  // Human-readable labels — Mac vs PC, browser-specific
-  var macLabels = {
-    Edge: [
-      'Cmd+T \u2014 opens new tab',
-      'Cmd+` \u2014 cycles app windows (macOS)',
-      'Cmd+Opt+I \u2014 opens DevTools',
-      'Cmd+Shift+C \u2014 opens DevTools inspector',
-      'Cmd+Shift+J \u2014 opens DevTools console',
-      'Cmd+Shift+H \u2014 opens History',
-      'Cmd+Shift+D \u2014 saves all tabs',
-      'Cmd+Shift+N \u2014 opens InPrivate window',
-    ],
-    Firefox: [
-      'Cmd+T \u2014 opens new tab',
-      'Cmd+` \u2014 cycles app windows (macOS)',
-      'Cmd+Opt+I \u2014 opens DevTools',
-      'Cmd+Shift+A \u2014 opens Add-ons',
-      'Cmd+Shift+H \u2014 opens History',
-      'Cmd+Shift+U \u2014 opens Page Source',
-      'Cmd+Shift+D \u2014 bookmarks page',
-      'Cmd+Shift+N \u2014 opens Private window',
-    ],
-    Safari: [
-      'Cmd+T \u2014 opens new tab',
-      'Cmd+` \u2014 cycles app windows (macOS)',
-      'Cmd+Opt+U \u2014 opens Page Source',
-      'Cmd+Opt+I \u2014 opens Web Inspector',
-      'Cmd+Opt+C \u2014 opens Inspector Console',
-      'Cmd+Shift+H \u2014 opens Home \u2215 History',
-      'Cmd+Shift+I \u2014 opens Mail',
-      'Cmd+Shift+L \u2014 opens Sidebar',
-    ],
-    Opera: [
-      'Cmd+T \u2014 opens new tab',
-      'Cmd+` \u2014 cycles app windows (macOS)',
-      'Cmd+Opt+I \u2014 opens DevTools',
-      'Cmd+Opt+J \u2014 opens DevTools console',
-      'Cmd+Shift+D \u2014 saves bookmark',
-      'Cmd+Shift+N \u2014 opens Private window',
-    ],
-    Chrome: [
-      'Cmd+T \u2014 opens new tab',
-      'Cmd+` \u2014 cycles app windows (macOS)',
-      'Cmd+Opt+I \u2014 opens DevTools',
-      'Cmd+Opt+J \u2014 opens DevTools console',
-      'Cmd+Shift+C \u2014 opens DevTools inspector',
-      'Cmd+Shift+N \u2014 opens Incognito window',
-    ],
-  };
-  var pcLabels = {
-    Edge: [
-      'Ctrl+T \u2014 opens new tab',
-      'Ctrl+Shift+I \u2014 opens DevTools',
-      'Ctrl+Shift+C \u2014 opens DevTools inspector',
-      'Ctrl+Shift+J \u2014 opens DevTools console',
-      'Ctrl+Shift+H \u2014 opens History',
-      'Ctrl+Shift+D \u2014 saves all tabs',
-      'Ctrl+Shift+N \u2014 opens InPrivate window',
-    ],
-    Firefox: [
-      'Ctrl+T \u2014 opens new tab',
-      'Ctrl+Shift+I \u2014 opens DevTools',
-      'Ctrl+Shift+A \u2014 opens Add-ons',
-      'Ctrl+Shift+H \u2014 opens History',
-      'Ctrl+Shift+U \u2014 opens Page Source',
-      'Ctrl+Shift+D \u2014 bookmarks page',
-      'Ctrl+Shift+N \u2014 opens Private window',
-    ],
-    Opera: [
-      'Ctrl+T \u2014 opens new tab',
-      'Ctrl+Shift+I \u2014 opens DevTools',
-      'Ctrl+Shift+J \u2014 opens DevTools console',
-      'Ctrl+Shift+D \u2014 saves bookmark',
-      'Ctrl+Shift+N \u2014 opens Private window',
-    ],
-    Chrome: [
-      'Ctrl+T \u2014 opens new tab',
-      'Ctrl+T \u2014 opens new tab',
-      'Ctrl+Shift+I \u2014 opens DevTools',
-      'Ctrl+Shift+J \u2014 opens DevTools console',
-      'Ctrl+Shift+C \u2014 opens DevTools inspector',
-      'Ctrl+Shift+N \u2014 opens Incognito window',
-    ],
-  };
-
-  var conflictKeys = [];
-  var labels       = [];
-
-  if (browser) {
-    var keyTable   = isMacOs ? mac   : pc;
-    var labelTable = isMacOs ? macLabels : pcLabels;
-    conflictKeys = (keyTable[browser]   || []).slice();
-    labels       = (labelTable[browser] || []).slice();
-  } else {
-    // Generic fallback — show both platforms' most universal conflicts
-    conflictKeys = isMacOs
-      ? ['CMD+T','CMD+GRAVE','CMD+OPTION+I','CMD+SHIFT+H','CMD+SHIFT+N']
-      : ['CMD+T','CMD+SHIFT+I', 'CMD+SHIFT+H','CMD+SHIFT+N'];
-    labels = isMacOs
-      ? ['Cmd+T \u2014 opens new tab','Cmd+` \u2014 cycles app windows (macOS)','Cmd+Opt+I \u2014 opens DevTools','Cmd+Shift+H \u2014 opens History','Cmd+Shift+N \u2014 opens Private window']
-      : ['Ctrl+T \u2014 opens new tab','Ctrl+Shift+I \u2014 opens DevTools','Ctrl+Shift+H \u2014 opens History','Ctrl+Shift+N \u2014 opens Private window'];
-  }
-
+  var ua = navigator.userAgent || '';
+  var isIpadSafari = (/iPad/.test(ua) || (navigator.maxTouchPoints > 1 && /Mac/.test(ua)))
+                     && /Safari\//.test(ua) && !/Chrome\//.test(ua) && !/Edg\//.test(ua);
+  var browserName = isIpadSafari ? 'Safari on iPadOS' : 'your browser';
   return {
-    name:        browser || 'your browser',
-    keys:        conflictKeys,   // canonical shortcut strings for pool filtering
-    labels:      labels,         // human-readable strings for display
+    name:   browserName,
+    keys:   ['CMD+T', 'CMD+SHIFT+H', 'CMD+SHIFT+N'],
+    labels: [
+      'Cmd+T \u2013 opens a new tab',
+      'Cmd+Shift+H \u2013 opens Bookmarks / History',
+      'Cmd+Shift+N \u2013 opens a Private tab',
+    ],
   };
 }
 
@@ -8085,19 +8089,23 @@ function medalPressUp() {
   if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
 }
 
-document.addEventListener('mousemove', e => {
-  if (!currentMedal) return;
-  if (gameState !== 'finished' && gameState !== 'confirm-reset' && gameState !== 'confirm-quit') return;
-  const d = (e.clientX / window.innerWidth) - 0.5; // -0.5..+0.5
-  rimTarget = d * 30; // ±15°
-  if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
-});
+// Tablet branch: medal rim responds to device tilt via DeviceOrientation,
+// not mouse movement. The gyro system is wired up in initGyroOrientationListener()
+// which is called after the user grants permission in the gyro modal.
 
-scoreDisc.addEventListener('mousedown', e => { medalPressDown(e.clientX); });
-scoreDisc.addEventListener('mouseup',   () => { medalPressUp(); });
-scoreDisc.addEventListener('mouseleave',() => { medalPressUp(); });
 scoreDisc.addEventListener('touchstart', e => { if (e.touches.length) medalPressDown(e.touches[0].clientX); }, { passive: true });
 scoreDisc.addEventListener('touchend',   () => { medalPressUp(); }, { passive: true });
+
+function onDeviceOrientationChange(event) {
+  if (!currentMedal) return;
+  const gamma = event.gamma || 0; // degrees: negative = tilted left, positive = right
+  rimTarget = Math.max(-15, Math.min(15, (gamma / 20) * 15));
+  if (!rimRafId) rimRafId = requestAnimationFrame(rimTick);
+}
+
+function initGyroOrientationListener() {
+  window.addEventListener('deviceorientation', onDeviceOrientationChange);
+}
 
 // Reset the "Ready?" prompt on any user interaction while awaiting Start/Unpause
 function _onUserActivity() {
@@ -8112,7 +8120,6 @@ function _onUserActivity() {
   _startReadyPromptTimer();
 }
 document.addEventListener('keydown',   _onUserActivity, { passive: true });
-document.addEventListener('mousemove', _onUserActivity, { passive: true });
 document.addEventListener('click',     _onUserActivity, { passive: true });
 document.addEventListener('touchstart',_onUserActivity, { passive: true });
 
@@ -8407,7 +8414,10 @@ function setKbPosition(pos) {
   // Going to face — remove 3D edges, reveal icons after transition
   if (pos === 'face') {
     stage.classList.remove('kb-show-base');
+    // Snap keys back to their normal colours instantly (no slow fade from grey)
+    panel.classList.add('no-key-transition');
     panel.classList.remove('kb-edges-visible', 'kb-edged');
+    requestAnimationFrame(function() { panel.classList.remove('no-key-transition'); });
     setTimeout(function() {
       if (_flipSeq !== seq) return;
       wrap.classList.remove('kb-flipping');
@@ -8511,6 +8521,170 @@ document.addEventListener('DOMContentLoaded', function() {
   var di = document.getElementById('diffIcon');
   if (di) di.addEventListener('click', diffIconClick);
 });
+
+/* ══════════════════════════════════════
+   TABLET LANDING SEQUENCE
+   Order: gyro modal → keyboard modal → reveal game.
+   Both modals share positionTabletModal().
+   Gyro answer persists in localStorage.
+   Keyboard modal fires every page load.
+══════════════════════════════════════ */
+
+function positionTabletModal(modalId) {
+  var modal = document.getElementById(modalId);
+  if (!modal || modal.style.display === 'none') return;
+  var left = Math.round((window.innerWidth  - 300) / 2);
+  var top  = Math.round((window.innerHeight - modal.offsetHeight) / 2);
+  modal.style.left = left + 'px';
+  modal.style.top  = top  + 'px';
+}
+
+/* ── Gyro permission modal ─────────────────────────────────────────────── */
+
+function showGyroModal() {
+  var backdrop = document.getElementById('gyroBackdrop');
+  var modal    = document.getElementById('gyroModal');
+  if (!backdrop || !modal) return;
+  backdrop.classList.add('visible');
+  modal.style.display = 'block';
+  requestAnimationFrame(function() {
+    positionTabletModal('gyroModal');
+    modal.classList.add('visible');
+  });
+  window.addEventListener('resize', _onResizeGyroModal);
+}
+
+function _onResizeGyroModal() { positionTabletModal('gyroModal'); }
+
+function hideGyroModal() {
+  var backdrop = document.getElementById('gyroBackdrop');
+  var modal    = document.getElementById('gyroModal');
+  if (backdrop) backdrop.classList.remove('visible');
+  if (modal)    { modal.classList.remove('visible'); modal.style.display = 'none'; }
+  window.removeEventListener('resize', _onResizeGyroModal);
+}
+
+function onGyroAllow() {
+  hideGyroModal();
+  var needsPermission = typeof DeviceOrientationEvent !== 'undefined' &&
+                        typeof DeviceOrientationEvent.requestPermission === 'function';
+  if (needsPermission) {
+    DeviceOrientationEvent.requestPermission().then(function(state) {
+      try { localStorage.setItem('kw_gyro', state); } catch(e) {}
+      if (state === 'granted') initGyroOrientationListener();
+    }).catch(function() {
+      try { localStorage.setItem('kw_gyro', 'denied'); } catch(e) {}
+    });
+  } else {
+    // Android or non-permission browsers — wire up directly.
+    try { localStorage.setItem('kw_gyro', 'granted'); } catch(e) {}
+    initGyroOrientationListener();
+  }
+  showKeyboardRecommendModal();
+}
+
+function onGyroDeny() {
+  try { localStorage.setItem('kw_gyro', 'denied'); } catch(e) {}
+  hideGyroModal();
+  showKeyboardRecommendModal();
+}
+
+/* ── Keyboard recommendation modal ────────────────────────────────────── */
+
+function showKeyboardRecommendModal() {
+  var backdrop = document.getElementById('keyboardRecommendBackdrop');
+  var modal    = document.getElementById('keyboardRecommendModal');
+  if (!backdrop || !modal) return;
+  backdrop.classList.add('visible');
+  modal.style.display = 'block';
+  requestAnimationFrame(function() {
+    positionTabletModal('keyboardRecommendModal');
+    modal.classList.add('visible');
+  });
+  window.addEventListener('resize', _onResizeKeyboardModal);
+}
+
+function _onResizeKeyboardModal() { positionTabletModal('keyboardRecommendModal'); }
+
+function hideKeyboardRecommendModal() {
+  var backdrop = document.getElementById('keyboardRecommendBackdrop');
+  var modal    = document.getElementById('keyboardRecommendModal');
+  if (backdrop) backdrop.classList.remove('visible');
+  if (modal)    { modal.classList.remove('visible'); modal.style.display = 'none'; }
+  window.removeEventListener('resize', _onResizeKeyboardModal);
+}
+
+function onKeyboardRecommendHaveOne() {
+  // Physical keyboard: touch off, sticky off — behaves like desktop mode.
+  setStickyKeys(false);
+  setTouchEnabled(false);
+  var stickyRow = document.getElementById('stickyRow');
+  if (stickyRow) stickyRow.classList.remove('disabled');
+  hideKeyboardRecommendModal();
+  revealGameAfterLanding();
+}
+
+function onKeyboardRecommendTouchOnly() {
+  // Touch-only: sticky on, touch on, sticky row locked.
+  setStickyKeys(true);
+  setTouchEnabled(true);
+  var stickyRow = document.getElementById('stickyRow');
+  if (stickyRow) stickyRow.classList.add('disabled');
+  hideKeyboardRecommendModal();
+  revealGameAfterLanding();
+}
+
+/* ── Reveal game after both modals are dismissed ──────────────────────── */
+
+function revealGameAfterLanding() {
+  document.body.classList.remove('landing-state');
+}
+
+/* ── Physical key detection: auto-dismiss keyboard modal if still open ── */
+(function() {
+  var PhysicalKeyboardDetected = false;
+  document.addEventListener('keydown', function(e) {
+    if (PhysicalKeyboardDetected || !e.isTrusted) return;
+    PhysicalKeyboardDetected = true;
+    var modal = document.getElementById('keyboardRecommendModal');
+    if (modal && modal.classList.contains('visible')) {
+      onKeyboardRecommendHaveOne();
+    }
+  }, { capture: true });
+})();
+
+/* ── Boot sequence: fire gyro modal (or skip if already answered) ──────── */
+(function() {
+  var GyroDecision = null;
+  try { GyroDecision = localStorage.getItem('kw_gyro'); } catch(e) {}
+
+  function startGyroIfGranted() {
+    if (GyroDecision === 'granted') initGyroOrientationListener();
+  }
+
+  if (GyroDecision !== null) {
+    // Already answered in a previous session — skip the modal entirely.
+    startGyroIfGranted();
+    setTimeout(showKeyboardRecommendModal, 400);
+    return;
+  }
+
+  // First time: check whether this browser requires an explicit permission request.
+  var NeedsPermission = typeof DeviceOrientationEvent !== 'undefined' &&
+                        typeof DeviceOrientationEvent.requestPermission === 'function';
+
+  if (!NeedsPermission) {
+    // Android / non-iOS — no permission prompt needed, wire up directly and skip gyro modal.
+    initGyroOrientationListener();
+    try { localStorage.setItem('kw_gyro', 'granted'); } catch(e) {}
+    setTimeout(showKeyboardRecommendModal, 400);
+    return;
+  }
+
+  // iOS 13+ first visit — show the gyro modal after a brief pause so the
+  // keyboard is visible and settled behind it.
+  setTimeout(showGyroModal, 600);
+})();
 </script>
 <!-- ══════════════════════════════════════
      SETTINGS PANEL
@@ -9062,6 +9236,10 @@ document.addEventListener('DOMContentLoaded', function() {
     color      0.35s ease 0.2s,
     transform  0.5s  ease 0.15s;
 }
+/* Applied for one frame when returning to face so keys snap back instantly */
+#keyboardPanel.no-key-transition .key {
+  transition: none !important;
+}
 #keyboardPanel.kb-edged .key {
   background: #e4e7ea;
   color:      transparent;
@@ -9238,7 +9416,6 @@ document.addEventListener('DOMContentLoaded', function() {
   display: block; fill: #9ca3af; pointer-events: auto;
   cursor: pointer; width: 44px; transition: transform 0.18s ease;
 }
-#diffIcon:hover { transform: scale(1.12); }
 #diffIcon #Needle {
   fill: #9ca3af; transform-origin: 45px 50.9px; transform: rotate(-60deg);
 }
