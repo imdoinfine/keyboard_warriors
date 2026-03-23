@@ -1,16 +1,19 @@
 <!-- ═══════════════════════════════════════════════════
-     BETA index.html — UI/UX experiment branch
-     Single test question (CMD+Z). Full SHORTCUTS data
-     and production logic lives in computer.html.
-     Do not deploy. Merge approved changes back manually.
+    BUILD March 2026 
      ═══════════════════════════════════════════════════ -->
-<script>const DBG_DEVICE = 'comp1.014';</script>
+<script>
+  const DefaultTitle = 'Keyboard Warriors';
+  const BuildLabel   = 'March26';
+  const TitlePrefix  = document.title !== DefaultTitle ? document.title.trim() + '_' : '';
+  const DBG_DEVICE   = TitlePrefix + BuildLabel;
+</script>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Keyboard Warriors</title>
+<link rel="icon" type="image/png" href="/keyboard_warriors_favicon.png">
 <script>
   // Redirect iPad users to the optimised iPad build
   (function() {
@@ -91,15 +94,15 @@ body {
   width: 100%;
   background: #e0f2fe;
   border-radius: 16px;
-  padding: 6px 60px 24px;
+  padding: 6px 60px 6px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   border: 1.5px solid white;
+  overflow: visible;
 }
 .topRow {
   display: flex;
   align-items: center;
   gap: 16px;
-  min-height: 108px;
 }
 .leftPanel {
   display: flex;
@@ -108,6 +111,7 @@ body {
   gap: 6px;
   flex-shrink: 0;
   width: 140px;
+  position: relative;
 }
 .middlePanel {
   flex: 1;
@@ -115,6 +119,8 @@ body {
   align-items: center;
   justify-content: center;
   padding: 0 20px;
+  overflow: visible;
+  /* Height driven by scoreDisc (130px) via topRow align-items:center */
 }
 .rightPanel {
   display: flex;
@@ -145,6 +151,22 @@ body {
   appearance: none;
 }
 #mainBtn:focus, #helpBtn:focus { outline: none; box-shadow: none; }
+
+/* Curly bracket shown during binary confirmation states for destructive actions */
+#confirmBracket {
+  position: absolute;
+  left: 136px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 70px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  fill: #9ca3af;
+  overflow: visible;
+}
+.leftPanel.showing-confirm #confirmBracket { opacity: 1; }
 #mainBtn { background: #10b981; color: white; }
 #mainBtn:hover { background: #059669; }
 #helpBtn { background: #6b7280; color: white; font-size: 12px; transition: background 0.8s ease; }
@@ -175,6 +197,7 @@ body {
   cursor: default;
   overflow: hidden;
   flex-shrink: 0;
+  position: relative;
 }
 /* Each half occupies exactly 50% so the divider always lands at centre */
 .scoreDisc .timer-top,
@@ -220,13 +243,16 @@ body {
 /* On medals: hide dashed, show solid groove */
 .scoreDisc.medal-gold   .div-dashed,
 .scoreDisc.medal-silver .div-dashed,
-.scoreDisc.medal-bronze .div-dashed { display: none; }
+.scoreDisc.medal-bronze .div-dashed,
+.scoreDisc.medal-lead   .div-dashed { display: none; }
 .scoreDisc.medal-gold   .div-groove-dark,
 .scoreDisc.medal-gold   .div-groove-light,
 .scoreDisc.medal-silver .div-groove-dark,
 .scoreDisc.medal-silver .div-groove-light,
 .scoreDisc.medal-bronze .div-groove-dark,
-.scoreDisc.medal-bronze .div-groove-light { display: block; }
+.scoreDisc.medal-bronze .div-groove-light,
+.scoreDisc.medal-lead   .div-groove-dark,
+.scoreDisc.medal-lead   .div-groove-light { display: block; }
 /* Per-medal groove colours */
 .scoreDisc.medal-gold   .div-groove-dark  { stroke: rgba(50,20,0,0.80); }
 .scoreDisc.medal-gold   .div-groove-light { stroke: rgba(255,225,80,0.70); }
@@ -234,6 +260,8 @@ body {
 .scoreDisc.medal-silver .div-groove-light { stroke: rgba(245,255,255,0.85); }
 .scoreDisc.medal-bronze .div-groove-dark  { stroke: rgba(30,8,0,0.80); }
 .scoreDisc.medal-bronze .div-groove-light { stroke: rgba(255,180,90,0.65); }
+.scoreDisc.medal-lead   .div-groove-dark  { stroke: rgba(10,12,18,0.85); }
+.scoreDisc.medal-lead   .div-groove-light { stroke: rgba(90,105,130,0.50); }
 /* Accuracy number */
 .scoreDisc .timer-accuracy {
   font-size: 26px;
@@ -254,7 +282,8 @@ body {
 ──────────────────────────────────────────────────────────────────────────── */
 .scoreDisc.medal-gold,
 .scoreDisc.medal-silver,
-.scoreDisc.medal-bronze {
+.scoreDisc.medal-bronze,
+.scoreDisc.medal-lead {
   position: relative;
   overflow: visible;
   transition: background 0.6s ease, box-shadow 0.6s ease;
@@ -264,7 +293,8 @@ body {
 }
 .scoreDisc.medal-gold::before,
 .scoreDisc.medal-silver::before,
-.scoreDisc.medal-bronze::before {
+.scoreDisc.medal-bronze::before,
+.scoreDisc.medal-lead::before {
   content: '';
   position: absolute;
   inset: 3px;
@@ -276,7 +306,8 @@ body {
 }
 .scoreDisc.medal-gold   > *,
 .scoreDisc.medal-silver > *,
-.scoreDisc.medal-bronze > * { position: relative; z-index: 2; }
+.scoreDisc.medal-bronze > *,
+.scoreDisc.medal-lead   > * { position: relative; z-index: 2; }
 
 /* GOLD */
 .scoreDisc.medal-gold {
@@ -353,15 +384,43 @@ body {
     inset -1px -1px 1px rgba(20,5,0,0.70);
 }
 
-/* Divider and icons on medal faces */
-.scoreDisc.medal-gold   .timer-divider line { stroke: rgba(50,20,0,0.55); }
+/* LEAD — dull dark blue-grey, low contrast, diffuse */
+.scoreDisc.medal-lead {
+  background: conic-gradient(
+    from 225deg,
+    #3a4050 0deg, #3a4050 1deg,
+    #7a8898 14deg, #7a8898 17deg,
+    #5a6272 35deg, #40454f 70deg,
+    #28303a 108deg, #1e2530 128deg, #1e2530 132deg,
+    #28303a 155deg, #383d4a 185deg, #404858 210deg,
+    #606878 222deg, #3a4050 225deg, #3a4050 360deg
+  );
+  color: #c0c8d4;
+  text-shadow: none;
+  box-shadow:
+    2px 5px 14px rgba(0,0,0,0.45),
+    1px 2px  5px rgba(0,0,0,0.25);
+}
+.scoreDisc.medal-lead::before {
+  background: radial-gradient(circle at 38% 38%, #363c48 0%, #252930 60%, #1a1e25 100%);
+  box-shadow:
+    inset 1px 1px 1px rgba(80,100,130,0.12),
+    inset -1px -1px 1px rgba(0,0,0,0.80);
+}
+/* Numbers: very dim on lead */
+.scoreDisc.medal-lead .timer-time,
+.scoreDisc.medal-lead .timer-accuracy { opacity: 0.20; }
+/* Icons: 35% */
+.scoreDisc.medal-lead .timer-icon    { opacity: 0.35; filter: none; }
+.scoreDisc.medal-lead .accuracy-icon { opacity: 0.35; filter: none; }
 .scoreDisc.medal-silver .timer-divider line { stroke: rgba(15,30,50,0.50); }
 .scoreDisc.medal-bronze .timer-divider line { stroke: rgba(30,8,0,0.55); }
+.scoreDisc.medal-lead   .timer-divider line { stroke: rgba(20,25,35,0.50); }
 /* Timer icon — bevel drop-shadow */
 .scoreDisc.medal-gold   .timer-icon { opacity:0.85; filter: drop-shadow(0 1px 0 rgba(255,230,80,0.7))  drop-shadow(0 -1px 0 rgba(50,20,0,0.5)); }
 .scoreDisc.medal-silver .timer-icon { opacity:0.85; filter: drop-shadow(0 1px 0 rgba(230,245,255,0.8)) drop-shadow(0 -1px 0 rgba(15,30,50,0.5)); }
 .scoreDisc.medal-bronze .timer-icon { opacity:0.85; filter: drop-shadow(0 1px 0 rgba(255,175,80,0.65)) drop-shadow(0 -1px 0 rgba(30,8,0,0.55)); }
-/* Accuracy icon — plain dark shadow colour only, no extra effects */
+/* Accuracy icon */
 .scoreDisc.medal-gold   .accuracy-icon { opacity:0.75; color: rgba(50,20,0,0.85);   filter: none; }
 .scoreDisc.medal-silver .accuracy-icon { opacity:0.75; color: rgba(15,30,50,0.85);  filter: none; }
 .scoreDisc.medal-bronze .accuracy-icon { opacity:0.75; color: rgba(30,8,0,0.85);    filter: none; }
@@ -388,9 +447,11 @@ body {
   transition: opacity 0.3s, filter 0.4s;
   filter: none;
   white-space: pre-line;
+  overflow: visible;
 }
 #title.hidden  { opacity: 0; }
-#title.strike  { text-decoration: line-through; opacity: 0.45; }
+#title.strike  { text-decoration: line-through; opacity: 0.45; transition: opacity 0.5s ease; }
+#title.strike.fading { opacity: 0; }
 #title.blurred { filter: blur(6px); opacity: 0.6; user-select: none; }
 #confirmHeading {
   font-size: 24px;
@@ -400,21 +461,31 @@ body {
   color: #1f2937;
   white-space: pre-line;
   position: absolute;
-  left: -20px; right: -20px;
+  left: -12px; right: -12px;
+  top: 50%; transform: translateY(-50%);
   z-index: 2;
   pointer-events: none;
-  padding: 16px 20px;
+  padding: 14px 20px;
   border-radius: 10px;
   background: transparent;
-  transition: background 0.2s ease;
+  overflow: visible;
 }
-#confirmHeading:not(:empty) {
+/* The frosted background is constrained to the gameContainer interior via
+   clip-path on #gameContainer. The pseudo-element uses absolute positioning
+   inset from the heading's own edges. */
+#confirmHeading:not(:empty)::before {
+  content: '';
+  position: absolute;
+  inset: 6px 0;
+  border-radius: 8px;
   background: rgba(224, 242, 254, 0.33);
   backdrop-filter: blur(2px);
+  z-index: -1;
 }
 #title.blur-instant,
 #questionRow.blur-instant { transition: none !important; }
 #questionRow.blurred { filter: blur(3px); opacity: 0.75; user-select: none; }
+#livesRow.blurred    { filter: blur(3px); opacity: 0.75; user-select: none; }
 
 /* ══════════════════════════════════════
    INFO ROWS (question count + best record)
@@ -423,14 +494,14 @@ body {
 
 #questionRow {
   width: 100%;
-  text-align: center;
-  min-height: 20px;
+  height: 23px;
   padding: 0 60px 2px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 /* Individual progress dot */
 .prog-dot {
@@ -443,6 +514,42 @@ body {
 /* Inner fill circle — hidden until answered */
 .prog-dot .dot-fill { opacity: 0; transition: opacity 0.15s ease; }
 .prog-dot.answered .dot-fill { opacity: 1; }
+
+/* Pop animation — used for both dot fill-reveal and heart-break.
+   Swap happens at peak (50%) where the scale change masks it. */
+@keyframes indicatorPop {
+  0%   { transform: scale(1);    }
+  50%  { transform: scale(1.35); }
+  100% { transform: scale(1);    }
+}
+.indicator-pop {
+  animation: indicatorPop 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ── Lives row ───────────────────────────────────────────────────────────────
+   Exact mirror of questionRow: same fixed height, same horizontal padding.
+   Always present in layout so the container never shifts height.
+   Hearts are invisible (opacity 0) until shown; display:none only when
+   playerLives is null (infinite lives). */
+#livesRow {
+  width: 100%;
+  height: 23px;
+  padding: 2px 60px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+#livesRow.lives-hidden { visibility: hidden; }
+.life-heart {
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity 0.18s ease;
+}
+.life-heart.visible { opacity: 1; }
+.life-heart.fading  { opacity: 0; transition: opacity 0.4s ease; }
 /* Stats row: mirrors leftPanel/rightPanel widths, sits under game panel */
 #statsRow {
   display: flex;
@@ -1403,9 +1510,9 @@ li.conflict-dismissed .conflict-desc {
 
   body { padding: 12px; }
 
-  #gameContainer { padding: 14px 16px 12px; max-width: none; }
+  #gameContainer { padding: 6px 16px 6px; max-width: none; }
 
-  .topRow { gap: 10px; min-height: 72px; }
+  .topRow { gap: 10px; }
 
   .leftPanel { width: 108px; }
 
@@ -1423,7 +1530,8 @@ li.conflict-dismissed .conflict-desc {
 
   #title { font-size: 18px; }
 
-  #questionRow { font-size: 13px; padding: 2px 16px; }
+  #questionRow { padding: 0 16px 2px; }
+  #livesRow    { padding: 2px 16px 0; }
 
   #statsRow { padding: 6px 16px 8px; }
   #statLeft  { width: 108px; }
@@ -1737,6 +1845,9 @@ li.conflict-dismissed .conflict-desc {
     <div class="leftPanel">
       <button id="mainBtn" onclick="mainButtonClick()">Start</button>
       <button id="helpBtn" onclick="helpButtonClick()">Help</button>
+      <svg id="confirmBracket" xmlns="http://www.w3.org/2000/svg" viewBox="43 21 15 84">
+        <path d="M43.95,103.55c4.8-.2,7.3-4.4,7.3-9.7v-21.8c0-8.9,4.9-9.5,4.9-9.5l.6-.1-.6-.1s-4.9-.6-4.9-9.5v-21.8c0-5.3-2.5-9.5-7.3-9.7h-.7s4.5,2,4.5,10.3v21c0,7.7,3.6,9.5,6.1,9.8-2.5.3-6.1,2.1-6.1,9.8v21c0,8.3-4.5,10.3-4.5,10.3.2.1.4.1.7,0Z"/>
+      </svg>
     </div>
     <div class="middlePanel">
       <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;">
@@ -1749,6 +1860,35 @@ li.conflict-dismissed .conflict-desc {
     <div class="rightPanel">
       <!-- CHANGE 5: timer click unpauses -->
       <div class="scoreDisc" id="scoreDisc" onclick="scoreDiscClick()">
+        <!-- Question timer arc: SVG overlay sitting on top of the disc perimeter.
+             Only visible when questionTimer is a finite integer.
+             The arc sweeps clockwise from 12 o'clock using stroke-dashoffset. -->
+        <svg id="questionTimerArc" viewBox="0 0 130 130"
+             style="position:absolute;top:0;left:0;width:130px;height:130px;pointer-events:none;opacity:0;transition:opacity 0.4s ease;">
+          <!-- A circle whose circumference we use as the dash track.
+               radius 60 → circumference = 2π×60 ≈ 376.99
+               Rotated -90° so stroke begins at 12 o'clock.
+               stroke-linecap butt on the trailing end is default;
+               we override the leading end appearance via JS by splitting
+               into two stacked circles: one butt (track), one round (cap). -->
+          <!-- Butt-capped track circle (the body of the arc) -->
+          <circle id="questionTimerArcTrack"
+                  cx="65" cy="65" r="60"
+                  fill="none"
+                  stroke="#10b981"
+                  stroke-width="5"
+                  stroke-linecap="butt"
+                  stroke-dasharray="376.99 376.99"
+                  stroke-dashoffset="376.99"
+                  transform="rotate(0 65 65)" />
+          <!-- Round-capped dot that rides the leading tip of the arc.
+               Rendered as a tiny filled circle positioned by JS. -->
+          <circle id="questionTimerArcLeadingCap"
+                  cx="65" cy="5"
+                  r="2.5"
+                  fill="#f97316"
+                  opacity="0" />
+        </svg>
         <div class="timer-top">
           <svg class="timer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="13" r="8"/>
@@ -1780,9 +1920,9 @@ li.conflict-dismissed .conflict-desc {
       </div>
     </div>
   </div>
+  <!-- Lives row: only visible when playerLives is finite. Mirrors questionRow. -->
+  <div id="livesRow" class="lives-hidden"></div>
 </div>
-
-<!-- Stats bar: always visible -->
 <div id="statsRow">
   <span id="statLeft"></span>
   <div id="kbToast">This keyboard is for display only. Play with an actual Mac keyboard.</div>
@@ -1858,7 +1998,7 @@ li.conflict-dismissed .conflict-desc {
         </span>
       </div>
       <div class="sp-col sp-col-right">
-        <p class="sp-body sp-clear-label" id="spClearLabel">Clear high score record?</p>
+        <p class="sp-body sp-clear-label" id="spClearLabel"><strong>Clear high score record?</strong></p>
         <div class="score-clear-pill">
           <button id="clearTimeBtn" class="score-pill-seg score-pill-quarter" onclick="_pauseClearClick('time')" title="Clear best time">
             <span class="diff-btn-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6"/><path d="M12 3v2"/></svg></span>
@@ -1868,9 +2008,14 @@ li.conflict-dismissed .conflict-desc {
             <span class="diff-btn-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/></svg></span>
           </button>
         </div>
-        <p class="sp-body sp-clear-label" style="margin-top:8px;"><strong>Report impossible question:</strong></p>
+        <div class="score-clear-pill" style="margin-top:8px;">
+          <button id="startOverBtn" class="score-pill-seg score-pill-full" onclick="_pauseStartOverClick()">
+            <span class="diff-btn-text">clear memory &amp; start fresh</span>
+          </button>
+        </div>
+        <p class="sp-body sp-clear-label" style="margin-top:8px;"><strong>Report a problem:</strong></p>
         <div class="score-clear-pill">
-          <button class="score-pill-seg score-pill-full" onclick="_reportImpossibleQuestion()" title="Report an impossible question">
+          <button class="score-pill-seg score-pill-full" onclick="_reportImpossibleQuestion()" title="Report a problem">
             <span class="diff-btn-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg></span>
           </button>
         </div>
@@ -2652,7 +2797,7 @@ medalFaceStyleEl.id = 'medalFaceStyle';
 document.head.appendChild(medalFaceStyleEl);
 
 function updateMedalFaceStyle(angle) {
-  if (!currentMedal) return;
+  if (!currentMedal || currentMedal === 'lead') return;
   medalFaceStyleEl.textContent =
     '.scoreDisc.medal-' + currentMedal + '::before { background: ' + MEDAL_FACE[currentMedal](angle) + ' !important; }';
 }
@@ -3311,6 +3456,10 @@ let questionPool    = [];  // shuffled pool of all 42 shortcuts
 let answersLeft     = 10;  // counts down only on correct answer
 let currentAnswer = '';
 let helpActive    = false;
+
+// ── Lives state ───────────────────────────────────────────────────────────────
+let livesRemaining  = null;  // null when playerLives is infinite
+let heartEls        = [];    // SVG elements in the livesRow
 let transitioning = false;
 let partialShortcutNudgeTimer    = null;
 let partialShortcutFollowUpTimer = null;
@@ -3327,6 +3476,13 @@ let totalHits       = 0;
 let hintPenaltyPct  = 0;  // decaying hint penalty in percentage points
 let helpFadeTimer = null;
 let accuracyPenaltyTimeout = null;
+
+// ── Question timer arc state ──────────────────────────────────────────────────
+// Tracks the per-question countdown arc drawn on the scoreDisc perimeter.
+// Only active when questionTimer is a finite integer (not null).
+let questionTimerArcInterval       = null;  // setInterval handle driving the arc animation
+let questionTimerSecondsRemaining  = 0;     // seconds left on the current question's countdown
+let questionTimerArcFrozen         = false; // true while paused — arc holds its position
 
 try {
   const s = localStorage.getItem('kw_best');
@@ -3398,7 +3554,16 @@ function showProgressDots() {
 }
 
 function fillProgressDot(index) {
-  if (dotEls[index]) dotEls[index].classList.add('answered');
+  var el = dotEls[index];
+  if (!el) return;
+  // Pop animation — fill class added at the midpoint so the colour change
+  // is hidden inside the scale swell
+  el.classList.add('indicator-pop');
+  setTimeout(function() { el.classList.add('answered'); }, 110);
+  el.addEventListener('animationend', function handler() {
+    el.removeEventListener('animationend', handler);
+    el.classList.remove('indicator-pop');
+  });
 }
 
 function hideProgressDots() {
@@ -3525,6 +3690,7 @@ function mainButtonClick() {
   if (gameState === 'confirm-kill-punctuation') { confirmKillPunctuationYes(); return; }
   if (gameState === 'confirm-diff-change') { confirmDiffChangeYes(); return; }
   if (gameState === 'confirm-trophy') { confirmTrophyYes(); return; }
+  if (gameState === 'confirm-start-over') { confirmStartOverYes(); return; }
 }
 
 const IMPROVEMENT_TIPS = [
@@ -3535,7 +3701,7 @@ const IMPROVEMENT_TIPS = [
   'Group shortcuts by hand.\nLeft-hand tools, right-hand combos.',
   'Play this daily for a week.\nSpaced repetition beats cramming.',
   'Try to improve your best time.',
-  'Pressing the lock key will pause the game.\nYou can also reset your high score.',
+  'Pressing the timer will pause your game.\nYou can reset scores and more.',
   'Play daily for a week to lock in muscle memory.',
   'Short sessions beat marathon drills.',
   'So you’ve maxed your accuracy — but can you chain three perfect runs?',
@@ -3553,6 +3719,10 @@ const IMPROVEMENT_TIPS = [
   'Channel your inner pro designer. Smooth & precise.',
   'Every rep trains your brain.',
   'Use the keyboard menu to ensure the game matches your setup.',
+  'Practicing with time pressure can actually promote flow states.',
+  'The more you play, the more the trainer adapts to help you.',
+  'Can you change OS and keep up?',
+  'If you find any inaccuracies or bugs, please contact me from the pause menu.',
 ];let tipIndex = 0;
 
 function helpButtonClick() {
@@ -3567,6 +3737,7 @@ function helpButtonClick() {
   if (gameState === 'confirm-kill-punctuation') { confirmKillPunctuationNo(); return; }
   if (gameState === 'confirm-diff-change')     { confirmDiffChangeNo(); return; }
   if (gameState === 'confirm-trophy')      { confirmTrophyNo(); return; }
+  if (gameState === 'confirm-start-over')  { confirmStartOverNo(); return; }
   if (gameState === 'finished')       { showTip(tipIndex + 1); tipIndex++; return; }
 }
 
@@ -3602,6 +3773,10 @@ function scoreDiscClick() {
   }
   if (gameState === 'confirm-diff-change') {
     confirmDiffChangeNo();
+    return;
+  }
+  if (gameState === 'confirm-start-over') {
+    confirmStartOverNo();
     return;
   }
 }
@@ -3656,10 +3831,14 @@ function toggleHelp() {
   resetPartialShortcutNudgeTimers();
   if (!helpActive) {
     helpActive = true;
-    // Show hint in the toast pill — green to distinguish from accuracy penalty
+    // Show hint in the stats-row toast pill — below the game panel, always readable
     kbToastEl.innerHTML = buildHintHTML(currentAnswer, '#10b981');
     kbToastEl.classList.add('show');
     clearTimeout(toastTimer);
+    // Suppress the "Ready?" prompt while the hint is on screen
+    _stopReadyPromptTimer();
+    // If "Ready?" is already showing, clear it so it doesn't overlap the hint
+    hideConfirmHeading();
     // Apply -10% hint penalty (deducted from displayed %, raw counts unchanged)
     hintPenaltyPct += 10;
     updateAccuracyDisplay();
@@ -3675,10 +3854,13 @@ function toggleHelp() {
     helpFadeTimer = setTimeout(() => {
       helpActive = false;
       kbToastEl.classList.remove('show');
+      // Restart the Ready prompt timer now the hint has cleared
+      _startReadyPromptTimer();
     }, 3000);
   } else {
     helpActive = false;
     kbToastEl.classList.remove('show');
+    _startReadyPromptTimer();
   }
 }
 
@@ -3723,6 +3905,7 @@ function _enterReadyToUnpause() {
   titleEl.className = '';
   titleEl.textContent = questionPool[questionIndex]?.display || '';
   questionCountEl.classList.remove('blurred');
+  document.getElementById('livesRow').classList.remove('blurred');
   // Pulse the unpause button once the keyboard has returned to face position,
   // then keep pulsing on a repeat timer as a persistent CTA.
   _startReadyToUnpauseInactivityTimer(1000);
@@ -3765,7 +3948,11 @@ function _startReadyPromptTimer() {
     var awaitingAction = (gameState === 'idle' || gameState === 'paused' ||
                           gameState === 'finished' || gameState === 'readyToUnpause');
     if (!awaitingAction) { readyPromptTimer = null; return; }
-    showConfirmHeading('Ready?');
+    // In idle/finished state, ensure title is not blurred before overlay
+    if (gameState === 'idle' || gameState === 'finished') {
+      titleEl.classList.remove('blurred');
+    }
+    showConfirmHeading('Ready?', false);
   }, 10000);
 }
 
@@ -3778,6 +3965,7 @@ function enterPause(instantBlur) {
   gameState = 'paused';
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
+  pauseQuestionTimerArc();   // freeze arc at its current position
   transitioning = false; // clear skip-in-progress if pause interrupts it
   clearHelp();
   resetPartialShortcutNudgeTimers();
@@ -3798,6 +3986,7 @@ function enterPause(instantBlur) {
   }
   titleEl.classList.add('blurred');
   questionCountEl.classList.add('blurred');
+  document.getElementById('livesRow').classList.add('blurred');
   titleEl.classList.remove('strike','hidden');
   timerDiv.innerHTML = '<svg width="26" height="26" viewBox="0 0 26 26" style="display:block;vertical-align:top;" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="2" width="4" height="22" rx="1.5" fill="white"/><rect x="16" y="2" width="4" height="22" rx="1.5" fill="white"/></svg>';
   setTimerState('paused');
@@ -3816,14 +4005,15 @@ function enterConfirmQuit() {
   _stopPauseInactivityTimer();
   titleEl.classList.add('blurred');
   questionCountEl.classList.add('blurred');
-  mainBtn.textContent = 'Yes';
+  document.getElementById('livesRow').classList.add('blurred');
+  mainBtn.textContent = 'Quit';
   mainBtn.style.background = '#10b981';
-  helpBtn.textContent = 'No';
+  helpBtn.textContent = 'Stay';
   helpBtn.style.background = '#6b7280';
   helpBtn.style.color = 'white';
   var inner = document.getElementById('settingsPanelInner');
   if (inner) inner.setAttribute('data-quit-confirm', '');
-  showConfirmHeading('Are you sure you want to abandon this game?');
+  showConfirmHeading('Abandon this game?', true, true);
   document.addEventListener('click', _quitConfirmGuard, true);
 }
 
@@ -3870,6 +4060,7 @@ function unpause() {
   }
   titleEl.classList.remove('blurred');
   questionCountEl.classList.remove('blurred');
+  document.getElementById('livesRow').classList.remove('blurred');
   helpBtn.style.background = '';
   helpBtn.style.color = '';
   resetscoreDisc();
@@ -3877,6 +4068,7 @@ function unpause() {
   helpBtn.textContent = 'Help';
   if (lockKeyEl) lockKeyEl.classList.remove('active');
   timerInterval = setInterval(updateTimer, 100);
+  resumeQuestionTimerArc();  // restart arc with 0.2s grace subtracted
 }
 
 
@@ -3894,6 +4086,7 @@ function enterConfirmReset(target) {
   // Blur the title so the end-game message or question doesn't compete with the confirm heading
   titleEl.classList.add('blurred');
   questionCountEl.classList.add('blurred');
+  document.getElementById('livesRow').classList.add('blurred');
 
   // Ensure panel overlay dimming is active (may not have come through _pauseClearClick)
   if (_scoreClearConfirmTarget === null) {
@@ -3910,19 +4103,25 @@ function enterConfirmReset(target) {
   gameState = 'confirm-reset';
   var resetMsg;
   if (_confirmAfterUpgrade) {
-    resetMsg = 'You ramped up difficulty. Reset your high scores too?';
+    resetMsg = 'You levelled up. Wipe your high scores too?';
   } else if (_clearTarget === 'time') {
     resetMsg = 'Wipe your best time record?';
   } else if (_clearTarget === 'accuracy') {
     resetMsg = 'Wipe your highest accuracy record?';
   } else {
-    resetMsg = 'Clear all your high scores?';
+    resetMsg = 'Wipe all your high scores?';
   }
-  showConfirmHeading(resetMsg);
+  showConfirmHeading(resetMsg, true, true);
   if (_confirmFromFinished) setAppSelectorGameActive(false);
-  mainBtn.textContent = 'Yes';
+  // Button labels depend on clear target
+  if (_clearTarget === 'both') {
+    mainBtn.textContent = 'Wipe';
+    helpBtn.textContent = 'Keep';
+  } else {
+    mainBtn.textContent = 'Wipe it';
+    helpBtn.textContent = 'Keep it';
+  }
   mainBtn.style.background = '#10b981';
-  helpBtn.textContent = 'No';
   helpBtn.style.background = '#6b7280';
   helpBtn.style.color = 'white';
   if (lockKeyEl) lockKeyEl.classList.add('active');
@@ -3943,6 +4142,7 @@ function _returnToPauseScreen(message) {
   titleEl.textContent = questionPool[questionIndex]?.display || '';
   titleEl.classList.add('blurred');
   questionCountEl.classList.add('blurred');
+  document.getElementById('livesRow').classList.add('blurred');
 
   // Show confirmation message permanently in the floating heading
   if (message) {
@@ -4065,8 +4265,9 @@ function enterConfirmTrophy(fromFinished, fromPause) {
   _stopPauseInactivityTimer();
   titleEl.classList.add('blurred');
   questionCountEl.classList.add('blurred');
+  document.getElementById('livesRow').classList.add('blurred');
 
-  showConfirmHeading('Return your trophy too? (Hardcore mode requires it)');
+  showConfirmHeading('Do you want to return your trophy too? You need a trophy for some settings.', true, true);
 
   // Blank buttons immediately, disable interaction
   mainBtn.textContent = '';
@@ -4077,9 +4278,9 @@ function enterConfirmTrophy(fromFinished, fromPause) {
   // After one second reveal labels and re-enable
   setTimeout(function() {
     if (gameState !== 'confirm-trophy') return;
-    mainBtn.textContent = 'Yes, return it';
+    mainBtn.textContent = 'Return it';
     mainBtn.disabled = false;
-    helpBtn.textContent = 'No, keep it';
+    helpBtn.textContent = 'Keep it';
     helpBtn.disabled = false;
   }, 1000);
 }
@@ -4165,14 +4366,14 @@ function enterConfirmDiffChange() {
   var inner = document.getElementById('settingsPanelInner');
   if (inner) inner.setAttribute('data-diff-confirm', '');
 
-  mainBtn.textContent = 'Yes';
+  mainBtn.textContent = 'Quit';
   mainBtn.style.background = '#10b981';
-  helpBtn.textContent = 'No';
+  helpBtn.textContent = 'Stay';
   helpBtn.style.background = '#6b7280';
   helpBtn.style.color = 'white';
   if (lockKeyEl) lockKeyEl.classList.add('active');
 
-  showConfirmHeading('Changing difficulty will quit your current game. Proceed?');
+  showConfirmHeading('Changing difficulty will end this round.', true, true);
 
   document.addEventListener('click', _diffConfirmGuard, true);
   // No toast here -- the guard toasts if they click elsewhere
@@ -4246,24 +4447,68 @@ function confirmDiffChangeNo() {
   _updateDiffSubtitle(currentDifficulty);
   _pendingDifficulty = null;
   _prevDifficulty    = null;
-  // Resume the paused game directly
-  _returnToPauseScreen('Difficulty unchanged. Game still paused.');
+  // Stay on the difficulty panel -- the overlay has already been removed by
+  // _exitDiffConfirm, so the panel is back to its normal interactive state.
+  // Just restore the paused button labels and game state.
+  gameState = 'paused';
+  mainBtn.textContent = 'Unpause';
+  mainBtn.style.background = '';
+  helpBtn.textContent = 'Quit';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+  // Restore stage pointer-events so the kb and browser icons remain clickable.
+  // openSettings set them to none; since we're staying on this panel (not
+  // navigating away), nothing else would restore them.
+  var stage = document.getElementById('kbFlipStage');
+  if (stage) stage.style.pointerEvents = '';
+  _startPauseInactivityTimer();
 }
 
-function showConfirmHeading(text) {
+function showConfirmHeading(text, blurTitle, showBracket) {
   var el = document.getElementById('confirmHeading');
   if (!el) return;
   el.textContent = text;
   el.style.display = 'block';
-  titleEl.classList.add('blurred');
-  questionCountEl.classList.add('blurred');
+  if (blurTitle !== false) {
+    titleEl.classList.add('blurred');
+    questionCountEl.classList.add('blurred');
+    document.getElementById('livesRow').classList.add('blurred');
+  }
+  var lp = document.querySelector('.leftPanel');
+  if (lp) lp.classList.toggle('showing-confirm', showBracket === true);
 }
 
 function hideConfirmHeading() {
   var el = document.getElementById('confirmHeading');
   if (!el) return;
   el.style.display = 'none';
-  el.textContent = '';
+  el.innerHTML = '';
+  var lp = document.querySelector('.leftPanel');
+  if (lp) lp.classList.remove('showing-confirm');
+  // Remove any lingering blur that was set by a confirm heading.
+  // Only safe to do in states where blur has no other purpose.
+  var nonBlurStates = ['idle', 'finished', 'welcome'];
+  if (nonBlurStates.indexOf(gameState) !== -1) {
+    titleEl.classList.remove('blurred');
+    questionCountEl.classList.remove('blurred');
+  document.getElementById('livesRow').classList.remove('blurred');
+  }
+}
+
+// Hint variant: shows HTML content (key pill badges) without blurring #title,
+// since the player needs to read the hint against the visible question.
+function showHintInHeading(htmlContent) {
+  var el = document.getElementById('confirmHeading');
+  if (!el) return;
+  el.innerHTML = htmlContent;
+  el.style.display = 'block';
+}
+
+function clearHintFromHeading() {
+  var el = document.getElementById('confirmHeading');
+  if (!el) return;
+  el.style.display = 'none';
+  el.innerHTML = '';
 }
 
 function resetToIdle() {
@@ -4286,7 +4531,7 @@ function resetToIdle() {
   setKbPosition('face');
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
-  clearTimeout(endScreenInactivityTimer);
+  hideQuestionTimerArc();
   endScreenInactivityTimer = null;
   _enterReadyToUnpauseCleanup();
   clearHelp();
@@ -4301,7 +4546,9 @@ function resetToIdle() {
   titleEl.className = '';
   titleEl.textContent = 'Play Keyboard Warriors';
   questionCountEl.classList.remove('blurred', 'blur-instant');
+  document.getElementById('livesRow').classList.remove('blurred', 'blur-instant');
   questionCountEl.innerHTML = ''; dotEls = [];
+  clearLivesRow();
   scoreDisc.style.background = '';
   scoreDisc.style.removeProperty('--face-rot');
   currentMedal = null;
@@ -4756,10 +5003,10 @@ function onKillPunctuationToggle() {
   // Block all settings panel interactions except the Kill Punctuation radio
   var sp = document.getElementById('settingsPanelInner');
   if (sp) sp.setAttribute('data-kill-punctuation-confirming', '');
-  showConfirmHeading('Are you sure? Use mitigations only as needed.');
-  mainBtn.textContent = 'Yes';
+  showConfirmHeading('Use no-punctuation mitigation only if needed.', true, true);
+  mainBtn.textContent = 'Remove';
   mainBtn.style.background = '#10b981';
-  helpBtn.textContent = 'No';
+  helpBtn.textContent = 'Keep';
   helpBtn.style.background = '#6b7280';
   helpBtn.style.color = 'white';
   if (lockKeyEl) lockKeyEl.classList.add('active');
@@ -5038,7 +5285,7 @@ function _unpinTooltip() {
 
 function openSettings(page) {
   // Block switching panels during any confirmation overlay or countdown
-  var confirmStates = ['confirm-reset', 'confirm-quit', 'confirm-trophy', 'confirm-diff-change', 'confirm-kill-punctuation', 'counting'];
+  var confirmStates = ['confirm-reset', 'confirm-quit', 'confirm-trophy', 'confirm-diff-change', 'confirm-kill-punctuation', 'confirm-start-over', 'counting'];
   if (confirmStates.indexOf(gameState) !== -1 && page !== 'panelPause') {
     showToast('Resolve the current prompt first.');
     return;
@@ -5052,10 +5299,10 @@ function openSettings(page) {
   setKbPosition(pos);
 
   // Pause game if needed (not for pause panel or when on welcome screen)
-  if (!wasOpen && page !== 'panelPause' && gameState !== 'welcome') {
+  if (page !== 'panelPause' && gameState !== 'welcome') {
     if (gameState === 'playing')  { enterPause(true); }
     else if (gameState === 'counting') { cancelCountdown(); _modalWasOpenOnPause = true; }
-    else if (gameState === 'paused')   { _modalWasOpenOnPause = true; }
+    else if (gameState === 'paused' && !wasOpen) { _modalWasOpenOnPause = true; }
   }
 
   // Populate content
@@ -5755,8 +6002,11 @@ function diffBtnClick(mode) {
 
   var modeMap = { fundamentals: -1, normal: 0, hardcore: 1 };
 
-  // If a game is paused mid-play, require confirmation before changing difficulty
-  if (_wasPlaying && answersLeft > 0 && gameState === 'paused') {
+  // If a game is in progress (playing or paused with time elapsed),
+  // require confirmation before changing difficulty.
+  var gameIsInProgress = totalTime > 0 &&
+    (gameState === 'paused' || gameState === 'playing' || gameState === 'readyToUnpause');
+  if (gameIsInProgress) {
     _prevDifficulty    = currentDifficulty;
     _pendingDifficulty = mode;
     // Move needle and update button styles immediately so the player sees the pending choice
@@ -6080,9 +6330,11 @@ function _initSliders() {
     knob.addEventListener('pointermove', function(e) {
       if (!isDragging) return;
       var unlocked = hasTrophy;
+      var gameIsInProgress = totalTime > 0 &&
+        (gameState === 'paused' || gameState === 'playing' || gameState === 'readyToUnpause');
       var deltaPct = ((e.clientX - dragStartX) / trackWidth) * 100;
       var spring = _getSpring(sliderType);
-      if (unlocked) {
+      if (unlocked && !gameIsInProgress) {
         // Free drag -- follow pointer directly, spring snaps on release
         var panel = document.getElementById('diffAdvancedPanel');
         var panelRect = panel ? panel.getBoundingClientRect() : el.getBoundingClientRect();
@@ -6094,7 +6346,7 @@ function _initSliders() {
         spring.target = rawPct;
         _setKnobPosition(el, rawPct);
       } else {
-        // Locked -- slight resistance anchored to the knob's resting position
+        // Locked or game in progress -- slight resistance, snaps back on release
         var resistance = 0.08;
         var deflection = Math.max(-5, Math.min(5, deltaPct * resistance));
         var deflectedPct = Math.max(0, Math.min(100, dragRestPct + deflection));
@@ -6109,7 +6361,9 @@ function _initSliders() {
       isDragging = false;
       var unlocked = hasTrophy;
       var spring = _getSpring(sliderType);
-      if (unlocked) {
+      var gameIsInProgress = totalTime > 0 &&
+        (gameState === 'paused' || gameState === 'playing' || gameState === 'readyToUnpause');
+      if (unlocked && !gameIsInProgress) {
         var stopIdx  = _snapToNearestStop(spring.pos);
         var newValue = SLIDER_VALUES[stopIdx];
         spring.target = SLIDER_STOPS[stopIdx];
@@ -6128,15 +6382,15 @@ function _initSliders() {
         _setKnobLabel(el, _labelForValue(newValue));
         _updateSliderSideLabel(sliderType, newValue);
       } else {
-        // Snap back to the resting position.
-        // Force a reflow so the browser commits the dragged position before we
-        // set the return transition -- without this, transition:none (set on
-        // pointerdown) and the new transition collapse into one paint and the
-        // knob jumps rather than animating back.
+        // Snap back to the current game's actual value, not just the drag-start position.
+        var currentValue = sliderType === 'timer' ? questionTimer : playerLives;
+        var currentStopPct = SLIDER_STOPS[_valueToStopIndex(currentValue)];
         void knob.offsetWidth;
-        spring.pos    = dragRestPct;
-        spring.target = dragRestPct;
+        spring.pos    = currentStopPct;
+        spring.target = currentStopPct;
         _animateSpring(sliderType, el, 'gentle');
+        _setKnobLabel(el, _labelForValue(currentValue));
+        _updateSliderSideLabel(sliderType, currentValue);
       }
     });
 
@@ -6145,6 +6399,12 @@ function _initSliders() {
       if (e.target === knob || knob.contains(e.target)) return;
       if (!hasTrophy) {
         showToast('Keep training to unlock more features.');
+        return;
+      }
+      var gameIsInProgress = totalTime > 0 &&
+        (gameState === 'paused' || gameState === 'playing' || gameState === 'readyToUnpause');
+      if (gameIsInProgress) {
+        showToast('Adjust these settings between games.');
         return;
       }
       var pct = getPct(e.clientX);
@@ -6175,6 +6435,14 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!hasTrophy) {
         if (!e.target.closest('.diff-slider-knob')) {
           showToast('Keep training to unlock more features.');
+        }
+        return;
+      }
+      var gameIsInProgress = totalTime > 0 &&
+        (gameState === 'paused' || gameState === 'playing' || gameState === 'readyToUnpause');
+      if (gameIsInProgress) {
+        if (!e.target.closest('.diff-slider-knob')) {
+          showToast('Adjust these settings between games.');
         }
         return;
       }
@@ -6405,6 +6673,8 @@ function _exitScoreClearConfirm() {
   var inner = document.getElementById('settingsPanelInner');
   if (inner) inner.removeAttribute('data-score-confirm');
   hideConfirmHeading();
+  // Also cancel start-over confirm if it was somehow co-active
+  if (_startOverConfirmActive) _exitStartOverConfirm();
 }
 
 function _reportImpossibleQuestion() {
@@ -6452,6 +6722,130 @@ function _reportImpossibleQuestion() {
 
 function _pauseDifficultyNudgeClick() {
   showToast('Change difficulty between game rounds.');
+}
+
+/* ── Start Over from pause screen ───────────────────────────────────────────
+   A single-button confirm: pressing once arms the confirm state, pressing
+   again (or pressing No / the main Unpause button) backs out cleanly.
+   Yes wipes all local data and transitions to the Welcome screen with the
+   same animated crossfade used by _returningStartOver.
+─────────────────────────────────────────────────────────────────────────── */
+var _startOverConfirmActive = false;
+
+function _pauseStartOverClick() {
+  if (_startOverConfirmActive) {
+    // Second press of the same button = cancel
+    _exitStartOverConfirm();
+    return;
+  }
+
+  // Cancel any other active confirm first
+  if (_scoreClearConfirmTarget !== null) _exitScoreClearConfirm();
+
+  _startOverConfirmActive = true;
+
+  var btn = document.getElementById('startOverBtn');
+  if (btn) {
+    btn.classList.add('score-pill-active');
+    _popScorePillLabel(btn);
+    // Expose only this pill via the same overlay pattern as score-clear
+    var pill = btn.closest('.score-clear-pill');
+    if (pill) pill.classList.add('score-confirm-source');
+  }
+
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.setAttribute('data-score-confirm', 'start-over');
+
+  document.addEventListener('click', _startOverConfirmGuard, true);
+
+  // Wire main/help buttons
+  gameState = 'confirm-start-over';
+  showConfirmHeading('Are you sure you want to reset & restart?', true, true);
+  mainBtn.textContent = 'Wipe';
+  mainBtn.style.background = '#10b981';
+  helpBtn.textContent = 'Keep';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+  if (lockKeyEl) lockKeyEl.classList.add('active');
+}
+
+function _startOverConfirmGuard(e) {
+  var btn = document.getElementById('startOverBtn');
+  // Allow the start-over button itself (toggle-cancel)
+  if (btn && (e.target === btn || btn.contains(e.target))) return;
+  // Allow main/help buttons
+  var mainB = document.getElementById('mainBtn');
+  var helpB = document.getElementById('helpBtn');
+  if ((mainB && (e.target === mainB || mainB.contains(e.target))) ||
+      (helpB && (e.target === helpB || helpB.contains(e.target)))) return;
+  // Block and toast
+  e.stopPropagation();
+  e.preventDefault();
+  showToast('Confirm above, or press No to keep your local data.');
+}
+
+function _exitStartOverConfirm() {
+  _startOverConfirmActive = false;
+  document.removeEventListener('click', _startOverConfirmGuard, true);
+  var btn = document.getElementById('startOverBtn');
+  if (btn) {
+    btn.classList.remove('score-pill-active');
+    var pill = btn.closest('.score-clear-pill');
+    if (pill) pill.classList.remove('score-confirm-source');
+  }
+  var inner = document.getElementById('settingsPanelInner');
+  if (inner) inner.removeAttribute('data-score-confirm');
+  hideConfirmHeading();
+  if (lockKeyEl) lockKeyEl.classList.remove('active');
+}
+
+function confirmStartOverYes() {
+  _exitStartOverConfirm();
+  mainBtn.style.background = '';
+  helpBtn.style.background = '';
+  helpBtn.style.color = '';
+
+  var panelInner = document.getElementById('settingsPanelInner');
+  setTimeout(function() {
+    if (panelInner) { panelInner.style.transition = 'opacity 0.3s ease'; panelInner.style.opacity = '0'; }
+    setTimeout(function() {
+      // Wipe all local data
+      try { localStorage.removeItem('kw_best'); }       catch(e) {}
+      try { localStorage.removeItem('kw_app'); }        catch(e) {}
+      try { localStorage.removeItem('kw_difficulty'); } catch(e) {}
+      try { localStorage.removeItem('kw_perfect'); }    catch(e) {}
+      try { localStorage.removeItem('kw_timer'); }      catch(e) {}
+      try { localStorage.removeItem('kw_lives'); }      catch(e) {}
+      try { sessionStorage.removeItem('kw_welcomed'); } catch(e) {}
+      bestRecord = { time: null, accuracy: null };
+      hasTrophy = false;
+      questionTimer = null;
+      playerLives   = null;
+      currentDifficulty = 'normal';
+      _diffFirst = true;
+      setDiffState(0);
+      updateBestDisplay();
+      _syncSliderToValue('timer', null);
+      _syncSliderToValue('lives', null);
+      if (panelInner) { panelInner.style.transition = ''; panelInner.style.opacity = ''; }
+      // Close settings and quit the game, then show the welcome screen
+      _closeAllModalsInstant();
+      resetToIdle();
+      _showWelcomeScreen();
+    }, 320);
+  }, 500);
+}
+
+function confirmStartOverNo() {
+  _exitStartOverConfirm();
+  // Restore paused button state
+  gameState = 'paused';
+  mainBtn.textContent = 'Unpause';
+  mainBtn.style.background = '';
+  helpBtn.textContent = 'Quit';
+  helpBtn.style.background = '#6b7280';
+  helpBtn.style.color = 'white';
+  _startPauseInactivityTimer();
 }
 
 function _showReturningScreen() {
@@ -6504,10 +6898,14 @@ function _returningStartOver() {
       try { sessionStorage.removeItem('kw_welcomed'); } catch(e) {}
       bestRecord = { time: null, accuracy: null };
       hasTrophy = false;
+      questionTimer = null;
+      playerLives   = null;
       currentDifficulty = 'normal';
       _diffFirst = true;
       setDiffState(0);
       updateBestDisplay();
+      _syncSliderToValue('timer', null);
+      _syncSliderToValue('lives', null);
       if (panelInner) { panelInner.style.transition = ''; panelInner.style.opacity = ''; }
       closeSettings();
       _showWelcomeScreen();
@@ -6789,6 +7187,444 @@ function beginResumeCountdown() {
   });
 }
 
+/* ══════════════════════════════════════
+   QUESTION TIMER ARC
+   Draws an orange arc that sweeps clockwise
+   around the scoreDisc perimeter, depleting
+   over the duration set by questionTimer.
+   Only active when questionTimer is a finite
+   integer (1, 3, 5, or 10 seconds).
+══════════════════════════════════════ */
+
+const questionTimerArcCircumference = 376.99; // 2π × r60, matches SVG values
+
+function updateQuestionTimerArcVisual() {
+  // Redraws the arc and the leading round cap to reflect the current
+  // questionTimerSecondsRemaining against the full questionTimer duration.
+  var arcTrack   = document.getElementById('questionTimerArcTrack');
+  var leadingCap = document.getElementById('questionTimerArcLeadingCap');
+  if (!arcTrack || !leadingCap) return;
+
+  var totalSeconds  = questionTimer;  // the setting (e.g. 5)
+  var fraction      = questionTimerSecondsRemaining / totalSeconds;  // 1.0 → 0.0
+  var drawnLength   = (1 - fraction) * questionTimerArcCircumference;
+  var offsetAmount  = questionTimerArcCircumference - drawnLength;
+
+  arcTrack.setAttribute('stroke-dashoffset', offsetAmount.toFixed(2));
+
+  // Colour gradient: green (full) → bright yellow (65% through) → orange (expired)
+  // Midpoint is at 65% remaining so the warning colour appears early enough to notice.
+  // fraction 1.0 = green #10b981, fraction 0.65 = yellow #f5e000, fraction 0.0 = orange #f97316
+  var arcColour;
+  var midpoint = 0.65;
+  if (fraction >= midpoint) {
+    // Green → yellow: fraction goes from 1.0 down to midpoint, blend factor 0 → 1
+    var blendGreenToYellow = 1 - ((fraction - midpoint) / (1 - midpoint));
+    arcColour = interpolateColour(
+      { r: 16,  g: 185, b: 129 },  // #10b981 green
+      { r: 245, g: 224, b: 0   },  // #f5e000 yellow
+      blendGreenToYellow
+    );
+  } else {
+    // Yellow → orange: fraction goes from midpoint down to 0.0, blend factor 0 → 1
+    var blendYellowToOrange = 1 - (fraction / midpoint);
+    arcColour = interpolateColour(
+      { r: 245, g: 224, b: 0   },  // #f5e000 yellow
+      { r: 249, g: 115, b: 22  },  // #f97316 orange
+      blendYellowToOrange
+    );
+  }
+
+  arcTrack.setAttribute('stroke', arcColour);
+  leadingCap.setAttribute('fill',  arcColour);
+
+  // Position the leading cap dot at the tip of the arc.
+  // The arc starts at 3 o'clock (0°) and sweeps clockwise.
+  // Angle in degrees from 3 o'clock = (1 − fraction) × 360
+  var angleDegrees  = (1 - fraction) * 360;
+  var angleRadians  = angleDegrees * (Math.PI / 180);
+  var capX          = 65 + 60 * Math.cos(angleRadians);
+  var capY          = 65 + 60 * Math.sin(angleRadians);
+  leadingCap.setAttribute('cx', capX.toFixed(2));
+  leadingCap.setAttribute('cy', capY.toFixed(2));
+  leadingCap.setAttribute('opacity', drawnLength > 2 ? '1' : '0');
+}
+
+function interpolateColour(colourA, colourB, blend) {
+  // Returns an rgb() string blended between colourA and colourB.
+  // blend = 0 gives colourA, blend = 1 gives colourB.
+  var r = Math.round(colourA.r + (colourB.r - colourA.r) * blend);
+  var g = Math.round(colourA.g + (colourB.g - colourA.g) * blend);
+  var b = Math.round(colourA.b + (colourB.b - colourA.b) * blend);
+  return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
+
+function startQuestionTimerArc() {
+  // Called at the start of each question (after the 0.3s pop grace period).
+  // Does nothing if questionTimer is null (infinite setting).
+  if (questionTimer === null) return;
+
+  stopQuestionTimerArc();  // clear any previous arc cleanly
+
+  questionTimerSecondsRemaining = questionTimer;
+  questionTimerArcFrozen        = false;
+
+  var arcOverlay = document.getElementById('questionTimerArc');
+  if (arcOverlay) arcOverlay.style.opacity = '1';
+
+  // Draw the full arc immediately at t=0 (nothing consumed yet)
+  updateQuestionTimerArcVisual();
+
+  // Tick every 50ms for smooth animation (~20fps is plenty for this)
+  var tickIntervalMs = 50;
+  questionTimerArcInterval = setInterval(function() {
+    if (gameState !== 'playing' || questionTimerArcFrozen) return;
+
+    questionTimerSecondsRemaining -= tickIntervalMs / 1000;
+
+    if (questionTimerSecondsRemaining <= 0) {
+      questionTimerSecondsRemaining = 0;
+      updateQuestionTimerArcVisual();
+      stopQuestionTimerArc();
+      onQuestionTimerExpired();
+      return;
+    }
+
+    updateQuestionTimerArcVisual();
+  }, tickIntervalMs);
+}
+
+function stopQuestionTimerArc() {
+  // Halts the arc interval without hiding the SVG overlay.
+  // Call hideQuestionTimerArc() separately when you want it to disappear.
+  clearInterval(questionTimerArcInterval);
+  questionTimerArcInterval = null;
+}
+
+function hideQuestionTimerArc() {
+  // Fades the arc overlay out. Called when a question is answered correctly
+  // or skipped, so the arc gracefully disappears before the next question pops.
+  stopQuestionTimerArc();
+  var arcOverlay = document.getElementById('questionTimerArc');
+  if (arcOverlay) arcOverlay.style.opacity = '0';
+}
+
+function pauseQuestionTimerArc() {
+  // Freezes arc animation while the game is paused.
+  // The arc stays visible at its frozen position.
+  questionTimerArcFrozen = true;
+}
+
+function resumeQuestionTimerArc() {
+  // Resumes arc animation after unpausing.
+  // Subtracts 0.2s from remaining time as the small grace gift.
+  if (questionTimer === null) return;
+  questionTimerSecondsRemaining = Math.max(0, questionTimerSecondsRemaining - 0.2);
+  questionTimerArcFrozen = false;
+  // If time was already exhausted during the frozen period, expire immediately
+  if (questionTimerSecondsRemaining <= 0) {
+    stopQuestionTimerArc();
+    onQuestionTimerExpired();
+  }
+}
+
+function onQuestionTimerExpired() {
+  if (gameState !== 'playing' || transitioning) return;
+  transitioning = true;
+  clearHelp();
+
+  // Apply the 10% accuracy penalty
+  hintPenaltyPct += 10;
+  updateAccuracyDisplay();
+  dbgRefreshCtx(); dbgRefreshAccuracy();
+
+  // Flash the bottom half of the scoreDisc (accuracy penalty signal)
+  clearTimeout(accuracyPenaltyTimeout);
+  scoreDisc.classList.add('penalty-acc');
+  accuracyPenaltyTimeout = setTimeout(function() {
+    scoreDisc.classList.remove('penalty-acc');
+    updateAccuracyDisplay();
+  }, 2000);
+
+  // Strike the title, then fade it out before the new question pops
+  titleEl.classList.remove('question-pop');
+  titleEl.classList.add('strike');
+  hideQuestionTimerArc();
+  clearInterval(timerInterval);
+
+  // Lose a life when lives are finite
+  if (playerLives !== null) {
+    var stillAlive = loseLife();
+    setTimeout(function() { titleEl.classList.add('fading'); }, 800);
+    setTimeout(function() {
+      if (!stillAlive) {
+        enterDefeat();
+        return;
+      }
+      advanceQuestion();
+      if (gameState === 'playing') {
+        resetscoreDisc();
+        timerInterval = setInterval(updateTimer, 100);
+        setTimeout(startQuestionTimerArc, 300);
+      }
+    }, 2000);
+    return;
+  }
+
+  setTimeout(function() { titleEl.classList.add('fading'); }, 800);
+
+  setTimeout(function() {
+    advanceQuestion();
+    if (gameState === 'playing') {
+      resetscoreDisc();
+      timerInterval = setInterval(updateTimer, 100);
+      setTimeout(startQuestionTimerArc, 300);
+    }
+  }, 2000);
+}
+
+/* ══════════════════════════════════════
+   LIVES / HEARTS
+   Hearts use the same DOT_SIZE (19px) and DOT_STROKE (1.5px) as progress dots.
+   The heart path is drawn in a 20×20 coordinate space with 1px padding on all
+   sides so the stroke never clips. The SVG viewBox is set to "-0.5 -0.5 20 20"
+   giving the stroke half-pixel bleed room.
+
+   Whole-shape swap on break: no fill layer -- the ring path itself changes.
+══════════════════════════════════════ */
+
+const HEART_COLOUR = '#b3bdc9';  // matches progress dot grey
+
+// viewBox from supplied artwork
+const HEART_VIEWBOX = '0 0 110 116';
+
+// Intact heart — single outline path, rendered as stroke
+const HEART_WHOLE_PATH =
+  'M94.2,26.8c-4.71-4.7-10.96-7.28-17.6-7.28s-12.89,2.59-17.61,7.29l-3.99,4-4.01-4c-4.7-4.7-10.95-7.29-17.6-7.29s-12.91,2.59-17.6,7.29c-9.71,9.71-9.71,25.5,0,35.21l38.04,38.04c.29.29.68.44,1.06.44h0s.11,0,.11,0c.41.04.85-.12,1.17-.44l38.04-38.03c4.71-4.7,7.3-10.95,7.3-17.6s-2.59-12.91-7.3-17.61ZM88.55,56.35l-33.55,33.55L21.44,56.35c-3.19-3.18-4.94-7.43-4.94-11.95s1.75-8.76,4.94-11.95c3.15-3.15,7.32-4.9,11.78-4.94h.17c4.52,0,8.76,1.75,11.95,4.94l5.06,5.07c1.23,1.23,2.86,1.9,4.6,1.9s3.39-.69,4.6-1.91l5.05-5.07c3.19-3.18,7.44-4.94,11.94-4.94s8.75,1.76,11.95,4.95c3.19,3.19,4.95,7.43,4.95,11.94s-1.76,8.75-4.95,11.94Z';
+
+// Broken heart — multiple filled pieces from supplied artwork
+// Four broken heart designs. Each is an array of path d-strings.
+const BROKEN_HEART_DESIGNS = [
+  // Design 1 (original)
+  [
+    'M26.84,61.4l-17.93-1.25c1,1.62,2.19,3.16,3.6,4.56l15.67,15.68,16.78-14.31-13.41-4.35-4.71-.33Z',
+    'M28.21,10.84l16.78,27.47-4.79-25.44c-3.13-1.38-6.53-2.11-10.05-2.11-.65,0-1.3.03-1.95.08Z',
+    'M74.71,88.27L84.34,78.65,64.47,70.63Z',
+    'M57.83,71.94v.82s-7.32,2.34-7.32,2.34l-5.54-2.42-11.47,9.78,20.23,20.23c.29.29.68.44,1.06.44h0s.11,0,.11,0c.41.04.85-.12,1.17-.44l12.41-12.41-10.64-18.33h0Z',
+    'M98.8,32.6l-31.81,21.34-3.99,2.67.44,1.5,25.08-.4-27.91,4.04.02,2.79,1.31.53,21.04,8.49,11.51-11.51c4.71-4.7,7.3-10.95,7.3-17.6,0-4.21-1.04-8.25-2.99-11.85Z',
+    'M48.05,50.18l.52.04-.52-.85-17.46-28.57c-4.67.98-8.97,3.29-12.42,6.74-2.18,2.18-3.86,4.66-5.06,7.31l21.6,19.36,2.78,2.49,5.75,1.86,4.8-8.39Z',
+    'M54.95,50.72l6.47.51.03.09,3.07-5.6,17.22-31.43c-2.22-.35-4.5-.4-6.79-.14-6.59.77-12.5,4.06-16.64,9.28l-3.5,4.44-4.44-3.51c-1.42-1.12-2.93-2.07-4.51-2.84l6.98,22.4,2.12,6.82Z',
+    'M6.39,53.34l19.76,1.38L5.42,36.13c-1.71,5.63-1.39,11.76.97,17.21Z',
+    'M101.03,25.3c-.81-1.13-1.71-2.21-2.71-3.21-2.31-2.31-5-4.1-7.92-5.33l-21.25,29.93,31.89-21.39Z',
+  ],
+  // Design 2
+  [
+    'M66.15,65.16l10.91-44.6c-1.64-.25-3.31-.35-5.01-.27-6.63.3-12.76,3.17-17.26,8.08l-3.81,4.18-4.19-3.82c-4.91-4.48-11.27-6.79-17.91-6.49s-12.78,3.17-17.25,8.08c-9.26,10.14-8.55,25.91,1.59,35.17l14.91,13.63,15.32-26.42,22.7,12.47Z',
+    'M51.13,109.33h.11c.4.1.86-.02,1.21-.3l41.94-33.68c5.19-4.16,8.45-10.09,9.17-16.7s-1.17-13.11-5.35-18.3v-.02c-3.12-3.86-7.2-6.64-11.81-8.11l-17.61,42.41-20.52-15.8-19.19,23.76,21.04,26.19c.26.32.63.51,1.01.55Z',
+  ],
+  // Design 3
+  [
+    'M13.25,67.96L47.3,96.92l10.87-27.44-28.91-9.86L13.25,67.96Z',
+    'M29.8,50.4l16.92-28.72-4.65-3.05c-5.55-3.65-12.2-4.93-18.71-3.59-6.51,1.34-12.12,5.14-15.77,10.69C.04,37.2,3.22,52.67,14.69,60.22l.84.55,14.27-10.36Z',
+    'M100.14,25.2v-.02c-4.72-4.7-10.97-7.28-17.61-7.28s-12.89,2.59-17.61,7.29l-3.99,4-.07-.07-22.36,24.72,24.67,10.71,13.96-10.1-10.35,12.43-12.74,25.84,5.73,5.73c.29.29.68.44,1.06.44h.11c.41.04.85-.12,1.17-.44l38.04-38.03c4.71-4.7,7.3-10.95,7.3-17.6s-2.59-12.91-7.3-17.61Z',
+  ],
+  // Design 4 (white stroke paths omitted -- single fill colour applied)
+  [
+    'M52.64,29.8l-4.01-4c-4.7-4.7-10.95-7.29-17.6-7.29s-12.91,2.59-17.6,7.29c-9.71,9.71-9.71,25.5,0,35.21l14.94,14.94,30.71-24.74-6.44-21.41Z',
+    'M92.61,46.14l-25.95,13.01-14.64,46.16v.02c.26.33.62.54,1,.59l.11.02c.4.1.86,0,1.22-.26l43.26-31.97c5.35-3.95,8.84-9.75,9.83-16.32.21-1.38.29-2.76.27-4.14l-15.1-7.12Z',
+    'M27.5,81.28L50.58,104.36,58.21,56.54Z',
+    'M90.54,16.61c6.09,2.65,10.79,7.51,13.23,13.71v.02c1.93,4.89,2.25,10.14.99,15.14l-12.74-10.79-1.48-18.08Z',
+    'M87.87,29.03l-23.73,16.72-6.08-21.77,3.63-3.64c4.72-4.7,10.97-7.29,17.61-7.29l8.57,15.98Z',
+  ],
+];
+
+// Per-design flip state: tracks how many times each design has appeared
+// so consecutive uses alternate mirror direction.
+var brokenHeartDesignUseCounts = [0, 0, 0, 0];
+// The design index used for the most recently broken heart
+var lastBrokenHeartDesignIndex = -1;
+
+function pickBrokenHeartDesign() {
+  // Build candidate list excluding the last-used design
+  var candidates = [0, 1, 2, 3].filter(function(i) { return i !== lastBrokenHeartDesignIndex; });
+  // Pick randomly from candidates
+  var designIndex = candidates[Math.floor(Math.random() * candidates.length)];
+  // Flip: alternate on each reuse (odd count = mirrored)
+  var flipped = (brokenHeartDesignUseCounts[designIndex] % 2 === 1);
+  brokenHeartDesignUseCounts[designIndex]++;
+  lastBrokenHeartDesignIndex = designIndex;
+  return { paths: BROKEN_HEART_DESIGNS[designIndex], flipped: flipped };
+}
+
+function buildHeartSvg(broken, brokenDesign) {
+  var ns  = 'http://www.w3.org/2000/svg';
+  var svg = document.createElementNS(ns, 'svg');
+  var renderSize = DOT_SIZE + 3;
+  svg.setAttribute('width',   renderSize);
+  svg.setAttribute('height',  renderSize);
+  svg.setAttribute('viewBox', HEART_VIEWBOX);
+  svg.style.overflow = 'visible';
+
+  if (!broken) {
+    var path = document.createElementNS(ns, 'path');
+    path.setAttribute('d',    HEART_WHOLE_PATH);
+    path.setAttribute('fill', HEART_COLOUR);
+    svg.appendChild(path);
+  } else {
+    var paths = brokenDesign ? brokenDesign.paths : BROKEN_HEART_DESIGNS[0];
+    paths.forEach(function(d) {
+      var path = document.createElementNS(ns, 'path');
+      path.setAttribute('d',    d);
+      path.setAttribute('fill', HEART_COLOUR);
+      svg.appendChild(path);
+    });
+  }
+  return svg;
+}
+
+function buildLivesHearts() {
+  var row = document.getElementById('livesRow');
+  row.innerHTML = '';
+  heartEls = [];
+  if (playerLives === null) {
+    row.classList.add('lives-hidden');
+    return;
+  }
+  row.classList.remove('lives-hidden');
+
+  for (var i = 0; i < playerLives; i++) {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'life-heart';
+    wrapper.style.width  = DOT_SIZE + 'px';
+    wrapper.style.height = DOT_SIZE + 'px';
+    wrapper.style.display = 'flex';
+    wrapper.style.alignItems = 'center';
+    wrapper.style.justifyContent = 'center';
+    wrapper.appendChild(buildHeartSvg(false));
+    row.appendChild(wrapper);
+    heartEls.push(wrapper);
+  }
+}
+
+function showLivesHearts() {
+  heartEls.forEach(function(el, i) {
+    setTimeout(function() { el.classList.add('visible'); }, i * 80);
+  });
+}
+
+function hideLivesHearts() {
+  heartEls.forEach(function(el, i) {
+    setTimeout(function() { el.classList.add('fading'); }, i * 80);
+  });
+}
+
+function clearLivesRow() {
+  var row = document.getElementById('livesRow');
+  row.innerHTML = '';
+  row.classList.add('lives-hidden');
+  heartEls = [];
+}
+
+function breakHeart(index) {
+  var wrapper = heartEls[index];
+  if (!wrapper) return;
+
+  var design = pickBrokenHeartDesign();
+  var flipTransform = design.flipped ? 'scaleX(-1)' : 'scaleX(1)';
+
+  wrapper.classList.add('indicator-pop');
+  setTimeout(function() {
+    wrapper.innerHTML = '';
+    var brokenSvg = buildHeartSvg(true, design);
+    brokenSvg.style.transform = flipTransform;
+    wrapper.appendChild(brokenSvg);
+  }, 110);
+  wrapper.addEventListener('animationend', function handler() {
+    wrapper.removeEventListener('animationend', handler);
+    wrapper.classList.remove('indicator-pop');
+  });
+}
+
+function loseLife() {
+  if (livesRemaining === null) return true;
+  var brokenIndex = playerLives - livesRemaining;
+  breakHeart(brokenIndex);
+  livesRemaining--;
+  return livesRemaining > 0;
+}
+
+/* ── Defeat screen ───────────────────────────────────────────────────────────
+   Called when lives run out mid-round. Scores are not updated.
+   Shows the lead medal and a contextual defeat message.
+─────────────────────────────────────────────────────────────────────────── */
+const DEFEAT_MESSAGES = [
+  // answersLeft 9--8: barely started
+  [ "Try again. Every rep you put in counts.",
+    "No shame in an early exit. Get right back up!",
+    "Keep trying." ],
+  // answersLeft 7--5: got going but ran out
+  [ "You were just finding your rhythm! Give it another go?",
+    "Halfway there. The shortcuts are sticking, keep going." ],
+  // answersLeft 4--2: close
+  [ "So close! A few more questions and you'd have had it.",
+    "That was a solid run. One more attempt might crack it." ],
+  // answersLeft 1: tantalizingly close
+  [ "One question away. You know the material. Trust it.",
+    "Ooof. Well, that last shortcut will be automatic next time!" ],
+];
+
+function defeatMessage(answersStillLeft) {
+  var bucket;
+  if      (answersStillLeft >= 8) bucket = 0;
+  else if (answersStillLeft >= 5) bucket = 1;
+  else if (answersStillLeft >= 2) bucket = 2;
+  else                            bucket = 3;
+  var options = DEFEAT_MESSAGES[bucket];
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+function enterDefeat() {
+  gameState = 'finished';
+  setAppSelectorGameActive(false);
+  clearInterval(timerInterval);
+  clearTimeout(penaltyTimeout);
+  hideQuestionTimerArc();
+  clearHelp();
+  clearAllLit();
+  heldKeys.clear();
+  titleEl.classList.remove('blurred');
+  questionCountEl.classList.remove('blurred');
+  document.getElementById('livesRow').classList.remove('blurred');
+
+  // Scores are NOT updated
+  mainBtn.textContent = 'Try again?';
+  mainBtn.style.background = '';
+  helpBtn.textContent = 'Help';
+  helpBtn.style.background = '';
+  helpBtn.style.color = '';
+
+  titleEl.className = '';
+  titleEl.textContent = defeatMessage(answersLeft);
+
+  // Lead medal on the scoreDisc
+  scoreDisc.className = 'scoreDisc medal-lead';
+  currentMedal = 'lead';
+  rimTarget = 0; rimCurrent = 0; rimVelocity = 0;
+  updateMedalFaceStyle(0);
+  timerDiv.textContent = formatTime(Math.floor(totalTime));
+
+  // Fade the broken hearts row out gently
+  setTimeout(hideLivesHearts, 600);
+
+  questionCountEl.classList.remove('blurred', 'blur-instant');
+  document.getElementById('livesRow').classList.remove('blurred', 'blur-instant');
+  fillProgressDot(10 - answersLeft);
+  setTimeout(hideProgressDots, 0);
+
+  startEndScreenInactivityTimer();
+  _startReadyPromptTimer();
+}
+
 function startGame() {
   gameState = 'playing';
   setAppSelectorGameActive(true);
@@ -6802,6 +7638,7 @@ function startGame() {
   }
   questionIndex = 0;
   answersLeft = 10;
+  _wasPlaying = true;
   currentAnswer = questionPool[0].shortcut;
   helpActive = false;
 
@@ -6813,8 +7650,15 @@ function startGame() {
   titleEl.className = '';
   titleEl.textContent = questionPool[0].display;
   questionCountEl.classList.remove('blurred', 'blur-instant');
+  document.getElementById('livesRow').classList.remove('blurred', 'blur-instant');
   buildProgressDots();
   showProgressDots();
+  // Initialise lives
+  livesRemaining = (playerLives !== null) ? playerLives : null;
+  brokenHeartDesignUseCounts = [0, 0, 0, 0];
+  lastBrokenHeartDesignIndex = -1;
+  buildLivesHearts();
+  showLivesHearts();
   resetscoreDisc();
   clearAllLit();
   heldKeys.clear();
@@ -6831,6 +7675,9 @@ function startGame() {
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
   timerInterval = setInterval(updateTimer, 100);
+
+  // Start the question timer arc after the title pop animation grace period
+  setTimeout(startQuestionTimerArc, 300);
 }
 
 function skipShortcut() {
@@ -6838,24 +7685,53 @@ function skipShortcut() {
   _wasPlaying = true;
   transitioning = true;
   clearHelp();
+  hideQuestionTimerArc();
+  // Remove any active pop animation so the strike/fade transition can take over opacity
+  titleEl.classList.remove('question-pop');
   titleEl.classList.add('strike');
   clearInterval(timerInterval);
-  scoreDisc.classList.add('penalty-time');
-  timerDiv.textContent = '+5';
 
-  penaltyTimeout = setTimeout(() => {
-    scoreDisc.classList.remove('penalty-time');
-    totalTime += 5;
-    advanceQuestion();
-    if (gameState === 'playing') {
-      resetscoreDisc();
-      timerInterval = setInterval(updateTimer, 100);
-    }
-  }, 2000);
+  // After a short beat, fade the struck title to invisible
+  setTimeout(function() { titleEl.classList.add('fading'); }, 800);
+
+  // When lives are finite, a skip costs a life instead of adding time.
+  var livesAreFinite = (playerLives !== null);
+
+  if (livesAreFinite) {
+    // Break the heart immediately so the player sees it at the moment of skip
+    var stillAlive = loseLife();
+    penaltyTimeout = setTimeout(() => {
+      if (!stillAlive) {
+        enterDefeat();
+        return;
+      }
+      advanceQuestion();
+      if (gameState === 'playing') {
+        resetscoreDisc();
+        timerInterval = setInterval(updateTimer, 100);
+        setTimeout(startQuestionTimerArc, 300);
+      }
+    }, 2000);
+  } else {
+    scoreDisc.classList.add('penalty-time');
+    timerDiv.textContent = '+5';
+
+    penaltyTimeout = setTimeout(() => {
+      scoreDisc.classList.remove('penalty-time');
+      totalTime += 5;
+      advanceQuestion();
+      if (gameState === 'playing') {
+        resetscoreDisc();
+        timerInterval = setInterval(updateTimer, 100);
+        setTimeout(startQuestionTimerArc, 300);
+      }
+    }, 2000);
+  }
 }
 
 function advanceQuestion() {
   resetPartialShortcutNudgeTimers();
+  hideQuestionTimerArc();  // clear the arc for the departing question
   // Move to the next question in the pool, reshuffling if we reach the end
   const lastDisplay = questionPool[questionIndex]?.display;
   questionIndex++;
@@ -6878,7 +7754,7 @@ function advanceQuestion() {
   } else {
     titleEl.classList.add('question-pop');
   }
-  mainBtn.textContent = 'Skip';
+  if (gameState === 'playing') mainBtn.textContent = 'Skip';
   clearHelp();
   transitioning = false;
   clearAllLit();
@@ -6906,11 +7782,12 @@ function recordAnswer() {
 function endGameMessage(time, accuracy, record, wasFirst) {
   if (wasFirst) return 'I will keep track of your best performances.';
   const newBestTime = time <= record.time;
-  const newBestAcc  = accuracy >= record.accuracy;
+  const newBestAcc  = accuracy > record.accuracy;  // strictly greater, not equal
   const perfectAcc  = record.accuracy >= 100;
   if (newBestTime && newBestAcc) return 'Wow.\nNew records on both fronts!';
   if (newBestTime) return perfectAcc ? 'New time record!' : 'New time record! Can you raise the accuracy too?';
   if (newBestAcc)  return 'Best accuracy yet!\nNow push that time down.';
+  if (accuracy >= 100) return 'Excellent accuracy.';  // matched perfect, no new record
   if (time < record.time + 10 && accuracy > (record.accuracy ?? 0) - 5)
     return "So close. You've shown you can do better.";
   if (accuracy > (record.accuracy ?? 0))
@@ -6941,11 +7818,13 @@ function endGame() {
   setAppSelectorGameActive(false);
   clearInterval(timerInterval);
   clearTimeout(penaltyTimeout);
+  hideQuestionTimerArc();
   clearHelp();
   clearAllLit();
   heldKeys.clear();
   titleEl.classList.remove('blurred');
   questionCountEl.classList.remove('blurred');
+  document.getElementById('livesRow').classList.remove('blurred');
 
   const finalAccuracy = calcAccuracy() ?? 0;
   const wasFirstRecord = bestRecord.time === null;
@@ -6983,6 +7862,7 @@ function endGame() {
   mainBtn.textContent = 'Try again?';
   titleEl.className = '';
   questionCountEl.classList.remove('blurred', 'blur-instant');
+  document.getElementById('livesRow').classList.remove('blurred', 'blur-instant');
   titleEl.textContent = justEarnedTrophy
     ? 'A perfect run! New game modes unlocked.'
     : endGameMessage(totalTime, finalAccuracy, bestRecord, wasFirstRecord);
@@ -7004,6 +7884,7 @@ function endGame() {
   }
   fillProgressDot(9);
   setTimeout(hideProgressDots, 0);
+  setTimeout(hideLivesHearts, 0);
   scoreDisc.className = 'scoreDisc medal-' + medal;
   currentMedal = medal;
   rimTarget = 0; rimCurrent = 0; rimVelocity = 0;
@@ -7155,11 +8036,13 @@ const MEDAL_RIM = {
   gold:   (a) => `conic-gradient(from ${225+a}deg,#b8730a 0deg,#b8730a 1deg,#fff9d6 14deg,#fff9d6 17deg,#e8c060 35deg,#c88810 70deg,#7c4d04 108deg,#3d1e00 128deg,#3d1e00 132deg,#6b3e03 155deg,#a06818 185deg,#c8860a 210deg,#f0d070 222deg,#b8730a 225deg,#b8730a 360deg)`,
   silver: (a) => `conic-gradient(from ${225+a}deg,#6a8090 0deg,#6a8090 1deg,#ffffff 14deg,#ffffff 17deg,#d8eaf5 35deg,#90aabf 70deg,#3a5060 108deg,#1a2830 128deg,#1a2830 132deg,#3a5060 155deg,#6a8898 185deg,#7a8fa6 210deg,#c8dce8 222deg,#6a8090 225deg,#6a8090 360deg)`,
   bronze: (a) => `conic-gradient(from ${225+a}deg,#6a3010 0deg,#6a3010 1deg,#ffd4a0 14deg,#ffd4a0 17deg,#d07040 35deg,#8b4515 70deg,#3a1808 108deg,#1a0800 128deg,#1a0800 132deg,#3a1808 155deg,#703018 185deg,#7a3e10 210deg,#d08040 222deg,#6a3010 225deg,#6a3010 360deg)`,
+  lead:   (a) => `conic-gradient(from ${225+a}deg,#2a2f3a 0deg,#2a2f3a 1deg,#6a7585 14deg,#6a7585 17deg,#4a5260 35deg,#303540 70deg,#1a1d24 108deg,#101318 128deg,#101318 132deg,#1a1d24 155deg,#282d38 185deg,#303845 210deg,#505a6a 222deg,#2a2f3a 225deg,#2a2f3a 360deg)`,
 };
 const MEDAL_FACE = {
   gold:   (a) => `conic-gradient(from ${a}deg,#c8860a 0deg,#fde68a 40deg,#f6c547 70deg,#b8730a 110deg,#7c4d04 140deg,#e8b84b 175deg,#fef08a 200deg,#d4a017 230deg,#8a5c08 265deg,#f0c040 295deg,#fde68a 325deg,#c8860a 360deg)`,
   silver: (a) => `conic-gradient(from ${a}deg,#7a8fa6 0deg,#dce8f0 40deg,#f4f8fb 70deg,#8fa8bf 110deg,#4a6070 140deg,#c8d8e8 175deg,#f4f8fb 200deg,#90a8be 230deg,#506070 265deg,#d0e0ee 295deg,#dce8f0 325deg,#7a8fa6 360deg)`,
   bronze: (a) => `conic-gradient(from ${a}deg,#7a3e10 0deg,#e8915a 40deg,#c8703a 70deg,#8b4515 110deg,#4a2008 140deg,#d4814a 175deg,#f0a060 200deg,#a05820 230deg,#5a2a0a 265deg,#c07840 295deg,#e8915a 325deg,#7a3e10 360deg)`,
+  lead:   (a) => `conic-gradient(from ${a}deg,#303845 0deg,#5a6272 40deg,#6a7585 70deg,#3a4050 110deg,#202530 140deg,#485060 175deg,#606878 200deg,#404858 230deg,#252a35 265deg,#505868 295deg,#5a6272 325deg,#303845 360deg)`,
 };
 
 // ── Rim easing: spring toward target angle, eases out with slight overshoot ──
@@ -7341,7 +8224,12 @@ document.getElementById('keyboardWrap').addEventListener('click', function(e) {
 
 function showTip(index) {
   tipIndex = ((index % IMPROVEMENT_TIPS.length) + IMPROVEMENT_TIPS.length) % IMPROVEMENT_TIPS.length;
+  // Dismiss "Ready?" if it is showing, and ensure the title is readable
+  hideConfirmHeading();
+  titleEl.classList.remove('blurred');
   titleEl.textContent = IMPROVEMENT_TIPS[tipIndex];
+  // Restart the Ready prompt so it reappears after another period of inactivity
+  _startReadyPromptTimer();
 }
 
 function handleKeydown(e) {
@@ -7383,6 +8271,7 @@ function handleKeydown(e) {
   if (isCorrect) {
     transitioning = true;
     clearHelp();
+    hideQuestionTimerArc();  // remove the arc for the answered question
     clearInterval(timerInterval);
     setTimerState('green', 'right');
     titleEl.style.color = '#10b981'; // instant green — directs attention before hiding
@@ -7397,6 +8286,7 @@ function handleKeydown(e) {
       if (gameState === 'playing') {
         resetscoreDisc();
         timerInterval = setInterval(updateTimer, 100);
+        setTimeout(startQuestionTimerArc, 300);
       }
     }, 1500);
   } else {
@@ -7680,6 +8570,15 @@ document.addEventListener('DOMContentLoaded', function() {
   top: 2px;
 }
 
+/* ── Settings panel toggle tracks: filled trough with inner shadow ───────────
+   Scoped to .sp-col so the top-bar OS toggle is untouched.
+   The track rect gets a light fill matching the pill style, plus a slightly
+   darker stroke so it reads as a recessed channel.                          */
+.sp-col .os-track rect:first-child {
+  fill: #f0f2f5;
+  stroke: #c4c9d1;
+}
+
 /* ── Pause panel additions ───────────────────────── */
 .sp-paused-heading {
   font-size: 15px !important;
@@ -7693,8 +8592,6 @@ document.addEventListener('DOMContentLoaded', function() {
   width: 100%;
   border: 1.5px solid #d1d5db;
   border-radius: 20px;
-  background: #f0f4f8;
-  box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
 }
 .score-clear-pill .score-pill-seg:first-child { border-radius: 18px 0 0 18px; }
 .score-clear-pill .score-pill-seg:last-child  { border-radius: 0 18px 18px 0; }
@@ -7703,17 +8600,19 @@ document.addEventListener('DOMContentLoaded', function() {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 32px;
   padding: 7px 0;
   font-family: 'Lato', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 600;
   color: #9ca3af;
   background: #f7f9fb;
+  box-shadow: inset 0 3px 0 rgba(0,0,0,0.04), inset 0 -3px 0 rgba(255,255,255,0.70);
   border: none;
   cursor: pointer;
   outline: none;
   -webkit-appearance: none;
-  transition: background 1.5s ease, color 1.5s ease;
+  transition: background 1.5s ease, color 1.5s ease, box-shadow 1.5s ease;
 }
 .score-pill-seg + .score-pill-seg {
   border-left: 1.5px solid #d1d5db;
@@ -7725,7 +8624,8 @@ document.addEventListener('DOMContentLoaded', function() {
 .score-pill-seg.score-pill-active {
   background: white;
   color: #374151;
-  transition: background 0s, color 0s;
+  box-shadow: none;
+  transition: background 0s, color 0s, box-shadow 0s;
 }
 .score-pill-seg.score-pill-active svg { stroke: #374151;  }
 .score-pill-inactive {
@@ -7845,10 +8745,10 @@ document.addEventListener('DOMContentLoaded', function() {
   background: transparent;
   transition: background 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
 }
-/* Active state: slight fill + inner shadow */
+/* Active state: slight fill + consistent top/bottom inset shadows */
 .diff-advanced-panel.diff-advanced-active {
   background: #f7f9fb;
-  box-shadow: inset 0 2px 6px rgba(0,0,0,0.07);
+  box-shadow: inset 0 3px 0 rgba(0,0,0,0.04), inset 0 -3px 0 rgba(255,255,255,0.70);
   border-color: #c8cdd4;
 }
 
@@ -7950,7 +8850,7 @@ document.addEventListener('DOMContentLoaded', function() {
   background: white;
   border: 1.5px solid #d1d5db;
   border-radius: 20px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.10);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.10), inset 0 -3px 0 rgba(255,255,255,0.80);
   min-width: 36px;
   height: 26px;
   display: flex;
@@ -8048,7 +8948,6 @@ document.addEventListener('DOMContentLoaded', function() {
   border: 1.5px solid #d1d5db;
   border-radius: 20px;
   background: #f0f4f8;
-  box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
 }
 .sp-seg-pill .sp-seg-btn:first-child,
 .sp-seg-pill .diff-btn:first-child { border-radius: 18px 0 0 18px; }
@@ -8068,6 +8967,7 @@ document.addEventListener('DOMContentLoaded', function() {
   outline: none;
   -webkit-appearance: none;
   appearance: none;
+  box-shadow: inset 0 3px 0 rgba(0,0,0,0.04), inset 0 -3px 0 rgba(255,255,255,0.70);
 }
 .sp-seg-btn:focus { outline: none; }
 /* Divider */
@@ -8096,6 +8996,7 @@ document.addEventListener('DOMContentLoaded', function() {
 .sp-seg-pill .diff-btn.diff-btn-active {
   background: white;
   color: #374151;
+  box-shadow: none;
 }
 /* ── Returning screen layout ─────────────────────────── */
 .sp-returning-inner {
