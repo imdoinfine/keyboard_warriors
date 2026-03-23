@@ -12,7 +12,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Keyboard Warriors</title>
+<title>Keyboard Warrior</title>
 <link rel="icon" type="image/png" href="/keyboard_warriors_favicon.png">
 <script>
   // Redirect iPad users to the optimised iPad build
@@ -2022,6 +2022,18 @@ li.conflict-dismissed .conflict-desc {
       </div>
     </div>
 
+    <!-- ── Padlock Panel ────────────────────────────────── -->
+    <div id="panelPadlock" class="sp-page">
+      <div class="sp-col sp-col-left">
+        <p class="sp-title"><strong>Easter Eggs.</strong></p>
+      </div>
+      <div class="sp-col sp-col-right">
+        <p class="sp-body sp-hint">If you encounter an error, hold down
+          <span class="sp-key-chip">Esc</span>
+          to open the debug window and send a report.</p>
+      </div>
+    </div>
+
     <!-- ── Returning User Landing ───────────────────────── -->
     <div id="panelReturning" class="sp-page">
       <p class="sp-title" style="margin-bottom:10px;text-align:center;"><em>Would you like to?</em></p>
@@ -2391,7 +2403,7 @@ function buildKey(cfg, isMini) {
       el.style.display = 'flex';
       el.style.alignItems = 'center';
       el.style.justifyContent = 'center';
-      el.addEventListener('mousedown', function(ev) { ev.preventDefault(); togglePause(); });
+      el.addEventListener('mousedown', function(ev) { ev.preventDefault(); openPadlockPanel(); });
       lockKeyEl = el;
       break;
     case 'letter':
@@ -3874,24 +3886,16 @@ function clearHelp() {
 /* ══════════════════════════════════════
    PAUSE / EASTER EGG
 ══════════════════════════════════════ */
-function togglePause() {
-  if (gameState === 'counting')  { cancelCountdown(); return; }
-  if (gameState === 'playing')   { enterPause(); return; }
-  if (gameState === 'readyToUnpause') { _enterReadyToUnpauseCleanup(); enterPause(); return; }
-  if (gameState === 'paused')    {
-    if (bestRecord.time === null && bestRecord.accuracy === null) return; // nothing to reset
-    // Ensure the pause panel is visible, then trigger the overlay confirm pattern.
-    // This keeps the screen content intact -- only the inactive treatment is applied.
-    if (activeSettings !== 'panelPause') openSettings('panelPause');
-    _pauseClearClick('both', 'First confirm if you want to reset or not.');
-    return;
+function openPadlockPanel() {
+  // If the padlock panel is already open, close it.
+  if (activeSettings === 'panelPadlock') { closeSettings(); return; }
+  // Open the panel first so enterPause does not auto-open panelPause on top.
+  openSettings('panelPadlock');
+  // Now suspend play if a game is active.
+  if (gameState === 'counting')        { cancelCountdown(); }
+  else if (gameState === 'readyToUnpause') { _enterReadyToUnpauseCleanup(); enterPause(); }
+  else if (gameState === 'playing')    { enterPause(); }
   }
-  if (gameState === 'confirm-reset') { confirmResetNo(); return; }
-  if (gameState === 'idle' || gameState === 'finished') {
-    var hasAnyRecord = bestRecord.time !== null || bestRecord.accuracy !== null;
-    if (hasAnyRecord) { enterConfirmReset('both'); return; }
-  }
-}
 
 function _enterReadyToUnpause() {
   gameState = 'readyToUnpause';
@@ -5218,7 +5222,7 @@ var activeSettings = null;
 var kbModalOpen = false;
 var browserModalOpen = false;
 
-var SP_PAGE_ORDER = ['panelKeyboard', 'panelBrowser', 'panelDifficulty', 'panelPause', 'panelReturning', 'panelWelcome'];
+var SP_PAGE_ORDER = ['panelKeyboard', 'panelBrowser', 'panelDifficulty', 'panelPause', 'panelPadlock', 'panelReturning', 'panelWelcome'];
 
 function _spPageEl(page) {
   var ids = {
@@ -5226,6 +5230,7 @@ function _spPageEl(page) {
     panelBrowser:    'panelBrowser',
     panelDifficulty: 'panelDifficulty',
     panelPause:      'panelPause',
+    panelPadlock:    'panelPadlock',
     panelReturning:  'panelReturning',
     panelWelcome:    'panelWelcome',
   };
@@ -5295,7 +5300,7 @@ function openSettings(page) {
   activeSettings = page;
 
   // Update kbPos — partial for most panels; edge for browser and pause
-  var pos = (page === 'panelBrowser' || page === 'panelPause' || page === 'panelDifficulty') ? 'edge' : 'partial';
+  var pos = (page === 'panelBrowser' || page === 'panelPause' || page === 'panelPadlock' || page === 'panelDifficulty') ? 'edge' : 'partial';
   setKbPosition(pos);
 
   // Pause game if needed (not for pause panel or when on welcome screen)
@@ -8407,7 +8412,10 @@ function setKbPosition(pos) {
   // Going to face — remove 3D edges, reveal icons after transition
   if (pos === 'face') {
     stage.classList.remove('kb-show-base');
+    // Snap keys back to their normal colours instantly (no slow fade from grey)
+    panel.classList.add('no-key-transition');
     panel.classList.remove('kb-edges-visible', 'kb-edged');
+    requestAnimationFrame(function() { panel.classList.remove('no-key-transition'); });
     setTimeout(function() {
       if (_flipSeq !== seq) return;
       wrap.classList.remove('kb-flipping');
@@ -9061,6 +9069,10 @@ document.addEventListener('DOMContentLoaded', function() {
     box-shadow 0.45s ease 0.15s,
     color      0.35s ease 0.2s,
     transform  0.5s  ease 0.15s;
+}
+/* Applied for one frame when returning to face so keys snap back instantly */
+#keyboardPanel.no-key-transition .key {
+  transition: none !important;
 }
 #keyboardPanel.kb-edged .key {
   background: #e4e7ea;
