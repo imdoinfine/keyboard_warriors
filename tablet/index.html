@@ -96,6 +96,12 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
+  min-height: 142px; /* disc (130px) + 6px top/bottom padding clearance */
+}
+/* WebKit/Safari: border-radius does not clip overflow:visible children,
+   but we add this rule to make the intent explicit across engines. */
+#gameContainer, .topRow, .rightPanel {
+  overflow: visible;
 }
 .leftPanel {
   display: flex;
@@ -1540,6 +1546,7 @@ li.conflict-dismissed .conflict-desc {
   position: relative;
   box-sizing: border-box;
   height: 41px;
+  overflow: visible;
 }
 /* Wrap is exactly as wide as the Start button (130px).
    Three columns: Mac-label (left), switch (centre), PC-label (right).
@@ -1799,20 +1806,32 @@ body.landing-state #keyboardWrap {
      but sits at the bottom of the viewport, face-up */
 }
 
-/* ── Keyboard wrapper zoom scale ──────────────────────────────────────────
-   zoom scales the element without affecting its 3D child transforms,
-   so the flip/rotateX system on keyboardPanel remains intact.
-   Margin-bottom compensates for the space the zoom adds below the wrap.
-   Values tuned per iPad model in landscape. ── */
-#keyboardWrap { zoom: 1.25; margin-bottom: 72px; }
+/* ── Keyboard wrapper scale ────────────────────────────────────────────────
+   We scale #kbFlipStage (the perspective container), not #keyboardWrap,
+   so the 3D child transforms and getBoundingClientRect() on the panel
+   remain in unscaled coordinates. transform-origin top-center keeps the
+   keyboard anchored at the top of the wrap during the flip animation.
+   The extra visual height the scale introduces is absorbed by padding on
+   #keyboardWrap itself. ── */
+#kbFlipStage { transform-origin: top center; }
+
+body:not(.landing-state) #keyboardWrap,
+body.landing-state #keyboardWrap {
+  padding-bottom: 64px;
+}
+#kbFlipStage { scale: 1.22; }
 
 @media (max-width: 1140px) {
   /* iPad mini 6 landscape: ~1133px */
-  #keyboardWrap { zoom: 1.15; margin-bottom: 44px; }
+  #kbFlipStage { scale: 1.12; }
+  body:not(.landing-state) #keyboardWrap,
+  body.landing-state #keyboardWrap { padding-bottom: 40px; }
 }
 @media (min-width: 1340px) {
   /* iPad Pro 12.9" landscape: ~1366px */
-  #keyboardWrap { zoom: 1.40; margin-bottom: 112px; }
+  #kbFlipStage { scale: 1.36; }
+  body:not(.landing-state) #keyboardWrap,
+  body.landing-state #keyboardWrap { padding-bottom: 104px; }
 }
 
 /* ── Shared modal shell ───────────────────────────────────────────────────
@@ -1843,7 +1862,9 @@ body.landing-state #keyboardWrap {
   padding: 28px 26px 22px;
   box-sizing: border-box;
   font-family: 'Lato', system-ui, sans-serif;
-  /* Centred via JS on show; transform-origin for the unfurl animation */
+  /* Start off-screen — JS positions before making visible */
+  top: -9999px;
+  left: -9999px;
   transform-origin: top center;
   display: none;
 }
@@ -2827,8 +2848,10 @@ function showToast(msg, duration) {
   duration = duration || readingDuration;
   var el = document.getElementById('kwToast');
   if (!el) return;
-  // When the keyboard is folded away, the settings panel content is what the
-  // user sees. Target its centre. When keyboard is at face, target the keyboard.
+  // Toast centred over the settings panel content when keyboard is folded,
+  // or over the keyboard wrap (not the scaled stage) when face-up.
+  // We deliberately use #keyboardWrap rather than #keyboardPanel so we
+  // get unscaled CSS-pixel coordinates unaffected by the kbFlipStage scale.
   var left, top;
   if (_kbPos !== 'face') {
     var inner = document.getElementById('settingsPanelInner');
@@ -2839,8 +2862,9 @@ function showToast(msg, duration) {
     }
   }
   if (!left) {
-    var r = _kbPanelRect();
-    if (r) {
+    var wrap = document.getElementById('keyboardWrap');
+    if (wrap) {
+      var r = wrap.getBoundingClientRect();
       left = Math.round(r.left + window.scrollX + r.width / 2);
       top  = Math.round(r.top  + window.scrollY + r.height / 2);
     } else {
@@ -4952,16 +4976,10 @@ function toggleAppDropdown() {
 }
 
 function openAppPill() {
-  var rect      = appPillEl.getBoundingClientRect();
-  var spaceBelow = window.innerHeight - rect.bottom - 8;
-  var needsDrop  = spaceBelow < 123;  // not enough room to expand upward
-  appPillEl.style.maxHeight = '';     // let CSS control it
-  appPillEl.classList.toggle('drop-down', needsDrop);
-  if (needsDrop) {
-    // Cap height to available space below
-    var cap = Math.min(123, Math.max(48, spaceBelow));
-    appPillEl.style.maxHeight = cap + 'px';
-  }
+  // Tablet: osRow sits at the very top of the page, so the pill always
+  // drops downward. No space-above calculation needed.
+  appPillEl.style.maxHeight = '';
+  appPillEl.classList.add('drop-down');
   appPillEl.classList.add('open');
   appPillEl.scrollTop = 0;
 }
@@ -8547,9 +8565,13 @@ function showGyroModal() {
   if (!backdrop || !modal) return;
   backdrop.classList.add('visible');
   modal.style.display = 'block';
+  // Double rAF: first frame commits display:block so layout runs,
+  // second frame reads offsetHeight accurately before adding .visible.
   requestAnimationFrame(function() {
-    positionTabletModal('gyroModal');
-    modal.classList.add('visible');
+    requestAnimationFrame(function() {
+      positionTabletModal('gyroModal');
+      modal.classList.add('visible');
+    });
   });
   window.addEventListener('resize', _onResizeGyroModal);
 }
@@ -8598,8 +8620,10 @@ function showKeyboardRecommendModal() {
   backdrop.classList.add('visible');
   modal.style.display = 'block';
   requestAnimationFrame(function() {
-    positionTabletModal('keyboardRecommendModal');
-    modal.classList.add('visible');
+    requestAnimationFrame(function() {
+      positionTabletModal('keyboardRecommendModal');
+      modal.classList.add('visible');
+    });
   });
   window.addEventListener('resize', _onResizeKeyboardModal);
 }
