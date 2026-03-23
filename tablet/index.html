@@ -5406,40 +5406,54 @@ function _spAlignPanel() {
   var inner = document.getElementById('settingsPanelInner');
   var wrap  = document.getElementById('keyboardWrap');
   if (!panel || !stage || !inner || !wrap) return;
+
+  // Set horizontal alignment immediately (no layout dependency).
   var left  = stage.offsetLeft + panel.offsetLeft;
   var width = panel.offsetWidth;
   inner.style.left  = left + 'px';
   inner.style.width = width + 'px';
 
-  // Tablet: compute the available vertical gap between the bottom of
-  // #statsRow and the top of the tilted keyboard stage, then vertically
-  // centre the settings content within that gap.
+  // Everything below depends on settled content height — use double rAF.
   requestAnimationFrame(function() {
     requestAnimationFrame(function() {
-      var statsRow = document.getElementById('statsRow');
-      var statsBottom = statsRow ? (statsRow.getBoundingClientRect().bottom + window.scrollY) : 0;
-      var wrapTop     = wrap.getBoundingClientRect().top + window.scrollY;
+      var contentH = inner.scrollHeight;
 
-      // The keyboard stage has been translated downward by KB_POS — read the
-      // actual rendered top of the stage to find where the keyboard sits.
-      var stageRect   = stage.getBoundingClientRect();
-      var stageTop    = stageRect.top + window.scrollY;
+      // ── Tablet: push keyboard to bottom of viewport, then centre content ──
+      // 1. Compute how far the stage needs to translate so its bottom sits
+      //    just above the credit line.
+      var creditEl       = document.getElementById('credit');
+      var wrapRect       = wrap.getBoundingClientRect();
+      var creditTop      = creditEl
+        ? creditEl.getBoundingClientRect().top
+        : window.innerHeight - 32;
 
-      // Available gap = from bottom of stats row to top of tilted keyboard
-      var availableGap = stageTop - statsBottom;
-      var contentH     = inner.scrollHeight;
+      var scaleValue     = parseFloat(getComputedStyle(stage).scale) || 1;
+      var scaledStageH   = stage.offsetHeight * scaleValue;
+      var targetStageTop = creditTop - 8 - scaledStageH;
+      var neededTranslate = targetStageTop - wrapRect.top;
 
-      // Centre the content: top offset within the wrap
-      var wrapRelativeStatsBottom = statsBottom - wrapTop;
-      var centredTop = wrapRelativeStatsBottom + Math.max(0, (availableGap - contentH) / 2);
+      if (neededTranslate > 0 && _kbPos !== 'face') {
+        stage.style.transform = 'translateY(' + Math.round(neededTranslate) + 'px)';
+      }
+
+      // 2. Vertically centre the settings content in the gap between
+      //    #statsRow and the top of the now-positioned keyboard stage.
+      var statsRow    = document.getElementById('statsRow');
+      var statsBottom = statsRow
+        ? (statsRow.getBoundingClientRect().bottom + window.scrollY)
+        : wrapRect.top + window.scrollY;
+      var stageTop    = targetStageTop + window.scrollY;
+      var availableGap     = stageTop - statsBottom;
+      var wrapRelativeTop  = statsBottom - (wrapRect.top + window.scrollY);
+      var centredTop = wrapRelativeTop + Math.max(8, (availableGap - contentH) / 2);
       inner.style.top = Math.round(centredTop) + 'px';
 
-      // Grow wrap to accommodate both content and tilted keyboard stage
+      // 3. Grow the wrap to accommodate both content and keyboard.
       var needed = Math.max(
-        wrapRelativeStatsBottom + contentH + 24,
-        wrapRelativeStatsBottom + stage.offsetHeight + 24
+        wrapRelativeTop + contentH + scaledStageH + 32,
+        320
       );
-      wrap.style.minHeight = Math.max(needed, 320) + 'px';
+      wrap.style.minHeight = needed + 'px';
     });
   });
 }
@@ -8505,28 +8519,11 @@ function setKbPosition(pos) {
     stage.classList.remove('kb-show-base');
   }
 
-  // Apply the CSS transform — transition handles smooth interpolation from any position
-  // Tablet: when opening to 'edge' or 'partial', compute a translateY large enough to
-  // push the keyboard to sit just above the credit line at the bottom of the viewport.
-  var stageTransform = KB_POS[pos].stage;
-  if (pos !== 'face') {
-    var wrapRect   = wrap.getBoundingClientRect();
-    var creditEl   = document.getElementById('credit');
-    var creditTop  = creditEl
-      ? creditEl.getBoundingClientRect().top
-      : window.innerHeight - 32;
-    // Target: bottom of the zoomed stage lands just above credit
-    // stage.offsetHeight is the unscaled height; CSS scale is applied via kbFlipStage
-    var scaleValue = parseFloat(getComputedStyle(stage).scale) || 1;
-    var scaledStageH = stage.offsetHeight * scaleValue;
-    var targetBottom = creditTop - 8;
-    var targetTop    = targetBottom - scaledStageH;
-    var neededTranslate = targetTop - wrapRect.top;
-    if (neededTranslate > 0) {
-      stageTransform = 'translateY(' + Math.round(neededTranslate) + 'px)';
-    }
-  }
-  stage.style.transform = stageTransform;
+  // Apply the CSS transform — transition handles smooth interpolation from any position.
+  // Tablet: final stage translateY is computed by _spAlignPanel after content is measured,
+  // so we only set the panel (rotateX) here. The stage gets its initial small translateY
+  // from KB_POS so the animation starts moving immediately, then _spAlignPanel corrects it.
+  stage.style.transform = KB_POS[pos].stage;
   panel.style.transform = KB_POS[pos].panel;
   panel.classList.toggle('kb-partial', pos === 'partial');
   // Drive credit/diffIcon nudge — class applied immediately so CSS transition runs in sync
